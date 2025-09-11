@@ -1,0 +1,55 @@
+{
+  "hash": "f42799da",
+  "configHash": "c8ac78d4",
+  "lockfileHash": "8bda084e",
+  "browserHash": "120cd732",
+  "optimized": {
+    "react/jsx-dev-runtime": {
+      "src": "../../node_modules/react/jsx-dev-runtime.js",
+      "file": "react_jsx-dev-runtime.js",
+      "fileHash": "a8ee0cda",
+      "needsInterop": true
+    },
+    "react": {
+      "src": "../../node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "06fc169a",
+      "needsInterop": true
+    },
+    "react-dom/client": {
+      "src": "../../node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "abb02c88",
+      "needsInterop": true
+    },
+    "react-router-dom": {
+      "src": "../../node_modules/react-router-dom/dist/index.mjs",
+      "file": "react-router-dom.js",
+      "fileHash": "7a829242",
+      "needsInterop": false
+    },
+    "react-router": {
+      "src": "../../node_modules/react-router/dist/development/index.mjs",
+      "file": "react-router.js",
+      "fileHash": "3558731d",
+      "needsInterop": false
+    },
+    "notistack": {
+      "src": "../../node_modules/notistack/notistack.esm.js",
+      "file": "notistack.js",
+      "fileHash": "e3dbe78c",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-XYNFQUN3": {
+      "file": "chunk-XYNFQUN3.js"
+    },
+    "chunk-4J6BLW67": {
+      "file": "chunk-4J6BLW67.js"
+    },
+    "chunk-WYQRYOQT": {
+      "file": "chunk-WYQRYOQT.js"
+    }
+  }
+}
