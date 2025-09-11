@@ -10,7 +10,6 @@ import {
 } from "../services/auth.service";
 import type { RegisterRequest, LoginRequest } from "../services/auth.service";
 
-// Register mutation
 export const useRegister = () => {
   return useMutation({
     mutationFn: ({
@@ -28,7 +27,6 @@ export const useRegister = () => {
   });
 };
 
-// Login mutation
 export const useLogin = () => {
   const queryClient = useQueryClient();
 
@@ -43,7 +41,6 @@ export const useLogin = () => {
   });
 };
 
-// Email verification mutation
 export const useVerifyEmail = () => {
   return useMutation({
     mutationFn: (token: string) => verifyEmail(token),
@@ -55,21 +52,18 @@ export const useVerifyEmail = () => {
   });
 };
 
-// Resend verification email mutation
 export const useResendVerificationEmail = () => {
   return useMutation({
     mutationFn: (email: string) => resendVerificationEmail(email),
   });
 };
 
-// Forgot password mutation
 export const useForgotPassword = () => {
   return useMutation({
     mutationFn: (email: string) => forgotPassword(email),
   });
 };
 
-// Reset password mutation
 export const useResetPassword = () => {
   return useMutation({
     mutationFn: ({
@@ -82,7 +76,6 @@ export const useResetPassword = () => {
   });
 };
 
-// Logout mutation
 export const useLogout = () => {
   const queryClient = useQueryClient();
 
