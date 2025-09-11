@@ -38,6 +38,6 @@ export const createUserProfile = (user) => {
         skills: user.skills || [],
         socialLinks: user.socialLinks || {},
         isEmailVerified: user.isEmailVerified,
-        createdAt: user.createdAt
+        createdAt: user.createdAt,
     };
 };

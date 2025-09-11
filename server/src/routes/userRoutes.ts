@@ -1,11 +1,24 @@
 import { Router } from "express";
-import { registerUser } from "../controllers/userController";
+import {
+  registerUser,
+  loginUser,
+  verifyEmailController,
+  resendVerificationEmailController,
+  forgotPasswordController,
+  resetPasswordController,
+} from "../controllers/userController";
 import {
   uploadMiddleware,
   uploadErrorHandler,
 } from "../middlewares/upload.middleware";
 import { validateRequest } from "../middlewares/validation.middleware";
-import { registerValidationSchema } from "../validations/user.validation";
+import {
+  registerValidationSchema,
+  loginValidationSchema,
+  resendVerificationSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+} from "../validations/user.validation";
 
 const userRouter = Router();
 
@@ -16,5 +29,27 @@ userRouter.post(
   validateRequest(registerValidationSchema),
   registerUser
 );
+
+userRouter.post("/login", validateRequest(loginValidationSchema), loginUser);
+
+// userRouter.get("/verify-email", verifyEmailController);
+
+// userRouter.post(
+//   "/resend-verification",
+//   validateRequest(resendVerificationSchema),
+//   resendVerificationEmailController
+// );
+
+// userRouter.post(
+//   "/forgot-password",
+//   validateRequest(forgotPasswordSchema),
+//   forgotPasswordController
+// );
+
+// userRouter.post(
+//   "/reset-password",
+//   validateRequest(resetPasswordSchema),
+//   resetPasswordController
+// );
 
 export default userRouter;
