@@ -28,7 +28,7 @@ app.get("/health", (_, res) => {
     });
 });
 // API Routes
-app.use("/api/users", userRouter);
+app.use("/api/auth", userRouter);
 // 404 handler
 app.use(notFoundHandler);
 // Global error handler

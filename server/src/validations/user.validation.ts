@@ -57,3 +57,29 @@ export const loginValidationSchema = Joi.object({
     "any.required": "Password is required",
   }),
 });
+
+export const resendVerificationSchema = Joi.object({
+  email: Joi.string().email().required().messages({
+    "string.email": "Please enter a valid email address",
+    "any.required": "Email is required",
+  }),
+});
+
+export const forgotPasswordSchema = Joi.object({
+  email: Joi.string().email().required().messages({
+    "string.email": "Please enter a valid email address",
+    "any.required": "Email is required",
+  }),
+});
+
+export const resetPasswordSchema = Joi.object({
+  token: Joi.string().required().messages({
+    "any.required": "Reset token is required",
+  }),
+
+  newPassword: Joi.string().min(6).max(128).required().messages({
+    "string.min": "Password must be at least 6 characters",
+    "string.max": "Password cannot exceed 128 characters",
+    "any.required": "New password is required",
+  }),
+});

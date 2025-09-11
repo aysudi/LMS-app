@@ -40,6 +40,8 @@ export interface IUser extends Document {
   enrolledCourses: string[];
   createdCourses: string[];
   lastLoginAt?: Date;
+  loginAttempts?: number;
+  lockUntil?: Date;
   isActive: boolean;
   emailVerificationToken?: string;
   emailVerificationExpires?: Date;
@@ -69,9 +71,9 @@ export interface UserProfileDto {
   lastName: string;
   email: string;
   avatar?: string;
-  avatarOrInitials: string; // Avatar URL or user initials
-  initials: string; // User's initials (e.g., "JD" for John Doe)
-  fullName: string; // Full name (firstName + lastName)
+  avatarOrInitials: string;
+  initials: string;
+  fullName: string;
   role: UserRole;
   bio?: string;
   skills: string[];

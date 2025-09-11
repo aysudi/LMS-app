@@ -78,6 +78,12 @@ const userSchema = new mongoose.Schema({
     },
     providerId: {
         type: String,
+        default: null,
+        sparse: true,
+    },
+    socketId: {
+        type: String,
+        default: null,
         sparse: true,
     },
     bio: {
@@ -114,6 +120,9 @@ const userSchema = new mongoose.Schema({
     lastLoginAt: {
         type: Date,
     },
+    loginAttempts: { type: Number, default: 0 },
+    lockUntil: { type: Date, default: null },
+    premium: { type: Boolean, default: false },
     isActive: {
         type: Boolean,
         default: true,
