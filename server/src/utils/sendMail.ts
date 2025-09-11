@@ -43,8 +43,8 @@ export const sendVerificationEmail = async (
   verificationToken: string
 ): Promise<void> => {
   const verificationUrl = `${
-    process.env.CLIENT_URL || "http://localhost:3000"
-  }/verify-email?token=${verificationToken}`;
+    config.CLIENT_URL || "http://localhost:5173"
+  }/auth/verify-email?token=${verificationToken}`;
 
   const subject = "Verify Your Email Address - Skillify";
 
