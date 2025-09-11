@@ -34,17 +34,17 @@ userRouter.post("/login", validateRequest(loginValidationSchema), loginUser);
 
 userRouter.get("/verify-email", verifyEmailController);
 
-// userRouter.post(
-//   "/resend-verification",
-//   validateRequest(resendVerificationSchema),
-//   resendVerificationEmailController
-// );
+userRouter.post(
+  "/resend-verification",
+  validateRequest(resendVerificationSchema),
+  resendVerificationEmailController
+);
 
-// userRouter.post(
-//   "/forgot-password",
-//   validateRequest(forgotPasswordSchema),
-//   forgotPasswordController
-// );
+userRouter.post(
+  "/forgot-password",
+  validateRequest(forgotPasswordSchema),
+  forgotPasswordController
+);
 
 // userRouter.post(
 //   "/reset-password",
