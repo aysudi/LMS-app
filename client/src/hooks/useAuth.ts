@@ -44,6 +44,7 @@ export const useLogin = () => {
 export const useVerifyEmail = () => {
   return useMutation({
     mutationFn: (token: string) => verifyEmail(token),
+    retry: false,
     onSuccess: (data) => {
       if (data.data?.token) {
         localStorage.setItem("accessToken", data.data.token);

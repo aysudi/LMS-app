@@ -62,7 +62,7 @@ const ROUTES = [
       //   element: <CheckEmail />,
       // },
       {
-        path: "email-verified",
+        path: "verify-email",
         element: <VerifyEmail />,
       },
       {

@@ -69,19 +69,19 @@ export const login = async (
 };
 
 export const verifyEmail = async (token: string): Promise<AuthResponse> => {
-  const response = await api.get(`/users/verify-email?token=${token}`);
+  const response = await api.get(`/api/auth/verify-email?token=${token}`);
   return response.data;
 };
 
 export const resendVerificationEmail = async (
   email: string
 ): Promise<ApiResponse> => {
-  const response = await api.post("/users/resend-verification", { email });
+  const response = await api.post("/api/auth/resend-verification", { email });
   return response.data;
 };
 
 export const forgotPassword = async (email: string): Promise<ApiResponse> => {
-  const response = await api.post("/users/forgot-password", { email });
+  const response = await api.post("/api/auth/forgot-password", { email });
   return response.data;
 };
 
@@ -89,7 +89,7 @@ export const resetPassword = async (
   token: string,
   newPassword: string
 ): Promise<ApiResponse> => {
-  const response = await api.post("/users/reset-password", {
+  const response = await api.post("/api/auth/reset-password", {
     token,
     newPassword,
   });
@@ -98,7 +98,7 @@ export const resetPassword = async (
 
 export const logout = async (): Promise<void> => {
   try {
-    await api.post("/users/logout");
+    await api.post("/api/auth/logout");
   } finally {
     localStorage.removeItem("accessToken");
   }
