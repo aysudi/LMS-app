@@ -1,55 +1,67 @@
 {
-  "hash": "f42799da",
+  "hash": "4e7fb703",
   "configHash": "c8ac78d4",
-  "lockfileHash": "8bda084e",
-  "browserHash": "120cd732",
+  "lockfileHash": "1b99f22e",
+  "browserHash": "e28bb143",
   "optimized": {
     "react/jsx-dev-runtime": {
       "src": "../../node_modules/react/jsx-dev-runtime.js",
       "file": "react_jsx-dev-runtime.js",
-      "fileHash": "a8ee0cda",
+      "fileHash": "db2c60a9",
       "needsInterop": true
     },
     "react": {
       "src": "../../node_modules/react/index.js",
       "file": "react.js",
-      "fileHash": "06fc169a",
+      "fileHash": "82638b96",
       "needsInterop": true
     },
     "react-dom/client": {
       "src": "../../node_modules/react-dom/client.js",
       "file": "react-dom_client.js",
-      "fileHash": "abb02c88",
+      "fileHash": "2b4bf302",
       "needsInterop": true
     },
     "react-router-dom": {
       "src": "../../node_modules/react-router-dom/dist/index.mjs",
       "file": "react-router-dom.js",
-      "fileHash": "7a829242",
+      "fileHash": "455a191b",
       "needsInterop": false
     },
     "react-router": {
       "src": "../../node_modules/react-router/dist/development/index.mjs",
       "file": "react-router.js",
-      "fileHash": "3558731d",
+      "fileHash": "c1d6356e",
       "needsInterop": false
     },
     "notistack": {
       "src": "../../node_modules/notistack/notistack.esm.js",
       "file": "notistack.js",
-      "fileHash": "e3dbe78c",
+      "fileHash": "93a947b2",
+      "needsInterop": false
+    },
+    "react-icons/fa": {
+      "src": "../../node_modules/react-icons/fa/index.mjs",
+      "file": "react-icons_fa.js",
+      "fileHash": "3f399026",
+      "needsInterop": false
+    },
+    "framer-motion": {
+      "src": "../../node_modules/framer-motion/dist/es/index.mjs",
+      "file": "framer-motion.js",
+      "fileHash": "b0db3cd9",
       "needsInterop": false
     }
   },
   "chunks": {
-    "chunk-XYNFQUN3": {
-      "file": "chunk-XYNFQUN3.js"
+    "chunk-7WDWXBYI": {
+      "file": "chunk-7WDWXBYI.js"
     },
-    "chunk-4J6BLW67": {
-      "file": "chunk-4J6BLW67.js"
+    "chunk-ZXRC6STD": {
+      "file": "chunk-ZXRC6STD.js"
     },
-    "chunk-WYQRYOQT": {
-      "file": "chunk-WYQRYOQT.js"
+    "chunk-FSA6OBXQ": {
+      "file": "chunk-FSA6OBXQ.js"
     }
   }
 }
