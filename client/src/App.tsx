@@ -1,15 +1,29 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import ROUTES from "./route/routes";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { SnackbarProvider } from "notistack";
+import ROUTES from "./route/routes";
+import { queryClient } from "./utils/queryClient";
+import { AuthProvider } from "./context/AuthContext";
 
 const router = createBrowserRouter(ROUTES);
 
 function App() {
   return (
-    <>
-      <SnackbarProvider />
-      <RouterProvider router={router} />
-    </>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <SnackbarProvider
+          maxSnack={3}
+          dense={false}
+          autoHideDuration={5000}
+          anchorOrigin={{
+            vertical: "top",
+            horizontal: "right",
+          }}
+          preventDuplicate
+        />
+        <RouterProvider router={router} />
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
 
