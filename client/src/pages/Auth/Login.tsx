@@ -1,5 +1,7 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useFormik } from "formik";
+import { useSnackbar } from "notistack";
 import {
   FaEnvelope,
   FaLock,
@@ -10,12 +12,138 @@ import {
   FaGraduationCap,
   FaArrowRight,
   FaCheckCircle,
+  FaSpinner,
+  FaExclamationTriangle,
 } from "react-icons/fa";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useLogin } from "../../hooks/useAuth";
+import { getErrorMessage } from "../../utils/errorUtils";
+import loginValidationSchema from "../../validations/loginValidation";
+
+type LoginStatus = "idle" | "loading" | "success" | "error";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [loginStatus, setLoginStatus] = useState<LoginStatus>("idle");
+
+  const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
+  const loginMutation = useLogin();
+
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+    validationSchema: loginValidationSchema,
+    onSubmit: async (values, { setSubmitting }) => {
+      try {
+        setLoginStatus("loading");
+
+        const result = await loginMutation.mutateAsync(values);
+
+        setLoginStatus("success");
+
+        enqueueSnackbar(`🎉 Welcome back, ${result.data.user.firstName}!`, {
+          variant: "success",
+          autoHideDuration: 4000,
+        });
+
+        if (rememberMe) {
+          localStorage.setItem("rememberMe", "true");
+          localStorage.setItem("userEmail", values.email);
+        } else {
+          localStorage.removeItem("rememberMe");
+          localStorage.removeItem("userEmail");
+        }
+
+        if (!result.data.user.isEmailVerified) {
+          enqueueSnackbar(
+            "📧 Please verify your email to access all features",
+            {
+              variant: "info",
+              autoHideDuration: 6000,
+            }
+          );
+        }
+
+        setTimeout(() => {
+          navigate("/");
+        }, 1500);
+      } catch (error) {
+        setLoginStatus("error");
+        const errorMessage = getErrorMessage(error);
+
+        enqueueSnackbar(`❌ Login failed: ${errorMessage}`, {
+          variant: "error",
+          autoHideDuration: 8000,
+        });
+
+        setTimeout(() => {
+          setLoginStatus("idle");
+        }, 3000);
+      } finally {
+        setSubmitting(false);
+      }
+    },
+  });
+
+  useEffect(() => {
+    const rememberedEmail = localStorage.getItem("userEmail");
+    const shouldRemember = localStorage.getItem("rememberMe") === "true";
+
+    if (shouldRemember && rememberedEmail) {
+      formik.setFieldValue("email", rememberedEmail);
+      setRememberMe(true);
+    }
+  }, []);
+
+  const getSubmitButtonContent = () => {
+    switch (loginStatus) {
+      case "loading":
+        return (
+          <>
+            <FaSpinner className="animate-spin text-sm" />
+            <span>Signing In...</span>
+          </>
+        );
+      case "success":
+        return (
+          <>
+            <FaCheckCircle className="text-sm" />
+            <span>Welcome Back!</span>
+          </>
+        );
+      case "error":
+        return (
+          <>
+            <FaExclamationTriangle className="text-sm" />
+            <span>Try Again</span>
+          </>
+        );
+      default:
+        return (
+          <>
+            <span>Sign In</span>
+            <FaArrowRight className="text-sm" />
+          </>
+        );
+    }
+  };
+
+  const getSubmitButtonColor = () => {
+    switch (loginStatus) {
+      case "loading":
+        return "from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700";
+      case "success":
+        return "from-green-500 to-green-600 hover:from-green-600 hover:to-green-700";
+      case "error":
+        return "from-red-500 to-red-600 hover:from-red-600 hover:to-red-700";
+      default:
+        return "from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700";
+    }
+  };
 
   const features = [
     {
@@ -136,7 +264,7 @@ const Login = () => {
                 </p>
               </div>
 
-              <form className="space-y-6">
+              <form onSubmit={formik.handleSubmit} className="space-y-6">
                 {/* Email */}
                 <div className="relative">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -145,11 +273,35 @@ const Login = () => {
                   <div className="relative">
                     <input
                       type="email"
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                      name="email"
+                      value={formik.values.email}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm ${
+                        formik.touched.email && formik.errors.email
+                          ? "border-red-300 focus:ring-red-500"
+                          : "border-gray-300"
+                      }`}
                       placeholder="Enter your email"
                     />
-                    <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm" />
+                    <FaEnvelope
+                      className={`absolute left-3 top-1/2 transform -translate-y-1/2 text-sm ${
+                        formik.touched.email && formik.errors.email
+                          ? "text-red-400"
+                          : "text-gray-400"
+                      }`}
+                    />
                   </div>
+                  {formik.touched.email && formik.errors.email && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-1 text-sm text-red-600 flex items-center space-x-1"
+                    >
+                      <FaExclamationTriangle className="text-xs" />
+                      <span>{formik.errors.email}</span>
+                    </motion.div>
+                  )}
                 </div>
 
                 {/* Password */}
@@ -160,10 +312,24 @@ const Login = () => {
                   <div className="relative">
                     <input
                       type={showPassword ? "text" : "password"}
-                      className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                      name="password"
+                      value={formik.values.password}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      className={`w-full pl-10 pr-12 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm ${
+                        formik.touched.password && formik.errors.password
+                          ? "border-red-300 focus:ring-red-500"
+                          : "border-gray-300"
+                      }`}
                       placeholder="Enter your password"
                     />
-                    <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm" />
+                    <FaLock
+                      className={`absolute left-3 top-1/2 transform -translate-y-1/2 text-sm ${
+                        formik.touched.password && formik.errors.password
+                          ? "text-red-400"
+                          : "text-gray-400"
+                      }`}
+                    />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
@@ -172,6 +338,16 @@ const Login = () => {
                       {showPassword ? <FaEyeSlash /> : <FaEye />}
                     </button>
                   </div>
+                  {formik.touched.password && formik.errors.password && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-1 text-sm text-red-600 flex items-center space-x-1"
+                    >
+                      <FaExclamationTriangle className="text-xs" />
+                      <span>{formik.errors.password}</span>
+                    </motion.div>
+                  )}
                 </div>
 
                 {/* Remember Me & Forgot Password */}
@@ -199,14 +375,63 @@ const Login = () => {
 
                 {/* Login Button */}
                 <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ scale: loginStatus === "loading" ? 1 : 1.02 }}
+                  whileTap={{ scale: loginStatus === "loading" ? 1 : 0.98 }}
                   type="submit"
-                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform flex items-center justify-center space-x-2"
+                  disabled={formik.isSubmitting || loginStatus === "loading"}
+                  className={`w-full bg-gradient-to-r ${getSubmitButtonColor()} disabled:opacity-70 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform flex items-center justify-center space-x-2`}
                 >
-                  <span>Sign In</span>
-                  <FaArrowRight className="text-sm" />
+                  {getSubmitButtonContent()}
                 </motion.button>
+
+                {/* Status Feedback */}
+                <AnimatePresence mode="wait">
+                  {loginStatus === "success" && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      className="bg-green-50 border border-green-200 rounded-xl p-4"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className="flex-shrink-0">
+                          <FaCheckCircle className="text-green-500 text-lg" />
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-medium text-green-800">
+                            Login Successful! 🎉
+                          </h4>
+                          <p className="text-xs text-green-600 mt-1">
+                            Redirecting you to your dashboard...
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {loginStatus === "error" && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      className="bg-red-50 border border-red-200 rounded-xl p-4"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className="flex-shrink-0">
+                          <FaExclamationTriangle className="text-red-500 text-lg" />
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-medium text-red-800">
+                            Login Failed
+                          </h4>
+                          <p className="text-xs text-red-600 mt-1">
+                            Please check your credentials and try again.
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
                 {/* Divider */}
                 <div className="relative my-6">
@@ -244,22 +469,24 @@ const Login = () => {
                 </div>
 
                 {/* Account Verification Notice */}
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mt-6">
-                  <div className="flex items-start space-x-3">
-                    <div className="text-blue-500 mt-1">
-                      <FaCheckCircle />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium text-blue-800">
-                        Email Verification Required
-                      </h4>
-                      <p className="text-xs text-blue-600 mt-1">
-                        If you haven't verified your email yet, check your inbox
-                        for a verification link.
-                      </p>
+                {loginStatus !== "success" && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mt-6">
+                    <div className="flex items-start space-x-3">
+                      <div className="text-blue-500 mt-1">
+                        <FaCheckCircle />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-medium text-blue-800">
+                          Email Verification Required
+                        </h4>
+                        <p className="text-xs text-blue-600 mt-1">
+                          If you haven't verified your email yet, check your
+                          inbox for a verification link.
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </form>
 
               {/* Register Link */}

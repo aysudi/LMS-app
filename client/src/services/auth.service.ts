@@ -64,7 +64,7 @@ export const register = async (
 export const login = async (
   credentials: LoginRequest
 ): Promise<AuthResponse> => {
-  const response = await api.post("/users/login", credentials);
+  const response = await api.post("/api/auth/login", credentials);
   return response.data;
 };
 

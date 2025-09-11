@@ -71,7 +71,6 @@ const Register = () => {
             "Account created successfully! Please check your email for verification."
         );
 
-        // Enhanced success notification
         enqueueSnackbar(
           "🎉 Account created successfully! Check your email for verification.",
           {
@@ -84,7 +83,6 @@ const Register = () => {
           }
         );
 
-        // Redirect after a short delay to show success state
         setTimeout(() => {
           navigate("/auth/login");
         }, 2000);
@@ -93,7 +91,6 @@ const Register = () => {
         const errorMsg = getErrorMessage(error);
         setErrorMessage(errorMsg);
 
-        // Enhanced error notification
         enqueueSnackbar(`❌ Registration failed: ${errorMsg}`, {
           variant: "error",
           autoHideDuration: 8000,
