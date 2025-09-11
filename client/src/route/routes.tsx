@@ -66,7 +66,7 @@ const ROUTES = [
         element: <VerifyEmail />,
       },
       {
-        path: "reset-password/:token",
+        path: "reset-password",
         element: <ResetPassword />,
       },
       {
