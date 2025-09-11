@@ -1,7 +1,14 @@
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import ROUTES from "./route/routes";
+import { SnackbarProvider } from "notistack";
+
+const router = createBrowserRouter(ROUTES);
+
 function App() {
   return (
     <>
-      <h1>hello</h1>
+      <SnackbarProvider />
+      <RouterProvider router={router} />
     </>
   );
 }
