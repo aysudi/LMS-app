@@ -32,7 +32,7 @@ userRouter.post(
 
 userRouter.post("/login", validateRequest(loginValidationSchema), loginUser);
 
-// userRouter.get("/verify-email", verifyEmailController);
+userRouter.get("/verify-email", verifyEmailController);
 
 // userRouter.post(
 //   "/resend-verification",
