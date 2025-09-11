@@ -46,10 +46,10 @@ userRouter.post(
   forgotPasswordController
 );
 
-// userRouter.post(
-//   "/reset-password",
-//   validateRequest(resetPasswordSchema),
-//   resetPasswordController
-// );
+userRouter.post(
+  "/reset-password",
+  validateRequest(resetPasswordSchema),
+  resetPasswordController
+);
 
 export default userRouter;
