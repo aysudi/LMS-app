@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useFormik } from "formik";
+import { useSnackbar } from "notistack";
 import {
   FaUser,
   FaEnvelope,
@@ -9,11 +11,100 @@ import {
   FaGoogle,
   FaGithub,
   FaGraduationCap,
+  FaCheckCircle,
+  FaExclamationTriangle,
+  FaSpinner,
 } from "react-icons/fa";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useRegister } from "../../hooks/useAuth";
+import { registerValidationSchema } from "../../validations/registerValidation";
+import { User } from "../../classes/User";
+import { getErrorMessage } from "../../utils/errorUtils";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [registrationStatus, setRegistrationStatus] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
+  const registerMutation = useRegister();
+
+  const formik = useFormik({
+    initialValues: {
+      firstName: "",
+      lastName: "",
+      username: "",
+      email: "",
+      password: "",
+      terms: false,
+    },
+    validationSchema: registerValidationSchema,
+    onSubmit: async (values) => {
+      try {
+        setRegistrationStatus("loading");
+        setErrorMessage("");
+
+        const user = User.forRegistration({
+          firstName: values.firstName,
+          lastName: values.lastName,
+          username: values.username,
+          email: values.email,
+          password: values.password,
+        });
+
+        const result = await registerMutation.mutateAsync({
+          userData: {
+            firstName: user.firstName,
+            lastName: user.lastName,
+            username: user.username,
+            email: user.email,
+            password: user.password,
+          },
+        });
+
+        setRegistrationStatus("success");
+        setSuccessMessage(
+          result.message ||
+            "Account created successfully! Please check your email for verification."
+        );
+
+        // Enhanced success notification
+        enqueueSnackbar(
+          "🎉 Account created successfully! Check your email for verification.",
+          {
+            variant: "success",
+            autoHideDuration: 6000,
+            anchorOrigin: {
+              vertical: "top",
+              horizontal: "right",
+            },
+          }
+        );
+
+        // Redirect after a short delay to show success state
+        setTimeout(() => {
+          navigate("/auth/login");
+        }, 2000);
+      } catch (error) {
+        setRegistrationStatus("error");
+        const errorMsg = getErrorMessage(error);
+        setErrorMessage(errorMsg);
+
+        // Enhanced error notification
+        enqueueSnackbar(`❌ Registration failed: ${errorMsg}`, {
+          variant: "error",
+          autoHideDuration: 8000,
+          anchorOrigin: {
+            vertical: "top",
+            horizontal: "right",
+          },
+        });
+      }
+    },
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-4">
@@ -99,7 +190,93 @@ const Register = () => {
                 </p>
               </div>
 
-              <form className="space-y-6">
+              {/* Status Indicators */}
+              <AnimatePresence>
+                {registrationStatus === "success" && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -20, scale: 0.9 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -20, scale: 0.9 }}
+                    className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="flex-shrink-0">
+                        <FaCheckCircle className="text-green-500 text-xl" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-semibold text-green-800">
+                          Registration Successful! 🎉
+                        </h4>
+                        <p className="text-sm text-green-600 mt-1">
+                          {successMessage}
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {registrationStatus === "error" && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -20, scale: 0.9 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -20, scale: 0.9 }}
+                    className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="flex-shrink-0">
+                        <FaExclamationTriangle className="text-red-500 text-xl" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-semibold text-red-800">
+                          Registration Failed
+                        </h4>
+                        <p className="text-sm text-red-600 mt-1">
+                          {errorMessage}
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Loading Progress Indicator */}
+              <AnimatePresence>
+                {registrationStatus === "loading" && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="mb-6"
+                  >
+                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                      <div className="flex items-center space-x-3">
+                        <FaSpinner className="animate-spin text-blue-500 text-lg" />
+                        <div>
+                          <h4 className="text-sm font-semibold text-blue-800">
+                            Creating your account...
+                          </h4>
+                          <p className="text-sm text-blue-600 mt-1">
+                            Please wait while we set up your Skillify account.
+                          </p>
+                        </div>
+                      </div>
+                      {/* Progress bar animation */}
+                      <div className="mt-3">
+                        <div className="w-full bg-blue-200 rounded-full h-2">
+                          <motion.div
+                            initial={{ width: "0%" }}
+                            animate={{ width: "100%" }}
+                            transition={{ duration: 3, ease: "easeInOut" }}
+                            className="bg-blue-500 h-2 rounded-full"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <form onSubmit={formik.handleSubmit} className="space-y-6">
                 {/* Name Fields */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="relative">
@@ -109,11 +286,24 @@ const Register = () => {
                     <div className="relative">
                       <input
                         type="text"
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                        name="firstName"
+                        value={formik.values.firstName}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm ${
+                          formik.touched.firstName && formik.errors.firstName
+                            ? "border-red-500"
+                            : "border-gray-300"
+                        }`}
                         placeholder="John"
                       />
                       <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm" />
                     </div>
+                    {formik.touched.firstName && formik.errors.firstName && (
+                      <div className="mt-1 text-sm text-red-600">
+                        {formik.errors.firstName}
+                      </div>
+                    )}
                   </div>
 
                   <div className="relative">
@@ -123,11 +313,24 @@ const Register = () => {
                     <div className="relative">
                       <input
                         type="text"
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                        name="lastName"
+                        value={formik.values.lastName}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm ${
+                          formik.touched.lastName && formik.errors.lastName
+                            ? "border-red-500"
+                            : "border-gray-300"
+                        }`}
                         placeholder="Doe"
                       />
                       <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm" />
                     </div>
+                    {formik.touched.lastName && formik.errors.lastName && (
+                      <div className="mt-1 text-sm text-red-600">
+                        {formik.errors.lastName}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -139,11 +342,24 @@ const Register = () => {
                   <div className="relative">
                     <input
                       type="text"
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                      name="username"
+                      value={formik.values.username}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm ${
+                        formik.touched.username && formik.errors.username
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`}
                       placeholder="johndoe123"
                     />
                     <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm" />
                   </div>
+                  {formik.touched.username && formik.errors.username && (
+                    <div className="mt-1 text-sm text-red-600">
+                      {formik.errors.username}
+                    </div>
+                  )}
                 </div>
 
                 {/* Email */}
@@ -154,11 +370,24 @@ const Register = () => {
                   <div className="relative">
                     <input
                       type="email"
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                      name="email"
+                      value={formik.values.email}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm ${
+                        formik.touched.email && formik.errors.email
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`}
                       placeholder="john@example.com"
                     />
                     <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm" />
                   </div>
+                  {formik.touched.email && formik.errors.email && (
+                    <div className="mt-1 text-sm text-red-600">
+                      {formik.errors.email}
+                    </div>
+                  )}
                 </div>
 
                 {/* Password */}
@@ -169,7 +398,15 @@ const Register = () => {
                   <div className="relative">
                     <input
                       type={showPassword ? "text" : "password"}
-                      className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                      name="password"
+                      value={formik.values.password}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      className={`w-full pl-10 pr-12 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm ${
+                        formik.touched.password && formik.errors.password
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`}
                       placeholder="••••••••"
                     />
                     <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm" />
@@ -181,6 +418,11 @@ const Register = () => {
                       {showPassword ? <FaEyeSlash /> : <FaEye />}
                     </button>
                   </div>
+                  {formik.touched.password && formik.errors.password && (
+                    <div className="mt-1 text-sm text-red-600">
+                      {formik.errors.password}
+                    </div>
+                  )}
                   <div className="mt-2 text-xs text-gray-500">
                     Password must be at least 6 characters long
                   </div>
@@ -191,6 +433,10 @@ const Register = () => {
                   <input
                     type="checkbox"
                     id="terms"
+                    name="terms"
+                    checked={formik.values.terms}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
                     className="mt-1 w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 focus:ring-2"
                   />
                   <label htmlFor="terms" className="text-sm text-gray-600">
@@ -210,15 +456,56 @@ const Register = () => {
                     </Link>
                   </label>
                 </div>
+                {formik.touched.terms && formik.errors.terms && (
+                  <div className="text-sm text-red-600">
+                    {formik.errors.terms}
+                  </div>
+                )}
 
                 {/* Submit Button */}
                 <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={{
+                    scale: registrationStatus === "loading" ? 1 : 1.02,
+                  }}
+                  whileTap={{
+                    scale: registrationStatus === "loading" ? 1 : 0.98,
+                  }}
                   type="submit"
-                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform"
+                  disabled={
+                    registerMutation.isPending ||
+                    !formik.isValid ||
+                    registrationStatus === "loading"
+                  }
+                  className={`w-full font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg transform flex items-center justify-center space-x-2 cursor-pointer ${
+                    registrationStatus === "success"
+                      ? "bg-green-500 hover:bg-green-600 text-white"
+                      : registrationStatus === "loading"
+                      ? "bg-gray-400 text-white cursor-not-allowed"
+                      : registrationStatus === "error"
+                      ? "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white"
+                      : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white hover:shadow-xl"
+                  } ${
+                    (registerMutation.isPending ||
+                      !formik.isValid ||
+                      registrationStatus === "loading") &&
+                    registrationStatus !== "success"
+                      ? "opacity-50 cursor-not-allowed"
+                      : ""
+                  }`}
                 >
-                  Create Account
+                  {registrationStatus === "loading" && (
+                    <FaSpinner className="animate-spin text-lg" />
+                  )}
+                  {registrationStatus === "success" && (
+                    <FaCheckCircle className="text-lg" />
+                  )}
+                  <span>
+                    {registrationStatus === "loading"
+                      ? "Creating Account..."
+                      : registrationStatus === "success"
+                      ? "Account Created! Redirecting..."
+                      : "Create Account"}
+                  </span>
                 </motion.button>
 
                 {/* Divider */}
@@ -239,7 +526,7 @@ const Register = () => {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     type="button"
-                    className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md"
+                    className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer"
                   >
                     <FaGoogle className="text-red-500 mr-2" />
                     Google
@@ -249,7 +536,7 @@ const Register = () => {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     type="button"
-                    className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md"
+                    className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer"
                   >
                     <FaGithub className="text-gray-800 mr-2" />
                     GitHub
