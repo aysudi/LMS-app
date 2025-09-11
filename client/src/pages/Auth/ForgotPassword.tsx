@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useFormik } from "formik";
+import { useSnackbar } from "notistack";
 import {
   FaEnvelope,
   FaArrowLeft,
@@ -9,23 +11,101 @@ import {
   FaShieldAlt,
   FaClock,
   FaLockOpen,
+  FaSpinner,
+  FaExclamationTriangle,
 } from "react-icons/fa";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useForgotPassword } from "../../hooks/useAuth";
+import { forgotPasswordValidationSchema } from "../../validations/authValidation";
+import { getErrorMessage } from "../../utils/errorUtils";
+
+type ForgotPasswordStatus = "idle" | "loading" | "success" | "error";
 
 const ForgotPassword = () => {
-  const [email, setEmail] = useState("");
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [forgotPasswordStatus, setForgotPasswordStatus] =
+    useState<ForgotPasswordStatus>("idle");
+  const [submittedEmail, setSubmittedEmail] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  const { enqueueSnackbar } = useSnackbar();
+  const forgotPasswordMutation = useForgotPassword();
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      setIsSubmitted(true);
-    }, 2000);
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+    },
+    validationSchema: forgotPasswordValidationSchema,
+    onSubmit: async (values, { setSubmitting }) => {
+      try {
+        setForgotPasswordStatus("loading");
+
+        await forgotPasswordMutation.mutateAsync(values.email);
+
+        setForgotPasswordStatus("success");
+        setSubmittedEmail(values.email);
+
+        enqueueSnackbar("📧 Password reset email sent successfully!", {
+          variant: "success",
+          autoHideDuration: 6000,
+        });
+      } catch (error) {
+        setForgotPasswordStatus("error");
+        const errorMessage = getErrorMessage(error);
+
+        enqueueSnackbar(`❌ Failed to send reset email: ${errorMessage}`, {
+          variant: "error",
+          autoHideDuration: 8000,
+        });
+
+        setTimeout(() => {
+          setForgotPasswordStatus("idle");
+        }, 3000);
+      } finally {
+        setSubmitting(false);
+      }
+    },
+  });
+
+  const handleSendAnother = () => {
+    setForgotPasswordStatus("idle");
+    setSubmittedEmail("");
+    formik.resetForm();
+  };
+
+  const getSubmitButtonContent = () => {
+    switch (forgotPasswordStatus) {
+      case "loading":
+        return (
+          <>
+            <FaSpinner className="animate-spin text-sm" />
+            <span>Sending...</span>
+          </>
+        );
+      case "error":
+        return (
+          <>
+            <FaExclamationTriangle className="text-sm" />
+            <span>Try Again</span>
+          </>
+        );
+      default:
+        return (
+          <>
+            <FaPaperPlane className="text-sm" />
+            <span>Send Reset Link</span>
+          </>
+        );
+    }
+  };
+
+  const getSubmitButtonColor = () => {
+    switch (forgotPasswordStatus) {
+      case "loading":
+        return "from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700";
+      case "error":
+        return "from-red-500 to-red-600 hover:from-red-600 hover:to-red-700";
+      default:
+        return "from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700";
+    }
   };
 
   const resetSteps = [
@@ -149,7 +229,7 @@ const ForgotPassword = () => {
             className="w-full"
           >
             <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-8">
-              {!isSubmitted ? (
+              {forgotPasswordStatus !== "success" ? (
                 // Email Form
                 <>
                   <div className="text-center mb-8">
@@ -165,7 +245,7 @@ const ForgotPassword = () => {
                     </p>
                   </div>
 
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                  <form onSubmit={formik.handleSubmit} className="space-y-6">
                     {/* Email Input */}
                     <div className="relative">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -174,44 +254,93 @@ const ForgotPassword = () => {
                       <div className="relative">
                         <input
                           type="email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                          name="email"
+                          value={formik.values.email}
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
+                          className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm ${
+                            formik.touched.email && formik.errors.email
+                              ? "border-red-300 focus:ring-red-500"
+                              : "border-gray-300"
+                          }`}
                           placeholder="Enter your registered email"
-                          required
                         />
-                        <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm" />
+                        <FaEnvelope
+                          className={`absolute left-3 top-1/2 transform -translate-y-1/2 text-sm ${
+                            formik.touched.email && formik.errors.email
+                              ? "text-red-400"
+                              : "text-gray-400"
+                          }`}
+                        />
                       </div>
-                      <p className="text-xs text-gray-500 mt-2">
-                        We'll send reset instructions to this email address
-                      </p>
+
+                      {formik.touched.email && formik.errors.email && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="mt-1 text-sm text-red-600 flex items-center space-x-1"
+                        >
+                          <FaExclamationTriangle className="text-xs" />
+                          <span>{formik.errors.email}</span>
+                        </motion.div>
+                      )}
+
+                      {!formik.errors.email && (
+                        <p className="text-xs text-gray-500 mt-2">
+                          We'll send reset instructions to this email address
+                        </p>
+                      )}
                     </div>
 
                     {/* Submit Button */}
                     <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
+                      whileHover={{
+                        scale: forgotPasswordStatus === "loading" ? 1 : 1.02,
+                      }}
+                      whileTap={{
+                        scale: forgotPasswordStatus === "loading" ? 1 : 0.98,
+                      }}
                       type="submit"
-                      disabled={isLoading || !email}
-                      className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform flex items-center justify-center space-x-2"
+                      disabled={
+                        formik.isSubmitting ||
+                        forgotPasswordStatus === "loading" ||
+                        !formik.values.email
+                      }
+                      className={`w-full bg-gradient-to-r ${getSubmitButtonColor()} disabled:opacity-70 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform flex items-center justify-center space-x-2`}
                     >
-                      {isLoading ? (
-                        <>
-                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                          <span>Sending...</span>
-                        </>
-                      ) : (
-                        <>
-                          <FaPaperPlane className="text-sm" />
-                          <span>Send Reset Link</span>
-                        </>
-                      )}
+                      {getSubmitButtonContent()}
                     </motion.button>
+
+                    {/* Status Feedback */}
+                    <AnimatePresence mode="wait">
+                      {forgotPasswordStatus === "error" && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.9 }}
+                          className="bg-red-50 border border-red-200 rounded-xl p-4"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div className="flex-shrink-0">
+                              <FaExclamationTriangle className="text-red-500 text-lg" />
+                            </div>
+                            <div>
+                              <h4 className="text-sm font-medium text-red-800">
+                                Failed to Send Reset Email
+                              </h4>
+                              <p className="text-xs text-red-600 mt-1">
+                                Please check your email address and try again.
+                              </p>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
 
                     {/* Back to Login */}
                     <div className="text-center">
                       <Link
-                        to="/login"
+                        to="/auth/login"
                         className="inline-flex items-center space-x-2 text-gray-600 hover:text-indigo-600 transition-colors duration-200"
                       >
                         <FaArrowLeft className="text-sm" />
@@ -240,7 +369,7 @@ const ForgotPassword = () => {
                       We've sent a password reset link to:
                     </p>
                     <p className="font-semibold text-indigo-600 text-lg">
-                      {email}
+                      {submittedEmail}
                     </p>
                   </div>
 
@@ -267,17 +396,14 @@ const ForgotPassword = () => {
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      onClick={() => {
-                        setIsSubmitted(false);
-                        setEmail("");
-                      }}
+                      onClick={handleSendAnother}
                       className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl"
                     >
                       Send Another Email
                     </motion.button>
 
                     <Link
-                      to="/login"
+                      to="/auth/login"
                       className="block w-full text-center py-3 px-6 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-all duration-200"
                     >
                       Back to Login
@@ -287,7 +413,7 @@ const ForgotPassword = () => {
               )}
 
               {/* Help Section */}
-              {!isSubmitted && (
+              {forgotPasswordStatus !== "success" && (
                 <div className="text-center mt-8 pt-6 border-t border-gray-200">
                   <p className="text-sm text-gray-500 mb-2">
                     Still having trouble?
@@ -302,12 +428,12 @@ const ForgotPassword = () => {
               )}
 
               {/* Register Link */}
-              {!isSubmitted && (
+              {forgotPasswordStatus !== "success" && (
                 <div className="text-center mt-6">
                   <p className="text-gray-600">
                     Don't have an account?{" "}
                     <Link
-                      to="/register"
+                      to="/auth/register"
                       className="text-indigo-600 hover:text-indigo-700 font-semibold transition-colors duration-200"
                     >
                       Create one here

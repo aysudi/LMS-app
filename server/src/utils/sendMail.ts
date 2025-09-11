@@ -227,7 +227,7 @@ export const sendForgotPasswordEmail = async (
 ): Promise<void> => {
   const resetUrl = `${
     process.env.CLIENT_URL || "http://localhost:3000"
-  }/reset-password?token=${resetToken}`;
+  }/auth/reset-password?token=${resetToken}`;
 
   const subject = "Reset Your Password - Skillify";
 
