@@ -4,7 +4,7 @@ export interface IUser {
   lastName: string;
   username: string;
   email: string;
-  password: string;
+  password?: string;
   role?: string;
   isEmailVerified?: boolean;
   avatar?: string;
@@ -18,7 +18,7 @@ export class User implements IUser {
   lastName: string;
   username: string;
   email: string;
-  password: string;
+  password?: string;
   role: string;
   isEmailVerified: boolean;
   avatar?: string;

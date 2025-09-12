@@ -9,8 +9,11 @@ import {
   logout,
 } from "../services/auth.service";
 import type { RegisterRequest, LoginRequest } from "../services/auth.service";
+import { useAuthContext } from "../context/AuthContext";
 
 export const useRegister = () => {
+  const { setUser } = useAuthContext();
+
   return useMutation({
     mutationFn: ({
       userData,
@@ -22,6 +25,9 @@ export const useRegister = () => {
     onSuccess: (data) => {
       if (data.data?.token) {
         localStorage.setItem("accessToken", data.data.token);
+        if (data.data.user) {
+          setUser(data.data.user);
+        }
       }
     },
   });
@@ -29,12 +35,16 @@ export const useRegister = () => {
 
 export const useLogin = () => {
   const queryClient = useQueryClient();
+  const { setUser } = useAuthContext();
 
   return useMutation({
     mutationFn: (credentials: LoginRequest) => login(credentials),
     onSuccess: (data) => {
       if (data.data?.token) {
         localStorage.setItem("accessToken", data.data.token);
+        if (data.data.user) {
+          setUser(data.data.user);
+        }
         queryClient.invalidateQueries({ queryKey: ["user"] });
       }
     },
@@ -42,12 +52,17 @@ export const useLogin = () => {
 };
 
 export const useVerifyEmail = () => {
+  const { setUser } = useAuthContext();
+
   return useMutation({
     mutationFn: (token: string) => verifyEmail(token),
     retry: false,
     onSuccess: (data) => {
       if (data.data?.token) {
         localStorage.setItem("accessToken", data.data.token);
+        if (data.data.user) {
+          setUser(data.data.user);
+        }
       }
     },
   });
@@ -79,10 +94,14 @@ export const useResetPassword = () => {
 
 export const useLogout = () => {
   const queryClient = useQueryClient();
+  const { setUser } = useAuthContext();
 
   return useMutation({
     mutationFn: () => logout(),
     onSuccess: () => {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("userData");
+      setUser(null);
       queryClient.clear();
       window.location.href = "/login";
     },

@@ -15,6 +15,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
   setUser: (user: User | null) => void;
   checkAuth: () => boolean;
 }
@@ -35,6 +36,7 @@ interface AuthProviderProps {
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const checkAuth = (): boolean => {
     const token = localStorage.getItem("accessToken");
@@ -44,17 +46,51 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const isAuthenticated = checkAuth() && user !== null;
 
   useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    if (token && !user) {
-      // In a real app, you might want to validate the token here
-      // For now, we'll just check if token exists
-    }
+    const initializeAuth = async () => {
+      const token = localStorage.getItem("accessToken");
+      if (token && !user) {
+        try {
+          // In a real app, you would validate the token and fetch user data
+          // For now, we'll decode the token or fetch user data from an API
+          // This is a placeholder - you should implement actual token validation
+
+          // You can either:
+          // 1. Decode JWT token to get user data
+          // 2. Make an API call to validate token and get user data
+          // 3. Store user data in localStorage (less secure)
+
+          // For now, let's check if there's user data in localStorage
+          const storedUser = localStorage.getItem("userData");
+          if (storedUser) {
+            setUser(JSON.parse(storedUser));
+          }
+        } catch (error) {
+          console.error("Error initializing auth:", error);
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("userData");
+        }
+      }
+      setIsLoading(false);
+    };
+
+    initializeAuth();
   }, [user]);
+
+  // Enhanced setUser to also store in localStorage
+  const setUserWithStorage = (userData: User | null) => {
+    setUser(userData);
+    if (userData) {
+      localStorage.setItem("userData", JSON.stringify(userData));
+    } else {
+      localStorage.removeItem("userData");
+    }
+  };
 
   const value = {
     user,
     isAuthenticated,
-    setUser,
+    isLoading,
+    setUser: setUserWithStorage,
     checkAuth,
   };
 

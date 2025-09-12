@@ -4,7 +4,9 @@ import Login from "../pages/Auth/Login";
 import Register from "../pages/Auth/Register";
 import ResetPassword from "../pages/Auth/ResetPassword";
 import VerifyEmail from "../pages/Auth/VerifyEmail";
+import About from "../pages/Client/About";
 import Basket from "../pages/Client/Basket";
+import Contact from "../pages/Client/Contact";
 import CourseDetails from "../pages/Client/CourseDetails";
 import Courses from "../pages/Client/Courses";
 import Favorites from "../pages/Client/Favorites";
@@ -41,6 +43,14 @@ const ROUTES = [
       {
         path: "courses/:courseId",
         element: <CourseDetails />,
+      },
+      {
+        path: "about",
+        element: <About />,
+      },
+      {
+        path: "contact",
+        element: <Contact />,
       },
     ],
   },
