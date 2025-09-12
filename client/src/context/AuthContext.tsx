@@ -1,6 +1,7 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { useCurrentUser } from "../hooks/useUserQueries";
+import { getAuthToken, removeAuthToken } from "../utils/auth-storage";
 
 interface User {
   id: string;
@@ -36,28 +37,89 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const checkAuth = (): boolean => {
-    const token = localStorage.getItem("accessToken");
+  // State to track token existence and trigger re-renders
+  const [hasToken, setHasToken] = useState(() => {
+    const token = getAuthToken();
     return !!token;
+  });
+
+  const checkAuth = (): boolean => {
+    const token = getAuthToken();
+    const tokenExists = !!token;
+
+    // Update state if token status changed
+    if (tokenExists !== hasToken) {
+      setHasToken(tokenExists);
+    }
+
+    return tokenExists;
   };
 
-  // Use React Query to manage user state
+  // Listen for localStorage changes (for cross-tab synchronization)
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "accessToken") {
+        const newTokenExists = !!e.newValue;
+        setHasToken(newTokenExists);
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  // Custom event listener for same-tab localStorage changes
+  useEffect(() => {
+    const handleCustomStorageChange = () => {
+      const token = getAuthToken();
+      setHasToken(!!token);
+    };
+
+    window.addEventListener("auth-token-changed", handleCustomStorageChange);
+    return () =>
+      window.removeEventListener(
+        "auth-token-changed",
+        handleCustomStorageChange
+      );
+  }, []);
+
   const {
     data: userData,
     isLoading,
     refetch: refetchUser,
+    error,
   } = useCurrentUser({
-    enabled: checkAuth(), // Only fetch user data if token exists
-    retry: false, // Don't retry on failure to avoid infinite loops
+    enabled: hasToken, // Now reactive to state changes
+    retry: (failureCount, error: any) => {
+      if (error?.response?.status === 401) {
+        removeAuthToken();
+        setHasToken(false);
+        // Dispatch custom event for same-tab sync
+        window.dispatchEvent(new CustomEvent("auth-token-changed"));
+        return false;
+      }
+      return failureCount < 2;
+    },
+    refetchOnWindowFocus: false,
+    staleTime: 2 * 60 * 1000,
   });
 
   const user = userData || null;
-  const isAuthenticated = checkAuth() && user !== null;
+  const isAuthenticated = hasToken && user !== null;
+
+  useEffect(() => {
+    if (error && (error as any)?.response?.status === 401) {
+      removeAuthToken();
+      setHasToken(false);
+      // Dispatch custom event for same-tab sync
+      window.dispatchEvent(new CustomEvent("auth-token-changed"));
+    }
+  }, [error]);
 
   const value = {
     user,
     isAuthenticated,
-    isLoading,
+    isLoading: hasToken ? isLoading : false,
     checkAuth,
     refetchUser,
   };

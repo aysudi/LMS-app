@@ -19,14 +19,10 @@ import {
   FaHome,
   FaBook,
 } from "react-icons/fa";
-import { User, type IUser } from "../../classes/User";
+import { useAuthContext } from "../../context/AuthContext";
+import { useLogout } from "../../hooks/useAuth";
 
-interface HeaderProps {
-  user?: IUser | null;
-  onLogout?: () => void;
-}
-
-const Header: React.FC<HeaderProps> = ({ user, onLogout }) => {
+const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -37,6 +33,9 @@ const Header: React.FC<HeaderProps> = ({ user, onLogout }) => {
 
   const navigate = useNavigate();
   const location = useLocation();
+
+  const { user, isAuthenticated } = useAuthContext();
+  const { mutate: logout } = useLogout();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -57,7 +56,18 @@ const Header: React.FC<HeaderProps> = ({ user, onLogout }) => {
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
-  const userInstance = user ? new User(user) : null;
+  const userDisplayData = user
+    ? {
+        avatar: user.avatar,
+        getFullName: () => `${user.firstName} ${user.lastName}`,
+        getDisplayName: () => `${user.firstName} ${user.lastName}`,
+        getInitials: () =>
+          `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`,
+        email: user.email,
+        isVerified: () => user.isEmailVerified,
+        isInstructor: () => user.role === "instructor",
+      }
+    : null;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,11 +78,8 @@ const Header: React.FC<HeaderProps> = ({ user, onLogout }) => {
   };
 
   const handleLogout = () => {
-    if (onLogout) {
-      onLogout();
-    }
+    logout();
     setIsUserMenuOpen(false);
-    navigate("/auth/login");
   };
 
   const navLinks = [
@@ -80,11 +87,11 @@ const Header: React.FC<HeaderProps> = ({ user, onLogout }) => {
     { name: "Courses", path: "/courses", icon: FaBook },
   ];
 
-  const userMenuItems = userInstance
+  const userMenuItems = userDisplayData
     ? [
         { name: "Profile", path: "/profile", icon: FaUser },
         { name: "Settings", path: "/settings", icon: FaCog },
-        ...(userInstance.isInstructor()
+        ...(userDisplayData.isInstructor()
           ? [
               {
                 name: "Instructor",
@@ -114,14 +121,14 @@ const Header: React.FC<HeaderProps> = ({ user, onLogout }) => {
           <motion.div
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="flex items-center space-x-3 cursor-pointer"
+            className="flex items-center space-x-2 cursor-pointer"
             onClick={() => navigate("/")}
           >
             <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-2 lg:p-3 rounded-xl shadow-lg">
-              <FaGraduationCap className="text-white text-xl lg:text-2xl" />
+              <FaGraduationCap className="text-white text-xl" />
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-xl lg:text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                 Skillify
               </h1>
               <p className="text-xs text-gray-500 hidden lg:block">
@@ -172,7 +179,7 @@ const Header: React.FC<HeaderProps> = ({ user, onLogout }) => {
 
           {/* Right Side - Auth & User Actions */}
           <div className="flex items-center space-x-1 lg:space-x-2 xl:space-x-4">
-            {userInstance ? (
+            {isAuthenticated && userDisplayData ? (
               // Logged in user
               <>
                 {/* User Action Buttons */}
@@ -182,7 +189,7 @@ const Header: React.FC<HeaderProps> = ({ user, onLogout }) => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => navigate("/favorites")}
-                    className="relative p-2 text-gray-700 hover:text-red-500 transition-colors duration-200 group"
+                    className="relative p-2 text-gray-700 hover:text-red-500 transition-colors duration-200 group cursor-pointer"
                     title="Favorites"
                   >
                     <FaHeart className="text-lg" />
@@ -198,7 +205,7 @@ const Header: React.FC<HeaderProps> = ({ user, onLogout }) => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => navigate("/cart")}
-                    className="relative p-2 text-gray-700 hover:text-indigo-600 transition-colors duration-200 group"
+                    className="relative p-2 text-gray-700 hover:text-indigo-600 transition-colors duration-200 group cursor-pointer"
                     title="Shopping Cart"
                   >
                     <FaShoppingCart className="text-lg" />
@@ -214,7 +221,7 @@ const Header: React.FC<HeaderProps> = ({ user, onLogout }) => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => navigate("/my-learning")}
-                    className="hidden xl:flex items-center space-x-2 px-3 py-2 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-200"
+                    className="hidden xl:flex items-center space-x-2 px-3 py-2 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-200 cursor-pointer"
                     title="My Learning"
                   >
                     <FaBookOpen className="text-sm" />
@@ -226,7 +233,7 @@ const Header: React.FC<HeaderProps> = ({ user, onLogout }) => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => navigate("/notifications")}
-                    className="relative p-2 text-gray-700 hover:text-blue-600 transition-colors duration-200"
+                    className="relative p-2 text-gray-700 hover:text-blue-600 transition-colors duration-200 cursor-pointer"
                     title="Notifications"
                   >
                     <FaBell className="text-lg" />
@@ -244,29 +251,29 @@ const Header: React.FC<HeaderProps> = ({ user, onLogout }) => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    className="flex items-center space-x-2 lg:space-x-3 p-1 rounded-xl hover:bg-gray-100 transition-all duration-200"
+                    className="flex items-center space-x-2 lg:space-x-3 p-1 rounded-xl hover:bg-gray-100 transition-all duration-200 cursor-pointer"
                   >
                     <div className="relative">
-                      {userInstance.avatar ? (
+                      {userDisplayData.avatar ? (
                         <img
-                          src={userInstance.avatar}
-                          alt={userInstance.getFullName()}
+                          src={userDisplayData.avatar}
+                          alt={userDisplayData.getFullName()}
                           className="w-8 h-8 lg:w-10 lg:h-10 rounded-full object-cover border-2 border-white shadow-lg"
                         />
                       ) : (
                         <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center border-2 border-white shadow-lg">
                           <span className="text-white text-sm lg:text-base font-semibold">
-                            {userInstance.getInitials()}
+                            {userDisplayData.getInitials()}
                           </span>
                         </div>
                       )}
-                      {userInstance.isVerified() && (
+                      {userDisplayData.isVerified() && (
                         <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
                       )}
                     </div>
                     <div className="hidden xl:block text-left">
                       <p className="text-sm font-semibold text-gray-900">
-                        {userInstance.getDisplayName()}
+                        {userDisplayData.getDisplayName()}
                       </p>
                     </div>
                     <FaChevronDown
@@ -289,20 +296,20 @@ const Header: React.FC<HeaderProps> = ({ user, onLogout }) => {
                         {/* User Info Header */}
                         <div className="px-4 py-3 border-b border-gray-100">
                           <p className="font-semibold text-gray-900">
-                            {userInstance.getFullName()}
+                            {userDisplayData.getFullName()}
                           </p>
                           <p className="text-sm text-gray-500">
-                            {userInstance.email}
+                            {userDisplayData.email}
                           </p>
                           <div className="flex items-center space-x-2 mt-2">
                             <span
                               className={`px-2 py-1 text-xs rounded-full ${
-                                userInstance.isVerified()
+                                userDisplayData.isVerified()
                                   ? "bg-green-100 text-green-700"
                                   : "bg-yellow-100 text-yellow-700"
                               }`}
                             >
-                              {userInstance.isVerified()
+                              {userDisplayData.isVerified()
                                 ? "Verified"
                                 : "Unverified"}
                             </span>
@@ -433,7 +440,7 @@ const Header: React.FC<HeaderProps> = ({ user, onLogout }) => {
               </div>
 
               {/* User Actions (Mobile) */}
-              {userInstance && (
+              {isAuthenticated && userDisplayData && (
                 <div className="border-t border-gray-200 pt-4 space-y-2">
                   <Link
                     to="/favorites"
@@ -495,7 +502,7 @@ const Header: React.FC<HeaderProps> = ({ user, onLogout }) => {
               )}
 
               {/* Auth Links (Mobile) */}
-              {!userInstance && (
+              {!isAuthenticated && (
                 <div className="border-t border-gray-200 pt-4 space-y-3">
                   <Link
                     to="/auth/login"
