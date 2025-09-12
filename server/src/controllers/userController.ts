@@ -13,6 +13,37 @@ import {
 import bcrypt from "bcrypt";
 import { uploadToCloudinary } from "../middlewares/upload.middleware";
 
+// Get current user controller (for /me endpoint)
+export const getCurrentUserController = async (
+  req: any,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    const user = await getUserById(req.user.userId);
+
+    res.status(200).json({
+      success: true,
+      message: "Current user retrieved successfully",
+      data: { user },
+    });
+  } catch (error: any) {
+    console.error("Get current user error:", error);
+    const statusCode = error.message === "User not found" ? 404 : 500;
+    res.status(statusCode).json({
+      success: false,
+      message: error.message || "Failed to retrieve current user",
+    });
+  }
+};
+
 export const registerUser = async (
   req: any,
   res: Response,

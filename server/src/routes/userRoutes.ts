@@ -9,12 +9,14 @@ import {
   getAllUsersController,
   getUserByIdController,
   getUserByUsernameController,
+  getCurrentUserController,
 } from "../controllers/userController";
 import {
   uploadMiddleware,
   uploadErrorHandler,
 } from "../middlewares/upload.middleware";
 import { validateRequest } from "../middlewares/validation.middleware";
+import { authenticateToken } from "../middlewares/auth.middleware";
 
 const validateQuery = (schema: any) => {
   return (req: any, res: any, next: any) => {
@@ -56,6 +58,9 @@ import {
 } from "../validations/user.validation";
 
 const userRouter = Router();
+
+// Protected route - must be before other routes to avoid conflicts
+userRouter.get("/me", authenticateToken, getCurrentUserController);
 
 userRouter.get("/", validateQuery(getUsersQuerySchema), getAllUsersController);
 
