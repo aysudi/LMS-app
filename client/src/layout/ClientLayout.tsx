@@ -1,14 +1,28 @@
 import { Outlet } from "react-router";
 import Header from "../components/Client/Header";
+import HeaderSkeleton from "../components/UI/HeaderSkeleton";
 import { useAuthContext } from "../context/AuthContext";
 
 const ClientLayout = () => {
-  const { user } = useAuthContext();
+  const { isLoading } = useAuthContext();
+
+  if (isLoading) {
+    return (
+      <>
+        <HeaderSkeleton />
+        <div className="pt-16 lg:pt-20">
+          <Outlet />
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
-      <Header user={user} />
-      <Outlet />
+      <Header />
+      <div className="pt-16 lg:pt-20">
+        <Outlet />
+      </div>
     </>
   );
 };

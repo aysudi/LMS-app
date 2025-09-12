@@ -10,6 +10,7 @@ import {
 } from "../services/auth.service";
 import type { RegisterRequest, LoginRequest } from "../services/auth.service";
 import { useInvalidateUsers, userQueryKeys } from "./useUserQueries";
+import { setAuthToken, removeAuthToken } from "../utils/auth-storage";
 
 export const useRegister = () => {
   const { invalidateCurrentUser } = useInvalidateUsers();
@@ -24,8 +25,7 @@ export const useRegister = () => {
     }) => register(userData, avatar),
     onSuccess: (data) => {
       if (data.data?.token) {
-        localStorage.setItem("accessToken", data.data.token);
-        // Invalidate and refetch current user data
+        setAuthToken(data.data.token);
         invalidateCurrentUser();
       }
     },
@@ -40,10 +40,8 @@ export const useLogin = () => {
     mutationFn: (credentials: LoginRequest) => login(credentials),
     onSuccess: (data) => {
       if (data.data?.token) {
-        localStorage.setItem("accessToken", data.data.token);
-        // Invalidate and refetch current user data
+        setAuthToken(data.data.token);
         invalidateCurrentUser();
-        // Also invalidate all user-related queries
         queryClient.invalidateQueries({ queryKey: userQueryKeys.all });
       }
     },
@@ -58,8 +56,7 @@ export const useVerifyEmail = () => {
     retry: false,
     onSuccess: (data) => {
       if (data.data?.token) {
-        localStorage.setItem("accessToken", data.data.token);
-        // Invalidate and refetch current user data
+        setAuthToken(data.data.token);
         invalidateCurrentUser();
       }
     },
@@ -96,9 +93,8 @@ export const useLogout = () => {
   return useMutation({
     mutationFn: () => logout(),
     onSuccess: () => {
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("userData"); // Clean up any remaining localStorage data
-      // Clear all queries from cache
+      removeAuthToken();
+      localStorage.removeItem("userData");
       queryClient.clear();
       window.location.href = "/login";
     },
