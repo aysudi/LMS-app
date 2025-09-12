@@ -9,10 +9,10 @@ import {
   logout,
 } from "../services/auth.service";
 import type { RegisterRequest, LoginRequest } from "../services/auth.service";
-import { useAuthContext } from "../context/AuthContext";
+import { useInvalidateUsers, userQueryKeys } from "./useUserQueries";
 
 export const useRegister = () => {
-  const { setUser } = useAuthContext();
+  const { invalidateCurrentUser } = useInvalidateUsers();
 
   return useMutation({
     mutationFn: ({
@@ -25,9 +25,8 @@ export const useRegister = () => {
     onSuccess: (data) => {
       if (data.data?.token) {
         localStorage.setItem("accessToken", data.data.token);
-        if (data.data.user) {
-          setUser(data.data.user);
-        }
+        // Invalidate and refetch current user data
+        invalidateCurrentUser();
       }
     },
   });
@@ -35,24 +34,24 @@ export const useRegister = () => {
 
 export const useLogin = () => {
   const queryClient = useQueryClient();
-  const { setUser } = useAuthContext();
+  const { invalidateCurrentUser } = useInvalidateUsers();
 
   return useMutation({
     mutationFn: (credentials: LoginRequest) => login(credentials),
     onSuccess: (data) => {
       if (data.data?.token) {
         localStorage.setItem("accessToken", data.data.token);
-        if (data.data.user) {
-          setUser(data.data.user);
-        }
-        queryClient.invalidateQueries({ queryKey: ["user"] });
+        // Invalidate and refetch current user data
+        invalidateCurrentUser();
+        // Also invalidate all user-related queries
+        queryClient.invalidateQueries({ queryKey: userQueryKeys.all });
       }
     },
   });
 };
 
 export const useVerifyEmail = () => {
-  const { setUser } = useAuthContext();
+  const { invalidateCurrentUser } = useInvalidateUsers();
 
   return useMutation({
     mutationFn: (token: string) => verifyEmail(token),
@@ -60,9 +59,8 @@ export const useVerifyEmail = () => {
     onSuccess: (data) => {
       if (data.data?.token) {
         localStorage.setItem("accessToken", data.data.token);
-        if (data.data.user) {
-          setUser(data.data.user);
-        }
+        // Invalidate and refetch current user data
+        invalidateCurrentUser();
       }
     },
   });
@@ -94,14 +92,13 @@ export const useResetPassword = () => {
 
 export const useLogout = () => {
   const queryClient = useQueryClient();
-  const { setUser } = useAuthContext();
 
   return useMutation({
     mutationFn: () => logout(),
     onSuccess: () => {
       localStorage.removeItem("accessToken");
-      localStorage.removeItem("userData");
-      setUser(null);
+      localStorage.removeItem("userData"); // Clean up any remaining localStorage data
+      // Clear all queries from cache
       queryClient.clear();
       window.location.href = "/login";
     },
