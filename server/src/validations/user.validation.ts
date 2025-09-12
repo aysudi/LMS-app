@@ -83,3 +83,60 @@ export const resetPasswordSchema = Joi.object({
     "any.required": "New password is required",
   }),
 });
+
+export const getUsersQuerySchema = Joi.object({
+  page: Joi.number().integer().min(1).optional().default(1).messages({
+    "number.base": "Page must be a number",
+    "number.integer": "Page must be an integer",
+    "number.min": "Page must be at least 1",
+  }),
+
+  limit: Joi.number()
+    .integer()
+    .min(1)
+    .max(100)
+    .optional()
+    .default(10)
+    .messages({
+      "number.base": "Limit must be a number",
+      "number.integer": "Limit must be an integer",
+      "number.min": "Limit must be at least 1",
+      "number.max": "Limit cannot exceed 100",
+    }),
+
+  role: Joi.string()
+    .valid(...Object.values(UserRole))
+    .optional()
+    .messages({
+      "any.only": "Role must be either student, instructor, or admin",
+    }),
+
+  search: Joi.string().max(100).optional().messages({
+    "string.max": "Search query cannot exceed 100 characters",
+  }),
+});
+
+export const getUserByIdSchema = Joi.object({
+  userId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "string.pattern.base": "Invalid user ID format",
+      "any.required": "User ID is required",
+    }),
+});
+
+export const getUserByUsernameSchema = Joi.object({
+  username: Joi.string()
+    .min(3)
+    .max(30)
+    .pattern(/^[a-zA-Z0-9_]+$/)
+    .required()
+    .messages({
+      "string.min": "Username must be at least 3 characters",
+      "string.max": "Username cannot exceed 30 characters",
+      "string.pattern.base":
+        "Username can only contain letters, numbers, and underscores",
+      "any.required": "Username is required",
+    }),
+});
