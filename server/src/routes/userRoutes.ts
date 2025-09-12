@@ -6,21 +6,58 @@ import {
   resendVerificationEmailController,
   forgotPasswordController,
   resetPasswordController,
+  getAllUsersController,
+  getUserByIdController,
+  getUserByUsernameController,
 } from "../controllers/userController";
 import {
   uploadMiddleware,
   uploadErrorHandler,
 } from "../middlewares/upload.middleware";
 import { validateRequest } from "../middlewares/validation.middleware";
+
+const validateQuery = (schema: any) => {
+  return (req: any, res: any, next: any) => {
+    const { error, value } = schema.validate(req.query);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.details[0].message,
+      });
+    }
+    req.validatedQuery = value;
+    next();
+  };
+};
+
+const validateParams = (schema: any) => {
+  return (req: any, res: any, next: any) => {
+    const { error, value } = schema.validate(req.params);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.details[0].message,
+      });
+    }
+    req.validatedParams = value;
+    next();
+  };
+};
+
 import {
   registerValidationSchema,
   loginValidationSchema,
   resendVerificationSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
+  getUsersQuerySchema,
+  getUserByIdSchema,
+  getUserByUsernameSchema,
 } from "../validations/user.validation";
 
 const userRouter = Router();
+
+userRouter.get("/", validateQuery(getUsersQuerySchema), getAllUsersController);
 
 userRouter.post(
   "/register",
@@ -50,6 +87,18 @@ userRouter.post(
   "/reset-password",
   validateRequest(resetPasswordSchema),
   resetPasswordController
+);
+
+userRouter.get(
+  "/username/:username",
+  validateParams(getUserByUsernameSchema),
+  getUserByUsernameController
+);
+
+userRouter.get(
+  "/:userId",
+  validateParams(getUserByIdSchema),
+  getUserByIdController
 );
 
 export default userRouter;
