@@ -2,6 +2,7 @@ import { Response } from "express";
 import { AuthRequest } from "../types/common.types";
 import {
   createLessonService,
+  getAllLessons,
   getLessonsBySectionService,
   getLessonByIdService,
   updateLessonService,
@@ -9,16 +10,35 @@ import {
   addNoteToLessonService,
   getUserNotesForLessonService,
 } from "../services/lessonService";
+import formatMongoData from "../utils/formatMongoData";
+
+export const getAllLessonsController = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  try {
+    const lessons = await getAllLessons();
+
+    res.status(200).json({
+      success: true,
+      data: formatMongoData(lessons),
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 export const addLesson = async (req: AuthRequest, res: Response) => {
   try {
-    const { courseId, sectionId } = req.params;
     const instructorId = req.user!.userId;
     const lessonData = req.body;
 
     const lesson = await createLessonService(
-      courseId,
-      sectionId,
+      lessonData.course,
+      lessonData.section,
       lessonData,
       instructorId
     );
@@ -26,7 +46,7 @@ export const addLesson = async (req: AuthRequest, res: Response) => {
     res.status(201).json({
       success: true,
       message: "Lesson added successfully",
-      data: lesson,
+      data: formatMongoData(lesson),
     });
   } catch (error: any) {
     res.status(400).json({
@@ -38,13 +58,12 @@ export const addLesson = async (req: AuthRequest, res: Response) => {
 
 export const updateLesson = async (req: AuthRequest, res: Response) => {
   try {
-    const { courseId, sectionId, lessonId } = req.params;
+    const { courseId, lessonId } = req.params;
     const instructorId = req.user!.userId;
     const lessonData = req.body;
 
     const lesson = await updateLessonService(
       courseId,
-      sectionId,
       lessonId,
       lessonData,
       instructorId
@@ -53,7 +72,7 @@ export const updateLesson = async (req: AuthRequest, res: Response) => {
     res.status(200).json({
       success: true,
       message: "Lesson updated successfully",
-      data: lesson,
+      data: formatMongoData(lesson),
     });
   } catch (error: any) {
     res.status(400).json({
@@ -65,20 +84,15 @@ export const updateLesson = async (req: AuthRequest, res: Response) => {
 
 export const deleteLesson = async (req: AuthRequest, res: Response) => {
   try {
-    const { courseId, sectionId, lessonId } = req.params;
+    const { courseId, lessonId } = req.params;
     const instructorId = req.user!.userId;
 
-    const result = await deleteLessonService(
-      courseId,
-      sectionId,
-      lessonId,
-      instructorId
-    );
+    const result = await deleteLessonService(courseId, lessonId, instructorId);
 
     res.status(200).json({
       success: true,
       message: "Lesson deleted successfully",
-      data: result,
+      data: formatMongoData(result),
     });
   } catch (error: any) {
     res.status(400).json({
@@ -105,7 +119,7 @@ export const addNoteToLesson = async (req: AuthRequest, res: Response) => {
     res.status(201).json({
       success: true,
       message: "Note added successfully",
-      data: note,
+      data: formatMongoData(note),
     });
   } catch (error: any) {
     res.status(400).json({
@@ -117,18 +131,13 @@ export const addNoteToLesson = async (req: AuthRequest, res: Response) => {
 
 export const getLessonsBySection = async (req: AuthRequest, res: Response) => {
   try {
-    const { courseId, sectionId } = req.params;
-    const userId = req.user?.userId;
+    const { sectionId } = req.params;
 
-    const lessons = await getLessonsBySectionService(
-      courseId,
-      sectionId,
-      userId
-    );
+    const lessons = await getLessonsBySectionService(sectionId);
 
     res.status(200).json({
       success: true,
-      data: lessons,
+      data: formatMongoData(lessons),
     });
   } catch (error: any) {
     res.status(400).json({
@@ -140,19 +149,13 @@ export const getLessonsBySection = async (req: AuthRequest, res: Response) => {
 
 export const getLessonById = async (req: AuthRequest, res: Response) => {
   try {
-    const { courseId, sectionId, lessonId } = req.params;
-    const userId = req.user?.userId;
+    const { lessonId } = req.params;
 
-    const lesson = await getLessonByIdService(
-      courseId,
-      sectionId,
-      lessonId,
-      userId
-    );
+    const lesson = await getLessonByIdService(lessonId);
 
     res.status(200).json({
       success: true,
-      data: lesson,
+      data: formatMongoData(lesson),
     });
   } catch (error: any) {
     res.status(400).json({
@@ -179,7 +182,7 @@ export const getUserNotesForLesson = async (
 
     res.status(200).json({
       success: true,
-      data: notes,
+      data: formatMongoData(notes),
     });
   } catch (error: any) {
     res.status(400).json({

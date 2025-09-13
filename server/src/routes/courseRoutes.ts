@@ -16,19 +16,15 @@ import {
 
 const courseRouter = Router();
 
-// Public routes
 courseRouter.get("/", (req, res) => getAllCourses(req, res));
 courseRouter.get("/:id", (req, res) => getCourseById(req, res));
 
-// Protected routes (require authentication)
 courseRouter.use(authenticateToken);
 
-// User/Student routes
 courseRouter.get("/user/enrolled", (req, res) =>
   getUserCourses(req as any, res)
 );
 
-// Instructor routes
 courseRouter.get(
   "/instructor/courses",
   authorizeRoles(UserRole.INSTRUCTOR),

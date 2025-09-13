@@ -109,6 +109,7 @@ export const getCourseByIdService = async (
       return {
         ...section,
         lessons,
+        lessonCount: lessons.length, // Add lesson count for UI
       };
     })
   );
