@@ -10,6 +10,15 @@ import {
   SectionQuery,
 } from "../types/section.types";
 
+export const getAllSections = async (): Promise<ISection[]> => {
+  const sections = await Section.find({})
+    .populate("course", "title instructor")
+    .sort({ createdAt: -1 })
+    .lean();
+
+  return sections;
+};
+
 export const getSectionsByCourse = async (
   courseId: string
 ): Promise<ISection[]> => {
@@ -36,9 +45,8 @@ export const createSection = async (
   sectionData: CreateSectionData,
   instructorId: string
 ): Promise<ISection> => {
-  // Verify course exists and instructor owns it
   const course = await Course.findOne({
-    _id: sectionData.courseId,
+    _id: sectionData.course,
     instructor: instructorId,
   });
 
@@ -46,10 +54,9 @@ export const createSection = async (
     throw new Error("Course not found or you are not authorized to modify it");
   }
 
-  // Set order if not provided
   let order = sectionData.order;
   if (!order) {
-    const lastSection = await Section.findOne({ course: sectionData.courseId })
+    const lastSection = await Section.findOne({ course: sectionData.course })
       .sort({ order: -1 })
       .select("order");
     order = lastSection ? lastSection.order + 1 : 1;
@@ -59,7 +66,7 @@ export const createSection = async (
     title: sectionData.title,
     description: sectionData.description,
     order,
-    course: sectionData.courseId,
+    course: sectionData.course,
   });
 
   await section.save();
@@ -77,7 +84,6 @@ export const updateSection = async (
     throw new Error("Section not found");
   }
 
-  // Check if instructor owns the course
   if ((section.course as any).instructor.toString() !== instructorId) {
     throw new Error("You are not authorized to update this section");
   }

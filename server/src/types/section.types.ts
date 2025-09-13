@@ -13,7 +13,7 @@ export interface CreateSectionData {
   title: string;
   description?: string;
   order?: number;
-  courseId: string;
+  course: string;
 }
 
 export interface UpdateSectionData {

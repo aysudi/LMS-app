@@ -6,17 +6,24 @@ import {
   ILesson,
   CreateLessonData,
   UpdateLessonData,
-  LessonQuery,
 } from "../types/lesson.types";
 
-// Create lesson
+export const getAllLessons = async (): Promise<ILesson[]> => {
+  const lessons = await Lesson.find({})
+    .populate("course", "title instructor")
+    .populate("section", "title")
+    .sort({ createdAt: -1 })
+    .lean();
+
+  return lessons;
+};
+
 export const createLessonService = async (
   courseId: string,
   sectionId: string,
   lessonData: CreateLessonData,
   instructorId: string
 ): Promise<ILesson> => {
-  // Verify course ownership
   const course = await Course.findOne({
     _id: courseId,
     instructor: instructorId,
@@ -26,7 +33,6 @@ export const createLessonService = async (
     throw new Error("Course not found or you are not authorized to modify it");
   }
 
-  // Verify section exists and belongs to course
   const section = await Section.findOne({
     _id: sectionId,
     course: courseId,
@@ -36,15 +42,16 @@ export const createLessonService = async (
     throw new Error("Section not found");
   }
 
-  // Set order if not provided
   if (!lessonData.order) {
     const lastLesson = await Lesson.findOne({
       section: sectionId,
-    }).sort({ order: -1 });
+    })
+      .sort({ order: -1 })
+      .populate("section")
+      .populate("course");
     lessonData.order = lastLesson ? lastLesson.order + 1 : 1;
   }
 
-  // Create lesson
   const lesson = new Lesson({
     ...lessonData,
     course: courseId,
@@ -53,72 +60,31 @@ export const createLessonService = async (
 
   await lesson.save();
 
-  // Update course lastUpdated
   course.lastUpdated = new Date();
   await course.save();
 
   return lesson;
 };
 
-// Get all lessons for a section
 export const getLessonsBySectionService = async (
-  courseId: string,
-  sectionId: string,
-  userId?: string
+  sectionId: string
 ): Promise<ILesson[]> => {
-  // Verify course exists
-  const course = await Course.findById(courseId);
-  if (!course) {
-    throw new Error("Course not found");
-  }
-
-  // Verify section exists and belongs to course
-  const section = await Section.findOne({
-    _id: sectionId,
-    course: courseId,
-  });
-
-  if (!section) {
-    throw new Error("Section not found");
-  }
-
-  // Get lessons for this section
   const lessons = await Lesson.find({
     section: sectionId,
-  }).sort({ order: 1 });
+  })
+    .sort({ order: 1 })
+    .populate("section")
+    .populate("course");
 
   return lessons;
 };
 
-// Get lesson by ID
 export const getLessonByIdService = async (
-  courseId: string,
-  sectionId: string,
-  lessonId: string,
-  userId?: string
+  lessonId: string
 ): Promise<ILesson> => {
-  // Verify course exists
-  const course = await Course.findById(courseId);
-  if (!course) {
-    throw new Error("Course not found");
-  }
-
-  // Verify section exists and belongs to course
-  const section = await Section.findOne({
-    _id: sectionId,
-    course: courseId,
-  });
-
-  if (!section) {
-    throw new Error("Section not found");
-  }
-
-  // Get lesson
-  const lesson = await Lesson.findOne({
-    _id: lessonId,
-    section: sectionId,
-    course: courseId,
-  });
+  const lesson = await Lesson.findById(lessonId)
+    .populate("section")
+    .populate("course");
 
   if (!lesson) {
     throw new Error("Lesson not found");
@@ -127,15 +93,12 @@ export const getLessonByIdService = async (
   return lesson;
 };
 
-// Update lesson
 export const updateLessonService = async (
   courseId: string,
-  sectionId: string,
   lessonId: string,
   lessonData: UpdateLessonData,
   instructorId: string
 ): Promise<ILesson> => {
-  // Verify course ownership
   const course = await Course.findOne({
     _id: courseId,
     instructor: instructorId,
@@ -145,21 +108,9 @@ export const updateLessonService = async (
     throw new Error("Course not found or you are not authorized to modify it");
   }
 
-  // Verify section exists and belongs to course
-  const section = await Section.findOne({
-    _id: sectionId,
-    course: courseId,
-  });
-
-  if (!section) {
-    throw new Error("Section not found");
-  }
-
-  // Update lesson
   const lesson = await Lesson.findOneAndUpdate(
     {
       _id: lessonId,
-      section: sectionId,
       course: courseId,
     },
     lessonData,
@@ -170,21 +121,17 @@ export const updateLessonService = async (
     throw new Error("Lesson not found");
   }
 
-  // Update course lastUpdated
   course.lastUpdated = new Date();
   await course.save();
 
   return lesson;
 };
 
-// Delete lesson
 export const deleteLessonService = async (
   courseId: string,
-  sectionId: string,
   lessonId: string,
   instructorId: string
 ): Promise<{ message: string }> => {
-  // Verify course ownership
   const course = await Course.findOne({
     _id: courseId,
     instructor: instructorId,
@@ -194,20 +141,8 @@ export const deleteLessonService = async (
     throw new Error("Course not found or you are not authorized to modify it");
   }
 
-  // Verify section exists and belongs to course
-  const section = await Section.findOne({
-    _id: sectionId,
-    course: courseId,
-  });
-
-  if (!section) {
-    throw new Error("Section not found");
-  }
-
-  // Delete lesson
   const lesson = await Lesson.findOneAndDelete({
     _id: lessonId,
-    section: sectionId,
     course: courseId,
   });
 
@@ -215,14 +150,12 @@ export const deleteLessonService = async (
     throw new Error("Lesson not found");
   }
 
-  // Update course lastUpdated
   course.lastUpdated = new Date();
   await course.save();
 
   return { message: "Lesson deleted successfully" };
 };
 
-// Add note to lesson
 export const addNoteToLessonService = async (
   courseId: string,
   sectionId: string,
@@ -274,14 +207,12 @@ export const addNoteToLessonService = async (
   return userNote;
 };
 
-// Get user notes for a lesson
 export const getUserNotesForLessonService = async (
   courseId: string,
   sectionId: string,
   lessonId: string,
   userId: string
 ) => {
-  // Verify course exists and user is enrolled
   const course = await Course.findById(courseId);
   if (!course) {
     throw new Error("Course not found");
@@ -291,7 +222,6 @@ export const getUserNotesForLessonService = async (
     throw new Error("You must be enrolled in this course to view notes");
   }
 
-  // Verify lesson exists
   const lesson = await Lesson.findOne({
     _id: lessonId,
     section: sectionId,
@@ -302,7 +232,6 @@ export const getUserNotesForLessonService = async (
     throw new Error("Lesson not found");
   }
 
-  // Get user notes for this lesson
   const notes = await UserNote.find({
     user: userId,
     lesson: lessonId,

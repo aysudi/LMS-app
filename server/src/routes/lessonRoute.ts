@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   addLesson,
+  getAllLessonsController,
   getLessonsBySection,
   getLessonById,
   updateLesson,
@@ -16,37 +17,26 @@ import { UserRole } from "../types/user.types";
 
 const lessonRouter = Router();
 
-// Apply authentication middleware to all routes
-lessonRouter.use(authenticateToken);
+lessonRouter.get("/", (req, res) => getAllLessonsController(req as any, res));
 
-// Get all lessons for a section
-lessonRouter.get("/:courseId/sections/:sectionId", (req, res) =>
+lessonRouter.get("/section/:sectionId", (req, res) =>
   getLessonsBySection(req as any, res)
 );
 
-// Get specific lesson
-lessonRouter.get(
-  "/:courseId/sections/:sectionId/lessons/:lessonId",
-  (req, res) => getLessonById(req as any, res)
+lessonRouter.get("/:lessonId", (req, res) => getLessonById(req as any, res));
+
+lessonRouter.post("/", authorizeRoles(UserRole.INSTRUCTOR), (req, res) =>
+  addLesson(req as any, res)
 );
 
-// Create new lesson (instructor only)
-lessonRouter.post(
-  "/:courseId/sections/:sectionId",
-  authorizeRoles(UserRole.INSTRUCTOR),
-  (req, res) => addLesson(req as any, res)
-);
-
-// Update lesson (instructor only)
 lessonRouter.put(
-  "/:courseId/sections/:sectionId/lessons/:lessonId",
+  "/:courseId/lesson/:lessonId",
   authorizeRoles(UserRole.INSTRUCTOR),
   (req, res) => updateLesson(req as any, res)
 );
 
-// Delete lesson (instructor only)
 lessonRouter.delete(
-  "/:courseId/sections/:sectionId/lessons/:lessonId",
+  "/:courseId/lesson/:lessonId",
   authorizeRoles(UserRole.INSTRUCTOR),
   (req, res) => deleteLesson(req as any, res)
 );

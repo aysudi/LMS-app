@@ -1,6 +1,7 @@
 import { Response } from "express";
 import {
   createSection,
+  getAllSections,
   getSectionsByCourse,
   getSectionById,
   updateSection as updateSectionService,
@@ -8,6 +9,27 @@ import {
   getSectionsWithLessonCount,
 } from "../services/sectionService";
 import { AuthRequest } from "../types/common.types";
+import formatMongoData from "../utils/formatMongoData";
+
+// Get all sections (admin/system use)
+export const getAllSectionsController = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  try {
+    const sections = await getAllSections();
+
+    res.status(200).json({
+      success: true,
+      data: formatMongoData(sections),
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 export const getSections = async (req: AuthRequest, res: Response) => {
   try {
@@ -17,7 +39,7 @@ export const getSections = async (req: AuthRequest, res: Response) => {
 
     res.status(200).json({
       success: true,
-      data: sections,
+      data: formatMongoData(sections),
     });
   } catch (error: any) {
     res.status(400).json({
@@ -35,7 +57,7 @@ export const getSectionsWithCount = async (req: AuthRequest, res: Response) => {
 
     res.status(200).json({
       success: true,
-      data: sections,
+      data: formatMongoData(sections),
     });
   } catch (error: any) {
     res.status(400).json({
@@ -53,7 +75,7 @@ export const getSection = async (req: AuthRequest, res: Response) => {
 
     res.status(200).json({
       success: true,
-      data: section,
+      data: formatMongoData(section),
     });
   } catch (error: any) {
     res.status(400).json({
@@ -65,16 +87,15 @@ export const getSection = async (req: AuthRequest, res: Response) => {
 
 export const addSection = async (req: AuthRequest, res: Response) => {
   try {
-    const { courseId } = req.params;
     const instructorId = req.user!.userId;
-    const sectionData = { ...req.body, courseId };
+    const sectionData = { ...req.body };
 
     const section = await createSection(sectionData, instructorId);
 
     res.status(201).json({
       success: true,
       message: "Section added successfully",
-      data: section,
+      data: formatMongoData(section),
     });
   } catch (error: any) {
     res.status(400).json({
@@ -99,7 +120,7 @@ export const updateSection = async (req: AuthRequest, res: Response) => {
     res.status(200).json({
       success: true,
       message: "Section updated successfully",
-      data: section,
+      data: formatMongoData(section),
     });
   } catch (error: any) {
     res.status(400).json({
@@ -119,7 +140,7 @@ export const deleteSection = async (req: AuthRequest, res: Response) => {
     res.status(200).json({
       success: true,
       message: "Section deleted successfully",
-      data: result,
+      data: formatMongoData(result),
     });
   } catch (error: any) {
     res.status(400).json({

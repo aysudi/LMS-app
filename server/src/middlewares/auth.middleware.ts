@@ -108,7 +108,6 @@ export const optionalAuth = (
 
     next();
   } catch (error) {
-    // For optional auth, we don't throw errors
     next();
   }
 };
