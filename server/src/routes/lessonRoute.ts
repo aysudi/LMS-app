@@ -17,6 +17,8 @@ import { UserRole } from "../types/user.types";
 
 const lessonRouter = Router();
 
+lessonRouter.use(authenticateToken);
+
 lessonRouter.get("/", (req, res) => getAllLessonsController(req as any, res));
 
 lessonRouter.get("/section/:sectionId", (req, res) =>

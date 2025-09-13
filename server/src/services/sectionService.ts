@@ -9,6 +9,8 @@ import {
   SectionWithLessonCount,
   SectionQuery,
 } from "../types/section.types";
+import UserProgress from "../models/UserProgress";
+import UserNote from "../models/UserNote";
 
 export const getAllSections = async (): Promise<ISection[]> => {
   const sections = await Section.find({})
@@ -104,15 +106,18 @@ export const deleteSection = async (
     throw new Error("Section not found");
   }
 
-  // Check if instructor owns the course
   if ((section.course as any).instructor.toString() !== instructorId) {
     throw new Error("You are not authorized to delete this section");
   }
 
-  // Delete all lessons in this section first
+  const lessonIds = await Lesson.find({ section: sectionId }).distinct("_id");
+
+  await UserNote.deleteMany({ lesson: { $in: lessonIds } });
+
+  await UserProgress.deleteMany({ lesson: { $in: lessonIds } });
+
   await Lesson.deleteMany({ section: sectionId });
 
-  // Delete the section
   await Section.deleteOne({ _id: sectionId });
 
   return { message: "Section and its lessons deleted successfully" };

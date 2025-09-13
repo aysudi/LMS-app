@@ -7,6 +7,7 @@ import {
   CreateLessonData,
   UpdateLessonData,
 } from "../types/lesson.types";
+import UserProgress from "../models/UserProgress";
 
 export const getAllLessons = async (): Promise<ILesson[]> => {
   const lessons = await Lesson.find({})
@@ -140,6 +141,10 @@ export const deleteLessonService = async (
   if (!course) {
     throw new Error("Course not found or you are not authorized to modify it");
   }
+
+  await UserNote.deleteMany({ lesson: lessonId });
+
+  await UserProgress.deleteMany({ lesson: lessonId });
 
   const lesson = await Lesson.findOneAndDelete({
     _id: lessonId,

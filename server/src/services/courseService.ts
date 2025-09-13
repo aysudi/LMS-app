@@ -8,6 +8,8 @@ import {
   ICourse,
   UpdateCourseData,
 } from "../types/course.types";
+import UserNote from "../models/UserNote";
+import UserProgress from "../models/UserProgress";
 
 // Get all courses with filtering, pagination, and search
 export const getAllCoursesService = async (query: CourseQuery = {}) => {
@@ -98,7 +100,6 @@ export const getCourseByIdService = async (
     throw new Error("Course not found");
   }
 
-  // Get sections with their lessons
   const sections = await Section.find({ course: id }).sort({ order: 1 }).lean();
 
   const sectionsWithLessons = await Promise.all(
@@ -109,7 +110,7 @@ export const getCourseByIdService = async (
       return {
         ...section,
         lessons,
-        lessonCount: lessons.length, // Add lesson count for UI
+        lessonCount: lessons.length,
       };
     })
   );
@@ -120,7 +121,6 @@ export const getCourseByIdService = async (
   };
 };
 
-// Create new course
 export const createCourseService = async (
   courseData: CreateCourseData,
   instructorId: string
@@ -134,7 +134,6 @@ export const createCourseService = async (
   return course.populate("instructor", "firstName lastName email avatar");
 };
 
-// Update course
 export const updateCourseService = async (
   id: string,
   updateData: UpdateCourseData,
@@ -149,10 +148,8 @@ export const updateCourseService = async (
     throw new Error("Course not found or you are not authorized to update it");
   }
 
-  // Update fields
   Object.assign(course, updateData);
 
-  // If publishing, set publishedAt date
   if (updateData.isPublished && !course.publishedAt) {
     course.publishedAt = new Date();
   }
@@ -163,7 +160,6 @@ export const updateCourseService = async (
   return course.populate("instructor", "firstName lastName email avatar");
 };
 
-// Delete course
 export const deleteCourseService = async (id: string, instructorId: string) => {
   const course = await Course.findOne({
     _id: id,
@@ -174,8 +170,17 @@ export const deleteCourseService = async (id: string, instructorId: string) => {
     throw new Error("Course not found or you are not authorized to delete it");
   }
 
+  await Lesson.deleteMany({ course: id });
+
+  await Section.deleteMany({ course: id });
+
+  await UserNote.deleteMany({ course: id });
+
+  await UserProgress.deleteMany({ course: id });
+
   await Course.deleteOne({ _id: id });
-  return { message: "Course deleted successfully" };
+
+  return { message: "Course and all related data deleted successfully" };
 };
 
 // Get user's courses (for students)
