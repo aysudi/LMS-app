@@ -19,3 +19,12 @@ export interface SearchQuery extends PaginationQuery {
   search?: string;
   filters?: Record<string, any>;
 }
+
+export interface AuthRequest extends Request {
+  user?: {
+    userId: string;
+    email: string;
+    role: string;
+    id: string; // alias for userId
+  };
+}
