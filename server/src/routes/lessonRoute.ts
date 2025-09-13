@@ -20,7 +20,7 @@ const lessonRouter = Router();
 lessonRouter.use(authenticateToken);
 
 // Get all lessons for a section
-lessonRouter.get("/:courseId/sections/:sectionId/lessons", (req, res) =>
+lessonRouter.get("/:courseId/sections/:sectionId", (req, res) =>
   getLessonsBySection(req as any, res)
 );
 
@@ -32,7 +32,7 @@ lessonRouter.get(
 
 // Create new lesson (instructor only)
 lessonRouter.post(
-  "/:courseId/sections/:sectionId/lessons",
+  "/:courseId/sections/:sectionId",
   authorizeRoles(UserRole.INSTRUCTOR),
   (req, res) => addLesson(req as any, res)
 );
