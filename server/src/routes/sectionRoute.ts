@@ -22,7 +22,7 @@ sectionRouter.use(authenticateToken);
 sectionRouter.get("/:courseId", (req, res) => getSections(req as any, res));
 
 // Get sections with lesson count
-sectionRouter.get("/:courseId/sections/with-count", (req, res) =>
+sectionRouter.get("/:courseId/with-count", (req, res) =>
   getSectionsWithCount(req as any, res)
 );
 
