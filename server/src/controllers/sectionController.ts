@@ -9,7 +9,6 @@ import {
 } from "../services/sectionService";
 import { AuthRequest } from "../types/common.types";
 
-// Get all sections for a course
 export const getSections = async (req: AuthRequest, res: Response) => {
   try {
     const { courseId } = req.params;
@@ -28,7 +27,6 @@ export const getSections = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Get sections with lesson count
 export const getSectionsWithCount = async (req: AuthRequest, res: Response) => {
   try {
     const { courseId } = req.params;
@@ -47,7 +45,6 @@ export const getSectionsWithCount = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Get section by ID
 export const getSection = async (req: AuthRequest, res: Response) => {
   try {
     const { sectionId } = req.params;
@@ -66,7 +63,6 @@ export const getSection = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Add section to course
 export const addSection = async (req: AuthRequest, res: Response) => {
   try {
     const { courseId } = req.params;
@@ -88,7 +84,6 @@ export const addSection = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Update section
 export const updateSection = async (req: AuthRequest, res: Response) => {
   try {
     const { sectionId } = req.params;
@@ -114,7 +109,6 @@ export const updateSection = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Delete section
 export const deleteSection = async (req: AuthRequest, res: Response) => {
   try {
     const { sectionId } = req.params;

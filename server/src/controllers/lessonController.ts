@@ -10,7 +10,6 @@ import {
   getUserNotesForLessonService,
 } from "../services/lessonService";
 
-// Add lesson to section
 export const addLesson = async (req: AuthRequest, res: Response) => {
   try {
     const { courseId, sectionId } = req.params;
@@ -37,7 +36,6 @@ export const addLesson = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Update lesson
 export const updateLesson = async (req: AuthRequest, res: Response) => {
   try {
     const { courseId, sectionId, lessonId } = req.params;
@@ -65,7 +63,6 @@ export const updateLesson = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Delete lesson
 export const deleteLesson = async (req: AuthRequest, res: Response) => {
   try {
     const { courseId, sectionId, lessonId } = req.params;
@@ -91,7 +88,6 @@ export const deleteLesson = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Add note to lesson (student only)
 export const addNoteToLesson = async (req: AuthRequest, res: Response) => {
   try {
     const { courseId, sectionId, lessonId } = req.params;
@@ -119,7 +115,6 @@ export const addNoteToLesson = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Get lessons for a section
 export const getLessonsBySection = async (req: AuthRequest, res: Response) => {
   try {
     const { courseId, sectionId } = req.params;
@@ -143,7 +138,6 @@ export const getLessonsBySection = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Get lesson by ID
 export const getLessonById = async (req: AuthRequest, res: Response) => {
   try {
     const { courseId, sectionId, lessonId } = req.params;
@@ -168,7 +162,6 @@ export const getLessonById = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Get user notes for a lesson
 export const getUserNotesForLesson = async (
   req: AuthRequest,
   res: Response

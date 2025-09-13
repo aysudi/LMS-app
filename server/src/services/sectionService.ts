@@ -10,7 +10,6 @@ import {
   SectionQuery,
 } from "../types/section.types";
 
-// Get all sections for a course
 export const getSectionsByCourse = async (
   courseId: string
 ): Promise<ISection[]> => {
@@ -21,7 +20,6 @@ export const getSectionsByCourse = async (
   return sections;
 };
 
-// Get section by ID
 export const getSectionById = async (sectionId: string): Promise<ISection> => {
   const section = await Section.findById(sectionId)
     .populate("course", "title instructor")
@@ -34,7 +32,6 @@ export const getSectionById = async (sectionId: string): Promise<ISection> => {
   return section;
 };
 
-// Create new section
 export const createSection = async (
   sectionData: CreateSectionData,
   instructorId: string
@@ -69,7 +66,6 @@ export const createSection = async (
   return section.populate("course", "title instructor");
 };
 
-// Update section
 export const updateSection = async (
   sectionId: string,
   updateData: UpdateSectionData,
@@ -92,7 +88,6 @@ export const updateSection = async (
   return section;
 };
 
-// Delete section
 export const deleteSection = async (
   sectionId: string,
   instructorId: string
@@ -117,7 +112,6 @@ export const deleteSection = async (
   return { message: "Section and its lessons deleted successfully" };
 };
 
-// Get sections with lesson counts
 export const getSectionsWithLessonCount = async (
   courseId: string
 ): Promise<SectionWithLessonCount[]> => {
@@ -147,7 +141,6 @@ export const getSectionsWithLessonCount = async (
   return sections;
 };
 
-// Legacy functions for backward compatibility (will be removed)
 export const addSectionService = createSection;
 export const updateSectionService = updateSection;
 export const deleteSectionService = deleteSection;
