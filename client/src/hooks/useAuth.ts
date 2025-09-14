@@ -27,6 +27,7 @@ export const useRegister = () => {
       if (data.data?.token) {
         setAuthToken(data.data.token);
         invalidateCurrentUser();
+        window.location.href = "/";
       }
     },
   });
@@ -43,6 +44,7 @@ export const useLogin = () => {
         setAuthToken(data.data.token);
         invalidateCurrentUser();
         queryClient.invalidateQueries({ queryKey: userQueryKeys.all });
+        window.location.href = "/";
       }
     },
   });
@@ -58,6 +60,7 @@ export const useVerifyEmail = () => {
       if (data.data?.token) {
         setAuthToken(data.data.token);
         invalidateCurrentUser();
+        window.location.href = "/";
       }
     },
   });
@@ -96,7 +99,7 @@ export const useLogout = () => {
       removeAuthToken();
       localStorage.removeItem("userData");
       queryClient.clear();
-      window.location.href = "/login";
+      window.location.href = "/";
     },
   });
 };

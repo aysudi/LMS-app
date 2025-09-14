@@ -13,6 +13,7 @@ import Favorites from "../pages/Client/Favorites";
 import Home from "../pages/Client/Home";
 import Profile from "../pages/Client/Profile";
 import PublicRoute from "./PublicRoute";
+import ProtectedRoute from "./ProtectedRoute";
 
 const ROUTES = [
   //client routes
@@ -26,15 +27,27 @@ const ROUTES = [
       },
       {
         path: "profile",
-        element: <Profile />,
+        element: (
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "favorites",
-        element: <Favorites />,
+        element: (
+          <ProtectedRoute>
+            <Favorites />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "basket",
-        element: <Basket />,
+        element: (
+          <ProtectedRoute>
+            <Basket />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "courses",
