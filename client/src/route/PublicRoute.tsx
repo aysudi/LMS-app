@@ -1,10 +1,15 @@
 import { Navigate } from "react-router-dom";
 import AuthLayout from "../layout/AuthLayout";
+import { useAuthContext } from "../context/AuthContext";
 
 const PublicRoute = () => {
-  const token = localStorage.getItem("token");
+  const { isAuthenticated, isLoading } = useAuthContext();
 
-  return token ? <Navigate to="/" replace /> : <AuthLayout />;
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  return isAuthenticated ? <Navigate to="/" replace /> : <AuthLayout />;
 };
 
 export default PublicRoute;

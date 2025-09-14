@@ -14,6 +14,8 @@ import {
   FaCheckCircle,
   FaSpinner,
   FaExclamationTriangle,
+  FaHome,
+  FaArrowLeft,
 } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLogin } from "../../hooks/useAuth";
@@ -170,6 +172,22 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-4">
+      {/* Back to Home Button */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="absolute top-6 left-6 z-20"
+      >
+        <Link
+          to="/"
+          className="group flex items-center space-x-2 bg-white/80 backdrop-blur-sm hover:bg-white border border-gray-200 hover:border-gray-300 text-gray-700 hover:text-indigo-600 px-4 py-2 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
+        >
+          <FaArrowLeft className="text-sm group-hover:transform group-hover:-translate-x-1 transition-transform duration-200" />
+          <FaHome className="text-sm" />
+          <span className="text-sm font-medium">Back to Home</span>
+        </Link>
+      </motion.div>
       {/* Background Decorations */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
