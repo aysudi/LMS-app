@@ -80,7 +80,6 @@ export const register = async (
   };
 };
 
-// Email verification function
 export const verifyEmail = async (
   token: string
 ): Promise<{
@@ -123,7 +122,6 @@ export const verifyEmail = async (
   };
 };
 
-// Resend verification email
 export const resendVerificationEmail = async (
   email: string
 ): Promise<{ message: string }> => {
@@ -467,4 +465,33 @@ export const getUserByUsername = async (
 
   const userProfile = createUserProfile(user);
   return formatMongoData(userProfile);
+};
+
+export const refreshAccessToken = async (
+  refreshToken: string
+): Promise<{
+  accessToken: string;
+  user: UserProfileDto;
+}> => {
+  try {
+    const decoded = JWTUtils.verifyRefreshToken(refreshToken);
+
+    const user = await User.findById(decoded.userId).select(
+      "-password -emailVerificationToken -passwordResetToken"
+    );
+
+    if (!user || !user.isActive) {
+      throw new Error("User not found or inactive");
+    }
+
+    const accessToken = JWTUtils.generateAccessToken(user as any);
+    const userProfile = createUserProfile(user.toObject());
+
+    return {
+      accessToken,
+      user: formatMongoData(userProfile),
+    };
+  } catch (error) {
+    throw new Error("Invalid refresh token");
+  }
 };
