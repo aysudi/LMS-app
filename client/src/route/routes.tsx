@@ -1,4 +1,6 @@
 import ClientLayout from "../layout/ClientLayout";
+import AuthError from "../pages/Auth/AuthError";
+import AuthSuccess from "../pages/Auth/AuthSuccess";
 import ForgotPassword from "../pages/Auth/ForgotPassword";
 import Login from "../pages/Auth/Login";
 import Register from "../pages/Auth/Register";
@@ -96,10 +98,14 @@ const ROUTES = [
         path: "forgot-password",
         element: <ForgotPassword />,
       },
-      // {
-      //   path: "success/:token",
-      //   element: <AuthCallback />,
-      // },
+      {
+        path: "success/:accessToken",
+        element: <AuthSuccess />,
+      },
+      {
+        path: "error",
+        element: <AuthError />,
+      },
     ],
   },
   //instructor routes

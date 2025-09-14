@@ -541,6 +541,10 @@ const Register = () => {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     type="button"
+                    onClick={() => {
+                      window.location.href =
+                        "http://localhost:4040/auth/google";
+                    }}
                     className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer"
                   >
                     <FaGoogle className="text-red-500 mr-2" />
@@ -551,6 +555,10 @@ const Register = () => {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     type="button"
+                    onClick={() => {
+                      window.location.href =
+                        "http://localhost:4040/auth/github";
+                    }}
                     className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer"
                   >
                     <FaGithub className="text-gray-800 mr-2" />
