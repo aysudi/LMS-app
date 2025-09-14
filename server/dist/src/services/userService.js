@@ -1,4 +1,5 @@
-import User from "../models/userModel";
+import User from "../models/User";
+import mongoose from "mongoose";
 import formatMongoData from "../utils/formatMongoData";
 import { JWTUtils } from "../utils/jwt.utils";
 import { createUserProfile, comparePassword, hashPassword, } from "../utils/user.utils";
@@ -46,7 +47,6 @@ export const register = async (userData, avatarUrl) => {
         user: formatMongoData(userProfile),
     };
 };
-// Email verification function
 export const verifyEmail = async (token) => {
     const hashedToken = hashToken(token);
     const user = await User.findOne({
@@ -73,7 +73,6 @@ export const verifyEmail = async (token) => {
         refreshToken,
     };
 };
-// Resend verification email
 export const resendVerificationEmail = async (email) => {
     const user = await User.findOne({ email });
     if (!user) {
@@ -84,8 +83,7 @@ export const resendVerificationEmail = async (email) => {
     }
     const verificationToken = generateVerificationToken();
     const hashedVerificationToken = hashToken(verificationToken);
-    const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-    // Update user with new token
+    const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
     await User.findByIdAndUpdate(user._id, {
         emailVerificationToken: hashedVerificationToken,
         emailVerificationExpires: verificationExpires,
@@ -201,7 +199,6 @@ export const getUserAccountStatus = async (email) => {
 export const forgotPassword = async (email) => {
     const user = await User.findOne({ email });
     if (!user) {
-        // Return success message even if user not found for security
         return {
             message: "If an account with that email exists, we've sent a password reset link.",
         };
@@ -212,16 +209,13 @@ export const forgotPassword = async (email) => {
     if (user.authProvider !== "local") {
         throw new Error(`This account was created with ${user.authProvider}. Please sign in with ${user.authProvider}.`);
     }
-    // Generate password reset token
     const resetToken = generatePasswordResetToken();
     const hashedResetToken = hashToken(resetToken);
-    const resetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
-    // Update user with reset token
+    const resetExpires = new Date(Date.now() + 60 * 60 * 1000);
     await User.findByIdAndUpdate(user._id, {
         passwordResetToken: hashedResetToken,
         passwordResetExpires: resetExpires,
     });
-    // Send password reset email
     try {
         await sendForgotPasswordEmail(user.email, user.firstName, resetToken);
     }
@@ -243,19 +237,94 @@ export const resetPassword = async (token, newPassword) => {
     if (!user) {
         throw new Error("Invalid or expired password reset token");
     }
-    // Hash new password
     const hashedPassword = await hashPassword(newPassword);
-    // Update user with new password and remove reset token
     await User.findByIdAndUpdate(user._id, {
         password: hashedPassword,
-        loginAttempts: 0, // Reset login attempts
+        loginAttempts: 0,
         $unset: {
             passwordResetToken: 1,
             passwordResetExpires: 1,
-            lockUntil: 1, // Remove any account locks
+            lockUntil: 1,
         },
     });
     return {
         message: "Password reset successful! You can now login with your new password.",
     };
+};
+export const getAllUsers = async (page = 1, limit = 10, role, search) => {
+    const skip = (page - 1) * limit;
+    const query = { isActive: true };
+    if (role) {
+        query.role = role;
+    }
+    if (search) {
+        query.$or = [
+            { firstName: { $regex: search, $options: "i" } },
+            { lastName: { $regex: search, $options: "i" } },
+            { email: { $regex: search, $options: "i" } },
+            { username: { $regex: search, $options: "i" } },
+        ];
+    }
+    const [users, totalUsers] = await Promise.all([
+        User.find(query)
+            .select("-password -emailVerificationToken -passwordResetToken")
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .lean(),
+        User.countDocuments(query),
+    ]);
+    const totalPages = Math.ceil(totalUsers / limit);
+    const userProfiles = users.map((user) => createUserProfile(user));
+    return {
+        users: userProfiles.map((user) => formatMongoData(user)),
+        pagination: {
+            currentPage: page,
+            totalPages,
+            totalUsers,
+            hasNextPage: page < totalPages,
+            hasPreviousPage: page > 1,
+        },
+    };
+};
+export const getUserById = async (userId) => {
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+        throw new Error("Invalid user ID");
+    }
+    const user = await User.findOne({ _id: userId, isActive: true })
+        .select("-password -emailVerificationToken -passwordResetToken")
+        .lean();
+    if (!user) {
+        throw new Error("User not found");
+    }
+    const userProfile = createUserProfile(user);
+    return formatMongoData(userProfile);
+};
+export const getUserByUsername = async (username) => {
+    const user = await User.findOne({ username, isActive: true })
+        .select("-password -emailVerificationToken -passwordResetToken")
+        .lean();
+    if (!user) {
+        throw new Error("User not found");
+    }
+    const userProfile = createUserProfile(user);
+    return formatMongoData(userProfile);
+};
+export const refreshAccessToken = async (refreshToken) => {
+    try {
+        const decoded = JWTUtils.verifyRefreshToken(refreshToken);
+        const user = await User.findById(decoded.userId).select("-password -emailVerificationToken -passwordResetToken");
+        if (!user || !user.isActive) {
+            throw new Error("User not found or inactive");
+        }
+        const accessToken = JWTUtils.generateAccessToken(user);
+        const userProfile = createUserProfile(user.toObject());
+        return {
+            accessToken,
+            user: formatMongoData(userProfile),
+        };
+    }
+    catch (error) {
+        throw new Error("Invalid refresh token");
+    }
 };

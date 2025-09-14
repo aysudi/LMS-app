@@ -1,6 +1,30 @@
-import { register, login, verifyEmail, resendVerificationEmail, forgotPassword, resetPassword, } from "../services/userService";
+import { register, login, verifyEmail, resendVerificationEmail, forgotPassword, resetPassword, getAllUsers, getUserById, getUserByUsername, refreshAccessToken, } from "../services/userService";
 import bcrypt from "bcrypt";
 import { uploadToCloudinary } from "../middlewares/upload.middleware";
+export const getCurrentUserController = async (req, res, next) => {
+    try {
+        if (!req.user || !req.user.userId) {
+            return res.status(401).json({
+                success: false,
+                message: "Authentication required",
+            });
+        }
+        const user = await getUserById(req.user.userId);
+        res.status(200).json({
+            success: true,
+            message: "Current user retrieved successfully",
+            data: { user },
+        });
+    }
+    catch (error) {
+        console.error("Get current user error:", error);
+        const statusCode = error.message === "User not found" ? 404 : 500;
+        res.status(statusCode).json({
+            success: false,
+            message: error.message || "Failed to retrieve current user",
+        });
+    }
+};
 export const registerUser = async (req, res, next) => {
     try {
         const { firstName, lastName, username, email, password, role } = req.body;
@@ -49,9 +73,8 @@ export const loginUser = async (req, res, next) => {
         const result = await login({ email, password });
         res.cookie("refreshToken", result.refreshToken, {
             httpOnly: true,
-            secure: true,
+            secure: process.env.NODE_ENV === "production",
             sameSite: "strict",
-            path: "/auth/refresh",
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
         res.status(200).json({
@@ -83,7 +106,6 @@ export const verifyEmailController = async (req, res, next) => {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "strict",
-            path: "/auth/refresh",
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
         res.status(200).json({
@@ -170,6 +192,127 @@ export const resetPasswordController = async (req, res, next) => {
         res.status(400).json({
             success: false,
             message: error.message || "Password reset failed",
+        });
+    }
+};
+export const getAllUsersController = async (req, res, next) => {
+    try {
+        const queryParams = req.validatedQuery || req.query;
+        const page = parseInt(queryParams.page) || 1;
+        const limit = parseInt(queryParams.limit) || 10;
+        const role = queryParams.role;
+        const search = queryParams.search;
+        const result = await getAllUsers(page, limit, role, search);
+        res.status(200).json({
+            success: true,
+            message: "Users retrieved successfully",
+            data: result,
+        });
+    }
+    catch (error) {
+        console.error("Get all users error:", error);
+        res.status(500).json({
+            success: false,
+            message: error.message || "Failed to retrieve users",
+        });
+    }
+};
+export const getUserByIdController = async (req, res, next) => {
+    try {
+        const params = req.validatedParams || req.params;
+        const { userId } = params;
+        if (!userId) {
+            return res.status(400).json({
+                success: false,
+                message: "User ID is required",
+            });
+        }
+        const user = await getUserById(userId);
+        res.status(200).json({
+            success: true,
+            message: "User retrieved successfully",
+            data: { user },
+        });
+    }
+    catch (error) {
+        console.error("Get user by ID error:", error);
+        const statusCode = error.message === "User not found" ? 404 : 400;
+        res.status(statusCode).json({
+            success: false,
+            message: error.message || "Failed to retrieve user",
+        });
+    }
+};
+export const getUserByUsernameController = async (req, res, next) => {
+    try {
+        const params = req.validatedParams || req.params;
+        const { username } = params;
+        if (!username) {
+            return res.status(400).json({
+                success: false,
+                message: "Username is required",
+            });
+        }
+        const user = await getUserByUsername(username);
+        res.status(200).json({
+            success: true,
+            message: "User retrieved successfully",
+            data: { user },
+        });
+    }
+    catch (error) {
+        console.error("Get user by username error:", error);
+        const statusCode = error.message === "User not found" ? 404 : 400;
+        res.status(statusCode).json({
+            success: false,
+            message: error.message || "Failed to retrieve user",
+        });
+    }
+};
+export const refreshTokenController = async (req, res, next) => {
+    try {
+        const refreshToken = req.cookies.refreshToken;
+        if (!refreshToken) {
+            return res.status(401).json({
+                success: false,
+                message: "Refresh token not found",
+            });
+        }
+        const result = await refreshAccessToken(refreshToken);
+        res.status(200).json({
+            success: true,
+            message: "Token refreshed successfully",
+            data: {
+                token: result.accessToken,
+                user: result.user,
+            },
+        });
+    }
+    catch (error) {
+        console.error("Token refresh error:", error);
+        res.status(401).json({
+            success: false,
+            message: error.message || "Token refresh failed",
+        });
+    }
+};
+export const logoutController = async (req, res, next) => {
+    try {
+        res.clearCookie("refreshToken", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+        });
+        res.status(200).json({
+            success: true,
+            message: "Logout successful",
+        });
+    }
+    catch (error) {
+        console.error("Logout error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Logout failed",
         });
     }
 };

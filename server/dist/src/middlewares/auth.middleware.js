@@ -16,6 +16,7 @@ export const authenticateToken = (req, res, next) => {
             userId: decoded.userId,
             email: decoded.email,
             role: decoded.role,
+            id: decoded.userId, // alias for userId
         };
         next();
     }
@@ -55,7 +56,8 @@ export const authorizeRoles = (...roles) => {
             });
             return;
         }
-        if (!roles.includes(req.user.role)) {
+        const userRole = req.user?.role;
+        if (!roles.includes(userRole)) {
             res.status(403).json({
                 success: false,
                 message: "Insufficient permissions",
@@ -77,6 +79,7 @@ export const optionalAuth = (req, res, next) => {
                     userId: decoded.userId,
                     email: decoded.email,
                     role: decoded.role,
+                    id: decoded.userId, // alias for userId
                 };
             }
             catch (error) {
@@ -87,7 +90,6 @@ export const optionalAuth = (req, res, next) => {
         next();
     }
     catch (error) {
-        // For optional auth, we don't throw errors
         next();
     }
 };

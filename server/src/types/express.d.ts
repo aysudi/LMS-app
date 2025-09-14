@@ -1,5 +1,3 @@
-import { Request } from "express";
-
 declare global {
   namespace Express {
     interface Request {
@@ -7,6 +5,7 @@ declare global {
         userId: string;
         email: string;
         role: string;
+        id: string; // alias for userId
       };
     }
   }

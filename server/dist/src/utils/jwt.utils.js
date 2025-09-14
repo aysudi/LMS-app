@@ -1,9 +1,10 @@
 import jwt from "jsonwebtoken";
+import config from "../configs/config.js";
 export class JWTUtils {
-    static ACCESS_TOKEN_SECRET = process.env.JWT_ACCESS_SECRET || "your-access-secret-key";
-    static REFRESH_TOKEN_SECRET = process.env.JWT_REFRESH_SECRET || "your-refresh-secret-key";
-    static ACCESS_TOKEN_EXPIRES_IN = process.env.JWT_ACCESS_EXPIRES_IN || "15m";
-    static REFRESH_TOKEN_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || "7d";
+    static ACCESS_TOKEN_SECRET = config.JWT_ACCESS_SECRET_KEY || "lms-access-secret";
+    static REFRESH_TOKEN_SECRET = config.JWT_REFRESH_SECRET_KEY || "lms-refresh-secret";
+    static ACCESS_TOKEN_EXPIRES_IN = config.JWT_ACCESS_EXPIRES_IN || "1h";
+    static REFRESH_TOKEN_EXPIRES_IN = config.JWT_REFRESH_EXPIRES_IN || "7d";
     static generateAccessToken(user) {
         const payload = {
             userId: user._id,
