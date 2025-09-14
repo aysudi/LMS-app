@@ -76,7 +76,6 @@ const lessonSchema = new mongoose.Schema(
   }
 );
 
-// Indexes for better performance
 lessonSchema.index({ course: 1, section: 1, order: 1 });
 lessonSchema.index({ section: 1, order: 1 });
 

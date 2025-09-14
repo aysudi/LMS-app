@@ -81,7 +81,6 @@ export const getAllCoursesService = async (query: CourseQuery = {}) => {
   };
 };
 
-// Get course by ID with full details including sections and lessons
 export const getCourseByIdService = async (
   id: string,
   includeUnpublished = false

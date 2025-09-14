@@ -1,4 +1,5 @@
 import mongoose, { Document } from "mongoose";
+import { ILesson } from "./lesson.types";
 
 export interface ISection extends Document {
   title: string;
@@ -7,6 +8,9 @@ export interface ISection extends Document {
   course: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
+  // Virtual fields
+  lessons?: ILesson[]; // Virtual field populated from Lesson collection
+  lessonCount?: number; // Virtual field for lesson count
 }
 
 export interface CreateSectionData {
@@ -43,5 +47,6 @@ export interface SectionResponse {
   };
   createdAt: Date;
   updatedAt: Date;
+  lessons?: ILesson[];
   lessonCount?: number;
 }

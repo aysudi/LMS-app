@@ -28,6 +28,23 @@ const sectionSchema = new mongoose.Schema(
   }
 );
 
+sectionSchema.virtual("lessons", {
+  ref: "Lesson",
+  localField: "_id",
+  foreignField: "section",
+  options: { sort: { order: 1 } },
+});
+
+sectionSchema.virtual("lessonCount", {
+  ref: "Lesson",
+  localField: "_id",
+  foreignField: "section",
+  count: true,
+});
+
+sectionSchema.set("toObject", { virtuals: true });
+sectionSchema.set("toJSON", { virtuals: true });
+
 sectionSchema.index({ course: 1, order: 1 });
 
 export default sectionSchema;
