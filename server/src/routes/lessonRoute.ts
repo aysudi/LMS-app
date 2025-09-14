@@ -17,7 +17,7 @@ import { UserRole } from "../types/user.types";
 
 const lessonRouter = Router();
 
-lessonRouter.use(authenticateToken);
+// lessonRouter.use(authenticateToken);
 
 lessonRouter.get("/", (req, res) => getAllLessonsController(req as any, res));
 
@@ -27,18 +27,23 @@ lessonRouter.get("/section/:sectionId", (req, res) =>
 
 lessonRouter.get("/:lessonId", (req, res) => getLessonById(req as any, res));
 
-lessonRouter.post("/", authorizeRoles(UserRole.INSTRUCTOR), (req, res) =>
-  addLesson(req as any, res)
+lessonRouter.post(
+  "/",
+  authenticateToken,
+  authorizeRoles(UserRole.INSTRUCTOR),
+  (req, res) => addLesson(req as any, res)
 );
 
 lessonRouter.put(
   "/:courseId/lesson/:lessonId",
+  authenticateToken,
   authorizeRoles(UserRole.INSTRUCTOR),
   (req, res) => updateLesson(req as any, res)
 );
 
 lessonRouter.delete(
   "/:courseId/lesson/:lessonId",
+  authenticateToken,
   authorizeRoles(UserRole.INSTRUCTOR),
   (req, res) => deleteLesson(req as any, res)
 );
@@ -46,6 +51,7 @@ lessonRouter.delete(
 // Add note to lesson (students and instructors)
 lessonRouter.post(
   "/:courseId/sections/:sectionId/lessons/:lessonId/notes",
+  authenticateToken,
   (req, res) => addNoteToLesson(req as any, res)
 );
 

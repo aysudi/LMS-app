@@ -7,7 +7,6 @@ import {
   CreateSectionData,
   UpdateSectionData,
   SectionWithLessonCount,
-  SectionQuery,
 } from "../types/section.types";
 import UserProgress from "../models/UserProgress";
 import UserNote from "../models/UserNote";
@@ -15,6 +14,10 @@ import UserNote from "../models/UserNote";
 export const getAllSections = async (): Promise<ISection[]> => {
   const sections = await Section.find({})
     .populate("course", "title instructor")
+    .populate({
+      path: "lessons",
+      options: { sort: { order: 1 } },
+    })
     .sort({ createdAt: -1 })
     .lean();
 
@@ -25,8 +28,11 @@ export const getSectionsByCourse = async (
   courseId: string
 ): Promise<ISection[]> => {
   const sections = await Section.find({ course: courseId })
-    .sort({ order: 1 })
-    .lean();
+    .populate({
+      path: "lessons",
+      options: { sort: { order: 1 } },
+    })
+    .sort({ order: 1 });
 
   return sections;
 };
@@ -34,6 +40,10 @@ export const getSectionsByCourse = async (
 export const getSectionById = async (sectionId: string): Promise<ISection> => {
   const section = await Section.findById(sectionId)
     .populate("course", "title instructor")
+    .populate({
+      path: "lessons",
+      options: { sort: { order: 1 } },
+    })
     .lean();
 
   if (!section) {
