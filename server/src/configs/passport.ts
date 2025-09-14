@@ -9,6 +9,14 @@ import {
 } from "passport-github2";
 import UserModel from "../models/User.js";
 
+const sanitizeUsername = (input: string): string => {
+  return input
+    .toLowerCase()
+    .replace(/[^a-z0-9_]/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_|_$/g, "");
+};
+
 passport.use(
   new GoogleStrategy(
     {
@@ -45,10 +53,14 @@ passport.use(
         const firstName = nameParts[0] || "User";
         const lastName = nameParts.slice(1).join(" ") || "Google";
 
+        const emailPrefix = profile.emails?.[0]?.value.split("@")[0] || "user";
+        const sanitizedPrefix = sanitizeUsername(emailPrefix);
+        const username = `${sanitizedPrefix}_${Date.now()}`;
+
         const newUser = await UserModel.create({
           firstName,
           lastName,
-          username: `${profile.emails?.[0]?.value.split("@")[0]}-${Date.now()}`,
+          username,
           email: profile.emails?.[0]?.value,
           avatar: profile.photos?.[0]?.value,
           authProvider: "google",
@@ -81,6 +93,7 @@ passport.use(
     ) => {
       try {
         if (!profile.id) {
+          console.log("❌ No profile ID found");
           return done(new Error("Invalid GitHub profile"), false);
         }
 
@@ -108,16 +121,19 @@ passport.use(
           });
         }
 
-        // Split display name into first and last name
         const displayName = profile.displayName || profile.username || "";
         const nameParts = displayName.trim().split(" ");
         const firstName = nameParts[0] || profile.username || "User";
         const lastName = nameParts.slice(1).join(" ") || "GitHub";
 
+        const githubUsername = profile.username || "user";
+        const sanitizedUsername = sanitizeUsername(githubUsername);
+        const username = `${sanitizedUsername}_${Date.now()}`;
+
         const newUser = await UserModel.create({
           firstName,
           lastName,
-          username: `${profile.username}-${Date.now()}`,
+          username,
           email,
           avatar: profile.photos?.[0]?.value,
           authProvider: "github",
@@ -128,6 +144,7 @@ passport.use(
 
         return done(null, newUser);
       } catch (error) {
+        console.error("💥 GitHub strategy error:", error);
         return done(error as Error, false);
       }
     }

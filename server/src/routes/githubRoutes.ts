@@ -8,12 +8,18 @@ const githubRouter = express.Router();
 
 githubRouter.get(
   "/github",
-  passport.authenticate("github", { scope: ["user:email"] })
+  passport.authenticate("github", {
+    scope: ["user:email"],
+    session: false,
+  })
 );
 
 githubRouter.get(
-  "/callback",
-  passport.authenticate("github", { failureRedirect: "/login" }),
+  "/github/callback",
+  passport.authenticate("github", {
+    failureRedirect: "/login",
+    session: false,
+  }),
   (req, res) => {
     try {
       const user = req.user as IUser;
@@ -34,7 +40,7 @@ githubRouter.get(
 
       res.redirect(`${config.CLIENT_URL}/auth/success/${accessToken}`);
     } catch (error) {
-      console.error("GitHub callback error:", error);
+      console.error("💥 GitHub callback error:", error);
       res.redirect(`${config.CLIENT_URL}/auth/error`);
     }
   }
