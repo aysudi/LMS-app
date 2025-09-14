@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { IUser } from "../types/user.types.js";
+import config from "../configs/config.js";
 
 interface JWTPayload {
   userId: string;
@@ -9,13 +10,13 @@ interface JWTPayload {
 
 export class JWTUtils {
   private static readonly ACCESS_TOKEN_SECRET =
-    process.env.JWT_ACCESS_SECRET || "your-access-secret-key";
+    config.JWT_ACCESS_SECRET_KEY || "lms-access-secret";
   private static readonly REFRESH_TOKEN_SECRET =
-    process.env.JWT_REFRESH_SECRET || "your-refresh-secret-key";
+    config.JWT_REFRESH_SECRET_KEY || "lms-refresh-secret";
   private static readonly ACCESS_TOKEN_EXPIRES_IN =
-    process.env.JWT_ACCESS_EXPIRES_IN || "15m";
+    config.JWT_ACCESS_EXPIRES_IN || "1h";
   private static readonly REFRESH_TOKEN_EXPIRES_IN =
-    process.env.JWT_REFRESH_EXPIRES_IN || "7d";
+    config.JWT_REFRESH_EXPIRES_IN || "7d";
 
   static generateAccessToken(user: IUser): string {
     const payload: JWTPayload = {

@@ -10,6 +10,8 @@ import {
   getUserByIdController,
   getUserByUsernameController,
   getCurrentUserController,
+  refreshTokenController,
+  logoutController,
 } from "../controllers/userController";
 import {
   uploadMiddleware,
@@ -73,6 +75,10 @@ userRouter.post(
 );
 
 userRouter.post("/login", validateRequest(loginValidationSchema), loginUser);
+
+userRouter.post("/refresh", refreshTokenController);
+
+userRouter.post("/logout", logoutController);
 
 userRouter.get("/verify-email", verifyEmailController);
 

@@ -44,6 +44,7 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshError) {
         localStorage.removeItem("accessToken");
+        localStorage.removeItem("userData");
         window.location.href = "/login";
         return Promise.reject(refreshError);
       }

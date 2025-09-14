@@ -9,11 +9,11 @@ import {
   getAllUsers,
   getUserById,
   getUserByUsername,
+  refreshAccessToken,
 } from "../services/userService";
 import bcrypt from "bcrypt";
 import { uploadToCloudinary } from "../middlewares/upload.middleware";
 
-// Get current user controller (for /me endpoint)
 export const getCurrentUserController = async (
   req: any,
   res: Response,
@@ -107,9 +107,8 @@ export const loginUser = async (
 
     res.cookie("refreshToken", result.refreshToken, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      path: "/auth/refresh",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -149,7 +148,6 @@ export const verifyEmailController = async (
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      path: "/auth/refresh",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
@@ -352,6 +350,65 @@ export const getUserByUsernameController = async (
     res.status(statusCode).json({
       success: false,
       message: error.message || "Failed to retrieve user",
+    });
+  }
+};
+
+export const refreshTokenController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (!refreshToken) {
+      return res.status(401).json({
+        success: false,
+        message: "Refresh token not found",
+      });
+    }
+
+    const result = await refreshAccessToken(refreshToken);
+
+    res.status(200).json({
+      success: true,
+      message: "Token refreshed successfully",
+      data: {
+        token: result.accessToken,
+        user: result.user,
+      },
+    });
+  } catch (error: any) {
+    console.error("Token refresh error:", error);
+    res.status(401).json({
+      success: false,
+      message: error.message || "Token refresh failed",
+    });
+  }
+};
+
+export const logoutController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Logout successful",
+    });
+  } catch (error: any) {
+    console.error("Logout error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Logout failed",
     });
   }
 };

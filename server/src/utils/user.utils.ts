@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import { UserProfileDto, IUser } from "../types/user.types";
+import { UserProfileDto } from "../types/user.types";
 
 export const hashPassword = async (password: string): Promise<string> => {
   const saltRounds = 12;
