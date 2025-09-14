@@ -28,7 +28,7 @@ const sendEmail = async (to, subject, htmlContent, textContent) => {
 };
 // Email verification function
 export const sendVerificationEmail = async (email, firstName, verificationToken) => {
-    const verificationUrl = `${process.env.CLIENT_URL || "http://localhost:3000"}/verify-email?token=${verificationToken}`;
+    const verificationUrl = `${config.CLIENT_URL || "http://localhost:5173"}/auth/verify-email?token=${verificationToken}`;
     const subject = "Verify Your Email Address - Skillify";
     const htmlContent = `
     <!DOCTYPE html>
@@ -192,7 +192,7 @@ export const sendUnlockAccountEmail = async (email, firstName, unlockTime) => {
 };
 // Forgot password email function
 export const sendForgotPasswordEmail = async (email, firstName, resetToken) => {
-    const resetUrl = `${process.env.CLIENT_URL || "http://localhost:3000"}/reset-password?token=${resetToken}`;
+    const resetUrl = `${process.env.CLIENT_URL || "http://localhost:3000"}/auth/reset-password?token=${resetToken}`;
     const subject = "Reset Your Password - Skillify";
     const htmlContent = `
     <!DOCTYPE html>

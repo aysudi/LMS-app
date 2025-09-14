@@ -1,4 +1,6 @@
 import cors from "cors";
+import passport from "passport";
+import "./configs/passport.js";
 import express from "express";
 import {
   errorHandler,
@@ -8,8 +10,12 @@ import userRouter from "./routes/userRoutes.js";
 import courseRouter from "./routes/courseRoutes.js";
 import sectionRouter from "./routes/sectionRoute.js";
 import lessonRouter from "./routes/lessonRoute.js";
+import googleRouter from "./routes/googleRoutes.js";
+import githubRouter from "./routes/githubRoutes.js";
 
 const app = express();
+
+app.use(passport.initialize());
 
 // Middleware
 app.use(express.json({ limit: "10mb" }));
@@ -42,6 +48,8 @@ app.get("/health", (_, res) => {
 });
 
 // API Routes
+app.use("/auth", googleRouter);
+app.use("/auth", githubRouter);
 app.use("/api/auth", userRouter);
 app.use("/api/courses", courseRouter);
 app.use("/api/sections", sectionRouter);

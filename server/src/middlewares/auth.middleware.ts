@@ -27,6 +27,7 @@ export const authenticateToken = (
       userId: decoded.userId,
       email: decoded.email,
       role: decoded.role,
+      id: decoded.userId, // alias for userId
     };
 
     next();
@@ -70,7 +71,8 @@ export const authorizeRoles = (...roles: UserRole[]) => {
       return;
     }
 
-    if (!roles.includes(req.user.role as UserRole)) {
+    const userRole = (req.user as any)?.role;
+    if (!roles.includes(userRole as UserRole)) {
       res.status(403).json({
         success: false,
         message: "Insufficient permissions",
@@ -99,6 +101,7 @@ export const optionalAuth = (
           userId: decoded.userId,
           email: decoded.email,
           role: decoded.role,
+          id: decoded.userId, // alias for userId
         };
       } catch (error) {
         // Token is invalid but we don't throw error for optional auth

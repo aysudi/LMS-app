@@ -1,0 +1,13 @@
+import { Router } from "express";
+import { addSection, getAllSectionsController, getSections, getSectionsWithCount, getSection, updateSection, deleteSection, } from "../controllers/sectionController";
+import { authenticateToken, authorizeRoles, } from "../middlewares/auth.middleware";
+import { UserRole } from "../types/user.types";
+const sectionRouter = Router();
+sectionRouter.get("/", (req, res) => getAllSectionsController(req, res));
+sectionRouter.post("/", authenticateToken, authorizeRoles(UserRole.INSTRUCTOR), (req, res) => addSection(req, res));
+sectionRouter.get("/course/:courseId", (req, res) => getSections(req, res));
+sectionRouter.get("/:courseId/with-count", (req, res) => getSectionsWithCount(req, res));
+sectionRouter.get("/:sectionId", (req, res) => getSection(req, res));
+sectionRouter.put("/:sectionId", authenticateToken, authorizeRoles(UserRole.INSTRUCTOR), (req, res) => updateSection(req, res));
+sectionRouter.delete("/:sectionId", authenticateToken, authorizeRoles(UserRole.INSTRUCTOR), (req, res) => deleteSection(req, res));
+export default sectionRouter;

@@ -1,8 +1,14 @@
 import cors from "cors";
+import passport from "passport";
+import "./config/passport.js";
 import express from "express";
 import { errorHandler, notFoundHandler, } from "./middlewares/error.middleware.js";
 import userRouter from "./routes/userRoutes.js";
+import courseRouter from "./routes/courseRoutes.js";
+import sectionRouter from "./routes/sectionRoute.js";
+import lessonRouter from "./routes/lessonRoute.js";
 const app = express();
+app.use(passport.initialize());
 // Middleware
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
@@ -28,7 +34,12 @@ app.get("/health", (_, res) => {
     });
 });
 // API Routes
+// app.use("/auth", googleRouter);
+// app.use("/auth", githubRouter);
 app.use("/api/auth", userRouter);
+app.use("/api/courses", courseRouter);
+app.use("/api/sections", sectionRouter);
+app.use("/api/lessons", lessonRouter);
 // 404 handler
 app.use(notFoundHandler);
 // Global error handler
