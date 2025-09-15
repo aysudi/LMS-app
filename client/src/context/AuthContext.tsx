@@ -12,6 +12,7 @@ interface User {
   role: string;
   isEmailVerified: boolean;
   avatar?: string;
+  avatarOrInitials: string;
 }
 
 interface AuthContextType {
@@ -37,7 +38,6 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  // State to track token existence and trigger re-renders
   const [hasToken, setHasToken] = useState(() => {
     const token = getAuthToken();
     return !!token;
@@ -47,7 +47,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const token = getAuthToken();
     const tokenExists = !!token;
 
-    // Update state if token status changed
     if (tokenExists !== hasToken) {
       setHasToken(tokenExists);
     }
@@ -55,7 +54,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return tokenExists;
   };
 
-  // Listen for localStorage changes (for cross-tab synchronization)
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === "accessToken") {
@@ -68,11 +66,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  // Custom event listener for same-tab localStorage changes
   useEffect(() => {
     const handleCustomStorageChange = () => {
       const token = getAuthToken();
-      setHasToken(!!token);
+      const newTokenExists = !!token;
+      setHasToken(newTokenExists);
     };
 
     window.addEventListener("auth-token-changed", handleCustomStorageChange);
@@ -81,20 +79,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         "auth-token-changed",
         handleCustomStorageChange
       );
-  }, []);
+  }, [hasToken]);
 
   const {
     data: userData,
     isLoading,
-    refetch: refetchUser,
+    refetch: refetchUserQuery,
     error,
   } = useCurrentUser({
-    enabled: hasToken, // Now reactive to state changes
+    enabled: hasToken,
     retry: (failureCount, error: any) => {
       if (error?.response?.status === 401) {
         removeAuthToken();
         setHasToken(false);
-        // Dispatch custom event for same-tab sync
         window.dispatchEvent(new CustomEvent("auth-token-changed"));
         return false;
       }
@@ -104,6 +101,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     staleTime: 2 * 60 * 1000,
   });
 
+  const refetchUser = async () => {
+    const token = getAuthToken();
+    if (token && !hasToken) {
+      setHasToken(true);
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+    return refetchUserQuery();
+  };
+
   const user = userData || null;
   const isAuthenticated = hasToken && user !== null;
 
@@ -111,7 +117,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     if (error && (error as any)?.response?.status === 401) {
       removeAuthToken();
       setHasToken(false);
-      // Dispatch custom event for same-tab sync
       window.dispatchEvent(new CustomEvent("auth-token-changed"));
     }
   }, [error]);

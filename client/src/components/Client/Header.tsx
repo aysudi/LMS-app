@@ -34,7 +34,7 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { user, isAuthenticated } = useAuthContext();
+  const { user, isAuthenticated, isLoading } = useAuthContext();
   const { mutate: logout } = useLogout();
 
   useEffect(() => {
@@ -59,6 +59,7 @@ const Header: React.FC = () => {
   const userDisplayData = user
     ? {
         avatar: user.avatar,
+        avatarOrInitials: user.avatarOrInitials,
         getFullName: () => `${user.firstName} ${user.lastName}`,
         getDisplayName: () => `${user.firstName} ${user.lastName}`,
         getInitials: () =>
@@ -254,16 +255,18 @@ const Header: React.FC = () => {
                     className="flex items-center space-x-2 lg:space-x-3 p-1 rounded-xl hover:bg-gray-100 transition-all duration-200 cursor-pointer"
                   >
                     <div className="relative">
-                      {userDisplayData.avatar ? (
+                      {userDisplayData.avatarOrInitials &&
+                      userDisplayData.avatarOrInitials.startsWith("http") ? (
                         <img
-                          src={userDisplayData.avatar}
+                          src={userDisplayData.avatarOrInitials}
                           alt={userDisplayData.getFullName()}
                           className="w-8 h-8 lg:w-10 lg:h-10 rounded-full object-cover border-2 border-white shadow-lg"
                         />
                       ) : (
                         <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center border-2 border-white shadow-lg">
                           <span className="text-white text-sm lg:text-base font-semibold">
-                            {userDisplayData.getInitials()}
+                            {userDisplayData.avatarOrInitials ||
+                              userDisplayData.getInitials()}
                           </span>
                         </div>
                       )}
@@ -350,6 +353,12 @@ const Header: React.FC = () => {
                   </AnimatePresence>
                 </div>
               </>
+            ) : isLoading ? (
+              // Loading state - show skeleton or loading indicator
+              <div className="flex items-center space-x-3">
+                <div className="w-16 h-8 bg-gray-200 rounded animate-pulse"></div>
+                <div className="w-20 h-8 bg-gray-200 rounded animate-pulse"></div>
+              </div>
             ) : (
               // Not logged in
               <div className="flex items-center space-x-3">
