@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useFormik } from "formik";
 import { useSnackbar } from "notistack";
 import {
@@ -30,8 +30,26 @@ const Login = () => {
   const [loginStatus, setLoginStatus] = useState<LoginStatus>("idle");
 
   const navigate = useNavigate();
+  const location = useLocation();
   const { enqueueSnackbar } = useSnackbar();
   const loginMutation = useLogin();
+
+  // Show success message if coming from email verification
+  useEffect(() => {
+    const { fromVerification, message } = location.state || {};
+    if (fromVerification && message) {
+      enqueueSnackbar(message, {
+        variant: "success",
+        autoHideDuration: 6000,
+        anchorOrigin: {
+          vertical: "top",
+          horizontal: "right",
+        },
+      });
+      // Clear the state to prevent showing message on refresh
+      navigate("/auth/login", { replace: true });
+    }
+  }, [location.state, enqueueSnackbar, navigate]);
 
   const formik = useFormik({
     initialValues: {
@@ -469,6 +487,10 @@ const Login = () => {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     type="button"
+                    onClick={() => {
+                      window.location.href =
+                        "http://localhost:4040/auth/google";
+                    }}
                     className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer"
                   >
                     <FaGoogle className="text-red-500 mr-2" />
@@ -479,6 +501,10 @@ const Login = () => {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     type="button"
+                    onClick={() => {
+                      window.location.href =
+                        "http://localhost:4040/auth/github";
+                    }}
                     className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer"
                   >
                     <FaGithub className="text-gray-800 mr-2" />

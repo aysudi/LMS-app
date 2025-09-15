@@ -143,22 +143,12 @@ export const verifyEmailController = async (
 
     const result = await verifyEmail(token);
 
-    // Set refresh token cookie
-    res.cookie("refreshToken", result.refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
-
+    // Don't automatically log in user - they should manually log in after verification
     res.status(200).json({
       success: true,
-      message: result.message,
-      data: {
-        user: result.user,
-        token: result.token,
-        refreshToken: result.refreshToken,
-      },
+      message:
+        result.message ||
+        "Email verified successfully! You can now log in to your account.",
     });
   } catch (error: any) {
     console.error("Email verification error:", error);
