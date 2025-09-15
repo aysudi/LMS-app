@@ -52,12 +52,11 @@ const VerifyEmail = () => {
     if (!token) {
       // If coming from registration, show instructions instead of error
       if (fromRegistration) {
-        setVerificationStatus("invalid-token");
+        setVerificationStatus("awaiting-verification");
         setMessage(
-          "Please check your email for a verification link. We've sent a verification email to your inbox."
+          "We've sent a verification email to your inbox. Please check your email and click the verification link to activate your account."
         );
         setResendEmail(email || "");
-        setShowResendForm(true);
       } else {
         setVerificationStatus("invalid-token");
         setMessage(
@@ -147,6 +146,8 @@ const VerifyEmail = () => {
         return <FaSpinner className="animate-spin text-4xl text-blue-500" />;
       case "success":
         return <FaCheckCircle className="text-4xl text-green-500" />;
+      case "awaiting-verification":
+        return <FaEnvelope className="text-4xl text-indigo-500" />;
       case "error":
       case "invalid-token":
         return <FaExclamationTriangle className="text-4xl text-red-500" />;
@@ -161,6 +162,8 @@ const VerifyEmail = () => {
         return "from-blue-500 to-cyan-500";
       case "success":
         return "from-green-500 to-emerald-500";
+      case "awaiting-verification":
+        return "from-blue-500 to-indigo-500";
       case "error":
       case "invalid-token":
         return "from-red-500 to-pink-500";
@@ -226,6 +229,8 @@ const VerifyEmail = () => {
                     "Verifying Your Email..."}
                   {verificationStatus === "success" &&
                     "Email Verified Successfully! 🎉"}
+                  {verificationStatus === "awaiting-verification" &&
+                    "Check Your Email 📧"}
                   {verificationStatus === "error" && "Verification Failed"}
                   {verificationStatus === "invalid-token" &&
                     "Invalid Verification Link"}
@@ -269,6 +274,36 @@ const VerifyEmail = () => {
                     >
                       Sign In
                     </Link>
+                  </motion.div>
+                )}
+
+                {verificationStatus === "awaiting-verification" && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                    className="space-y-3"
+                  >
+                    <Link
+                      to="/auth/login"
+                      className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
+                    >
+                      <span>I've verified my email - Sign In</span>
+                    </Link>
+                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                      <p className="text-sm text-blue-700">
+                        💡 <strong>Tip:</strong> Can't find the email? Check
+                        your spam/junk folder. If you still can't find it, you
+                        can request a new verification email below.
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setShowResendForm(true)}
+                      className="w-full py-3 px-6 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-all duration-200 flex items-center justify-center space-x-2"
+                    >
+                      <FaRedo className="text-sm" />
+                      <span>Resend Verification Email</span>
+                    </button>
                   </motion.div>
                 )}
 

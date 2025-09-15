@@ -29,14 +29,15 @@ const AuthSuccess = () => {
           throw new Error("No access token received");
         }
 
-        // Store the access token
         setAuthToken(accessToken);
 
-        // Trigger a custom event to notify other parts of the app
         window.dispatchEvent(new CustomEvent("auth-token-changed"));
 
-        // Refetch user data to update the auth context
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
         await refetchUser();
+
+        await new Promise((resolve) => setTimeout(resolve, 200));
 
         setStatus("success");
 
@@ -49,10 +50,9 @@ const AuthSuccess = () => {
           },
         });
 
-        // Redirect to home page after a short delay
         setTimeout(() => {
           navigate("/", { replace: true });
-        }, 2000);
+        }, 1500);
       } catch (error: any) {
         console.error("OAuth success handling error:", error);
         setStatus("error");
