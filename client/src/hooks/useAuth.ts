@@ -13,8 +13,6 @@ import { useInvalidateUsers, userQueryKeys } from "./useUserQueries";
 import { setAuthToken, removeAuthToken } from "../utils/auth-storage";
 
 export const useRegister = () => {
-  const { invalidateCurrentUser } = useInvalidateUsers();
-
   return useMutation({
     mutationFn: ({
       userData,
@@ -23,13 +21,8 @@ export const useRegister = () => {
       userData: RegisterRequest;
       avatar?: File;
     }) => register(userData, avatar),
-    onSuccess: (data) => {
-      if (data.data?.token) {
-        setAuthToken(data.data.token);
-        invalidateCurrentUser();
-        window.location.href = "/";
-      }
-    },
+    // Remove automatic login on registration
+    // Users should verify email first
   });
 };
 
@@ -51,18 +44,11 @@ export const useLogin = () => {
 };
 
 export const useVerifyEmail = () => {
-  const { invalidateCurrentUser } = useInvalidateUsers();
-
   return useMutation({
     mutationFn: (token: string) => verifyEmail(token),
     retry: false,
-    onSuccess: (data) => {
-      if (data.data?.token) {
-        setAuthToken(data.data.token);
-        invalidateCurrentUser();
-        window.location.href = "/";
-      }
-    },
+    // Remove automatic login on verification
+    // Users should manually log in after verification
   });
 };
 

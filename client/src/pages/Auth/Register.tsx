@@ -86,7 +86,12 @@ const Register = () => {
         );
 
         setTimeout(() => {
-          navigate("/auth/login");
+          navigate("/auth/verify-email", {
+            state: {
+              email: values.email,
+              fromRegistration: true,
+            },
+          });
         }, 2000);
       } catch (error) {
         setRegistrationStatus("error");

@@ -1,5 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useSearchParams,
+  useLocation,
+} from "react-router-dom";
 import { useSnackbar } from "notistack";
 import {
   FaCheckCircle,
@@ -17,7 +22,12 @@ import {
 } from "../../hooks/useAuth";
 import { getErrorMessage } from "../../utils/errorUtils";
 
-type VerificationStatus = "loading" | "success" | "error" | "invalid-token";
+type VerificationStatus =
+  | "loading"
+  | "success"
+  | "error"
+  | "invalid-token"
+  | "awaiting-verification";
 
 const VerifyEmail = () => {
   const [verificationStatus, setVerificationStatus] =
@@ -28,6 +38,7 @@ const VerifyEmail = () => {
   const verificationAttempted = useRef(false);
 
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
 
@@ -36,12 +47,23 @@ const VerifyEmail = () => {
 
   useEffect(() => {
     const token = searchParams.get("token");
+    const { email, fromRegistration } = location.state || {};
 
     if (!token) {
-      setVerificationStatus("invalid-token");
-      setMessage(
-        "No verification token provided. Please check your email link."
-      );
+      // If coming from registration, show instructions instead of error
+      if (fromRegistration) {
+        setVerificationStatus("invalid-token");
+        setMessage(
+          "Please check your email for a verification link. We've sent a verification email to your inbox."
+        );
+        setResendEmail(email || "");
+        setShowResendForm(true);
+      } else {
+        setVerificationStatus("invalid-token");
+        setMessage(
+          "No verification token provided. Please check your email link."
+        );
+      }
       return;
     }
 
@@ -49,7 +71,7 @@ const VerifyEmail = () => {
       verificationAttempted.current = true;
       verifyToken(token);
     }
-  }, [searchParams]);
+  }, [searchParams, location.state]);
 
   const verifyToken = async (token: string) => {
     if (verifyEmailMutation.isPending || verificationStatus === "success") {
@@ -63,16 +85,22 @@ const VerifyEmail = () => {
 
       setVerificationStatus("success");
       setMessage(
-        result.message || "Your email has been successfully verified!"
+        result.message ||
+          "Your email has been successfully verified! You can now log in to your account."
       );
 
-      enqueueSnackbar("🎉 Email verified successfully! Welcome to Skillify!", {
+      enqueueSnackbar("🎉 Email verified successfully! You can now log in.", {
         variant: "success",
         autoHideDuration: 6000,
       });
 
       setTimeout(() => {
-        navigate("/auth/login");
+        navigate("/auth/login", {
+          state: {
+            fromVerification: true,
+            message: "Email verified successfully! Please log in to continue.",
+          },
+        });
       }, 3000);
     } catch (error) {
       setVerificationStatus("error");

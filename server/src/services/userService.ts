@@ -84,9 +84,6 @@ export const verifyEmail = async (
   token: string
 ): Promise<{
   message: string;
-  user: UserProfileDto;
-  token: string;
-  refreshToken: string;
 }> => {
   const hashedToken = hashToken(token);
 
@@ -107,18 +104,8 @@ export const verifyEmail = async (
     },
   });
 
-  const updatedUser = await User.findById(user._id);
-  const userProfile = createUserProfile(updatedUser);
-
-  const { accessToken, refreshToken } = JWTUtils.generateTokens(
-    updatedUser as any
-  );
-
   return {
-    message: "Email verified successfully! You are now logged in.",
-    user: formatMongoData(userProfile),
-    token: accessToken,
-    refreshToken,
+    message: "Email verified successfully! You can now log in to your account.",
   };
 };
 
