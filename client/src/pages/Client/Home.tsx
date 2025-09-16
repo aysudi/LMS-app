@@ -1,15 +1,12 @@
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
   FaSearch,
-  FaFilter,
   FaStar,
   FaUsers,
-  FaClock,
   FaPlay,
   FaHeart,
-  FaBookmark,
   FaArrowRight,
   FaGraduationCap,
   FaCode,
@@ -17,8 +14,6 @@ import {
   FaChartLine,
   FaCamera,
   FaRocket,
-  FaSort,
-  FaChevronDown,
   FaFire,
   FaTrophy,
   FaLightbulb,
@@ -183,17 +178,157 @@ const sortOptions = [
   { value: "popular", label: "Most Popular", icon: FaFire },
   { value: "rating", label: "Highest Rated", icon: FaStar },
   { value: "newest", label: "Newest", icon: FaRocket },
-  { value: "price-low", label: "Price: Low to High", icon: FaSort },
-  { value: "price-high", label: "Price: High to Low", icon: FaSort },
 ];
+
+// Course Card Component
+const CourseCard = ({ course, index }: { course: any; index: number }) => {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuthContext();
+  const { isInWishlist, addToWishlist, removeFromWishlist, addViewedCourse } =
+    usePersonalization();
+
+  const handleCourseClick = (courseId: string | number) => {
+    if (isAuthenticated) {
+      addViewedCourse(courseId.toString());
+    }
+    navigate(`/course/${courseId}`);
+  };
+
+  const handleWishlistToggle = async (courseId: string | number) => {
+    if (!isAuthenticated) {
+      navigate("/auth/login");
+      return;
+    }
+
+    const courseIdStr = courseId.toString();
+    if (isInWishlist(courseIdStr)) {
+      await removeFromWishlist(courseIdStr);
+    } else {
+      await addToWishlist(courseIdStr);
+    }
+  };
+
+  const handleEnroll = (courseId: string | number) => {
+    if (!isAuthenticated) {
+      navigate("/auth/login");
+      return;
+    }
+    // Handle enrollment logic
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: index * 0.1 }}
+      className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 group cursor-pointer"
+      onClick={() => handleCourseClick(course._id || course.id)}
+    >
+      <div className="relative">
+        <img
+          src={
+            course.thumbnail ||
+            course.image ||
+            "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&h=200&fit=crop"
+          }
+          alt={course.title}
+          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+        />
+
+        {/* Wishlist Button */}
+        <div className="absolute top-3 right-3">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleWishlistToggle(course._id || course.id);
+            }}
+            className={`p-2 rounded-full backdrop-blur-sm transition-colors duration-200 ${
+              isInWishlist((course._id || course.id).toString())
+                ? "bg-red-500 text-white"
+                : "bg-white/80 text-gray-700 hover:bg-red-500 hover:text-white"
+            }`}
+          >
+            <FaHeart className="text-sm" />
+          </button>
+        </div>
+
+        {/* Play Button Overlay */}
+        <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div className="bg-white/90 backdrop-blur-sm text-indigo-500 p-3 rounded-full shadow-xl">
+            <FaPlay className="text-lg ml-1" />
+          </div>
+        </div>
+      </div>
+
+      <div className="p-6">
+        <div className="mb-3">
+          <span className="inline-block px-3 py-1 bg-indigo-100 text-indigo-700 text-sm font-medium rounded-full">
+            {course.category}
+          </span>
+        </div>
+
+        <h3 className="font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-indigo-600 transition-colors">
+          {course.title}
+        </h3>
+
+        <p className="text-sm text-gray-600 mb-4">
+          by{" "}
+          <span className="font-medium">
+            {course.instructor?.firstName
+              ? `${course.instructor.firstName} ${course.instructor.lastName}`
+              : course.instructor}
+          </span>
+        </p>
+
+        <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
+          <div className="flex items-center gap-1">
+            <FaStar className="text-yellow-400" />
+            <span className="font-medium">{course.rating || 0}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <FaUsers className="text-indigo-500" />
+            <span>
+              {Number(
+                course.enrollmentCount || course.students || 0
+              ).toLocaleString()}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-xl font-bold text-gray-900">
+              {course.isFree
+                ? "Free"
+                : `$${course.currentPrice || course.price}`}
+            </span>
+            {course.originalPrice &&
+              course.originalPrice > (course.currentPrice || course.price) && (
+                <span className="text-sm text-gray-500 line-through">
+                  ${course.originalPrice}
+                </span>
+              )}
+          </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleEnroll(course._id || course.id);
+            }}
+            className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
+          >
+            Enroll
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
 
 const Home = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthContext();
   const {
-    wishlist,
     recommendations,
-    loading: personalizationLoading,
     addToWishlist,
     removeFromWishlist,
     isInWishlist,
@@ -203,80 +338,13 @@ const Home = () => {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [sortBy, setSortBy] = useState("popular");
-  const [showFilters, setShowFilters] = useState(false);
-  const [filteredCourses, setFilteredCourses] = useState(mockCourses);
-  const [favorites, setFavorites] = useState<number[]>([]);
-  const [bookmarks, setBookmarks] = useState<number[]>([]);
 
-  // Filter and sort courses
-  useEffect(() => {
-    let filtered = mockCourses;
-
-    // Filter by category
-    if (selectedCategory !== "all") {
-      filtered = filtered.filter(
-        (course) =>
-          course.category.toLowerCase().replace(" ", "-") === selectedCategory
-      );
-    }
-
-    // Filter by search query
-    if (searchQuery) {
-      filtered = filtered.filter(
-        (course) =>
-          course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          course.instructor.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          course.description
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase()) ||
-          course.tags.some((tag) =>
-            tag.toLowerCase().includes(searchQuery.toLowerCase())
-          )
-      );
-    }
-
-    // Sort courses
-    filtered = [...filtered].sort((a, b) => {
-      switch (sortBy) {
-        case "rating":
-          return b.rating - a.rating;
-        case "newest":
-          return a.isNew ? -1 : 1;
-        case "price-low":
-          return a.price - b.price;
-        case "price-high":
-          return b.price - a.price;
-        case "popular":
-        default:
-          return b.students - a.students;
-      }
-    });
-
-    setFilteredCourses(filtered);
-  }, [searchQuery, selectedCategory, sortBy]);
-
-  const toggleFavorite = (courseId: number) => {
-    setFavorites((prev) =>
-      prev.includes(courseId)
-        ? prev.filter((id) => id !== courseId)
-        : [...prev, courseId]
-    );
-  };
-
-  const toggleBookmark = (courseId: number) => {
-    setBookmarks((prev) =>
-      prev.includes(courseId)
-        ? prev.filter((id) => id !== courseId)
-        : [...prev, courseId]
-    );
-  };
-
-  const handleEnroll = (courseId: number) => {
+  const handleEnroll = (_courseId: number | string) => {
     if (!isAuthenticated) {
       navigate("/auth/login");
       return;
     }
+    // Handle enrollment logic
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -289,14 +357,14 @@ const Home = () => {
     }
   };
 
-  const handleCourseClick = (courseId: number) => {
+  const handleCourseClick = (courseId: number | string) => {
     if (isAuthenticated) {
       addViewedCourse(courseId.toString());
     }
     navigate(`/course/${courseId}`);
   };
 
-  const handleWishlistToggle = async (courseId: number) => {
+  const handleWishlistToggle = async (courseId: number | string) => {
     if (!isAuthenticated) {
       navigate("/auth/login");
       return;
@@ -515,7 +583,9 @@ const Home = () => {
                             </div>
                             <div className="flex items-center justify-between">
                               <span className="font-bold text-lg text-gray-900">
-                                {course.isFree ? "Free" : `$${course.price}`}
+                                {course.isFree
+                                  ? "Free"
+                                  : `$${course.currentPrice}`}
                               </span>
                               {course.originalPrice &&
                                 course.originalPrice > course.price && (
@@ -615,446 +685,315 @@ const Home = () => {
                 </motion.div>
               )}
 
-              {/* Most Popular Courses */}
-              {recommendations.popular.length > 0 && (
+              {/* Trending Now - Single Featured Course */}
+              {(recommendations.popular.length > 0 ||
+                mockCourses.length > 0) && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.9 }}
-                  className="mb-12"
+                  className="mb-16"
                 >
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                      <FaFire className="text-orange-600" />
+                  <div className="text-center mb-8">
+                    <h2 className="text-3xl font-bold text-gray-900 flex items-center justify-center gap-3 mb-2">
+                      <FaFire className="text-orange-500 text-4xl" />
                       Trending Now
                     </h2>
-                    <button className="text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1">
-                      View All <FaArrowRight className="text-sm" />
-                    </button>
+                    <p className="text-gray-600 text-lg">
+                      The most popular course this week
+                    </p>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {recommendations.popular
-                      .slice(0, 4)
-                      .map((course, index) => (
-                        <motion.div
-                          key={course._id}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.4, delay: index * 0.1 }}
-                          className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer"
-                          onClick={() => handleCourseClick(course._id)}
+
+                  {(() => {
+                    const trendingCourse =
+                      recommendations.popular[0] || mockCourses[0];
+                    if (!trendingCourse) return null;
+                    return (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.5 }}
+                        className="relative max-w-5xl mx-auto"
+                      >
+                        <div
+                          className="bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 rounded-3xl shadow-2xl border border-orange-200 overflow-hidden group cursor-pointer"
+                          onClick={() =>
+                            handleCourseClick(
+                              trendingCourse._id || trendingCourse.id || 1
+                            )
+                          }
                         >
-                          <div className="relative">
-                            <img
-                              src={
-                                course.thumbnail ||
-                                "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&h=200&fit=crop"
-                              }
-                              alt={course.title}
-                              className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
-                            />
-                            <div className="absolute top-2 left-2">
-                              <span className="px-2 py-1 bg-orange-500 text-white text-xs font-medium rounded-full">
-                                TRENDING
+                          {/* Trending Badge */}
+                          <div className="absolute top-6 left-6 z-10">
+                            <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full shadow-lg">
+                              <FaFire className="animate-pulse" />
+                              <span className="font-bold text-sm">
+                                🔥 TRENDING #1
                               </span>
                             </div>
-                            <div className="absolute top-2 right-2">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleWishlistToggle(course._id);
-                                }}
-                                className={`p-2 rounded-full backdrop-blur-sm transition-colors duration-200 ${
-                                  isInWishlist(course._id)
-                                    ? "bg-red-500 text-white"
-                                    : "bg-white/80 text-gray-700 hover:bg-red-500 hover:text-white"
-                                }`}
-                              >
-                                <FaHeart className="text-sm" />
-                              </button>
-                            </div>
                           </div>
-                          <div className="p-4">
-                            <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-indigo-600 transition-colors">
-                              {course.title}
-                            </h3>
-                            <p className="text-sm text-gray-600 mb-2">
-                              by {course.instructor?.firstName}{" "}
-                              {course.instructor?.lastName}
-                            </p>
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className="flex items-center gap-1">
-                                <FaStar className="text-yellow-400 text-sm" />
-                                <span className="text-sm font-medium">
-                                  {course.rating}
+
+                          {/* Wishlist Button */}
+                          <div className="absolute top-6 right-6 z-10">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleWishlistToggle(
+                                  trendingCourse._id || trendingCourse.id || 1
+                                );
+                              }}
+                              className={`p-3 rounded-full backdrop-blur-sm transition-all duration-200 shadow-lg ${
+                                isInWishlist(
+                                  (
+                                    trendingCourse._id ||
+                                    trendingCourse.id ||
+                                    1
+                                  ).toString()
+                                )
+                                  ? "bg-red-500 text-white"
+                                  : "bg-white/90 text-gray-700 hover:bg-red-500 hover:text-white"
+                              }`}
+                            >
+                              <FaHeart className="text-lg" />
+                            </button>
+                          </div>
+
+                          <div className="grid md:grid-cols-2 gap-0">
+                            {/* Course Image */}
+                            <div className="relative overflow-hidden md:order-2">
+                              <img
+                                src={
+                                  trendingCourse.thumbnail ||
+                                  "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&h=400&fit=crop"
+                                }
+                                alt={trendingCourse.title}
+                                className="w-full h-64 md:h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                              />
+
+                              {/* Play Button Overlay */}
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <div className="bg-white/90 backdrop-blur-sm text-orange-500 p-4 rounded-full shadow-xl hover:bg-white transition-colors duration-200">
+                                  <FaPlay className="text-2xl ml-1" />
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Course Content */}
+                            <div className="p-8 md:p-12 flex flex-col justify-center md:order-1">
+                              <div className="mb-4">
+                                <span className="inline-flex items-center px-3 py-1 bg-orange-100 text-orange-700 text-sm font-semibold rounded-full">
+                                  {trendingCourse.category}
                                 </span>
                               </div>
-                              <span className="text-gray-300">•</span>
-                              <span className="text-sm text-gray-600">
-                                {course.enrollmentCount} students
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <span className="font-bold text-lg text-gray-900">
-                                {course.isFree ? "Free" : `$${course.price}`}
-                              </span>
-                              {course.originalPrice &&
-                                course.originalPrice > course.price && (
-                                  <span className="text-sm text-gray-500 line-through">
-                                    ${course.originalPrice}
+
+                              <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 group-hover:text-orange-600 transition-colors">
+                                {trendingCourse.title}
+                              </h3>
+
+                              <p className="text-gray-600 mb-6 text-lg leading-relaxed">
+                                {trendingCourse.description}
+                              </p>
+
+                              <div className="text-lg text-gray-700 mb-6">
+                                by{" "}
+                                <span className="font-semibold text-gray-900">
+                                  {trendingCourse.instructor?.firstName}{" "}
+                                  {trendingCourse.instructor?.lastName}
+                                </span>
+                              </div>
+
+                              {/* Stats */}
+                              <div className="flex items-center gap-6 mb-8">
+                                <div className="flex items-center gap-2">
+                                  <FaStar className="text-yellow-400 text-lg" />
+                                  <span className="font-bold text-lg">
+                                    {trendingCourse.rating || 0}
                                   </span>
-                                )}
+                                  <span className="text-gray-500">
+                                    (1,234 reviews)
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <FaUsers className="text-indigo-500" />
+                                  <span className="font-semibold">
+                                    {Number(
+                                      trendingCourse.enrollmentCount ||
+                                        trendingCourse.students ||
+                                        0
+                                    ).toLocaleString()}
+                                  </span>
+                                  <span className="text-gray-500">
+                                    students
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Price and CTA */}
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <span className="text-3xl font-bold text-gray-900">
+                                    {trendingCourse.isFree
+                                      ? "Free"
+                                      : `$${trendingCourse.currentPrice}`}
+                                  </span>
+                                  {trendingCourse.originalPrice &&
+                                    trendingCourse.originalPrice >
+                                      trendingCourse.currentPrice && (
+                                      <span className="text-lg text-gray-500 line-through">
+                                        ${trendingCourse.originalPrice}
+                                      </span>
+                                    )}
+                                </div>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleEnroll(
+                                      trendingCourse._id ||
+                                        trendingCourse.id ||
+                                        1
+                                    );
+                                  }}
+                                  className="px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                                >
+                                  Enroll Now
+                                </button>
+                              </div>
                             </div>
                           </div>
-                        </motion.div>
-                      ))}
-                  </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })()}
                 </motion.div>
               )}
             </>
           )}
 
-          {/* Featured Section */}
-          {selectedCategory === "all" && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.7 }}
-              className="mb-12"
-            >
-              <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-8 text-white">
-                <div className="grid md:grid-cols-2 gap-8 items-center">
-                  <div>
-                    <h2 className="text-3xl font-bold mb-4">
-                      🔥 Featured Course of the Week
-                    </h2>
-                    <p className="text-indigo-100 mb-6">
-                      Join thousands of students in our most popular web
-                      development course. Learn from industry experts and build
-                      real-world projects.
-                    </p>
-                    <div className="flex items-center gap-4 mb-6">
-                      <div className="flex items-center gap-1">
-                        <FaStar className="text-yellow-400" />
-                        <span className="font-medium">4.8</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <FaUsers />
-                        <span>12,543 students</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <FaClock />
-                        <span>42 hours</span>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => handleEnroll(1)}
-                      className="bg-white text-indigo-600 px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-colors duration-200"
-                    >
-                      Enroll Now - $89.99
-                    </button>
-                  </div>
-                  <div className="relative">
-                    <img
-                      src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&h=250&fit=crop"
-                      alt="Featured Course"
-                      className="rounded-xl shadow-xl"
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <button className="bg-white/20 backdrop-blur-sm text-white p-4 rounded-full hover:bg-white/30 transition-colors duration-200">
-                        <FaPlay className="text-2xl" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
+          {/* Category Sections */}
+          <div className="space-y-16">
+            {(() => {
+              // Helper function to get courses for a category
+              const getCoursesForCategory = (category: string) => {
+                return (
+                  recommendations.recommended.length > 0
+                    ? recommendations.recommended
+                    : mockCourses
+                )
+                  .filter((course) => course.category === category)
+                  .slice(0, 3);
+              };
 
-          {/* Filters and Sort */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.8 }}
-            className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8"
-          >
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
-              <h3 className="text-xl font-semibold text-gray-900">
-                {filteredCourses.length} courses found
-              </h3>
+              const categories = [
+                {
+                  id: "Development",
+                  name: "Development",
+                  description: "Master programming and software development",
+                  icon: FaCode,
+                  bgColor: "bg-blue-100",
+                  iconColor: "text-blue-600",
+                  buttonColor: "text-blue-600 hover:text-blue-700",
+                  hoverBg: "hover:bg-blue-50",
+                },
+                {
+                  id: "Design",
+                  name: "Design",
+                  description: "Create beautiful and functional designs",
+                  icon: FaPalette,
+                  bgColor: "bg-purple-100",
+                  iconColor: "text-purple-600",
+                  buttonColor: "text-purple-600 hover:text-purple-700",
+                  hoverBg: "hover:bg-purple-50",
+                },
+                {
+                  id: "Data Science",
+                  name: "Data Science",
+                  description: "Analyze data and build intelligent systems",
+                  icon: FaChartLine,
+                  bgColor: "bg-green-100",
+                  iconColor: "text-green-600",
+                  buttonColor: "text-green-600 hover:text-green-700",
+                  hoverBg: "hover:bg-green-50",
+                },
+                {
+                  id: "Marketing",
+                  name: "Marketing",
+                  description: "Grow your business and reach more customers",
+                  icon: FaRocket,
+                  bgColor: "bg-orange-100",
+                  iconColor: "text-orange-600",
+                  buttonColor: "text-orange-600 hover:text-orange-700",
+                  hoverBg: "hover:bg-orange-50",
+                },
+                {
+                  id: "Photography",
+                  name: "Photography",
+                  description:
+                    "Capture moments and tell stories through images",
+                  icon: FaCamera,
+                  bgColor: "bg-pink-100",
+                  iconColor: "text-pink-600",
+                  buttonColor: "text-pink-600 hover:text-pink-700",
+                  hoverBg: "hover:bg-pink-50",
+                },
+              ];
 
-              {/* Mobile Filter Button */}
-              <div className="sm:hidden w-full">
-                <button
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200"
-                >
-                  <FaFilter className="text-sm" />
-                  <span>Filters & Sort</span>
-                  <FaChevronDown
-                    className={`text-xs transition-transform duration-200 ${
-                      showFilters ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-              </div>
+              return categories
+                .map((category, categoryIndex) => {
+                  const courses = getCoursesForCategory(category.id);
 
-              {/* Desktop Filter Button */}
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className="hidden sm:flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200"
-              >
-                <FaFilter className="text-sm" />
-                <span>Filters</span>
-              </button>
-            </div>
+                  // Only render the category if it has courses
+                  if (courses.length === 0) return null;
 
-            {/* Desktop Sort Dropdown */}
-            <div className="hidden sm:block relative">
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              >
-                {sortOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              <FaChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm pointer-events-none" />
-            </div>
-          </motion.div>
-
-          {/* Mobile Filters Panel */}
-          <AnimatePresence>
-            {showFilters && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                className="sm:hidden mb-8 bg-white rounded-xl shadow-lg border border-gray-200 p-4"
-              >
-                <h4 className="font-semibold text-gray-900 mb-4">Sort By</h4>
-                <div className="grid grid-cols-1 gap-2">
-                  {sortOptions.map((option) => (
-                    <button
-                      key={option.value}
-                      onClick={() => {
-                        setSortBy(option.value);
-                        setShowFilters(false);
+                  return (
+                    <motion.div
+                      key={category.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        duration: 0.6,
+                        delay: 1.0 + categoryIndex * 0.1,
                       }}
-                      className={`flex items-center gap-3 p-3 rounded-lg text-left transition-colors duration-200 ${
-                        sortBy === option.value
-                          ? "bg-indigo-100 text-indigo-700"
-                          : "hover:bg-gray-50"
-                      }`}
+                      className="mb-16"
                     >
-                      <option.icon className="text-sm" />
-                      <span>{option.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Course Grid */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 1 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-          >
-            <AnimatePresence>
-              {filteredCourses.map((course, index) => (
-                <motion.div
-                  key={course.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.4, delay: index * 0.1 }}
-                  className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 group"
-                >
-                  {/* Course Image */}
-                  <div className="relative overflow-hidden">
-                    <img
-                      src={course.image}
-                      alt={course.title}
-                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-
-                    {/* Badges */}
-                    <div className="absolute top-3 left-3 flex gap-2">
-                      {course.isNew && (
-                        <span className="px-2 py-1 bg-green-500 text-white text-xs font-medium rounded-full">
-                          New
-                        </span>
-                      )}
-                      {course.isBestseller && (
-                        <span className="px-2 py-1 bg-orange-500 text-white text-xs font-medium rounded-full">
-                          Bestseller
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <button
-                        onClick={() => toggleFavorite(course.id)}
-                        className={`p-2 rounded-full backdrop-blur-sm transition-colors duration-200 ${
-                          favorites.includes(course.id)
-                            ? "bg-red-500 text-white"
-                            : "bg-white/80 text-gray-700 hover:bg-red-500 hover:text-white"
-                        }`}
-                      >
-                        <FaHeart className="text-sm" />
-                      </button>
-                      <button
-                        onClick={() => toggleBookmark(course.id)}
-                        className={`p-2 rounded-full backdrop-blur-sm transition-colors duration-200 ${
-                          bookmarks.includes(course.id)
-                            ? "bg-indigo-500 text-white"
-                            : "bg-white/80 text-gray-700 hover:bg-indigo-500 hover:text-white"
-                        }`}
-                      >
-                        <FaBookmark className="text-sm" />
-                      </button>
-                    </div>
-
-                    {/* Preview Button */}
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <button className="bg-white/90 backdrop-blur-sm text-indigo-600 p-3 rounded-full shadow-lg hover:bg-white transition-colors duration-200">
-                        <FaPlay className="text-lg" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Course Content */}
-                  <div className="p-6">
-                    {/* Course Info */}
-                    <div className="flex items-start justify-between mb-3">
-                      <span className="px-3 py-1 bg-indigo-100 text-indigo-700 text-sm font-medium rounded-full">
-                        {course.category}
-                      </span>
-                      <span className="text-sm font-medium text-gray-500">
-                        {course.level}
-                      </span>
-                    </div>
-
-                    <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-indigo-600 transition-colors duration-200">
-                      {course.title}
-                    </h3>
-
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                      {course.description}
-                    </p>
-
-                    <div className="text-sm text-gray-500 mb-4">
-                      by{" "}
-                      <span className="font-medium text-gray-700">
-                        {course.instructor}
-                      </span>
-                    </div>
-
-                    {/* Tags */}
-                    <div className="flex flex-wrap gap-1 mb-4">
-                      {course.tags.slice(0, 3).map((tag, tagIndex) => (
-                        <span
-                          key={tagIndex}
-                          className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded"
+                      <div className="flex items-center justify-between mb-8">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-3 ${category.bgColor} rounded-xl`}>
+                            <category.icon
+                              className={`${category.iconColor} text-2xl`}
+                            />
+                          </div>
+                          <div>
+                            <h2 className="text-2xl font-bold text-gray-900">
+                              {category.name}
+                            </h2>
+                            <p className="text-gray-600">
+                              {category.description}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          className={`${category.buttonColor} font-medium flex items-center gap-2 px-4 py-2 rounded-lg ${category.hoverBg} transition-colors`}
                         >
-                          {tag}
-                        </span>
-                      ))}
-                      {course.tags.length > 3 && (
-                        <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
-                          +{course.tags.length - 3}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Course Stats */}
-                    <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
-                      <div className="flex items-center gap-1">
-                        <FaStar className="text-yellow-400" />
-                        <span className="font-medium">{course.rating}</span>
+                          View All <FaArrowRight className="text-sm" />
+                        </button>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <FaUsers />
-                        <span>{course.students.toLocaleString()}</span>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {courses.map((course, index) => (
+                          <CourseCard
+                            key={`${category.id.toLowerCase()}-${
+                              course._id || course.id
+                            }`}
+                            course={course}
+                            index={index}
+                          />
+                        ))}
                       </div>
-                      <div className="flex items-center gap-1">
-                        <FaClock />
-                        <span>{course.duration}</span>
-                      </div>
-                    </div>
-
-                    {/* Price and Action */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="text-2xl font-bold text-gray-900">
-                          ${course.price}
-                        </span>
-                        <span className="text-sm text-gray-500 line-through">
-                          ${course.originalPrice}
-                        </span>
-                      </div>
-                      <button
-                        onClick={() => handleEnroll(course.id)}
-                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
-                      >
-                        <span>Enroll</span>
-                        <FaArrowRight className="text-sm" />
-                      </button>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </motion.div>
-
-          {/* Load More Button */}
-          {filteredCourses.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 1.2 }}
-              className="text-center mt-12"
-            >
-              <button className="px-8 py-3 bg-white border-2 border-indigo-600 text-indigo-600 font-semibold rounded-xl hover:bg-indigo-600 hover:text-white transition-all duration-200 shadow-md hover:shadow-lg">
-                Load More Courses
-              </button>
-            </motion.div>
-          )}
-
-          {/* No Results */}
-          {filteredCourses.length === 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="text-center py-16"
-            >
-              <div className="text-6xl text-gray-300 mb-4">🔍</div>
-              <h3 className="text-2xl font-bold text-gray-700 mb-2">
-                No courses found
-              </h3>
-              <p className="text-gray-500 mb-6">
-                Try adjusting your search criteria or browse different
-                categories
-              </p>
-              <button
-                onClick={() => {
-                  setSearchQuery("");
-                  setSelectedCategory("all");
-                }}
-                className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-200"
-              >
-                View All Courses
-              </button>
-            </motion.div>
-          )}
+                    </motion.div>
+                  );
+                })
+                .filter(Boolean); // Remove null values
+            })()}
+          </div>
         </div>
       </section>
     </div>
