@@ -38,10 +38,25 @@ const courseSchema = new mongoose.Schema(
       default: 0,
       min: 0,
     },
+    originalPrice: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
     discountPrice: {
       type: Number,
       default: 0,
       min: 0,
+    },
+    isFree: {
+      type: Boolean,
+      default: false,
+    },
+    discountPercentage: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 100,
     },
     rating: {
       type: Number,

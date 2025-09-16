@@ -127,6 +127,40 @@ const userSchema = new mongoose.Schema(
         ref: "Course",
       },
     ],
+    wishlist: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Course",
+      },
+    ],
+    searchHistory: [
+      {
+        query: {
+          type: String,
+          trim: true,
+        },
+        category: {
+          type: String,
+          trim: true,
+        },
+        timestamp: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
+    viewedCourses: [
+      {
+        course: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Course",
+        },
+        timestamp: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
     lastLoginAt: {
       type: Date,
     },
