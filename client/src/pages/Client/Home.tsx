@@ -24,6 +24,7 @@ import {
   FaLightbulb,
 } from "react-icons/fa";
 import { useAuthContext } from "../../context/AuthContext";
+import { usePersonalization } from "../../hooks/usePersonalization";
 
 // Mock course data - replace with actual API data later
 const mockCourses = [
@@ -189,6 +190,16 @@ const sortOptions = [
 const Home = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthContext();
+  const {
+    wishlist,
+    recommendations,
+    loading: personalizationLoading,
+    addToWishlist,
+    removeFromWishlist,
+    isInWishlist,
+    addToSearchHistory,
+    addViewedCourse,
+  } = usePersonalization();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -270,6 +281,37 @@ const Home = () => {
     console.log("Enrolling in course:", courseId);
   };
 
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim() && isAuthenticated) {
+      addToSearchHistory(
+        searchQuery.trim(),
+        selectedCategory !== "all" ? selectedCategory : undefined
+      );
+    }
+  };
+
+  const handleCourseClick = (courseId: number) => {
+    if (isAuthenticated) {
+      addViewedCourse(courseId.toString());
+    }
+    navigate(`/course/${courseId}`);
+  };
+
+  const handleWishlistToggle = async (courseId: number) => {
+    if (!isAuthenticated) {
+      navigate("/auth/login");
+      return;
+    }
+
+    const courseIdStr = courseId.toString();
+    if (isInWishlist(courseIdStr)) {
+      await removeFromWishlist(courseIdStr);
+    } else {
+      await addToWishlist(courseIdStr);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
       {/* Hero Section */}
@@ -333,7 +375,7 @@ const Home = () => {
               transition={{ duration: 0.6, delay: 0.4 }}
               className="max-w-2xl mx-auto"
             >
-              <div className="relative">
+              <form onSubmit={handleSearchSubmit} className="relative">
                 <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg" />
                 <input
                   type="text"
@@ -342,7 +384,7 @@ const Home = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-12 pr-4 py-4 text-lg border border-gray-300 rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm shadow-lg"
                 />
-              </div>
+              </form>
             </motion.div>
           </div>
         </div>
@@ -395,6 +437,284 @@ const Home = () => {
               ))}
             </div>
           </motion.div>
+
+          {/* Personalized Sections for Authenticated Users */}
+          {isAuthenticated && (
+            <>
+              {/* Recommended for You */}
+              {recommendations.recommended.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.7 }}
+                  className="mb-12"
+                >
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                      <FaLightbulb className="text-indigo-600" />
+                      Recommended for You
+                    </h2>
+                    <button className="text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1">
+                      View All <FaArrowRight className="text-sm" />
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {recommendations.recommended
+                      .slice(0, 4)
+                      .map((course, index) => (
+                        <motion.div
+                          key={course._id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.4, delay: index * 0.1 }}
+                          className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer"
+                          onClick={() => handleCourseClick(course._id)}
+                        >
+                          <div className="relative">
+                            <img
+                              src={
+                                course.thumbnail ||
+                                "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&h=200&fit=crop"
+                              }
+                              alt={course.title}
+                              className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                            <div className="absolute top-2 right-2">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleWishlistToggle(course._id);
+                                }}
+                                className={`p-2 rounded-full backdrop-blur-sm transition-colors duration-200 ${
+                                  isInWishlist(course._id)
+                                    ? "bg-red-500 text-white"
+                                    : "bg-white/80 text-gray-700 hover:bg-red-500 hover:text-white"
+                                }`}
+                              >
+                                <FaHeart className="text-sm" />
+                              </button>
+                            </div>
+                          </div>
+                          <div className="p-4">
+                            <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-indigo-600 transition-colors">
+                              {course.title}
+                            </h3>
+                            <p className="text-sm text-gray-600 mb-2">
+                              by {course.instructor?.firstName}{" "}
+                              {course.instructor?.lastName}
+                            </p>
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="flex items-center gap-1">
+                                <FaStar className="text-yellow-400 text-sm" />
+                                <span className="text-sm font-medium">
+                                  {course.rating}
+                                </span>
+                              </div>
+                              <span className="text-gray-300">•</span>
+                              <span className="text-sm text-gray-600">
+                                {course.enrollmentCount} students
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="font-bold text-lg text-gray-900">
+                                {course.isFree ? "Free" : `$${course.price}`}
+                              </span>
+                              {course.originalPrice &&
+                                course.originalPrice > course.price && (
+                                  <span className="text-sm text-gray-500 line-through">
+                                    ${course.originalPrice}
+                                  </span>
+                                )}
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Free Courses */}
+              {recommendations.free.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.8 }}
+                  className="mb-12"
+                >
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                      <FaRocket className="text-green-600" />
+                      Free Courses to Get Started
+                    </h2>
+                    <button className="text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1">
+                      View All <FaArrowRight className="text-sm" />
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {recommendations.free.slice(0, 3).map((course, index) => (
+                      <motion.div
+                        key={course._id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4, delay: index * 0.1 }}
+                        className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl shadow-md border border-green-200 overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer"
+                        onClick={() => handleCourseClick(course._id)}
+                      >
+                        <div className="relative">
+                          <img
+                            src={
+                              course.thumbnail ||
+                              "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&h=200&fit=crop"
+                            }
+                            alt={course.title}
+                            className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                          <div className="absolute top-2 left-2">
+                            <span className="px-2 py-1 bg-green-500 text-white text-xs font-medium rounded-full">
+                              FREE
+                            </span>
+                          </div>
+                          <div className="absolute top-2 right-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleWishlistToggle(course._id);
+                              }}
+                              className={`p-2 rounded-full backdrop-blur-sm transition-colors duration-200 ${
+                                isInWishlist(course._id)
+                                  ? "bg-red-500 text-white"
+                                  : "bg-white/80 text-gray-700 hover:bg-red-500 hover:text-white"
+                              }`}
+                            >
+                              <FaHeart className="text-sm" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="p-4">
+                          <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-indigo-600 transition-colors">
+                            {course.title}
+                          </h3>
+                          <p className="text-sm text-gray-600 mb-2">
+                            by {course.instructor?.firstName}{" "}
+                            {course.instructor?.lastName}
+                          </p>
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="flex items-center gap-1">
+                              <FaStar className="text-yellow-400 text-sm" />
+                              <span className="text-sm font-medium">
+                                {course.rating}
+                              </span>
+                            </div>
+                            <span className="text-gray-300">•</span>
+                            <span className="text-sm text-gray-600">
+                              {course.enrollmentCount} students
+                            </span>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Most Popular Courses */}
+              {recommendations.popular.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.9 }}
+                  className="mb-12"
+                >
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                      <FaFire className="text-orange-600" />
+                      Trending Now
+                    </h2>
+                    <button className="text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1">
+                      View All <FaArrowRight className="text-sm" />
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {recommendations.popular
+                      .slice(0, 4)
+                      .map((course, index) => (
+                        <motion.div
+                          key={course._id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.4, delay: index * 0.1 }}
+                          className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer"
+                          onClick={() => handleCourseClick(course._id)}
+                        >
+                          <div className="relative">
+                            <img
+                              src={
+                                course.thumbnail ||
+                                "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&h=200&fit=crop"
+                              }
+                              alt={course.title}
+                              className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                            <div className="absolute top-2 left-2">
+                              <span className="px-2 py-1 bg-orange-500 text-white text-xs font-medium rounded-full">
+                                TRENDING
+                              </span>
+                            </div>
+                            <div className="absolute top-2 right-2">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleWishlistToggle(course._id);
+                                }}
+                                className={`p-2 rounded-full backdrop-blur-sm transition-colors duration-200 ${
+                                  isInWishlist(course._id)
+                                    ? "bg-red-500 text-white"
+                                    : "bg-white/80 text-gray-700 hover:bg-red-500 hover:text-white"
+                                }`}
+                              >
+                                <FaHeart className="text-sm" />
+                              </button>
+                            </div>
+                          </div>
+                          <div className="p-4">
+                            <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-indigo-600 transition-colors">
+                              {course.title}
+                            </h3>
+                            <p className="text-sm text-gray-600 mb-2">
+                              by {course.instructor?.firstName}{" "}
+                              {course.instructor?.lastName}
+                            </p>
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="flex items-center gap-1">
+                                <FaStar className="text-yellow-400 text-sm" />
+                                <span className="text-sm font-medium">
+                                  {course.rating}
+                                </span>
+                              </div>
+                              <span className="text-gray-300">•</span>
+                              <span className="text-sm text-gray-600">
+                                {course.enrollmentCount} students
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="font-bold text-lg text-gray-900">
+                                {course.isFree ? "Free" : `$${course.price}`}
+                              </span>
+                              {course.originalPrice &&
+                                course.originalPrice > course.price && (
+                                  <span className="text-sm text-gray-500 line-through">
+                                    ${course.originalPrice}
+                                  </span>
+                                )}
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                  </div>
+                </motion.div>
+              )}
+            </>
+          )}
 
           {/* Featured Section */}
           {selectedCategory === "all" && (

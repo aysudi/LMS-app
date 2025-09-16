@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FaGraduationCap,
@@ -16,8 +16,6 @@ import {
   FaTimes,
   FaChevronDown,
   FaUserCircle,
-  FaHome,
-  FaBook,
 } from "react-icons/fa";
 import { useAuthContext } from "../../context/AuthContext";
 import { useLogout } from "../../hooks/useAuth";
@@ -32,7 +30,7 @@ const Header: React.FC = () => {
   const [cartItems] = useState(2);
 
   const navigate = useNavigate();
-  const location = useLocation();
+  // const location = useLocation();
 
   const { user, isAuthenticated, isLoading } = useAuthContext();
   const { mutate: logout } = useLogout();
@@ -83,10 +81,10 @@ const Header: React.FC = () => {
     setIsUserMenuOpen(false);
   };
 
-  const navLinks = [
-    { name: "Home", path: "/", icon: FaHome },
-    { name: "Courses", path: "/courses", icon: FaBook },
-  ];
+  // const navLinks = [
+  //   { name: "Home", path: "/", icon: FaHome },
+  //   { name: "Courses", path: "/courses", icon: FaBook },
+  // ];
 
   const userMenuItems = userDisplayData
     ? [
@@ -139,7 +137,7 @@ const Header: React.FC = () => {
           </motion.div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center lg:ml-2 xl:ml-6 space-x-2 lg:space-x-4 xl:space-x-8">
+          {/* <nav className="hidden lg:flex items-center lg:ml-2 xl:ml-6 space-x-2 lg:space-x-4 xl:space-x-8">
             {navLinks.map((link) => {
               const IconComponent = link.icon;
               const isActive = location.pathname === link.path;
@@ -162,7 +160,7 @@ const Header: React.FC = () => {
                 </Link>
               );
             })}
-          </nav>
+          </nav> */}
 
           {/* Search Bar */}
           <div className="hidden md:flex flex-1 min-w-0 mx-4 lg:mx-3 xl:mx-8">
@@ -426,7 +424,7 @@ const Header: React.FC = () => {
               </div>
 
               {/* Navigation Links */}
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 {navLinks.map((link) => {
                   const IconComponent = link.icon;
                   const isActive = location.pathname === link.path;
@@ -446,7 +444,7 @@ const Header: React.FC = () => {
                     </Link>
                   );
                 })}
-              </div>
+              </div> */}
 
               {/* User Actions (Mobile) */}
               {isAuthenticated && userDisplayData && (
