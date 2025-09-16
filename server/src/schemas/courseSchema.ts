@@ -32,14 +32,9 @@ const courseSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    price: {
-      type: Number,
-      required: true,
-      default: 0,
-      min: 0,
-    },
     originalPrice: {
       type: Number,
+      required: true,
       default: 0,
       min: 0,
     },
@@ -50,13 +45,8 @@ const courseSchema = new mongoose.Schema(
     },
     isFree: {
       type: Boolean,
+      required: true,
       default: false,
-    },
-    discountPercentage: {
-      type: Number,
-      default: 0,
-      min: 0,
-      max: 100,
     },
     rating: {
       type: Number,
@@ -126,6 +116,7 @@ const courseSchema = new mongoose.Schema(
     },
     certificateProvided: {
       type: Boolean,
+      required: true,
       default: false,
     },
     isPublished: {
@@ -167,6 +158,8 @@ const courseSchema = new mongoose.Schema(
   {
     timestamps: true,
     versionKey: false,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
 
@@ -184,6 +177,30 @@ courseSchema.methods.calculateAverageRating = function () {
   );
   this.rating = Number((sum / this.reviews.length).toFixed(1));
   this.ratingsCount = this.reviews.length;
+};
+
+// Virtual property to get current price
+courseSchema.virtual("currentPrice").get(function () {
+  if (this.isFree) return 0;
+  if (this.discountPrice > 0 && this.discountPrice < this.originalPrice) {
+    return this.discountPrice;
+  }
+  return this.originalPrice;
+});
+
+// Virtual property to check if course has discount
+courseSchema.virtual("hasDiscount").get(function () {
+  return this.discountPrice > 0 && this.discountPrice < this.originalPrice;
+});
+
+// Method to calculate discount percentage
+courseSchema.methods.calculateDiscountPercentage = function () {
+  if (this.hasDiscount) {
+    return Math.round(
+      ((this.originalPrice - this.discountPrice) / this.originalPrice) * 100
+    );
+  }
+  return 0;
 };
 
 // Indexes for better performance

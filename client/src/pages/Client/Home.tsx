@@ -277,8 +277,6 @@ const Home = () => {
       navigate("/auth/login");
       return;
     }
-    // Handle enrollment logic
-    console.log("Enrolling in course:", courseId);
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {

@@ -9,7 +9,7 @@ import {
   logout,
 } from "../services/auth.service";
 import type { RegisterRequest, LoginRequest } from "../services/auth.service";
-import { useInvalidateUsers, userQueryKeys } from "./useUserQueries";
+import { useInvalidateUsers } from "./useUserQueries";
 import { setAuthToken, removeAuthToken } from "../utils/auth-storage";
 
 export const useRegister = () => {
@@ -27,17 +27,22 @@ export const useRegister = () => {
 };
 
 export const useLogin = () => {
-  const queryClient = useQueryClient();
   const { invalidateCurrentUser } = useInvalidateUsers();
 
   return useMutation({
     mutationFn: (credentials: LoginRequest) => login(credentials),
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       if (data.data?.token) {
         setAuthToken(data.data.token);
+
+        // Wait a bit for the token to be set properly
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        // Invalidate user queries to refetch with new token
         invalidateCurrentUser();
-        queryClient.invalidateQueries({ queryKey: userQueryKeys.all });
-        window.location.href = "/";
+
+        // Don't use window.location.href as it causes page reload
+        // Let the component handle navigation
       }
     },
   });

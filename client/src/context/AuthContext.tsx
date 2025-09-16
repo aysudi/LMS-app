@@ -90,9 +90,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     enabled: hasToken,
     retry: (failureCount, error: any) => {
       if (error?.response?.status === 401) {
-        removeAuthToken();
-        setHasToken(false);
-        window.dispatchEvent(new CustomEvent("auth-token-changed"));
+        // Only remove token if this is a confirmed unauthorized error
+        // and not just a timing issue on initial load
+        setTimeout(() => {
+          const currentToken = getAuthToken();
+          if (currentToken && hasToken) {
+            console.warn(
+              "401 error but token still exists - might be timing issue"
+            );
+            return;
+          }
+          removeAuthToken();
+          setHasToken(false);
+          window.dispatchEvent(new CustomEvent("auth-token-changed"));
+        }, 100);
         return false;
       }
       return failureCount < 2;

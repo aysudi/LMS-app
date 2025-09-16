@@ -19,6 +19,7 @@ import {
 } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLogin } from "../../hooks/useAuth";
+import { useAuthContext } from "../../context/AuthContext";
 import { getErrorMessage } from "../../utils/errorUtils";
 import loginValidationSchema from "../../validations/loginValidation";
 
@@ -32,6 +33,7 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { enqueueSnackbar } = useSnackbar();
+  const { refetchUser } = useAuthContext();
   const loginMutation = useLogin();
 
   // Show success message if coming from email verification
@@ -63,6 +65,12 @@ const Login = () => {
 
         const result = await loginMutation.mutateAsync(values);
 
+        // Wait a bit for the authentication context to update
+        await new Promise((resolve) => setTimeout(resolve, 300));
+
+        // Trigger user refetch to sync the auth context
+        await refetchUser();
+
         setLoginStatus("success");
 
         enqueueSnackbar(`🎉 Welcome back, ${result.data.user.firstName}!`, {
@@ -88,9 +96,10 @@ const Login = () => {
           );
         }
 
+        // Navigate after ensuring auth state is properly set
         setTimeout(() => {
-          navigate("/");
-        }, 1500);
+          navigate("/", { replace: true });
+        }, 1000);
       } catch (error) {
         setLoginStatus("error");
         const errorMessage = getErrorMessage(error);

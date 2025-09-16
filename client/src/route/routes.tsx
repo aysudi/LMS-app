@@ -82,10 +82,6 @@ const ROUTES = [
         path: "register",
         element: <Register />,
       },
-      // {
-      //   path: "check-email",
-      //   element: <CheckEmail />,
-      // },
       {
         path: "verify-email",
         element: <VerifyEmail />,

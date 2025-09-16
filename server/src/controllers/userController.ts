@@ -108,7 +108,7 @@ export const loginUser = async (
     res.cookie("refreshToken", result.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -350,6 +350,14 @@ export const refreshTokenController = async (
   next: NextFunction
 ) => {
   try {
+    // Check if cookies exist
+    if (!req.cookies) {
+      return res.status(401).json({
+        success: false,
+        message: "No cookies found",
+      });
+    }
+
     const refreshToken = req.cookies.refreshToken;
 
     if (!refreshToken) {
@@ -387,7 +395,7 @@ export const logoutController = async (
     res.clearCookie("refreshToken", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "lax",
     });
 
     res.status(200).json({

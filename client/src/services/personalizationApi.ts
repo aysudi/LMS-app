@@ -18,27 +18,26 @@ export interface PersonalizedRecommendations {
 }
 
 export const personalizationApi = {
-  // Wishlist operations
   addToWishlist: (courseId: string) =>
-    api.post(`/personalization/wishlist/add/${courseId}`),
+    api.post(`/api/personalization/wishlist/add/${courseId}`),
 
   removeFromWishlist: (courseId: string) =>
-    api.delete(`/personalization/wishlist/remove/${courseId}`),
+    api.delete(`/api/personalization/wishlist/remove/${courseId}`),
 
-  getWishlist: () => api.get("/personalization/wishlist"),
+  getWishlist: () => api.get("/api/personalization/wishlist"),
 
   // Search history
   addToSearchHistory: (query: string, category?: string) =>
-    api.post("/personalization/search-history", { query, category }),
+    api.post("/api/personalization/search-history", { query, category }),
 
   getSearchHistory: (): Promise<{ data: SearchHistoryItem[] }> =>
-    api.get("/personalization/search-history"),
+    api.get("/api/personalization/search-history"),
 
   // Viewed courses
   addViewedCourse: (courseId: string) =>
-    api.post(`/personalization/viewed/${courseId}`),
+    api.post(`/api/personalization/viewed/${courseId}`),
 
   // Recommendations
   getRecommendations: (): Promise<{ data: PersonalizedRecommendations }> =>
-    api.get("/personalization/recommendations"),
+    api.get("/api/personalization/recommendations"),
 };

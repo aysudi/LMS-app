@@ -23,7 +23,6 @@ router.post(
         return res.status(404).json({ message: "User not found" });
       }
 
-      // Check if course exists
       const course = await Course.findById(courseId);
       if (!course) {
         return res.status(404).json({ message: "Course not found" });
@@ -250,22 +249,18 @@ router.get(
         return res.status(404).json({ message: "User not found" });
       }
 
-      // Get categories from enrolled courses
       const enrolledCategories = user.enrolledCourses
         .map((course) => (course as any).category)
         .filter(Boolean);
 
-      // Get categories from search history
       const searchCategories = user.searchHistory
         .map((search) => search.category)
         .filter(Boolean);
 
-      // Get categories from viewed courses
       const viewedCategories = user.viewedCourses
         .map((viewed) => (viewed.course as any)?.category)
         .filter(Boolean);
 
-      // Combine and get unique categories
       const interestCategories = [
         ...new Set([
           ...enrolledCategories,
@@ -280,7 +275,6 @@ router.get(
         ...user.wishlist,
       ];
 
-      // Get recommendations based on interests
       let recommendations: any[] = [];
       if (interestCategories.length > 0) {
         recommendations = await Course.find({
@@ -292,7 +286,6 @@ router.get(
           .limit(10);
       }
 
-      // Get popular courses (fallback or additional)
       const popularCourses = await Course.find({
         _id: { $nin: excludeIds },
       })
@@ -300,7 +293,6 @@ router.get(
         .sort({ enrollmentCount: -1, rating: -1 })
         .limit(8);
 
-      // Get free courses
       const freeCourses = await Course.find({
         isFree: true,
         _id: { $nin: excludeIds },

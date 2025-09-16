@@ -1,7 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:4040/api";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4040";
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
@@ -31,21 +30,41 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
+        // Check if we have a token before attempting refresh
+        const currentToken = localStorage.getItem("accessToken");
+
+        if (!currentToken) {
+          return Promise.reject(error);
+        }
+
         const response = await axios.post(
-          `${API_BASE_URL}/auth/refresh`,
+          `${API_BASE_URL}/api/auth/refresh`,
           {},
           { withCredentials: true }
         );
 
         const { token } = response.data.data;
-        localStorage.setItem("accessToken", token);
+        if (token) {
+          localStorage.setItem("accessToken", token);
+          window.dispatchEvent(new CustomEvent("auth-token-changed"));
 
-        originalRequest.headers.Authorization = `Bearer ${token}`;
-        return api(originalRequest);
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          return api(originalRequest);
+        } else {
+          throw new Error("No token received from refresh");
+        }
       } catch (refreshError) {
+        console.error("Token refresh failed:", refreshError);
         localStorage.removeItem("accessToken");
         localStorage.removeItem("userData");
-        window.location.href = "/login";
+        window.dispatchEvent(new CustomEvent("auth-token-changed"));
+
+        // Only redirect to login if this isn't an initial user fetch
+        const isUserFetch = originalRequest.url?.includes("/api/auth/me");
+        if (!isUserFetch) {
+          // window.location.href = "/auth/login";
+        }
+
         return Promise.reject(refreshError);
       }
     }

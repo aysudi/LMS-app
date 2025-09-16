@@ -29,15 +29,17 @@ const AuthSuccess = () => {
           throw new Error("No access token received");
         }
 
+        // Set token first
         setAuthToken(accessToken);
 
-        window.dispatchEvent(new CustomEvent("auth-token-changed"));
+        // Wait a bit longer for the token to be set properly
+        await new Promise((resolve) => setTimeout(resolve, 300));
 
-        await new Promise((resolve) => setTimeout(resolve, 100));
-
+        // Trigger user refetch
         await refetchUser();
 
-        await new Promise((resolve) => setTimeout(resolve, 200));
+        // Wait a bit more to ensure user data is loaded
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
         setStatus("success");
 

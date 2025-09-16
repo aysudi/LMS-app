@@ -2,6 +2,7 @@ import cors from "cors";
 import passport from "passport";
 import "./configs/passport.js";
 import express from "express";
+import cookieParser from "cookie-parser";
 import {
   errorHandler,
   notFoundHandler,
@@ -19,6 +20,7 @@ const app = express();
 app.use(passport.initialize());
 
 // Middleware
+app.use(cookieParser());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 

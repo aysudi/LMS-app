@@ -15,7 +15,6 @@ export const usePersonalization = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch wishlist
   const fetchWishlist = async () => {
     if (!user) return;
 
