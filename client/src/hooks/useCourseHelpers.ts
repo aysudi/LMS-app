@@ -264,7 +264,7 @@ export const useCourseStats = (courses: any[] = []) => {
     const averageRating = totalRating / totalCourses;
 
     const totalPrice = courses.reduce(
-      (sum, course) => sum + (course.price || 0),
+      (sum, course) => sum + (course.originalPrice || 0),
       0
     );
     const averagePrice = totalPrice / totalCourses;
@@ -285,10 +285,10 @@ export const useCourseStats = (courses: any[] = []) => {
     const levelsCount = levels.size;
 
     const freeCoursesCount = courses.filter(
-      (course) => course.price === 0
+      (course) => course.isFree || course.originalPrice === 0
     ).length;
     const paidCoursesCount = courses.filter(
-      (course) => course.price > 0
+      (course) => !course.isFree && course.originalPrice > 0
     ).length;
 
     return {
@@ -326,24 +326,28 @@ export const useCoursePrice = () => {
   );
 
   const isFree = useCallback((course: any) => {
-    return course.price === 0 || course.discountPrice === 0;
+    return (
+      course.isFree || course.originalPrice === 0 || course.discountPrice === 0
+    );
   }, []);
 
   const getEffectivePrice = useCallback((course: any) => {
+    if (course.isFree || course.originalPrice === 0) return 0;
     if (
       course.discountPrice !== undefined &&
-      course.discountPrice < course.price
+      course.discountPrice < course.originalPrice
     ) {
       return course.discountPrice;
     }
-    return course.price;
+    return course.originalPrice;
   }, []);
 
   const hasDiscount = useCallback((course: any) => {
     return (
       course.discountPrice !== undefined &&
-      course.discountPrice < course.price &&
-      course.discountPrice >= 0
+      course.discountPrice < course.originalPrice &&
+      course.discountPrice >= 0 &&
+      !course.isFree
     );
   }, []);
 

@@ -35,9 +35,9 @@ export const getAllCoursesService = async (query: CourseQuery = {}) => {
 
   // Price range filter
   if (minPrice !== undefined || maxPrice !== undefined) {
-    filter.price = {};
-    if (minPrice !== undefined) filter.price.$gte = minPrice;
-    if (maxPrice !== undefined) filter.price.$lte = maxPrice;
+    filter.originalPrice = {};
+    if (minPrice !== undefined) filter.originalPrice.$gte = minPrice;
+    if (maxPrice !== undefined) filter.originalPrice.$lte = maxPrice;
   }
 
   // Text search
@@ -269,7 +269,7 @@ export const getCourseStatisticsService = async (
       isPublished: course.isPublished,
       studentsEnrolled: totalEnrollments,
       rating: course.rating,
-      totalEarnings: course.price * totalEnrollments,
+      totalEarnings: course.originalPrice * totalEnrollments,
     },
     statistics: {
       sectionsCount,
