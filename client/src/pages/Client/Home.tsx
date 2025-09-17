@@ -20,167 +20,13 @@ import {
 } from "react-icons/fa";
 import { useAuthContext } from "../../context/AuthContext";
 import { usePersonalization } from "../../hooks/usePersonalization";
+import {
+  useCourses,
+  useFeaturedCourses,
+  useFreeCourses,
+  useTrendingCourses,
+} from "../../hooks/useCourseQueries";
 
-// Mock course data - replace with actual API data later
-const mockCourses = [
-  {
-    id: 1,
-    title: "Complete Web Development Bootcamp",
-    instructor: "Sarah Johnson",
-    category: "Development",
-    price: 89.99,
-    originalPrice: 199.99,
-    rating: 4.8,
-    students: 12543,
-    duration: "42 hours",
-    level: "Beginner",
-    image:
-      "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&h=250&fit=crop",
-    description:
-      "Learn HTML, CSS, JavaScript, React, Node.js and build real projects",
-    tags: ["HTML", "CSS", "JavaScript", "React"],
-    isNew: true,
-    isBestseller: true,
-  },
-  {
-    id: 2,
-    title: "UI/UX Design Masterclass",
-    instructor: "Alex Chen",
-    category: "Design",
-    price: 79.99,
-    originalPrice: 149.99,
-    rating: 4.9,
-    students: 8967,
-    duration: "28 hours",
-    level: "Intermediate",
-    image:
-      "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=250&fit=crop",
-    description:
-      "Master the fundamentals of user experience and interface design",
-    tags: ["Figma", "Adobe XD", "Prototyping", "Design Systems"],
-    isNew: false,
-    isBestseller: true,
-  },
-  {
-    id: 3,
-    title: "Data Science with Python",
-    instructor: "Dr. Maria Rodriguez",
-    category: "Data Science",
-    price: 94.99,
-    originalPrice: 179.99,
-    rating: 4.7,
-    students: 15234,
-    duration: "56 hours",
-    level: "Advanced",
-    image:
-      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=250&fit=crop",
-    description: "Complete Python data science course with machine learning",
-    tags: ["Python", "Pandas", "NumPy", "Machine Learning"],
-    isNew: true,
-    isBestseller: false,
-  },
-  {
-    id: 4,
-    title: "Digital Marketing Strategy",
-    instructor: "James Wilson",
-    category: "Marketing",
-    price: 69.99,
-    originalPrice: 129.99,
-    rating: 4.6,
-    students: 9876,
-    duration: "32 hours",
-    level: "Beginner",
-    image:
-      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=250&fit=crop",
-    description: "Build comprehensive digital marketing campaigns that convert",
-    tags: ["SEO", "Social Media", "Analytics", "Content Marketing"],
-    isNew: false,
-    isBestseller: true,
-  },
-  {
-    id: 5,
-    title: "Mobile App Development with React Native",
-    instructor: "Emily Davis",
-    category: "Development",
-    price: 99.99,
-    originalPrice: 199.99,
-    rating: 4.8,
-    students: 7543,
-    duration: "48 hours",
-    level: "Intermediate",
-    image:
-      "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&h=250&fit=crop",
-    description: "Build iOS and Android apps with React Native and Expo",
-    tags: ["React Native", "JavaScript", "Mobile", "iOS", "Android"],
-    isNew: true,
-    isBestseller: false,
-  },
-  {
-    id: 6,
-    title: "Photography Fundamentals",
-    instructor: "Michael Brown",
-    category: "Photography",
-    price: 59.99,
-    originalPrice: 119.99,
-    rating: 4.7,
-    students: 6234,
-    duration: "24 hours",
-    level: "Beginner",
-    image:
-      "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=400&h=250&fit=crop",
-    description: "Master photography basics and advanced techniques",
-    tags: ["DSLR", "Composition", "Lighting", "Editing"],
-    isNew: false,
-    isBestseller: false,
-  },
-];
-
-const categories = [
-  {
-    id: "all",
-    name: "All Courses",
-    icon: FaGraduationCap,
-    count: mockCourses.length,
-  },
-  {
-    id: "development",
-    name: "Development",
-    icon: FaCode,
-    count: mockCourses.filter((c) => c.category === "Development").length,
-  },
-  {
-    id: "design",
-    name: "Design",
-    icon: FaPalette,
-    count: mockCourses.filter((c) => c.category === "Design").length,
-  },
-  {
-    id: "data-science",
-    name: "Data Science",
-    icon: FaChartLine,
-    count: mockCourses.filter((c) => c.category === "Data Science").length,
-  },
-  {
-    id: "marketing",
-    name: "Marketing",
-    icon: FaRocket,
-    count: mockCourses.filter((c) => c.category === "Marketing").length,
-  },
-  {
-    id: "photography",
-    name: "Photography",
-    icon: FaCamera,
-    count: mockCourses.filter((c) => c.category === "Photography").length,
-  },
-];
-
-const sortOptions = [
-  { value: "popular", label: "Most Popular", icon: FaFire },
-  { value: "rating", label: "Highest Rated", icon: FaStar },
-  { value: "newest", label: "Newest", icon: FaRocket },
-];
-
-// Course Card Component
 const CourseCard = ({ course, index }: { course: any; index: number }) => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthContext();
@@ -227,7 +73,6 @@ const CourseCard = ({ course, index }: { course: any; index: number }) => {
       <div className="relative">
         <img
           src={
-            course.thumbnail ||
             course.image ||
             "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&h=200&fit=crop"
           }
@@ -240,10 +85,10 @@ const CourseCard = ({ course, index }: { course: any; index: number }) => {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              handleWishlistToggle(course._id || course.id);
+              handleWishlistToggle(course._id);
             }}
             className={`p-2 rounded-full backdrop-blur-sm transition-colors duration-200 ${
-              isInWishlist((course._id || course.id).toString())
+              isInWishlist(course._id)
                 ? "bg-red-500 text-white"
                 : "bg-white/80 text-gray-700 hover:bg-red-500 hover:text-white"
             }`}
@@ -276,7 +121,7 @@ const CourseCard = ({ course, index }: { course: any; index: number }) => {
           <span className="font-medium">
             {course.instructor?.firstName
               ? `${course.instructor.firstName} ${course.instructor.lastName}`
-              : course.instructor}
+              : "Instructor"}
           </span>
         </p>
 
@@ -287,23 +132,19 @@ const CourseCard = ({ course, index }: { course: any; index: number }) => {
           </div>
           <div className="flex items-center gap-1">
             <FaUsers className="text-indigo-500" />
-            <span>
-              {Number(
-                course.enrollmentCount || course.students || 0
-              ).toLocaleString()}
-            </span>
+            <span>{Number(course.enrollmentCount || 0).toLocaleString()}</span>
           </div>
         </div>
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-xl font-bold text-gray-900">
-              {course.isFree
+              {course.isFree || course.originalPrice === 0
                 ? "Free"
-                : `$${course.currentPrice || course.price}`}
+                : `$${course.discountPrice || course.originalPrice}`}
             </span>
-            {course.originalPrice &&
-              course.originalPrice > (course.currentPrice || course.price) && (
+            {course.discountPrice &&
+              course.originalPrice > course.discountPrice && (
                 <span className="text-sm text-gray-500 line-through">
                   ${course.originalPrice}
                 </span>
@@ -312,7 +153,7 @@ const CourseCard = ({ course, index }: { course: any; index: number }) => {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              handleEnroll(course._id || course.id);
+              handleEnroll(course._id);
             }}
             className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
           >
@@ -336,15 +177,82 @@ const Home = () => {
     addViewedCourse,
   } = usePersonalization();
 
+  // Fetch real course data
+  const { data: allCoursesData, isLoading: allCoursesLoading } = useCourses({
+    limit: 12,
+    sortBy: "rating",
+    sortOrder: "desc",
+  });
+
+  const { data: featuredCoursesData, isLoading: featuredLoading } =
+    useFeaturedCourses(8);
+  const { data: freeCoursesData, isLoading: freeLoading } = useFreeCourses(6);
+  const { data: trendingCoursesData, isLoading: trendingLoading } =
+    useTrendingCourses(1);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
 
-  const handleEnroll = (_courseId: number | string) => {
+  // Use real course data or fallback to empty array
+  const allCourses = allCoursesData?.data || [];
+  const featuredCourses = featuredCoursesData?.data || [];
+  const freeCourses = freeCoursesData?.data || [];
+  const trendingCourse = trendingCoursesData?.data?.[0];
+
+  // Calculate category counts from real data
+  const categories = [
+    {
+      id: "all",
+      name: "All Courses",
+      icon: FaGraduationCap,
+      count: allCourses.length,
+    },
+    {
+      id: "development",
+      name: "Development",
+      icon: FaCode,
+      count: allCourses.filter(
+        (c) => c.category.toLowerCase() === "development"
+      ).length,
+    },
+    {
+      id: "design",
+      name: "Design",
+      icon: FaPalette,
+      count: allCourses.filter((c) => c.category.toLowerCase() === "design")
+        .length,
+    },
+    {
+      id: "data-science",
+      name: "Data Science",
+      icon: FaChartLine,
+      count: allCourses.filter((c) => c.category.toLowerCase().includes("data"))
+        .length,
+    },
+    {
+      id: "marketing",
+      name: "Marketing",
+      icon: FaRocket,
+      count: allCourses.filter((c) => c.category.toLowerCase() === "marketing")
+        .length,
+    },
+    {
+      id: "photography",
+      name: "Photography",
+      icon: FaCamera,
+      count: allCourses.filter(
+        (c) => c.category.toLowerCase() === "photography"
+      ).length,
+    },
+  ];
+
+  const handleEnroll = (courseId: string | number) => {
     if (!isAuthenticated) {
       navigate("/auth/login");
       return;
     }
     // Handle enrollment logic
+    console.log("Enrolling in course:", courseId);
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -356,6 +264,18 @@ const Home = () => {
       );
     }
   };
+
+  // Show loading state while fetching initial data
+  if (allCoursesLoading && featuredLoading && freeLoading && trendingLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="mt-4 text-lg text-gray-600">Loading courses...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleCourseClick = (courseId: number | string) => {
     if (isAuthenticated) {
@@ -508,7 +428,8 @@ const Home = () => {
           {isAuthenticated && (
             <>
               {/* Recommended for You */}
-              {recommendations.recommended.length > 0 && (
+              {(recommendations.recommended.length > 0 ||
+                featuredCourses.length > 0) && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -525,26 +446,64 @@ const Home = () => {
                     </button>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {recommendations.recommended
+                    {(recommendations.recommended.length > 0
+                      ? recommendations.recommended
+                      : featuredCourses
+                    )
                       .slice(0, 4)
                       .map((course, index) => (
+                        <CourseCard key={index} course={course} index={index} />
+                      ))}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Free Courses */}
+              {(recommendations.free.length > 0 || freeCourses.length > 0) && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.8 }}
+                  className="mb-12"
+                >
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                      <FaRocket className="text-green-600" />
+                      Free Courses to Get Started
+                    </h2>
+                    <button className="text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1">
+                      View All <FaArrowRight className="text-sm" />
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {(recommendations.free.length > 0
+                      ? recommendations.free
+                      : freeCourses
+                    )
+                      .slice(0, 3)
+                      .map((course, index) => (
                         <motion.div
-                          key={course._id}
+                          key={index}
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.4, delay: index * 0.1 }}
-                          className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer"
+                          className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl shadow-md border border-green-200 overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer"
                           onClick={() => handleCourseClick(course._id)}
                         >
                           <div className="relative">
                             <img
                               src={
-                                course.thumbnail ||
+                                course.image ||
                                 "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&h=200&fit=crop"
                               }
                               alt={course.title}
                               className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
                             />
+                            <div className="absolute top-2 left-2">
+                              <span className="px-2 py-1 bg-green-500 text-white text-xs font-medium rounded-full">
+                                FREE
+                              </span>
+                            </div>
                             <div className="absolute top-2 right-2">
                               <button
                                 onClick={(e) => {
@@ -581,19 +540,6 @@ const Home = () => {
                                 {course.enrollmentCount} students
                               </span>
                             </div>
-                            <div className="flex items-center justify-between">
-                              <span className="font-bold text-lg text-gray-900">
-                                {course.isFree
-                                  ? "Free"
-                                  : `$${course.currentPrice}`}
-                              </span>
-                              {course.originalPrice &&
-                                course.originalPrice > course.price && (
-                                  <span className="text-sm text-gray-500 line-through">
-                                    ${course.originalPrice}
-                                  </span>
-                                )}
-                            </div>
                           </div>
                         </motion.div>
                       ))}
@@ -601,93 +547,8 @@ const Home = () => {
                 </motion.div>
               )}
 
-              {/* Free Courses */}
-              {recommendations.free.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.8 }}
-                  className="mb-12"
-                >
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                      <FaRocket className="text-green-600" />
-                      Free Courses to Get Started
-                    </h2>
-                    <button className="text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1">
-                      View All <FaArrowRight className="text-sm" />
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {recommendations.free.slice(0, 3).map((course, index) => (
-                      <motion.div
-                        key={course._id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.4, delay: index * 0.1 }}
-                        className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl shadow-md border border-green-200 overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer"
-                        onClick={() => handleCourseClick(course._id)}
-                      >
-                        <div className="relative">
-                          <img
-                            src={
-                              course.thumbnail ||
-                              "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&h=200&fit=crop"
-                            }
-                            alt={course.title}
-                            className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                          <div className="absolute top-2 left-2">
-                            <span className="px-2 py-1 bg-green-500 text-white text-xs font-medium rounded-full">
-                              FREE
-                            </span>
-                          </div>
-                          <div className="absolute top-2 right-2">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleWishlistToggle(course._id);
-                              }}
-                              className={`p-2 rounded-full backdrop-blur-sm transition-colors duration-200 ${
-                                isInWishlist(course._id)
-                                  ? "bg-red-500 text-white"
-                                  : "bg-white/80 text-gray-700 hover:bg-red-500 hover:text-white"
-                              }`}
-                            >
-                              <FaHeart className="text-sm" />
-                            </button>
-                          </div>
-                        </div>
-                        <div className="p-4">
-                          <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-indigo-600 transition-colors">
-                            {course.title}
-                          </h3>
-                          <p className="text-sm text-gray-600 mb-2">
-                            by {course.instructor?.firstName}{" "}
-                            {course.instructor?.lastName}
-                          </p>
-                          <div className="flex items-center gap-2 mb-2">
-                            <div className="flex items-center gap-1">
-                              <FaStar className="text-yellow-400 text-sm" />
-                              <span className="text-sm font-medium">
-                                {course.rating}
-                              </span>
-                            </div>
-                            <span className="text-gray-300">•</span>
-                            <span className="text-sm text-gray-600">
-                              {course.enrollmentCount} students
-                            </span>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-
               {/* Trending Now - Single Featured Course */}
-              {(recommendations.popular.length > 0 ||
-                mockCourses.length > 0) && (
+              {(trendingCourse || featuredCourses.length > 0) && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -705,9 +566,8 @@ const Home = () => {
                   </div>
 
                   {(() => {
-                    const trendingCourse =
-                      recommendations.popular[0] || mockCourses[0];
-                    if (!trendingCourse) return null;
+                    const displayCourse = trendingCourse || featuredCourses[0];
+                    if (!displayCourse) return null;
                     return (
                       <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
@@ -717,11 +577,7 @@ const Home = () => {
                       >
                         <div
                           className="bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 rounded-3xl shadow-2xl border border-orange-200 overflow-hidden group cursor-pointer"
-                          onClick={() =>
-                            handleCourseClick(
-                              trendingCourse._id || trendingCourse.id || 1
-                            )
-                          }
+                          onClick={() => handleCourseClick(displayCourse._id)}
                         >
                           {/* Trending Badge */}
                           <div className="absolute top-6 left-6 z-10">
@@ -738,18 +594,10 @@ const Home = () => {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleWishlistToggle(
-                                  trendingCourse._id || trendingCourse.id || 1
-                                );
+                                handleWishlistToggle(displayCourse._id);
                               }}
                               className={`p-3 rounded-full backdrop-blur-sm transition-all duration-200 shadow-lg ${
-                                isInWishlist(
-                                  (
-                                    trendingCourse._id ||
-                                    trendingCourse.id ||
-                                    1
-                                  ).toString()
-                                )
+                                isInWishlist(displayCourse._id)
                                   ? "bg-red-500 text-white"
                                   : "bg-white/90 text-gray-700 hover:bg-red-500 hover:text-white"
                               }`}
@@ -763,10 +611,10 @@ const Home = () => {
                             <div className="relative overflow-hidden md:order-2">
                               <img
                                 src={
-                                  trendingCourse.thumbnail ||
+                                  displayCourse.image ||
                                   "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&h=400&fit=crop"
                                 }
-                                alt={trendingCourse.title}
+                                alt={displayCourse.title}
                                 className="w-full h-64 md:h-full object-cover group-hover:scale-110 transition-transform duration-700"
                               />
 
@@ -782,23 +630,23 @@ const Home = () => {
                             <div className="p-8 md:p-12 flex flex-col justify-center md:order-1">
                               <div className="mb-4">
                                 <span className="inline-flex items-center px-3 py-1 bg-orange-100 text-orange-700 text-sm font-semibold rounded-full">
-                                  {trendingCourse.category}
+                                  {displayCourse.category}
                                 </span>
                               </div>
 
                               <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 group-hover:text-orange-600 transition-colors">
-                                {trendingCourse.title}
+                                {displayCourse.title}
                               </h3>
 
                               <p className="text-gray-600 mb-6 text-lg leading-relaxed">
-                                {trendingCourse.description}
+                                {displayCourse.description}
                               </p>
 
                               <div className="text-lg text-gray-700 mb-6">
                                 by{" "}
                                 <span className="font-semibold text-gray-900">
-                                  {trendingCourse.instructor?.firstName}{" "}
-                                  {trendingCourse.instructor?.lastName}
+                                  {displayCourse.instructor?.firstName}{" "}
+                                  {displayCourse.instructor?.lastName}
                                 </span>
                               </div>
 
@@ -807,19 +655,17 @@ const Home = () => {
                                 <div className="flex items-center gap-2">
                                   <FaStar className="text-yellow-400 text-lg" />
                                   <span className="font-bold text-lg">
-                                    {trendingCourse.rating || 0}
+                                    {displayCourse.rating || 0}
                                   </span>
                                   <span className="text-gray-500">
-                                    (1,234 reviews)
+                                    ({displayCourse.ratingsCount || 0} reviews)
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <FaUsers className="text-indigo-500" />
                                   <span className="font-semibold">
                                     {Number(
-                                      trendingCourse.enrollmentCount ||
-                                        trendingCourse.students ||
-                                        0
+                                      displayCourse.enrollmentCount || 0
                                     ).toLocaleString()}
                                   </span>
                                   <span className="text-gray-500">
@@ -832,26 +678,25 @@ const Home = () => {
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                   <span className="text-3xl font-bold text-gray-900">
-                                    {trendingCourse.isFree
+                                    {displayCourse.originalPrice === 0
                                       ? "Free"
-                                      : `$${trendingCourse.currentPrice}`}
+                                      : `$${
+                                          displayCourse.discountPrice ||
+                                          displayCourse.originalPrice
+                                        }`}
                                   </span>
-                                  {trendingCourse.originalPrice &&
-                                    trendingCourse.originalPrice >
-                                      trendingCourse.currentPrice && (
+                                  {displayCourse.discountPrice &&
+                                    displayCourse.originalPrice >
+                                      displayCourse.discountPrice && (
                                       <span className="text-lg text-gray-500 line-through">
-                                        ${trendingCourse.originalPrice}
+                                        ${displayCourse.originalPrice}
                                       </span>
                                     )}
                                 </div>
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    handleEnroll(
-                                      trendingCourse._id ||
-                                        trendingCourse.id ||
-                                        1
-                                    );
+                                    handleEnroll(displayCourse._id);
                                   }}
                                   className="px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
                                 >
@@ -874,12 +719,16 @@ const Home = () => {
             {(() => {
               // Helper function to get courses for a category
               const getCoursesForCategory = (category: string) => {
-                return (
+                const coursesToFilter =
                   recommendations.recommended.length > 0
                     ? recommendations.recommended
-                    : mockCourses
-                )
-                  .filter((course) => course.category === category)
+                    : allCourses;
+
+                return coursesToFilter
+                  .filter(
+                    (course: any) =>
+                      course.category.toLowerCase() === category.toLowerCase()
+                  )
                   .slice(0, 3);
               };
 

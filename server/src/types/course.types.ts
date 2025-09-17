@@ -7,8 +7,9 @@ export interface ICourse extends Document {
   category: string;
   subcategory?: string;
   instructor: mongoose.Types.ObjectId;
-  price: number;
+  originalPrice: number;
   discountPrice?: number;
+  isFree: boolean;
   rating: number;
   ratingsCount: number;
   studentsEnrolled: mongoose.Types.ObjectId[];
@@ -52,7 +53,7 @@ export interface CourseQuery {
   instructor?: string;
   minPrice?: number;
   maxPrice?: number;
-  sortBy?: "rating" | "price" | "createdAt" | "studentsCount";
+  sortBy?: "rating" | "originalPrice" | "createdAt" | "studentsCount";
   sortOrder?: "asc" | "desc";
 }
 
@@ -63,8 +64,9 @@ export interface CreateCourseData {
   category: string;
   subcategory?: string;
   instructor: string;
-  price: number;
+  originalPrice: number;
   discountPrice?: number;
+  isFree?: boolean;
   image?: string;
   videoPromo?: string;
   tags?: string[];

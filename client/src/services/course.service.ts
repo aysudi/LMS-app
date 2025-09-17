@@ -15,9 +15,10 @@ export interface Course {
     email: string;
     avatar?: string;
   };
-  price: number;
+  originalPrice: number;
   discountPrice?: number;
-  originalPrice?: number;
+  isFree: boolean;
+  currentPrice?: number; // Virtual field from backend
   rating: number;
   ratingsCount: number;
   studentsEnrolled: string[];
@@ -63,7 +64,7 @@ export interface CourseQuery {
   instructor?: string;
   minPrice?: number;
   maxPrice?: number;
-  sortBy?: "rating" | "price" | "createdAt" | "studentsCount";
+  sortBy?: "rating" | "originalPrice" | "createdAt" | "studentsCount";
   sortOrder?: "asc" | "desc";
 }
 
@@ -73,8 +74,9 @@ export interface CreateCourseData {
   shortDescription?: string;
   category: string;
   subcategory?: string;
-  price: number;
+  originalPrice: number;
   discountPrice?: number;
+  isFree?: boolean;
   image?: string;
   videoPromo?: string;
   tags?: string[];
