@@ -64,21 +64,36 @@ const CourseCard = ({ course, index }: { course: any; index: number }) => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.1 }}
-      className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 group cursor-pointer"
+      transition={{
+        duration: 0.5,
+        delay: index * 0.1,
+        ease: [0.25, 0.25, 0, 1],
+      }}
+      className="group relative bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-gray-200 transform hover:-translate-y-1"
       onClick={() => handleCourseClick(course._id || course.id)}
     >
-      <div className="relative">
+      {/* Image Container with Enhanced Overlay */}
+      <div className="relative h-40 overflow-hidden">
         <img
           src={
             course.image ||
             "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&h=200&fit=crop"
           }
           alt={course.title}
-          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
         />
+
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+        {/* Course Level Badge */}
+        <div className="absolute top-3 left-3">
+          <span className="px-2 py-1 bg-white/95 backdrop-blur-sm text-gray-800 text-xs font-semibold rounded-full shadow-lg">
+            {course.level}
+          </span>
+        </div>
 
         {/* Wishlist Button */}
         <div className="absolute top-3 right-3">
@@ -87,10 +102,10 @@ const CourseCard = ({ course, index }: { course: any; index: number }) => {
               e.stopPropagation();
               handleWishlistToggle(course._id);
             }}
-            className={`p-2 rounded-full backdrop-blur-sm transition-colors duration-200 ${
+            className={`p-2 rounded-full backdrop-blur-md transition-all duration-300 transform hover:scale-110 ${
               isInWishlist(course._id)
-                ? "bg-red-500 text-white"
-                : "bg-white/80 text-gray-700 hover:bg-red-500 hover:text-white"
+                ? "bg-red-500/90 text-white shadow-lg"
+                : "bg-white/90 text-gray-700 hover:bg-red-500 hover:text-white"
             }`}
           >
             <FaHeart className="text-sm" />
@@ -98,66 +113,90 @@ const CourseCard = ({ course, index }: { course: any; index: number }) => {
         </div>
 
         {/* Play Button Overlay */}
-        <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <div className="bg-white/90 backdrop-blur-sm text-indigo-500 p-3 rounded-full shadow-xl">
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+          <div className="bg-white/95 backdrop-blur-lg text-indigo-600 p-3 rounded-full shadow-2xl transform scale-0 group-hover:scale-100 transition-transform duration-300">
             <FaPlay className="text-lg ml-1" />
+          </div>
+        </div>
+
+        {/* Price Badge */}
+        <div className="absolute bottom-3 right-3">
+          <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-3 py-1 rounded-full shadow-lg">
+            <span className="text-sm font-bold">
+              {course.isFree || course.originalPrice === 0
+                ? "FREE"
+                : `$${course.discountPrice || course.originalPrice}`}
+            </span>
           </div>
         </div>
       </div>
 
-      <div className="p-6">
-        <div className="mb-3">
-          <span className="inline-block px-3 py-1 bg-indigo-100 text-indigo-700 text-sm font-medium rounded-full">
+      {/* Content Section */}
+      <div className="p-4 space-y-3">
+        {/* Category Tag */}
+        <div className="flex items-center justify-between">
+          <span className="inline-flex items-center px-2 py-1 bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-700 text-xs font-semibold rounded-full border border-indigo-100">
             {course.category}
           </span>
+          {course.discountPrice &&
+            course.originalPrice > course.discountPrice && (
+              <span className="text-xs text-gray-500 line-through bg-gray-100 px-2 py-1 rounded-full">
+                ${course.originalPrice}
+              </span>
+            )}
         </div>
 
-        <h3 className="font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-indigo-600 transition-colors">
+        {/* Title */}
+        <h3 className="font-bold text-gray-900 text-base leading-tight line-clamp-2 group-hover:text-indigo-600 transition-colors duration-300">
           {course.title}
         </h3>
 
-        <p className="text-sm text-gray-600 mb-4">
-          by{" "}
-          <span className="font-medium">
+        {/* Instructor */}
+        <div className="flex items-center space-x-2">
+          <div className="w-6 h-6 bg-gradient-to-r from-indigo-400 to-purple-500 rounded-full flex items-center justify-center">
+            <span className="text-white text-xs font-semibold">
+              {course.instructor?.firstName?.charAt(0) || "I"}
+            </span>
+          </div>
+          <p className="text-sm text-gray-600">
             {course.instructor?.firstName
               ? `${course.instructor.firstName} ${course.instructor.lastName}`
-              : "Instructor"}
-          </span>
-        </p>
+              : "Expert Instructor"}
+          </p>
+        </div>
 
-        <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
-          <div className="flex items-center gap-1">
-            <FaStar className="text-yellow-400" />
-            <span className="font-medium">{course.rating || 0}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <FaUsers className="text-indigo-500" />
-            <span>{Number(course.enrollmentCount || 0).toLocaleString()}</span>
+        {/* Stats Row */}
+        <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-1">
+              <FaStar className="text-yellow-400" />
+              <span className="font-semibold text-gray-700">
+                {course.rating || 0}
+              </span>
+              <span className="text-gray-500 text-xs">
+                ({course.ratingsCount || 0})
+              </span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <FaUsers className="text-indigo-500" />
+              <span className="text-gray-600 text-xs">
+                {Number(course.enrollmentCount || 0).toLocaleString()}
+              </span>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-xl font-bold text-gray-900">
-              {course.isFree || course.originalPrice === 0
-                ? "Free"
-                : `$${course.discountPrice || course.originalPrice}`}
-            </span>
-            {course.discountPrice &&
-              course.originalPrice > course.discountPrice && (
-                <span className="text-sm text-gray-500 line-through">
-                  ${course.originalPrice}
-                </span>
-              )}
-          </div>
+        {/* Action Button */}
+        <div className="pt-1">
           <button
             onClick={(e) => {
               e.stopPropagation();
               handleEnroll(course._id);
             }}
-            className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
+            className="w-full py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] flex items-center justify-center space-x-2"
           >
-            Enroll
+            <span className="text-sm">Enroll Now</span>
+            <FaArrowRight className="text-sm" />
           </button>
         </div>
       </div>
@@ -177,7 +216,6 @@ const Home = () => {
     addViewedCourse,
   } = usePersonalization();
 
-  // Fetch real course data
   const { data: allCoursesData, isLoading: allCoursesLoading } = useCourses({
     limit: 12,
     sortBy: "rating",
@@ -193,13 +231,11 @@ const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
 
-  // Use real course data or fallback to empty array
   const allCourses = allCoursesData?.data || [];
   const featuredCourses = featuredCoursesData?.data || [];
   const freeCourses = freeCoursesData?.data || [];
   const trendingCourse = trendingCoursesData?.data?.[0];
 
-  // Calculate category counts from real data
   const categories = [
     {
       id: "all",
@@ -251,7 +287,6 @@ const Home = () => {
       navigate("/auth/login");
       return;
     }
-    // Handle enrollment logic
     console.log("Enrolling in course:", courseId);
   };
 
@@ -265,7 +300,6 @@ const Home = () => {
     }
   };
 
-  // Show loading state while fetching initial data
   if (allCoursesLoading && featuredLoading && freeLoading && trendingLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center">
@@ -299,78 +333,192 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50">
       {/* Hero Section */}
-      <section className="relative pt-20 pb-16 overflow-hidden">
-        {/* Background Decorations */}
+      <section className="relative pt-20 pb-32 overflow-hidden">
+        {/* Enhanced Background Decorations */}
         <div className="absolute inset-0">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-          <div className="absolute top-40 left-40 w-80 h-80 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+          <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-indigo-400 to-purple-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+          <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+          <div className="absolute top-40 left-1/3 w-96 h-96 bg-gradient-to-br from-pink-400 to-rose-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+
+          {/* Floating Elements */}
+          <div className="absolute top-20 right-1/4 w-4 h-4 bg-indigo-400 rounded-full animate-bounce opacity-60"></div>
+          <div className="absolute top-1/3 left-1/4 w-6 h-6 bg-purple-400 rounded-full animate-pulse opacity-40"></div>
+          <div className="absolute bottom-1/3 right-1/3 w-3 h-3 bg-cyan-400 rounded-full animate-bounce animation-delay-1000 opacity-50"></div>
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="mb-8"
+              transition={{ duration: 0.8, ease: [0.25, 0.25, 0, 1] }}
+              className="mb-12"
             >
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6">
-                Learn Without{" "}
-                <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                  Limits
+              <div className="inline-flex items-center px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-indigo-100 shadow-lg mb-8">
+                <FaFire className="text-orange-500 mr-2" />
+                <span className="text-sm font-semibold text-gray-700">
+                  🎉 Join 50,000+ learners worldwide
+                </span>
+              </div>
+
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-gray-900 mb-8 leading-tight">
+                Master New{" "}
+                <span className="relative">
+                  <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                    Skills
+                  </span>
+                  <svg
+                    className="absolute -bottom-2 left-0 w-full h-3"
+                    viewBox="0 0 200 12"
+                    fill="none"
+                  >
+                    <path
+                      d="M2 10C20 6, 40 2, 60 3C80 4, 100 8, 120 4C140 1, 160 5, 180 2C185 1, 190 3, 198 2"
+                      stroke="url(#gradient)"
+                      strokeWidth="3"
+                      fill="none"
+                      strokeLinecap="round"
+                    />
+                    <defs>
+                      <linearGradient
+                        id="gradient"
+                        x1="0%"
+                        y1="0%"
+                        x2="100%"
+                        y2="0%"
+                      >
+                        <stop offset="0%" stopColor="#6366f1" />
+                        <stop offset="50%" stopColor="#8b5cf6" />
+                        <stop offset="100%" stopColor="#ec4899" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
                 </span>
               </h1>
-              <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                Discover thousands of courses from expert instructors. Build
-                skills that matter for your career and personal growth.
+
+              <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed mb-12">
+                Unlock your potential with expert-led courses designed for the
+                modern learner.
+                <span className="block mt-2 font-semibold text-gray-700">
+                  Build skills that shape the future.
+                </span>
               </p>
             </motion.div>
 
-            {/* Stats */}
+            {/* Enhanced Stats */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto mb-12"
+              transition={{
+                duration: 0.8,
+                delay: 0.2,
+                ease: [0.25, 0.25, 0, 1],
+              }}
+              className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto mb-16"
             >
               {[
-                { icon: FaUsers, value: "50K+", label: "Students" },
-                { icon: FaGraduationCap, value: "1K+", label: "Courses" },
-                { icon: FaTrophy, value: "100+", label: "Experts" },
-                { icon: FaLightbulb, value: "24/7", label: "Support" },
+                {
+                  icon: FaUsers,
+                  value: "50K+",
+                  label: "Active Students",
+                  color: "from-blue-500 to-cyan-500",
+                },
+                {
+                  icon: FaGraduationCap,
+                  value: "1K+",
+                  label: "Expert Courses",
+                  color: "from-indigo-500 to-purple-500",
+                },
+                {
+                  icon: FaTrophy,
+                  value: "100+",
+                  label: "Industry Experts",
+                  color: "from-purple-500 to-pink-500",
+                },
+                {
+                  icon: FaLightbulb,
+                  value: "24/7",
+                  label: "Learning Support",
+                  color: "from-orange-500 to-red-500",
+                },
               ].map((stat, index) => (
-                <div key={index} className="text-center">
-                  <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl mb-3">
-                    <stat.icon className="text-white text-xl" />
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
+                  className="group"
+                >
+                  <div
+                    className={`inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r ${stat.color} rounded-2xl mb-4 shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-110`}
+                  >
+                    <stat.icon className="text-white text-2xl" />
                   </div>
-                  <div className="text-2xl font-bold text-gray-900">
+                  <div className="text-3xl font-bold text-gray-900 mb-1">
                     {stat.value}
                   </div>
-                  <div className="text-sm text-gray-600">{stat.label}</div>
-                </div>
+                  <div className="text-sm text-gray-600 font-medium">
+                    {stat.label}
+                  </div>
+                </motion.div>
               ))}
             </motion.div>
 
-            {/* Search Bar */}
+            {/* Enhanced Search Bar */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="max-w-2xl mx-auto"
+              transition={{
+                duration: 0.8,
+                delay: 0.4,
+                ease: [0.25, 0.25, 0, 1],
+              }}
+              className="max-w-3xl mx-auto"
             >
-              <form onSubmit={handleSearchSubmit} className="relative">
-                <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg" />
-                <input
-                  type="text"
-                  placeholder="What do you want to learn today?"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 text-lg border border-gray-300 rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm shadow-lg"
-                />
+              <form onSubmit={handleSearchSubmit} className="relative group">
+                <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-3xl opacity-20 group-hover:opacity-30 transition-opacity duration-300 blur-xl"></div>
+                <div className="relative bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+                  <div className="flex items-center">
+                    <FaSearch className="absolute left-6 text-gray-400 text-xl z-10" />
+                    <input
+                      type="text"
+                      placeholder="What would you like to learn today?"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-16 pr-32 py-6 text-lg bg-transparent border-none focus:outline-none focus:ring-0 placeholder-gray-500"
+                    />
+                    <button
+                      type="submit"
+                      className="absolute right-2 px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                    >
+                      Search
+                    </button>
+                  </div>
+                </div>
               </form>
+
+              {/* Popular Search Tags */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.6 }}
+                className="mt-6 flex flex-wrap justify-center gap-3"
+              >
+                <span className="text-sm text-gray-500 mr-2">Popular:</span>
+                {["Web Development", "AI & ML", "Design", "Business"].map(
+                  (tag, index) => (
+                    <button
+                      key={index}
+                      className="px-4 py-2 bg-white/60 backdrop-blur-sm text-gray-700 text-sm font-medium rounded-full border border-gray-200 hover:bg-white hover:shadow-md transition-all duration-300"
+                      onClick={() => setSearchQuery(tag)}
+                    >
+                      {tag}
+                    </button>
+                  )
+                )}
+              </motion.div>
             </motion.div>
           </div>
         </div>
@@ -381,44 +529,116 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Categories */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-            className="mb-12"
+            transition={{ duration: 0.8, delay: 0.6, ease: [0.25, 0.25, 0, 1] }}
+            className="mb-20"
           >
-            <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-              Explore by Category
-            </h2>
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center px-4 py-2 bg-indigo-50 rounded-full mb-6">
+                <FaGraduationCap className="text-indigo-600 mr-2" />
+                <span className="text-sm font-semibold text-indigo-600">
+                  Explore Categories
+                </span>
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                Find Your{" "}
+                <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  Learning Path
+                </span>
+              </h2>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                Discover courses tailored to your interests. Each category is
+                designed to take you from beginner to expert.
+              </p>
+            </div>
+
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {categories.map((category) => (
+              {categories.map((category, index) => (
                 <motion.button
                   key={category.id}
                   onClick={() => setSelectedCategory(category.id)}
-                  whileHover={{ scale: 1.05 }}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 0.6,
+                    delay: 0.7 + index * 0.05,
+                    ease: [0.25, 0.25, 0, 1],
+                  }}
+                  whileHover={{
+                    scale: 1.05,
+                    y: -5,
+                  }}
                   whileTap={{ scale: 0.95 }}
-                  className={`p-4 rounded-xl text-center transition-all duration-200 ${
+                  className={`group relative p-6 rounded-2xl text-center transition-all duration-300 overflow-hidden ${
                     selectedCategory === category.id
-                      ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg"
-                      : "bg-white hover:bg-gray-50 text-gray-700 shadow-md border border-gray-200"
+                      ? "bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-2xl"
+                      : "bg-white hover:bg-gradient-to-br hover:from-indigo-50 hover:to-purple-50 text-gray-700 shadow-lg hover:shadow-xl border border-gray-100"
                   }`}
                 >
-                  <category.icon
-                    className={`text-2xl mx-auto mb-2 ${
-                      selectedCategory === category.id
-                        ? "text-white"
-                        : "text-indigo-600"
-                    }`}
-                  />
-                  <div className="text-sm font-medium">{category.name}</div>
+                  {/* Background Pattern for Active Category */}
+                  {selectedCategory === category.id && (
+                    <div className="absolute inset-0 opacity-10">
+                      <div
+                        className="absolute inset-0"
+                        style={{
+                          backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='white' fill-opacity='0.3'%3E%3Cpath d='M20 20c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10zm10 0c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10z'/%3E%3C/g%3E%3C/svg%3E")`,
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  {/* Icon with enhanced styling */}
                   <div
-                    className={`text-xs mt-1 ${
+                    className={`relative inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 transition-all duration-300 ${
                       selectedCategory === category.id
-                        ? "text-indigo-100"
-                        : "text-gray-500"
+                        ? "bg-white/20 backdrop-blur-sm"
+                        : "bg-indigo-100 group-hover:bg-indigo-200"
                     }`}
                   >
-                    {category.count} courses
+                    <category.icon
+                      className={`text-2xl transition-all duration-300 ${
+                        selectedCategory === category.id
+                          ? "text-white"
+                          : "text-indigo-600 group-hover:text-indigo-700"
+                      }`}
+                    />
+
+                    {/* Floating indicator for active */}
+                    {selectedCategory === category.id && (
+                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full animate-pulse" />
+                    )}
                   </div>
+
+                  <div className="relative">
+                    <div
+                      className={`text-sm font-semibold mb-2 transition-colors duration-300 ${
+                        selectedCategory === category.id
+                          ? "text-white"
+                          : "text-gray-900 group-hover:text-indigo-600"
+                      }`}
+                    >
+                      {category.name}
+                    </div>
+                    <div
+                      className={`text-xs transition-colors duration-300 ${
+                        selectedCategory === category.id
+                          ? "text-indigo-100"
+                          : "text-gray-500 group-hover:text-indigo-500"
+                      }`}
+                    >
+                      {category.count} courses
+                    </div>
+                  </div>
+
+                  {/* Hover Border Effect */}
+                  <div
+                    className={`absolute inset-0 rounded-2xl border-2 transition-all duration-300 ${
+                      selectedCategory === category.id
+                        ? "border-white/30"
+                        : "border-transparent group-hover:border-indigo-200"
+                    }`}
+                  />
                 </motion.button>
               ))}
             </div>
@@ -431,21 +651,42 @@ const Home = () => {
               {(recommendations.recommended.length > 0 ||
                 featuredCourses.length > 0) && (
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.7 }}
-                  className="mb-12"
+                  transition={{
+                    duration: 0.8,
+                    delay: 0.7,
+                    ease: [0.25, 0.25, 0, 1],
+                  }}
+                  className="mb-20"
                 >
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                      <FaLightbulb className="text-indigo-600" />
-                      Recommended for You
-                    </h2>
-                    <button className="text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1">
+                  <div className="flex items-center justify-between mb-12">
+                    <div>
+                      <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-full mb-4">
+                        <FaLightbulb className="text-orange-500 mr-2" />
+                        <span className="text-sm font-semibold text-orange-600">
+                          Personalized
+                        </span>
+                      </div>
+                      <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+                        Recommended{" "}
+                        <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
+                          for You
+                        </span>
+                      </h2>
+                      <p className="text-gray-600 mt-2">
+                        Courses picked just for your learning journey
+                      </p>
+                    </div>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="hidden md:flex items-center gap-2 px-6 py-3 text-indigo-600 hover:text-indigo-700 font-semibold rounded-xl hover:bg-indigo-50 transition-all duration-300"
+                    >
                       View All <FaArrowRight className="text-sm" />
-                    </button>
+                    </motion.button>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                     {(recommendations.recommended.length > 0
                       ? recommendations.recommended
                       : featuredCourses
@@ -550,18 +791,31 @@ const Home = () => {
               {/* Trending Now - Single Featured Course */}
               {(trendingCourse || featuredCourses.length > 0) && (
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.9 }}
-                  className="mb-16"
+                  transition={{
+                    duration: 0.8,
+                    delay: 0.9,
+                    ease: [0.25, 0.25, 0, 1],
+                  }}
+                  className="mb-24"
                 >
-                  <div className="text-center mb-8">
-                    <h2 className="text-3xl font-bold text-gray-900 flex items-center justify-center gap-3 mb-2">
-                      <FaFire className="text-orange-500 text-4xl" />
-                      Trending Now
+                  <div className="text-center mb-16">
+                    <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-orange-50 to-red-50 rounded-full mb-6">
+                      <FaFire className="text-orange-500 mr-2 animate-pulse" />
+                      <span className="text-sm font-semibold text-orange-600">
+                        Hot Trending
+                      </span>
+                    </div>
+                    <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                      This Week's{" "}
+                      <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
+                        Hottest Course
+                      </span>
                     </h2>
-                    <p className="text-gray-600 text-lg">
-                      The most popular course this week
+                    <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                      Join thousands of learners in the most popular course of
+                      the week
                     </p>
                   </div>
 
@@ -572,20 +826,33 @@ const Home = () => {
                       <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.5 }}
-                        className="relative max-w-5xl mx-auto"
+                        transition={{ duration: 0.8, delay: 1.0 }}
+                        className="relative max-w-6xl mx-auto"
+                        whileHover={{ scale: 1.02 }}
                       >
+                        <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500 rounded-3xl opacity-20 blur-2xl transform scale-105"></div>
                         <div
-                          className="bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 rounded-3xl shadow-2xl border border-orange-200 overflow-hidden group cursor-pointer"
+                          className="relative bg-white rounded-3xl shadow-2xl border border-orange-100 overflow-hidden group cursor-pointer backdrop-blur-sm"
                           onClick={() => handleCourseClick(displayCourse._id)}
                         >
-                          {/* Trending Badge */}
-                          <div className="absolute top-6 left-6 z-10">
-                            <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full shadow-lg">
-                              <FaFire className="animate-pulse" />
-                              <span className="font-bold text-sm">
-                                🔥 TRENDING #1
+                          {/* Enhanced Background Pattern */}
+                          <div className="absolute inset-0 opacity-5">
+                            <div
+                              className="absolute inset-0"
+                              style={{
+                                backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ff6b35' fill-opacity='0.1'%3E%3Cpath d='M30 30l15-15v30l-15-15zm-15 0L0 15v30l15-15z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+                              }}
+                            />
+                          </div>
+
+                          {/* Enhanced Trending Badge */}
+                          <div className="absolute top-8 left-8 z-10">
+                            <div className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white rounded-2xl shadow-2xl border border-white/20 backdrop-blur-sm">
+                              <FaFire className="animate-pulse text-lg" />
+                              <span className="font-bold text-sm tracking-wide">
+                                🔥 #1 TRENDING
                               </span>
+                              <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-ping"></div>
                             </div>
                           </div>
 
@@ -725,68 +992,111 @@ const Home = () => {
                     : allCourses;
 
                 return coursesToFilter
-                  .filter(
-                    (course: any) =>
-                      course.category.toLowerCase() === category.toLowerCase()
-                  )
+                  .filter((course: any) => course.category === category)
                   .slice(0, 3);
               };
 
-              const categories = [
-                {
-                  id: "Development",
-                  name: "Development",
-                  description: "Master programming and software development",
-                  icon: FaCode,
-                  bgColor: "bg-blue-100",
-                  iconColor: "text-blue-600",
-                  buttonColor: "text-blue-600 hover:text-blue-700",
-                  hoverBg: "hover:bg-blue-50",
-                },
-                {
-                  id: "Design",
-                  name: "Design",
-                  description: "Create beautiful and functional designs",
-                  icon: FaPalette,
-                  bgColor: "bg-purple-100",
-                  iconColor: "text-purple-600",
-                  buttonColor: "text-purple-600 hover:text-purple-700",
-                  hoverBg: "hover:bg-purple-50",
-                },
-                {
-                  id: "Data Science",
-                  name: "Data Science",
-                  description: "Analyze data and build intelligent systems",
-                  icon: FaChartLine,
-                  bgColor: "bg-green-100",
-                  iconColor: "text-green-600",
-                  buttonColor: "text-green-600 hover:text-green-700",
-                  hoverBg: "hover:bg-green-50",
-                },
-                {
-                  id: "Marketing",
-                  name: "Marketing",
-                  description: "Grow your business and reach more customers",
-                  icon: FaRocket,
-                  bgColor: "bg-orange-100",
-                  iconColor: "text-orange-600",
-                  buttonColor: "text-orange-600 hover:text-orange-700",
-                  hoverBg: "hover:bg-orange-50",
-                },
-                {
-                  id: "Photography",
-                  name: "Photography",
-                  description:
-                    "Capture moments and tell stories through images",
-                  icon: FaCamera,
-                  bgColor: "bg-pink-100",
-                  iconColor: "text-pink-600",
-                  buttonColor: "text-pink-600 hover:text-pink-700",
-                  hoverBg: "hover:bg-pink-50",
-                },
-              ];
+              // Generate dynamic categories from actual course data
+              const generateDynamicCategories = () => {
+                if (!allCourses || allCourses.length === 0) return [];
 
-              return categories
+                // Get unique categories from courses
+                const uniqueCategories = [
+                  ...new Set(allCourses.map((course) => course.category)),
+                ];
+
+                // Color palettes that cycle through for any number of categories
+                const colorPalettes = [
+                  {
+                    bgColor: "bg-blue-100",
+                    iconColor: "text-blue-600",
+                    buttonColor: "text-blue-600 hover:text-blue-700",
+                    hoverBg: "hover:bg-blue-50",
+                  },
+                  {
+                    bgColor: "bg-purple-100",
+                    iconColor: "text-purple-600",
+                    buttonColor: "text-purple-600 hover:text-purple-700",
+                    hoverBg: "hover:bg-purple-50",
+                  },
+                  {
+                    bgColor: "bg-green-100",
+                    iconColor: "text-green-600",
+                    buttonColor: "text-green-600 hover:text-green-700",
+                    hoverBg: "hover:bg-green-50",
+                  },
+                  {
+                    bgColor: "bg-orange-100",
+                    iconColor: "text-orange-600",
+                    buttonColor: "text-orange-600 hover:text-orange-700",
+                    hoverBg: "hover:bg-orange-50",
+                  },
+                  {
+                    bgColor: "bg-pink-100",
+                    iconColor: "text-pink-600",
+                    buttonColor: "text-pink-600 hover:text-pink-700",
+                    hoverBg: "hover:bg-pink-50",
+                  },
+                  {
+                    bgColor: "bg-indigo-100",
+                    iconColor: "text-indigo-600",
+                    buttonColor: "text-indigo-600 hover:text-indigo-700",
+                    hoverBg: "hover:bg-indigo-50",
+                  },
+                  {
+                    bgColor: "bg-emerald-100",
+                    iconColor: "text-emerald-600",
+                    buttonColor: "text-emerald-600 hover:text-emerald-700",
+                    hoverBg: "hover:bg-emerald-50",
+                  },
+                  {
+                    bgColor: "bg-violet-100",
+                    iconColor: "text-violet-600",
+                    buttonColor: "text-violet-600 hover:text-violet-700",
+                    hoverBg: "hover:bg-violet-50",
+                  },
+                  {
+                    bgColor: "bg-red-100",
+                    iconColor: "text-red-600",
+                    buttonColor: "text-red-600 hover:text-red-700",
+                    hoverBg: "hover:bg-red-50",
+                  },
+                  {
+                    bgColor: "bg-cyan-100",
+                    iconColor: "text-cyan-600",
+                    buttonColor: "text-cyan-600 hover:text-cyan-700",
+                    hoverBg: "hover:bg-cyan-50",
+                  },
+                  {
+                    bgColor: "bg-amber-100",
+                    iconColor: "text-amber-600",
+                    buttonColor: "text-amber-600 hover:text-amber-700",
+                    hoverBg: "hover:bg-amber-50",
+                  },
+                  {
+                    bgColor: "bg-gray-100",
+                    iconColor: "text-gray-600",
+                    buttonColor: "text-gray-600 hover:text-gray-700",
+                    hoverBg: "hover:bg-gray-50",
+                  },
+                ];
+
+                return uniqueCategories.map((categoryName, index) => {
+                  const colorIndex = index % colorPalettes.length;
+
+                  return {
+                    id: categoryName,
+                    name: categoryName,
+                    description: `Explore ${categoryName} courses and enhance your skills`,
+                    icon: FaGraduationCap, // Use consistent icon for all dynamic categories
+                    ...colorPalettes[colorIndex],
+                  };
+                });
+              };
+
+              const dynamicCategories = generateDynamicCategories();
+
+              return dynamicCategories
                 .map((category, categoryIndex) => {
                   const courses = getCoursesForCategory(category.id);
 
@@ -840,7 +1150,7 @@ const Home = () => {
                     </motion.div>
                   );
                 })
-                .filter(Boolean); // Remove null values
+                .filter(Boolean);
             })()}
           </div>
         </div>
