@@ -14,6 +14,7 @@ import lessonRouter from "./routes/lessonRoute.js";
 import googleRouter from "./routes/googleRoutes.js";
 import githubRouter from "./routes/githubRoutes.js";
 import personalizationRouter from "./routes/personalization.js";
+import searchRouter from "./routes/searchRoutes.js";
 
 const app = express();
 
@@ -58,6 +59,7 @@ app.use("/api/courses", courseRouter);
 app.use("/api/sections", sectionRouter);
 app.use("/api/lessons", lessonRouter);
 app.use("/api/personalization", personalizationRouter);
+app.use("/api/search", searchRouter);
 
 // 404 handler
 app.use(notFoundHandler);
