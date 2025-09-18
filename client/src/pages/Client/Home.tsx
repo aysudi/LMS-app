@@ -5,7 +5,6 @@ import {
   FaSearch,
   FaStar,
   FaUsers,
-  FaPlay,
   FaHeart,
   FaArrowRight,
   FaGraduationCap,
@@ -113,11 +112,7 @@ const CourseCard = ({ course, index }: { course: any; index: number }) => {
         </div>
 
         {/* Play Button Overlay */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-          <div className="bg-white/95 backdrop-blur-lg text-indigo-600 p-3 rounded-full shadow-2xl transform scale-0 group-hover:scale-100 transition-transform duration-300">
-            <FaPlay className="text-lg ml-1" />
-          </div>
-        </div>
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
 
         {/* Price Badge */}
         <div className="absolute bottom-3 right-3">
@@ -138,12 +133,6 @@ const CourseCard = ({ course, index }: { course: any; index: number }) => {
           <span className="inline-flex items-center px-2 py-1 bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-700 text-xs font-semibold rounded-full border border-indigo-100">
             {course.category}
           </span>
-          {course.discountPrice &&
-            course.originalPrice > course.discountPrice && (
-              <span className="text-xs text-gray-500 line-through bg-gray-100 px-2 py-1 rounded-full">
-                ${course.originalPrice}
-              </span>
-            )}
         </div>
 
         {/* Title */}
@@ -886,11 +875,7 @@ const Home = () => {
                               />
 
                               {/* Play Button Overlay */}
-                              <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <div className="bg-white/90 backdrop-blur-sm text-orange-500 p-4 rounded-full shadow-xl hover:bg-white transition-colors duration-200">
-                                  <FaPlay className="text-2xl ml-1" />
-                                </div>
-                              </div>
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                             </div>
 
                             {/* Course Content */}
@@ -952,13 +937,6 @@ const Home = () => {
                                           displayCourse.originalPrice
                                         }`}
                                   </span>
-                                  {displayCourse.discountPrice &&
-                                    displayCourse.originalPrice >
-                                      displayCourse.discountPrice && (
-                                      <span className="text-lg text-gray-500 line-through">
-                                        ${displayCourse.originalPrice}
-                                      </span>
-                                    )}
                                 </div>
                                 <button
                                   onClick={(e) => {
@@ -984,7 +962,6 @@ const Home = () => {
           {/* Category Sections */}
           <div className="space-y-16">
             {(() => {
-              // Helper function to get courses for a category
               const getCoursesForCategory = (category: string) => {
                 const coursesToFilter =
                   recommendations.recommended.length > 0
@@ -996,16 +973,13 @@ const Home = () => {
                   .slice(0, 3);
               };
 
-              // Generate dynamic categories from actual course data
               const generateDynamicCategories = () => {
                 if (!allCourses || allCourses.length === 0) return [];
 
-                // Get unique categories from courses
                 const uniqueCategories = [
                   ...new Set(allCourses.map((course) => course.category)),
                 ];
 
-                // Color palettes that cycle through for any number of categories
                 const colorPalettes = [
                   {
                     bgColor: "bg-blue-100",
