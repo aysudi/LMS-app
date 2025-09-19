@@ -197,7 +197,6 @@ export const saveSearchHistory = async (
   searchData: Omit<SearchHistoryType, "_id" | "user">
 ): Promise<void> => {
   try {
-    // Remove duplicate recent searches for the same query
     await SearchHistory.deleteMany({
       user: userId,
       query: searchData.query.trim(),
