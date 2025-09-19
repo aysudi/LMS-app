@@ -19,11 +19,6 @@ const searchHistorySchema = new mongoose.Schema(
       enum: ["search", "suggestion"],
       default: "search",
     },
-    timestamp: {
-      type: Date,
-      default: Date.now,
-      index: true,
-    },
     metadata: {
       resultCount: {
         type: Number,
