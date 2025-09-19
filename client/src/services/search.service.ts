@@ -12,13 +12,20 @@ export interface SearchSuggestion {
     courseId?: string;
     image?: string;
     description?: string;
+    rating?: number;
+    price?: number;
   };
 }
 
 export interface RecentSearch {
+  _id?: string;
   query: string;
-  timestamp: string;
   type: "search" | "suggestion";
+  timestamp: string;
+  metadata?: {
+    resultCount?: number;
+    selectedSuggestion?: string;
+  };
 }
 
 export interface SearchSuggestionsResponse {
@@ -31,189 +38,142 @@ export interface SearchHistoryResponse {
   data: RecentSearch[];
 }
 
-const mockCategories = [
-  "Development",
-  "Design",
-  "Business",
-  "Marketing",
-  "Photography",
-  "Music",
-  "Health & Fitness",
-  "Personal Development",
-  "IT & Software",
-  "Office Productivity",
-  "Lifestyle",
-  "Language",
-  "Teaching & Academics",
-];
-
-const mockInstructors = [
-  { id: "1", name: "Dr. Angela Yu", specialization: "Web Development" },
-  { id: "2", name: "Jonas Schmedtmann", specialization: "JavaScript" },
-  { id: "3", name: "Maximilian Schwarzmüller", specialization: "React" },
-  { id: "4", name: "Brad Traversy", specialization: "Full Stack" },
-  { id: "5", name: "Colt Steele", specialization: "Python" },
-];
-
 export const getSearchSuggestions = async (
   query: string
-): Promise<SearchSuggestionsResponse> => {
+): Promise<SearchSuggestion[]> => {
   try {
-    const response = await api.get(`/api/search/suggestions`, {
-      params: { q: query, limit: 10 },
-    });
-    return response.data;
+    if (!query.trim()) {
+      return [];
+    }
+
+    const response = await api.get<SearchSuggestionsResponse>(
+      `/search/suggestions?q=${encodeURIComponent(query.trim())}`
+    );
+
+    return response.data.data || [];
   } catch (error) {
-    const suggestions: SearchSuggestion[] = [];
-    const queryLower = query.toLowerCase();
-
-    const mockCourses = [
-      "React - The Complete Guide",
-      "JavaScript: The Complete Course",
-      "Python for Everybody",
-      "Web Development Bootcamp",
-      "Machine Learning A-Z",
-      "Node.js Complete Course",
-      "Angular - The Complete Guide",
-      "Vue.js Complete Course",
-      "Data Science Masterclass",
-      "Digital Marketing Course",
-    ];
-
-    mockCourses
-      .filter((course) => course.toLowerCase().includes(queryLower))
-      .slice(0, 4)
-      .forEach((course, index) => {
-        suggestions.push({
-          id: `course-${index}`,
-          value: course,
-          label: course,
-          type: "course",
-          count: Math.floor(Math.random() * 1000) + 100,
-          metadata: {
-            courseId: `course-${index}`,
-            image: `https://images.unsplash.com/photo-${
-              1500000000000 + index
-            }?w=300&h=200&fit=crop`,
-            description: `Learn ${course} from scratch to advanced level`,
-          },
-        });
-      });
-
-    mockCategories
-      .filter((category) => category.toLowerCase().includes(queryLower))
-      .slice(0, 3)
-      .forEach((category, index) => {
-        suggestions.push({
-          id: `category-${index}`,
-          value: category,
-          label: category,
-          type: "category",
-          count: Math.floor(Math.random() * 500) + 50,
-          metadata: {
-            categoryId: category.toLowerCase().replace(/\s+/g, "-"),
-          },
-        });
-      });
-
-    mockInstructors
-      .filter(
-        (instructor) =>
-          instructor.name.toLowerCase().includes(queryLower) ||
-          instructor.specialization.toLowerCase().includes(queryLower)
-      )
-      .slice(0, 2)
-      .forEach((instructor, index) => {
-        suggestions.push({
-          id: `instructor-${index}`,
-          value: instructor.name,
-          label: `${instructor.name} - ${instructor.specialization}`,
-          type: "instructor",
-          count: Math.floor(Math.random() * 100) + 10,
-          metadata: {
-            instructorId: instructor.id,
-            description: `Expert in ${instructor.specialization}`,
-          },
-        });
-      });
-
-    return {
-      success: true,
-      data: suggestions.slice(0, 8),
-    };
+    console.error("Failed to fetch search suggestions:", error);
+    return [];
   }
 };
 
-export const saveSearchHistory = async (
-  searchData: Omit<RecentSearch, "timestamp">
+export const getSearchHistory = async (): Promise<RecentSearch[]> => {
+  try {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      return getGuestSearchHistory();
+    }
+
+    const response = await api.get<SearchHistoryResponse>("/search/history");
+    return response.data.data || [];
+  } catch (error) {
+    console.error("Failed to fetch search history:", error);
+
+    return getGuestSearchHistory();
+  }
+};
+
+export const saveSearchToHistory = async (
+  query: string,
+  type: "search" | "suggestion" = "search",
+  metadata?: { resultCount?: number; selectedSuggestion?: string }
 ): Promise<void> => {
   try {
-    await api.post("/api/search/history", {
-      ...searchData,
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    console.error("Failed to save search history to server:", error);
-    const historyData = {
-      ...searchData,
-      timestamp: new Date().toISOString(),
-    };
-    saveLocalSearchHistory(historyData);
-  }
-};
+    const token = localStorage.getItem("token");
 
-export const getSearchHistory = async (): Promise<SearchHistoryResponse> => {
-  try {
-    const response = await api.get("/api/search/history", {
-      params: { limit: 10 },
+    if (!token) {
+      saveGuestSearchHistory({
+        query,
+        type,
+        timestamp: new Date().toISOString(),
+        metadata,
+      });
+      return;
+    }
+
+    await api.post("/search/history", {
+      query: query.trim(),
+      type,
+      metadata,
     });
-    return response.data;
   } catch (error) {
-    console.error("Failed to fetch search history from server:", error);
-    return {
-      success: true,
-      data: getLocalSearchHistory(),
-    };
+    console.error("Failed to save search to history:", error);
+
+    saveGuestSearchHistory({
+      query,
+      type,
+      timestamp: new Date().toISOString(),
+      metadata,
+    });
   }
 };
 
 export const clearSearchHistory = async (): Promise<void> => {
   try {
-    await api.delete("/api/search/history");
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      clearGuestSearchHistory();
+      return;
+    }
+
+    await api.delete("/search/history");
   } catch (error) {
-    console.error("Failed to clear search history on server:", error);
+    console.error("Failed to clear search history:", error);
+
+    clearGuestSearchHistory();
   }
-  clearLocalSearchHistory();
 };
 
-export const getLocalSearchHistory = (): RecentSearch[] => {
+export const getPopularSearches = async (): Promise<string[]> => {
   try {
-    const history = localStorage.getItem("searchHistory");
-    return history ? JSON.parse(history) : [];
+    const response = await api.get<{ success: boolean; data: string[] }>(
+      "/search/popular"
+    );
+    return response.data.data || [];
   } catch (error) {
-    console.error("Failed to parse local search history:", error);
+    console.error("Failed to fetch popular searches:", error);
     return [];
   }
 };
 
-export const saveLocalSearchHistory = (searchData: RecentSearch): void => {
-  try {
-    const currentHistory = getLocalSearchHistory();
-    const updatedHistory = [
-      searchData,
-      ...currentHistory.filter((item) => item.query !== searchData.query),
-    ].slice(0, 10);
+const GUEST_SEARCH_HISTORY_KEY = "guest_search_history";
+const MAX_GUEST_HISTORY = 20;
 
-    localStorage.setItem("searchHistory", JSON.stringify(updatedHistory));
+const getGuestSearchHistory = (): RecentSearch[] => {
+  try {
+    const stored = localStorage.getItem(GUEST_SEARCH_HISTORY_KEY);
+    if (!stored) return [];
+
+    const history: RecentSearch[] = JSON.parse(stored);
+    return history.slice(0, MAX_GUEST_HISTORY);
   } catch (error) {
-    console.error("Failed to save search history to local storage:", error);
+    console.error("Failed to parse guest search history:", error);
+    return [];
   }
 };
 
-export const clearLocalSearchHistory = (): void => {
+const saveGuestSearchHistory = (search: RecentSearch): void => {
   try {
-    localStorage.removeItem("searchHistory");
+    const history = getGuestSearchHistory();
+
+    const filteredHistory = history.filter(
+      (item) => item.query !== search.query
+    );
+
+    const newHistory = [search, ...filteredHistory].slice(0, MAX_GUEST_HISTORY);
+
+    localStorage.setItem(GUEST_SEARCH_HISTORY_KEY, JSON.stringify(newHistory));
   } catch (error) {
-    console.error("Failed to clear local search history:", error);
+    console.error("Failed to save guest search history:", error);
+  }
+};
+
+const clearGuestSearchHistory = (): void => {
+  try {
+    localStorage.removeItem(GUEST_SEARCH_HISTORY_KEY);
+  } catch (error) {
+    console.error("Failed to clear guest search history:", error);
   }
 };
