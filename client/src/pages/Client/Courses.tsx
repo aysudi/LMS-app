@@ -9,13 +9,13 @@ import {
   FaChevronDown,
   FaList,
   FaGraduationCap,
-  FaSpinner,
   FaTh,
 } from "react-icons/fa";
 import { useAuthContext } from "../../context/AuthContext";
 import { usePersonalization } from "../../hooks/usePersonalization";
 import { useCourses } from "../../hooks/useCourseQueries";
 import type { Course, CourseQuery } from "../../services/course.service";
+import Loading from "../../components/Common/Loading";
 
 const CourseCard = ({
   course,
@@ -648,16 +648,7 @@ const Courses: React.FC = () => {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* Loading State */}
-        {isLoading && (
-          <div className="flex items-center justify-center py-24">
-            <div className="text-center">
-              <FaSpinner className="animate-spin text-5xl text-indigo-600 mb-6 mx-auto" />
-              <p className="text-xl text-gray-600 font-medium">
-                Loading courses...
-              </p>
-            </div>
-          </div>
-        )}
+        {isLoading && <Loading variant="page" message="Loading courses..." />}
 
         {/* Error State */}
         {error && (

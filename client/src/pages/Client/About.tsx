@@ -14,8 +14,11 @@ import {
   FaTwitter,
   FaArrowRight,
 } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const About = () => {
+  const navigate = useNavigate();
+
   const stats = [
     {
       number: "50K+",
@@ -210,9 +213,13 @@ const About = () => {
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <motion.button
+                  onClick={() => {
+                    navigate("/");
+                    // window.location.href = "/";
+                  }}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
+                  className="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 cursor-pointer"
                 >
                   <span>Start Learning Today</span>
                   <FaArrowRight />
@@ -220,7 +227,7 @@ const About = () => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-8 py-4 bg-white/80 backdrop-blur-sm border border-gray-200 text-gray-700 font-semibold rounded-2xl hover:bg-white hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
+                  className="px-8 py-4 bg-white/80 backdrop-blur-sm border border-gray-200 text-gray-700 font-semibold rounded-2xl hover:bg-white hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2 cursor-pointer"
                 >
                   <FaPlay />
                   <span>Watch Our Story</span>
