@@ -4,7 +4,7 @@ export interface SearchSuggestion {
   id: string;
   value: string;
   label: string;
-  type: "course" | "category" | "instructor";
+  type: "course" | "category" | "instructor" | "search";
   count?: number;
   metadata?: {
     instructorId?: string;
@@ -46,13 +46,40 @@ export const getSearchSuggestions = async (
       return [];
     }
 
+    // Request course suggestions that match the query
     const response = await api.get<SearchSuggestionsResponse>(
-      `/search/suggestions?q=${encodeURIComponent(query.trim())}`
+      `/api/search/suggestions?q=${encodeURIComponent(
+        query.trim()
+      )}&type=course&limit=9`
     );
 
-    return response.data.data || [];
+    const courseSuggestions = response.data.data || [];
+
+    // Create the search term suggestion as the first item
+    const searchTermSuggestion: SearchSuggestion = {
+      id: `search-${query.trim()}`,
+      value: query.trim(),
+      label: `Search for "${query.trim()}"`,
+      type: "search",
+    };
+
+    // Return search term first, then course suggestions
+    return [searchTermSuggestion, ...courseSuggestions];
   } catch (error) {
     console.error("Failed to fetch search suggestions:", error);
+
+    // Even on error, return the search term suggestion
+    if (query.trim()) {
+      return [
+        {
+          id: `search-${query.trim()}`,
+          value: query.trim(),
+          label: `Search for "${query.trim()}"`,
+          type: "search",
+        },
+      ];
+    }
+
     return [];
   }
 };
@@ -65,7 +92,9 @@ export const getSearchHistory = async (): Promise<RecentSearch[]> => {
       return getGuestSearchHistory();
     }
 
-    const response = await api.get<SearchHistoryResponse>("/search/history");
+    const response = await api.get<SearchHistoryResponse>(
+      "/api/search/history"
+    );
     return response.data.data || [];
   } catch (error) {
     console.error("Failed to fetch search history:", error);
@@ -92,7 +121,7 @@ export const saveSearchToHistory = async (
       return;
     }
 
-    await api.post("/search/history", {
+    await api.post("/api/search/history", {
       query: query.trim(),
       type,
       metadata,
@@ -118,7 +147,7 @@ export const clearSearchHistory = async (): Promise<void> => {
       return;
     }
 
-    await api.delete("/search/history");
+    await api.delete("/api/search/history");
   } catch (error) {
     console.error("Failed to clear search history:", error);
 
@@ -129,7 +158,7 @@ export const clearSearchHistory = async (): Promise<void> => {
 export const getPopularSearches = async (): Promise<string[]> => {
   try {
     const response = await api.get<{ success: boolean; data: string[] }>(
-      "/search/popular"
+      "/api/search/popular"
     );
     return response.data.data || [];
   } catch (error) {

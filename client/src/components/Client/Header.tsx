@@ -1,5 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useLocation,
+  useSearchParams,
+} from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FaGraduationCap,
@@ -50,6 +55,8 @@ const Header: React.FC = () => {
   const searchDropdownRef = useRef<HTMLDivElement>(null);
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
 
   const { user, isAuthenticated, isLoading } = useAuthContext();
   const { mutate: logout } = useLogout();
@@ -62,8 +69,39 @@ const Header: React.FC = () => {
 
     setIsLoadingSuggestions(true);
     try {
-      const results = await getSearchSuggestions(query);
-      setSuggestions(results);
+      const [apiResults, recentSearches] = await Promise.all([
+        getSearchSuggestions(query),
+        getSearchHistory(),
+      ]);
+
+      const matchingRecentSearches = recentSearches
+        .filter(
+          (recent) =>
+            recent.query.toLowerCase().includes(query.toLowerCase()) &&
+            recent.query.toLowerCase() !== query.toLowerCase()
+        )
+        .slice(0, 3) // Limit to 3 recent searches
+        .map((recent) => ({
+          id: `recent-${recent.query}`,
+          value: recent.query,
+          label: recent.query,
+          type: "search" as const,
+          metadata: {
+            description: `From your recent searches`,
+          },
+        }));
+
+      const combinedSuggestions = [
+        ...matchingRecentSearches,
+        ...apiResults.filter(
+          (api) =>
+            !matchingRecentSearches.some(
+              (recent) => recent.value.toLowerCase() === api.value.toLowerCase()
+            )
+        ),
+      ];
+
+      setSuggestions(combinedSuggestions);
     } catch (error) {
       console.error("Failed to fetch suggestions:", error);
       setSuggestions([]);
@@ -162,13 +200,12 @@ const Header: React.FC = () => {
     setSearchQuery(suggestion.value);
     setIsSearchFocused(false);
 
-    if (suggestion.type === "course" && suggestion.metadata?.courseId) {
+    if (suggestion.type === "search") {
+      navigate(`/courses?search=${encodeURIComponent(suggestion.value)}`);
+    } else if (suggestion.type === "course" && suggestion.metadata?.courseId) {
       navigate(`/course/${suggestion.metadata.courseId}`);
-    } else if (
-      suggestion.type === "category" &&
-      suggestion.metadata?.categoryId
-    ) {
-      navigate(`/courses?category=${suggestion.metadata.categoryId}`);
+    } else if (suggestion.type === "category") {
+      navigate(`/courses?category=${encodeURIComponent(suggestion.value)}`);
     } else if (
       suggestion.type === "instructor" &&
       suggestion.metadata?.instructorId
@@ -194,14 +231,21 @@ const Header: React.FC = () => {
     setSearchHistory([]);
   };
 
-  const getSuggestionIcon = (type: string) => {
-    switch (type) {
+  const getSuggestionIcon = (suggestion: SearchSuggestion) => {
+    // Check if this is a recent search suggestion
+    if (suggestion.id.startsWith("recent-")) {
+      return <FaClock className="text-orange-500" />;
+    }
+
+    switch (suggestion.type) {
       case "course":
         return <FaBookOpen className="text-blue-500" />;
       case "category":
         return <FaBookmark className="text-green-500" />;
       case "instructor":
         return <FaUser className="text-purple-500" />;
+      case "search":
+        return <FaSearch className="text-indigo-500" />;
       default:
         return <FaSearch className="text-gray-400" />;
     }
@@ -257,6 +301,17 @@ const Header: React.FC = () => {
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (location.pathname === "/courses") {
+      const urlSearchQuery = searchParams.get("search") || "";
+      if (urlSearchQuery !== searchQuery && !isSearchFocused) {
+        setSearchQuery(urlSearchQuery);
+      }
+    } else if (location.pathname === "/" && !isSearchFocused) {
+      setSearchQuery("");
+    }
+  }, [location.pathname, searchParams]);
 
   const userDisplayData = user
     ? {
@@ -366,7 +421,7 @@ const Header: React.FC = () => {
                         // Search Suggestions
                         <div className="py-2">
                           <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-gray-100">
-                            Suggestions
+                            Search Suggestions
                           </div>
                           {isLoadingSuggestions ? (
                             <div className="px-4 py-8 text-center text-gray-500">
@@ -388,7 +443,7 @@ const Header: React.FC = () => {
                               >
                                 <div className="flex items-center space-x-3">
                                   <div className="flex-shrink-0">
-                                    {getSuggestionIcon(suggestion.type)}
+                                    {getSuggestionIcon(suggestion)}
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center justify-between">
@@ -417,7 +472,9 @@ const Header: React.FC = () => {
                                     )}
                                     <div className="flex items-center justify-between mt-1">
                                       <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 capitalize">
-                                        {suggestion.type}
+                                        {suggestion.id.startsWith("recent-")
+                                          ? "Recent"
+                                          : suggestion.type}
                                       </span>
                                       {suggestion.count && (
                                         <span className="text-xs text-gray-400">

@@ -68,12 +68,6 @@ const CourseCard = ({
                   <span className="inline-flex items-center px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-medium rounded-full mr-3">
                     {course.category}
                   </span>
-                  {course.discountPrice &&
-                    course.originalPrice > course.discountPrice && (
-                      <span className="text-xs text-gray-500 line-through bg-gray-100 px-2 py-1 rounded-full">
-                        ${course.originalPrice}
-                      </span>
-                    )}
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors duration-300">
                   {course.title}
@@ -375,8 +369,40 @@ const Courses: React.FC = () => {
               {/* Title & Stats */}
               <div className="flex-1">
                 <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-3">
-                  Discover Courses
+                  {searchQuery
+                    ? `Search Results for "${searchQuery}"`
+                    : "Discover Courses"}
                 </h1>
+
+                {/* Active Filters Display */}
+                {(searchQuery ||
+                  filters.category ||
+                  filters.level ||
+                  filters.isFree) && (
+                  <div className="flex flex-wrap items-center gap-2 mb-3">
+                    {searchQuery && (
+                      <span className="inline-flex items-center px-3 py-1.5 bg-indigo-100 text-indigo-800 text-sm font-medium rounded-full">
+                        🔍 Search: "{searchQuery}"
+                      </span>
+                    )}
+                    {filters.category && (
+                      <span className="inline-flex items-center px-3 py-1.5 bg-green-100 text-green-800 text-sm font-medium rounded-full">
+                        📂 Category: {filters.category}
+                      </span>
+                    )}
+                    {filters.level && (
+                      <span className="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
+                        📊 Level: {filters.level}
+                      </span>
+                    )}
+                    {filters.isFree && (
+                      <span className="inline-flex items-center px-3 py-1.5 bg-yellow-100 text-yellow-800 text-sm font-medium rounded-full">
+                        💰 Free Only
+                      </span>
+                    )}
+                  </div>
+                )}
+
                 <p className="text-gray-600 text-lg">
                   {!isLoading && pagination && pagination.totalCourses > 0 && (
                     <span>

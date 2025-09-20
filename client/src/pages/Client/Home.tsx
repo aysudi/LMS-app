@@ -2,7 +2,6 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
-  FaSearch,
   FaStar,
   FaUsers,
   FaHeart,
@@ -201,7 +200,6 @@ const Home = () => {
     addToWishlist,
     removeFromWishlist,
     isInWishlist,
-    addToSearchHistory,
     addViewedCourse,
   } = usePersonalization();
 
@@ -217,7 +215,6 @@ const Home = () => {
   const { data: trendingCoursesData, isLoading: trendingLoading } =
     useTrendingCourses(1);
 
-  const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
 
   const allCourses = allCoursesData?.data || [];
@@ -277,16 +274,6 @@ const Home = () => {
       return;
     }
     console.log("Enrolling in course:", courseId);
-  };
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim() && isAuthenticated) {
-      addToSearchHistory(
-        searchQuery.trim(),
-        selectedCategory !== "all" ? selectedCategory : undefined
-      );
-    }
   };
 
   if (allCoursesLoading && featuredLoading && freeLoading && trendingLoading) {
@@ -453,61 +440,6 @@ const Home = () => {
                   </div>
                 </motion.div>
               ))}
-            </motion.div>
-
-            {/* Enhanced Search Bar */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                duration: 0.8,
-                delay: 0.4,
-                ease: [0.25, 0.25, 0, 1],
-              }}
-              className="max-w-3xl mx-auto"
-            >
-              <form onSubmit={handleSearchSubmit} className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-3xl opacity-20 group-hover:opacity-30 transition-opacity duration-300 blur-xl"></div>
-                <div className="relative bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
-                  <div className="flex items-center">
-                    <FaSearch className="absolute left-6 text-gray-400 text-xl z-10" />
-                    <input
-                      type="text"
-                      placeholder="What would you like to learn today?"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-16 pr-32 py-6 text-lg bg-transparent border-none focus:outline-none focus:ring-0 placeholder-gray-500"
-                    />
-                    <button
-                      type="submit"
-                      className="absolute right-2 px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
-                    >
-                      Search
-                    </button>
-                  </div>
-                </div>
-              </form>
-
-              {/* Popular Search Tags */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.6 }}
-                className="mt-6 flex flex-wrap justify-center gap-3"
-              >
-                <span className="text-sm text-gray-500 mr-2">Popular:</span>
-                {["Web Development", "AI & ML", "Design", "Business"].map(
-                  (tag, index) => (
-                    <button
-                      key={index}
-                      className="px-4 py-2 bg-white/60 backdrop-blur-sm text-gray-700 text-sm font-medium rounded-full border border-gray-200 hover:bg-white hover:shadow-md transition-all duration-300"
-                      onClick={() => setSearchQuery(tag)}
-                    >
-                      {tag}
-                    </button>
-                  )
-                )}
-              </motion.div>
             </motion.div>
           </div>
         </div>
