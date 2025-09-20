@@ -221,12 +221,11 @@ const Home = () => {
     },
   ];
 
-  const handleEnroll = (courseId: string | number) => {
+  const handleEnroll = () => {
     if (!isAuthenticated) {
       navigate("/auth/login");
       return;
     }
-    console.log("Enrolling in course:", courseId);
   };
 
   if (allCoursesLoading && featuredLoading && freeLoading && trendingLoading) {
@@ -235,7 +234,6 @@ const Home = () => {
 
   const handleCourseClick = (courseId: number | string) => {
     if (isAuthenticated) {
-      console.log("Adding viewed course:", courseId);
       addViewedCourse(courseId.toString());
     }
     navigate(`/course/${courseId}`);
@@ -812,7 +810,7 @@ const Home = () => {
                               </div>
                               <button
                                 onClick={(e) => {
-                                  handleEnroll(displayCourse.id);
+                                  handleEnroll();
                                   e.stopPropagation();
                                 }}
                                 className="px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 cursor-pointer"
