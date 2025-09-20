@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import {
   FaStar,
   FaUsers,
-  FaHeart,
   FaArrowRight,
   FaGraduationCap,
   FaCode,
@@ -29,36 +28,13 @@ import Loading from "../../components/Common/Loading";
 const CourseCard = ({ course, index }: { course: any; index: number }) => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthContext();
-  const { isInWishlist, addToWishlist, removeFromWishlist, addViewedCourse } =
-    usePersonalization();
+  const { addViewedCourse } = usePersonalization();
 
   const handleCourseClick = (courseId: string | number) => {
     if (isAuthenticated) {
       addViewedCourse(courseId.toString());
     }
     navigate(`/course/${courseId}`);
-  };
-
-  const handleWishlistToggle = async (courseId: string | number) => {
-    if (!isAuthenticated) {
-      navigate("/auth/login");
-      return;
-    }
-
-    const courseIdStr = courseId.toString();
-    if (isInWishlist(courseIdStr)) {
-      await removeFromWishlist(courseIdStr);
-    } else {
-      await addToWishlist(courseIdStr);
-    }
-  };
-
-  const handleEnroll = () => {
-    if (!isAuthenticated) {
-      navigate("/auth/login");
-      return;
-    }
-    // Handle enrollment logic
   };
 
   return (
@@ -70,8 +46,8 @@ const CourseCard = ({ course, index }: { course: any; index: number }) => {
         delay: index * 0.1,
         ease: [0.25, 0.25, 0, 1],
       }}
-      className="group relative bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-gray-200 transform hover:-translate-y-1"
-      onClick={() => handleCourseClick(course._id || course.id)}
+      className="group relative bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-gray-200 transform hover:-translate-y-1 cursor-pointer"
+      onClick={() => handleCourseClick(course.id)}
     >
       {/* Image Container with Enhanced Overlay */}
       <div className="relative h-40 overflow-hidden">
@@ -92,23 +68,6 @@ const CourseCard = ({ course, index }: { course: any; index: number }) => {
           <span className="px-2 py-1 bg-white/95 backdrop-blur-sm text-gray-800 text-xs font-semibold rounded-full shadow-lg">
             {course.level}
           </span>
-        </div>
-
-        {/* Wishlist Button */}
-        <div className="absolute top-3 right-3">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleWishlistToggle(course._id);
-            }}
-            className={`p-2 rounded-full backdrop-blur-md transition-all duration-300 transform hover:scale-110 ${
-              isInWishlist(course._id)
-                ? "bg-red-500/90 text-white shadow-lg"
-                : "bg-white/90 text-gray-700 hover:bg-red-500 hover:text-white"
-            }`}
-          >
-            <FaHeart className="text-sm" />
-          </button>
         </div>
 
         {/* Play Button Overlay */}
@@ -178,9 +137,8 @@ const CourseCard = ({ course, index }: { course: any; index: number }) => {
         {/* Action Button */}
         <div className="pt-1">
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleEnroll();
+            onClick={() => {
+              navigate(`/course/${course.id}`);
             }}
             className="w-full py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] flex items-center justify-center space-x-2"
           >
@@ -196,13 +154,7 @@ const CourseCard = ({ course, index }: { course: any; index: number }) => {
 const Home = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthContext();
-  const {
-    recommendations,
-    addToWishlist,
-    removeFromWishlist,
-    isInWishlist,
-    addViewedCourse,
-  } = usePersonalization();
+  const { recommendations, addViewedCourse } = usePersonalization();
 
   const { data: allCoursesData, isLoading: allCoursesLoading } = useCourses({
     limit: 12,
@@ -283,23 +235,10 @@ const Home = () => {
 
   const handleCourseClick = (courseId: number | string) => {
     if (isAuthenticated) {
+      console.log("Adding viewed course:", courseId);
       addViewedCourse(courseId.toString());
     }
     navigate(`/course/${courseId}`);
-  };
-
-  const handleWishlistToggle = async (courseId: number | string) => {
-    if (!isAuthenticated) {
-      navigate("/auth/login");
-      return;
-    }
-
-    const courseIdStr = courseId.toString();
-    if (isInWishlist(courseIdStr)) {
-      await removeFromWishlist(courseIdStr);
-    } else {
-      await addToWishlist(courseIdStr);
-    }
   };
 
   return (
@@ -670,7 +609,7 @@ const Home = () => {
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ duration: 0.4, delay: index * 0.1 }}
                               className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl shadow-md border border-green-200 overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer"
-                              onClick={() => handleCourseClick(course._id)}
+                              onClick={() => handleCourseClick(course.id)}
                             >
                               <div className="relative">
                                 <img
@@ -685,21 +624,6 @@ const Home = () => {
                                   <span className="px-2 py-1 bg-green-500 text-white text-xs font-medium rounded-full">
                                     FREE
                                   </span>
-                                </div>
-                                <div className="absolute top-2 right-2">
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleWishlistToggle(course._id);
-                                    }}
-                                    className={`p-2 rounded-full backdrop-blur-sm transition-colors duration-200 ${
-                                      isInWishlist(course._id)
-                                        ? "bg-red-500 text-white"
-                                        : "bg-white/80 text-gray-700 hover:bg-red-500 hover:text-white"
-                                    }`}
-                                  >
-                                    <FaHeart className="text-sm" />
-                                  </button>
                                 </div>
                               </div>
                               <div className="p-4">
@@ -728,201 +652,182 @@ const Home = () => {
                   </div>
                 </motion.div>
               )}
+            </>
+          )}
 
-              {/* Trending Now - Single Featured Course */}
-              {(trendingLoading ||
-                trendingCourse ||
-                featuredCourses.length > 0) && (
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    duration: 0.8,
-                    delay: 0.9,
-                    ease: [0.25, 0.25, 0, 1],
-                  }}
-                  className="mb-24"
-                >
-                  <div className="text-center mb-16">
-                    <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-orange-50 to-red-50 rounded-full mb-6">
-                      <FaFire className="text-orange-500 mr-2 animate-pulse" />
-                      <span className="text-sm font-semibold text-orange-600">
-                        Hot Trending
-                      </span>
-                    </div>
-                    <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                      This Week's{" "}
-                      <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
-                        Hottest Course
-                      </span>
-                    </h2>
-                    <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-                      Join thousands of learners in the most popular course of
-                      the week
-                    </p>
-                  </div>
+          {/* Trending Now - Single Featured Course - Available for all users */}
+          {(trendingLoading ||
+            trendingCourse ||
+            featuredCourses.length > 0) && (
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.8,
+                delay: 0.9,
+                ease: [0.25, 0.25, 0, 1],
+              }}
+              className="mb-24"
+            >
+              <div className="text-center mb-16">
+                <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-orange-50 to-red-50 rounded-full mb-6">
+                  <FaFire className="text-orange-500 mr-2 animate-pulse" />
+                  <span className="text-sm font-semibold text-orange-600">
+                    Hot Trending
+                  </span>
+                </div>
+                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                  This Week's{" "}
+                  <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
+                    Hottest Course
+                  </span>
+                </h2>
+                <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                  Join thousands of learners in the most popular course of the
+                  week
+                </p>
+              </div>
 
-                  {trendingLoading ? (
-                    <div className="max-w-6xl mx-auto">
-                      <Loading
-                        variant="card"
-                        size="lg"
-                        message="Loading trending course..."
-                      />
-                    </div>
-                  ) : (
-                    (() => {
-                      const displayCourse =
-                        trendingCourse || featuredCourses[0];
-                      if (!displayCourse) return null;
-                      return (
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ duration: 0.8, delay: 1.0 }}
-                          className="relative max-w-6xl mx-auto"
-                          whileHover={{ scale: 1.02 }}
-                        >
-                          <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500 rounded-3xl opacity-20 blur-2xl transform scale-105"></div>
+              {trendingLoading ? (
+                <div className="max-w-6xl mx-auto">
+                  <Loading
+                    variant="card"
+                    size="lg"
+                    message="Loading trending course..."
+                  />
+                </div>
+              ) : (
+                (() => {
+                  const displayCourse = trendingCourse || featuredCourses[0];
+                  if (!displayCourse) return null;
+                  return (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.8, delay: 1.0 }}
+                      className="relative max-w-6xl mx-auto"
+                      whileHover={{ scale: 1.02 }}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500 rounded-3xl opacity-20 blur-2xl transform scale-105"></div>
+                      <div
+                        className="relative bg-white rounded-3xl shadow-2xl border border-orange-100 overflow-hidden group cursor-pointer backdrop-blur-sm"
+                        onClick={() => {
+                          handleCourseClick(displayCourse.id);
+                        }}
+                      >
+                        {/* Enhanced Background Pattern */}
+                        <div className="absolute inset-0 opacity-5">
                           <div
-                            className="relative bg-white rounded-3xl shadow-2xl border border-orange-100 overflow-hidden group cursor-pointer backdrop-blur-sm"
-                            onClick={() => handleCourseClick(displayCourse._id)}
-                          >
-                            {/* Enhanced Background Pattern */}
-                            <div className="absolute inset-0 opacity-5">
-                              <div
-                                className="absolute inset-0"
-                                style={{
-                                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ff6b35' fill-opacity='0.1'%3E%3Cpath d='M30 30l15-15v30l-15-15zm-15 0L0 15v30l15-15z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-                                }}
-                              />
+                            className="absolute inset-0"
+                            style={{
+                              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ff6b35' fill-opacity='0.1'%3E%3Cpath d='M30 30l15-15v30l-15-15zm-15 0L0 15v30l15-15z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+                            }}
+                          />
+                        </div>
+
+                        {/* Enhanced Trending Badge */}
+                        <div className="absolute top-8 left-8 z-10">
+                          <div className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white rounded-2xl shadow-2xl border border-white/20 backdrop-blur-sm">
+                            <FaFire className="animate-pulse text-lg" />
+                            <span className="font-bold text-sm tracking-wide">
+                              🔥 #1 TRENDING
+                            </span>
+                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-ping"></div>
+                          </div>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-0">
+                          {/* Course Image */}
+                          <div className="relative overflow-hidden md:order-2">
+                            <img
+                              src={
+                                displayCourse.image ||
+                                "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&h=400&fit=crop"
+                              }
+                              alt={displayCourse.title}
+                              className="w-full h-64 md:h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                            />
+
+                            {/* Play Button Overlay */}
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                          </div>
+
+                          {/* Course Content */}
+                          <div className="p-8 md:p-12 flex flex-col justify-center md:order-1">
+                            <div className="mb-4">
+                              <span className="inline-flex items-center px-3 py-1 bg-orange-100 text-orange-700 text-sm font-semibold rounded-full">
+                                {displayCourse.category}
+                              </span>
                             </div>
 
-                            {/* Enhanced Trending Badge */}
-                            <div className="absolute top-8 left-8 z-10">
-                              <div className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white rounded-2xl shadow-2xl border border-white/20 backdrop-blur-sm">
-                                <FaFire className="animate-pulse text-lg" />
-                                <span className="font-bold text-sm tracking-wide">
-                                  🔥 #1 TRENDING
+                            <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 group-hover:text-orange-600 transition-colors">
+                              {displayCourse.title}
+                            </h3>
+
+                            <p className="text-gray-600 mb-6 text-lg leading-relaxed">
+                              {displayCourse.description}
+                            </p>
+
+                            <div className="text-lg text-gray-700 mb-6">
+                              by{" "}
+                              <span className="font-semibold text-gray-900">
+                                {displayCourse.instructor?.firstName}{" "}
+                                {displayCourse.instructor?.lastName}
+                              </span>
+                            </div>
+
+                            {/* Stats */}
+                            <div className="flex items-center gap-6 mb-8">
+                              <div className="flex items-center gap-2">
+                                <FaStar className="text-yellow-400 text-lg" />
+                                <span className="font-bold text-lg">
+                                  {displayCourse.rating || 0}
                                 </span>
-                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-ping"></div>
+                                <span className="text-gray-500">
+                                  ({displayCourse.ratingsCount || 0} reviews)
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <FaUsers className="text-indigo-500" />
+                                <span className="font-semibold">
+                                  {Number(
+                                    displayCourse.enrollmentCount || 0
+                                  ).toLocaleString()}
+                                </span>
+                                <span className="text-gray-500">students</span>
                               </div>
                             </div>
 
-                            {/* Wishlist Button */}
-                            <div className="absolute top-6 right-6 z-10">
+                            {/* Price and CTA */}
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <span className="text-3xl font-bold text-gray-900">
+                                  {displayCourse.originalPrice === 0
+                                    ? "Free"
+                                    : `$${
+                                        displayCourse.discountPrice ||
+                                        displayCourse.originalPrice
+                                      }`}
+                                </span>
+                              </div>
                               <button
                                 onClick={(e) => {
+                                  handleEnroll(displayCourse.id);
                                   e.stopPropagation();
-                                  handleWishlistToggle(displayCourse._id);
                                 }}
-                                className={`p-3 rounded-full backdrop-blur-sm transition-all duration-200 shadow-lg ${
-                                  isInWishlist(displayCourse._id)
-                                    ? "bg-red-500 text-white"
-                                    : "bg-white/90 text-gray-700 hover:bg-red-500 hover:text-white"
-                                }`}
+                                className="px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 cursor-pointer"
                               >
-                                <FaHeart className="text-lg" />
+                                Enroll Now
                               </button>
                             </div>
-
-                            <div className="grid md:grid-cols-2 gap-0">
-                              {/* Course Image */}
-                              <div className="relative overflow-hidden md:order-2">
-                                <img
-                                  src={
-                                    displayCourse.image ||
-                                    "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&h=400&fit=crop"
-                                  }
-                                  alt={displayCourse.title}
-                                  className="w-full h-64 md:h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                                />
-
-                                {/* Play Button Overlay */}
-                                <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                              </div>
-
-                              {/* Course Content */}
-                              <div className="p-8 md:p-12 flex flex-col justify-center md:order-1">
-                                <div className="mb-4">
-                                  <span className="inline-flex items-center px-3 py-1 bg-orange-100 text-orange-700 text-sm font-semibold rounded-full">
-                                    {displayCourse.category}
-                                  </span>
-                                </div>
-
-                                <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 group-hover:text-orange-600 transition-colors">
-                                  {displayCourse.title}
-                                </h3>
-
-                                <p className="text-gray-600 mb-6 text-lg leading-relaxed">
-                                  {displayCourse.description}
-                                </p>
-
-                                <div className="text-lg text-gray-700 mb-6">
-                                  by{" "}
-                                  <span className="font-semibold text-gray-900">
-                                    {displayCourse.instructor?.firstName}{" "}
-                                    {displayCourse.instructor?.lastName}
-                                  </span>
-                                </div>
-
-                                {/* Stats */}
-                                <div className="flex items-center gap-6 mb-8">
-                                  <div className="flex items-center gap-2">
-                                    <FaStar className="text-yellow-400 text-lg" />
-                                    <span className="font-bold text-lg">
-                                      {displayCourse.rating || 0}
-                                    </span>
-                                    <span className="text-gray-500">
-                                      ({displayCourse.ratingsCount || 0}{" "}
-                                      reviews)
-                                    </span>
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                    <FaUsers className="text-indigo-500" />
-                                    <span className="font-semibold">
-                                      {Number(
-                                        displayCourse.enrollmentCount || 0
-                                      ).toLocaleString()}
-                                    </span>
-                                    <span className="text-gray-500">
-                                      students
-                                    </span>
-                                  </div>
-                                </div>
-
-                                {/* Price and CTA */}
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-3">
-                                    <span className="text-3xl font-bold text-gray-900">
-                                      {displayCourse.originalPrice === 0
-                                        ? "Free"
-                                        : `$${
-                                            displayCourse.discountPrice ||
-                                            displayCourse.originalPrice
-                                          }`}
-                                    </span>
-                                  </div>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleEnroll(displayCourse._id);
-                                    }}
-                                    className="px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                                  >
-                                    Enroll Now
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
                           </div>
-                        </motion.div>
-                      );
-                    })()
-                  )}
-                </motion.div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })()
               )}
-            </>
+            </motion.div>
           )}
 
           {/* Category Sections */}
@@ -1079,9 +984,7 @@ const Home = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {courses.map((course, index) => (
                           <CourseCard
-                            key={`${category.id.toLowerCase()}-${
-                              course._id || course.id
-                            }`}
+                            key={`${category.id.toLowerCase()}-${course.id}`}
                             course={course}
                             index={index}
                           />

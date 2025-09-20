@@ -14,7 +14,7 @@ import {
 import { useAuthContext } from "../../context/AuthContext";
 import { usePersonalization } from "../../hooks/usePersonalization";
 import { useCourses } from "../../hooks/useCourseQueries";
-import type { Course, CourseQuery } from "../../services/course.service";
+import type { Course, CourseQuery } from "../../types/course.type";
 import Loading from "../../components/Common/Loading";
 
 const CourseCard = ({
@@ -28,11 +28,11 @@ const CourseCard = ({
   const { isAuthenticated } = useAuthContext();
   const { addViewedCourse } = usePersonalization();
 
-  const handleCourseClick = () => {
+  const handleCourseClick = (course: any) => {
     if (isAuthenticated) {
-      addViewedCourse(course._id);
+      addViewedCourse(course.id);
     }
-    navigate(`/course/${course._id}`);
+    navigate(`/course/${course.id}`);
   };
 
   if (viewMode === "list") {
@@ -705,7 +705,7 @@ const Courses: React.FC = () => {
             >
               {courses.map((course, index) => (
                 <motion.div
-                  key={course._id}
+                  key={course.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}

@@ -31,7 +31,7 @@ import type {
   CoursesResponse,
   CourseResponse,
   CourseListResponse,
-} from "../services/course.service";
+} from "../types/course.type";
 
 // Query keys for consistent cache management
 export const courseQueryKeys = {
@@ -291,14 +291,12 @@ export const useCreateCourse = (
   return useMutation({
     mutationFn: createCourse,
     onSuccess: (data) => {
-      // Invalidate course lists to refetch
       queryClient.invalidateQueries({ queryKey: courseQueryKeys.lists() });
       queryClient.invalidateQueries({
         queryKey: courseQueryKeys.instructorCourses(),
       });
 
-      // Add the new course to cache
-      queryClient.setQueryData(courseQueryKeys.detail(data.data._id), data);
+      queryClient.setQueryData(courseQueryKeys.detail(data.data.id), data);
     },
     ...options,
   });
@@ -318,13 +316,11 @@ export const useUpdateCourse = (
     mutationFn: ({ courseId, updateData }) =>
       updateCourse(courseId, updateData),
     onSuccess: (data, variables) => {
-      // Update the course in cache
       queryClient.setQueryData(
         courseQueryKeys.detail(variables.courseId),
         data
       );
 
-      // Invalidate related queries
       queryClient.invalidateQueries({ queryKey: courseQueryKeys.lists() });
       queryClient.invalidateQueries({
         queryKey: courseQueryKeys.instructorCourses(),
