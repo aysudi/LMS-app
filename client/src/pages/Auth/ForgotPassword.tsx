@@ -11,13 +11,13 @@ import {
   FaShieldAlt,
   FaClock,
   FaLockOpen,
-  FaSpinner,
   FaExclamationTriangle,
 } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { useForgotPassword } from "../../hooks/useAuth";
 import { forgotPasswordValidationSchema } from "../../validations/authValidation";
 import { getErrorMessage } from "../../utils/errorUtils";
+import Loading from "../../components/Common/Loading";
 
 type ForgotPasswordStatus = "idle" | "loading" | "success" | "error";
 
@@ -76,7 +76,7 @@ const ForgotPassword = () => {
       case "loading":
         return (
           <>
-            <FaSpinner className="animate-spin text-sm" />
+            <Loading variant="default" size="sm" message="" />
             <span>Sending...</span>
           </>
         );

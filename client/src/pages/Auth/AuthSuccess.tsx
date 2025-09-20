@@ -3,11 +3,11 @@ import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   FaCheckCircle,
-  FaSpinner,
   FaExclamationTriangle,
-  FaHome,
   FaUser,
+  FaHome,
 } from "react-icons/fa";
+import Loading from "../../components/Common/Loading";
 import { useAuthContext } from "../../context/AuthContext";
 import { useSnackbar } from "notistack";
 import { setAuthToken } from "../../utils/auth-storage";
@@ -110,7 +110,11 @@ const AuthSuccess = () => {
             >
               <div className="flex justify-center mb-6">
                 <div className="bg-blue-100 p-4 rounded-full">
-                  <FaSpinner className="text-4xl text-blue-500 animate-spin" />
+                  <Loading
+                    variant="default"
+                    size="lg"
+                    message="Completing authentication..."
+                  />
                 </div>
               </div>
               <h1 className="text-2xl font-bold text-gray-800 mb-4">
@@ -179,7 +183,7 @@ const AuthSuccess = () => {
                 className="flex justify-center"
               >
                 <div className="flex items-center space-x-2 text-sm text-gray-500">
-                  <FaSpinner className="animate-spin" />
+                  <Loading variant="default" size="sm" message="" />
                   <span>Redirecting...</span>
                 </div>
               </motion.div>

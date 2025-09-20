@@ -18,8 +18,8 @@ import {
   FaBook,
   FaGraduationCap,
   FaCheckCircle,
-  FaSpinner,
 } from "react-icons/fa";
+import Loading from "../../components/Common/Loading";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -420,7 +420,7 @@ const Contact = () => {
                   >
                     {isSubmitting ? (
                       <>
-                        <FaSpinner className="animate-spin" />
+                        <Loading variant="default" size="sm" message="" />
                         <span>Sending...</span>
                       </>
                     ) : (

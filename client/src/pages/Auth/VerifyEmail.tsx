@@ -9,7 +9,6 @@ import { useSnackbar } from "notistack";
 import {
   FaCheckCircle,
   FaExclamationTriangle,
-  FaSpinner,
   FaGraduationCap,
   FaEnvelope,
   FaRedo,
@@ -21,6 +20,7 @@ import {
   useResendVerificationEmail,
 } from "../../hooks/useAuth";
 import { getErrorMessage } from "../../utils/errorUtils";
+import Loading from "../../components/Common/Loading";
 
 type VerificationStatus =
   | "loading"
@@ -143,7 +143,9 @@ const VerifyEmail = () => {
   const getStatusIcon = () => {
     switch (verificationStatus) {
       case "loading":
-        return <FaSpinner className="animate-spin text-4xl text-blue-500" />;
+        return (
+          <Loading variant="default" size="lg" message="Verifying email..." />
+        );
       case "success":
         return <FaCheckCircle className="text-4xl text-green-500" />;
       case "awaiting-verification":
@@ -366,7 +368,11 @@ const VerifyEmail = () => {
                             >
                               {resendVerificationMutation.isPending ? (
                                 <>
-                                  <FaSpinner className="animate-spin text-sm" />
+                                  <Loading
+                                    variant="default"
+                                    size="sm"
+                                    message=""
+                                  />
                                   <span>Sending...</span>
                                 </>
                               ) : (

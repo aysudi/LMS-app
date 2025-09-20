@@ -8,7 +8,6 @@ import {
   FaEyeSlash,
   FaGraduationCap,
   FaCheckCircle,
-  FaSpinner,
   FaExclamationTriangle,
   FaShieldAlt,
   FaArrowRight,
@@ -19,6 +18,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useResetPassword } from "../../hooks/useAuth";
 import { resetPasswordValidationSchema } from "../../validations/authValidation";
 import { getErrorMessage } from "../../utils/errorUtils";
+import Loading from "../../components/Common/Loading";
 
 type ResetPasswordStatus =
   | "idle"
@@ -128,7 +128,7 @@ const ResetPassword = () => {
       case "loading":
         return (
           <>
-            <FaSpinner className="animate-spin text-sm" />
+            <Loading variant="default" size="sm" message="" />
             <span>Resetting Password...</span>
           </>
         );
