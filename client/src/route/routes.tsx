@@ -56,7 +56,7 @@ const ROUTES = [
         element: <Courses />,
       },
       {
-        path: "courses/:courseId",
+        path: "course/:courseId",
         element: <CourseDetails />,
       },
       {
