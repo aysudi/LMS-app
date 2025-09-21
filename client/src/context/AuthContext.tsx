@@ -90,8 +90,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     enabled: hasToken,
     retry: (failureCount, error: any) => {
       if (error?.response?.status === 401) {
-        // Only remove token if this is a confirmed unauthorized error
-        // and not just a timing issue on initial load
         setTimeout(() => {
           const currentToken = getAuthToken();
           if (currentToken && hasToken) {
@@ -122,6 +120,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const user = userData || null;
+  console.log("user: ", user);
   const isAuthenticated = hasToken && user !== null;
 
   useEffect(() => {

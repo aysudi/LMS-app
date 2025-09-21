@@ -70,6 +70,7 @@ export interface UserProfileDto {
   firstName: string;
   lastName: string;
   email: string;
+  username: string;
   avatar?: string;
   avatarOrInitials: string;
   initials: string;

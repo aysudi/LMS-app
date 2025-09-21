@@ -51,6 +51,7 @@ export const createUserProfile = (user: any): UserProfileDto => {
     firstName: user.firstName,
     lastName: user.lastName,
     email: user.email,
+    username: user.username,
     avatar: user.avatar,
     avatarOrInitials,
     initials,
