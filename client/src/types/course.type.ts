@@ -25,7 +25,7 @@ export interface Course {
   tags: string[];
   level: "Beginner" | "Intermediate" | "Advanced";
   language: string;
-  sections: any[];
+  sections: Section[];
   learningObjectives: string[];
   requirements: string[];
   targetAudience: string[];
@@ -50,6 +50,42 @@ export interface Course {
     lastAccessedLesson?: string;
     enrollmentDate: string;
   }[];
+}
+
+export interface Lesson {
+  id: string;
+  title: string;
+  description?: string;
+  videoUrl: string;
+  duration: number; // in seconds
+  order: number;
+  isPreview: boolean;
+  course: string;
+  section: string;
+  resources: {
+    name: string;
+    url: string;
+    type: "pdf" | "zip" | "doc" | "other";
+  }[];
+  quiz: {
+    question: string;
+    options: string[];
+    correctAnswer: number;
+  }[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Section {
+  id: string;
+  title: string;
+  description?: string;
+  order: number;
+  course: string;
+  lessons: Lesson[];
+  lessonCount: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CourseQuery {

@@ -140,7 +140,7 @@ const CourseCard = ({ course, index }: { course: any; index: number }) => {
             onClick={() => {
               navigate(`/course/${course.id}`);
             }}
-            className="w-full py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] flex items-center justify-center space-x-2"
+            className="w-full py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] flex items-center justify-center space-x-2 cursor-pointer"
           >
             <span className="text-sm">Enroll Now</span>
             <FaArrowRight className="text-sm" />
