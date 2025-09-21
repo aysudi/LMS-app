@@ -427,9 +427,9 @@ export const getUserById = async (userId: string): Promise<UserProfileDto> => {
     throw new Error("Invalid user ID");
   }
 
-  const user = await User.findOne({ _id: userId, isActive: true })
-    .select("-password -emailVerificationToken -passwordResetToken")
-    .lean();
+  const user = await User.findOne({ _id: userId, isActive: true }).select(
+    "-password -emailVerificationToken -passwordResetToken"
+  );
 
   if (!user) {
     throw new Error("User not found");
