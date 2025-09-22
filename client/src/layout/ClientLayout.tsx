@@ -3,6 +3,7 @@ import Header from "../components/Client/Header";
 import HeaderSkeleton from "../components/UI/HeaderSkeleton";
 import { useAuthContext } from "../context/AuthContext";
 import Footer from "../components/Client/Footer";
+import ScrollToTop from "../components/Common/ScrollToTop";
 
 const ClientLayout = () => {
   const { isLoading } = useAuthContext();
@@ -10,6 +11,7 @@ const ClientLayout = () => {
   if (isLoading) {
     return (
       <>
+        <ScrollToTop />
         <HeaderSkeleton />
         <div className="pt-16 lg:pt-20">
           <Outlet />
@@ -20,6 +22,7 @@ const ClientLayout = () => {
 
   return (
     <>
+      <ScrollToTop />
       <Header />
       <div className="pt-16 lg:pt-20">
         <Outlet />

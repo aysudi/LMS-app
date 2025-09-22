@@ -111,12 +111,12 @@ const CoursePreviewCard: React.FC<{
 
         {/* Action Buttons */}
         <div className="space-y-3 mb-6">
-          <button className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold text-center rounded transition-colors duration-200">
+          <button className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold text-center rounded transition-colors duration-200 cursor-pointer">
             {course.isFree ? "Enroll for Free" : "Add to Cart"}
           </button>
 
           {!course.isFree && (
-            <button className="w-full py-3 border border-gray-800 hover:bg-gray-50 text-gray-900 font-bold text-center rounded transition-colors duration-200">
+            <button className="w-full py-3 border border-gray-800 hover:bg-gray-50 text-gray-900 font-bold text-center rounded transition-colors duration-200 cursor-pointer">
               Buy Now
             </button>
           )}
@@ -247,11 +247,13 @@ const CourseDetails = () => {
   const course = courseResponse.data;
 
   const toggleSection = (sectionId: string) => {
-    setExpandedSections((prev) =>
-      prev.includes(sectionId)
+    setExpandedSections((prev) => {
+      const newExpanded = prev.includes(sectionId)
         ? prev.filter((id) => id !== sectionId)
-        : [...prev, sectionId]
-    );
+        : [...prev, sectionId];
+
+      return newExpanded;
+    });
   };
 
   const formatDuration = (seconds: number): string => {
@@ -297,7 +299,7 @@ const CourseDetails = () => {
             <nav className="flex items-center space-x-2 text-sm text-purple-200 mb-4">
               <button
                 onClick={() => navigate("/courses")}
-                className="hover:text-white transition-colors"
+                className="hover:text-white transition-colors cursor-pointer"
               >
                 Courses
               </button>
@@ -420,7 +422,7 @@ const CourseDetails = () => {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id as any)}
-                      className={`py-4 px-6 border-b-2 font-medium text-sm transition-colors ${
+                      className={`py-4 px-6 border-b-2 font-medium text-sm transition-colors cursor-pointer ${
                         activeTab === tab.id
                           ? "border-purple-600 text-purple-600"
                           : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
@@ -625,80 +627,90 @@ const CourseCurriculum: React.FC<{
 
       {/* Sections */}
       <div className="border border-gray-200 rounded-lg overflow-hidden">
-        {course.sections.map((section, sectionIndex) => (
-          <div
-            key={section.id}
-            className="border-b border-gray-200 last:border-b-0"
-          >
-            {/* Section Header */}
-            <button
-              onClick={() => toggleSection(section.id)}
-              className="w-full px-6 py-5 text-left hover:bg-gray-50 transition-colors flex items-center justify-between group"
+        {course.sections.map((section, sectionIndex) => {
+          const sectionKey = section.id || `section-${sectionIndex}`;
+
+          return (
+            <div
+              key={sectionKey}
+              className="border-b border-gray-200 last:border-b-0 "
             >
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-3 mb-1">
-                  <span className="text-sm font-medium text-gray-500">
-                    Section {sectionIndex + 1}:
-                  </span>
-                  <span className="font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">
-                    {section.title}
-                  </span>
+              {/* Section Header */}
+              <button
+                onClick={() => {
+                  toggleSection(sectionKey);
+                }}
+                className="w-full px-6 py-5 text-left hover:bg-gray-50 transition-colors flex items-center justify-between group"
+              >
+                <div className="flex-1 min-w-0 cursor-pointer">
+                  <div className="flex items-center gap-3 mb-1">
+                    <span className="text-sm font-medium text-gray-500">
+                      Section {sectionIndex + 1}:
+                    </span>
+                    <span className="font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">
+                      {section.title}
+                    </span>
+                  </div>
+                  {section.description && (
+                    <p className="text-sm text-gray-600 mt-1 leading-relaxed">
+                      {section.description}
+                    </p>
+                  )}
                 </div>
-                {section.description && (
-                  <p className="text-sm text-gray-600 mt-1 leading-relaxed">
-                    {section.description}
-                  </p>
-                )}
-              </div>
-              <div className="flex items-center gap-4 ml-4">
-                <div className="text-right text-sm text-gray-500">
-                  <div>{section.lessons.length} lectures</div>
-                  <div className="font-medium">
-                    {formatDuration(
-                      section.lessons.reduce(
-                        (acc, lesson) => acc + lesson.duration,
-                        0
-                      )
+                <div className="flex items-center gap-4 ml-4">
+                  <div className="text-right text-sm text-gray-500">
+                    <div>{section.lessons.length} lectures</div>
+                    <div className="font-medium">
+                      {formatDuration(
+                        section.lessons.reduce(
+                          (acc, lesson) => acc + lesson.duration,
+                          0
+                        )
+                      )}
+                    </div>
+                  </div>
+                  <div className="transition-transform duration-200 group-hover:scale-110">
+                    {expandedSections.includes(sectionKey) ? (
+                      <FaChevronUp className="text-gray-400" />
+                    ) : (
+                      <FaChevronDown className="text-gray-400" />
                     )}
                   </div>
                 </div>
-                <div className="transition-transform duration-200 group-hover:scale-110">
-                  {expandedSections.includes(section.id) ? (
-                    <FaChevronUp className="text-gray-400" />
-                  ) : (
-                    <FaChevronDown className="text-gray-400" />
-                  )}
-                </div>
-              </div>
-            </button>
+              </button>
 
-            {/* Section Content */}
-            <AnimatePresence>
-              {expandedSections.includes(section.id) && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="overflow-hidden"
-                >
-                  <div className="bg-gray-50 px-6 py-4">
-                    <div className="space-y-2">
-                      {section.lessons.map((lesson, lessonIndex) => (
-                        <LessonItem
-                          key={lesson.id}
-                          lesson={lesson}
-                          lessonIndex={lessonIndex}
-                          formatDuration={formatDuration}
-                        />
-                      ))}
+              {/* Section Content */}
+              <AnimatePresence initial={false}>
+                {expandedSections.includes(sectionKey) && (
+                  <motion.div
+                    key={`content-${sectionKey}`}
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="overflow-hidden"
+                  >
+                    <div className="bg-gray-50 px-6 py-4">
+                      <div className="space-y-2">
+                        {section.lessons.map((lesson, lessonIndex) => (
+                          <LessonItem
+                            key={
+                              lesson.id ||
+                              `lesson-${sectionIndex}-${lessonIndex}`
+                            }
+                            lesson={lesson}
+                            lessonIndex={lessonIndex}
+                            formatDuration={formatDuration}
+                          />
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -875,7 +887,7 @@ const CourseReviews: React.FC<{
             <p className="text-gray-500 mb-6">
               Be the first to review this course and help other students!
             </p>
-            <button className="px-6 py-3 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-colors">
+            <button className="px-6 py-3 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-colors cursor-pointer">
               Write a Review
             </button>
           </div>

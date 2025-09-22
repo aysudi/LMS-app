@@ -232,7 +232,6 @@ const Header: React.FC = () => {
   };
 
   const getSuggestionIcon = (suggestion: SearchSuggestion) => {
-    // Check if this is a recent search suggestion
     if (suggestion.id.startsWith("recent-")) {
       return <FaClock className="text-orange-500" />;
     }
@@ -308,7 +307,8 @@ const Header: React.FC = () => {
       if (urlSearchQuery !== searchQuery && !isSearchFocused) {
         setSearchQuery(urlSearchQuery);
       }
-    } else if (location.pathname === "/" && !isSearchFocused) {
+    } else if (!isSearchFocused) {
+      // Clear search query when navigating to any page other than courses
       setSearchQuery("");
     }
   }, [location.pathname, searchParams]);
