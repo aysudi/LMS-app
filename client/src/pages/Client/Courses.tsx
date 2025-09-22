@@ -42,7 +42,7 @@ const CourseCard = ({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-200 hover:border-gray-300 cursor-pointer group"
-        onClick={handleCourseClick}
+        onClick={() => handleCourseClick(course)}
       >
         <div className="flex">
           <div className="relative w-64 h-40 flex-shrink-0">
@@ -134,7 +134,7 @@ const CourseCard = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       className="group relative bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-gray-200 transform hover:-translate-y-2 cursor-pointer"
-      onClick={handleCourseClick}
+      onClick={() => handleCourseClick(course)}
     >
       <div className="relative h-56 overflow-hidden">
         <img
