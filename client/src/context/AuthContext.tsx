@@ -120,7 +120,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const user = userData || null;
-  console.log("user: ", user);
   const isAuthenticated = hasToken && user !== null;
 
   useEffect(() => {
