@@ -15,6 +15,7 @@ import googleRouter from "./routes/googleRoutes.js";
 import githubRouter from "./routes/githubRoutes.js";
 import personalizationRouter from "./routes/personalization.js";
 import searchRouter from "./routes/searchRoutes.js";
+import wishlistRouter from "./routes/wishlistRoutes.js";
 
 const app = express();
 
@@ -60,6 +61,7 @@ app.use("/api/sections", sectionRouter);
 app.use("/api/lessons", lessonRouter);
 app.use("/api/personalization", personalizationRouter);
 app.use("/api/search", searchRouter);
+app.use("/api/wishlist", wishlistRouter);
 
 // 404 handler
 app.use(notFoundHandler);

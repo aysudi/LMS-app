@@ -13,6 +13,7 @@ import {
 } from "../services/userService";
 import bcrypt from "bcrypt";
 import { uploadToCloudinary } from "../middlewares/upload.middleware";
+import formatMongoData from "../utils/formatMongoData";
 
 export const getCurrentUserController = async (
   req: any,
@@ -32,7 +33,7 @@ export const getCurrentUserController = async (
     res.status(200).json({
       success: true,
       message: "Current user retrieved successfully",
-      data: { user },
+      data: formatMongoData(user),
     });
   } catch (error: any) {
     console.error("Get current user error:", error);
@@ -40,6 +41,101 @@ export const getCurrentUserController = async (
     res.status(statusCode).json({
       success: false,
       message: error.message || "Failed to retrieve current user",
+    });
+  }
+};
+
+export const getAllUsersController = async (
+  req: any,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const queryParams = req.validatedQuery || req.query;
+
+    const page = parseInt(queryParams.page as string) || 1;
+    const limit = parseInt(queryParams.limit as string) || 10;
+    const role = queryParams.role as string;
+    const search = queryParams.search as string;
+
+    const result = await getAllUsers(page, limit, role, search);
+
+    res.status(200).json({
+      success: true,
+      message: "Users retrieved successfully",
+      data: formatMongoData(result.users),
+    });
+  } catch (error: any) {
+    console.error("Get all users error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to retrieve users",
+    });
+  }
+};
+
+export const getUserByIdController = async (
+  req: any,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const params = req.validatedParams || req.params;
+    const { userId } = params;
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "User ID is required",
+      });
+    }
+
+    const user = await getUserById(userId);
+
+    res.status(200).json({
+      success: true,
+      message: "User retrieved successfully",
+      data: formatMongoData(user),
+    });
+  } catch (error: any) {
+    console.error("Get user by ID error:", error);
+    const statusCode = error.message === "User not found" ? 404 : 400;
+    res.status(statusCode).json({
+      success: false,
+      message: error.message || "Failed to retrieve user",
+    });
+  }
+};
+
+export const getUserByUsernameController = async (
+  req: any,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const params = req.validatedParams || req.params;
+    const { username } = params;
+
+    if (!username) {
+      return res.status(400).json({
+        success: false,
+        message: "Username is required",
+      });
+    }
+
+    const user = await getUserByUsername(username);
+
+    res.status(200).json({
+      success: true,
+      message: "User retrieved successfully",
+      data: formatMongoData(user),
+    });
+  } catch (error: any) {
+    console.error("Get user by username error:", error);
+    const statusCode = error.message === "User not found" ? 404 : 400;
+    res.status(statusCode).json({
+      success: false,
+      message: error.message || "Failed to retrieve user",
     });
   }
 };
@@ -143,7 +239,6 @@ export const verifyEmailController = async (
 
     const result = await verifyEmail(token);
 
-    // Don't automatically log in user - they should manually log in after verification
     res.status(200).json({
       success: true,
       message:
@@ -245,101 +340,6 @@ export const resetPasswordController = async (
     res.status(400).json({
       success: false,
       message: error.message || "Password reset failed",
-    });
-  }
-};
-
-export const getAllUsersController = async (
-  req: any,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const queryParams = req.validatedQuery || req.query;
-
-    const page = parseInt(queryParams.page as string) || 1;
-    const limit = parseInt(queryParams.limit as string) || 10;
-    const role = queryParams.role as string;
-    const search = queryParams.search as string;
-
-    const result = await getAllUsers(page, limit, role, search);
-
-    res.status(200).json({
-      success: true,
-      message: "Users retrieved successfully",
-      data: result,
-    });
-  } catch (error: any) {
-    console.error("Get all users error:", error);
-    res.status(500).json({
-      success: false,
-      message: error.message || "Failed to retrieve users",
-    });
-  }
-};
-
-export const getUserByIdController = async (
-  req: any,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const params = req.validatedParams || req.params;
-    const { userId } = params;
-
-    if (!userId) {
-      return res.status(400).json({
-        success: false,
-        message: "User ID is required",
-      });
-    }
-
-    const user = await getUserById(userId);
-
-    res.status(200).json({
-      success: true,
-      message: "User retrieved successfully",
-      data: { user },
-    });
-  } catch (error: any) {
-    console.error("Get user by ID error:", error);
-    const statusCode = error.message === "User not found" ? 404 : 400;
-    res.status(statusCode).json({
-      success: false,
-      message: error.message || "Failed to retrieve user",
-    });
-  }
-};
-
-export const getUserByUsernameController = async (
-  req: any,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const params = req.validatedParams || req.params;
-    const { username } = params;
-
-    if (!username) {
-      return res.status(400).json({
-        success: false,
-        message: "Username is required",
-      });
-    }
-
-    const user = await getUserByUsername(username);
-
-    res.status(200).json({
-      success: true,
-      message: "User retrieved successfully",
-      data: { user },
-    });
-  } catch (error: any) {
-    console.error("Get user by username error:", error);
-    const statusCode = error.message === "User not found" ? 404 : 400;
-    res.status(statusCode).json({
-      success: false,
-      message: error.message || "Failed to retrieve user",
     });
   }
 };
