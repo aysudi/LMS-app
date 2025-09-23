@@ -33,42 +33,12 @@ import {
   getCurrentUser,
   type User as BaseUser,
 } from "../../services/user.service";
+import profileValidationSchema from "../../validations/profileValidation";
+import Loading from "../../components/Common/Loading";
 
-// Extended User interface for profile page
 interface User extends BaseUser {
   bio?: string;
 }
-
-// Validation schema for edit profile form
-const profileValidationSchema = Yup.object({
-  firstName: Yup.string()
-    .min(2, "First name must be at least 2 characters")
-    .max(50, "First name cannot exceed 50 characters")
-    .required("First name is required"),
-  lastName: Yup.string()
-    .min(2, "Last name must be at least 2 characters")
-    .max(50, "Last name cannot exceed 50 characters")
-    .required("Last name is required"),
-  username: Yup.string()
-    .min(3, "Username must be at least 3 characters")
-    .max(30, "Username cannot exceed 30 characters")
-    .matches(
-      /^[a-zA-Z0-9_]+$/,
-      "Username can only contain letters, numbers, and underscores"
-    )
-    .required("Username is required"),
-  email: Yup.string()
-    .email("Please enter a valid email")
-    .required("Email is required"),
-  bio: Yup.string().max(500, "Bio cannot exceed 500 characters"),
-  skills: Yup.array().of(Yup.string()),
-  socialLinks: Yup.object({
-    website: Yup.string().url("Please enter a valid URL"),
-    linkedin: Yup.string().url("Please enter a valid LinkedIn URL"),
-    github: Yup.string().url("Please enter a valid GitHub URL"),
-    twitter: Yup.string().url("Please enter a valid Twitter URL"),
-  }),
-});
 
 interface EditProfileFormData {
   firstName: string;
@@ -118,7 +88,6 @@ const Profile = () => {
     },
   });
 
-  // Fetch user data
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -137,7 +106,6 @@ const Profile = () => {
     fetchUserData();
   }, [currentUser, enqueueSnackbar]);
 
-  // Formik form for editing profile
   const editProfileFormik = useFormik<EditProfileFormData>({
     initialValues: {
       firstName: user?.firstName || "",
@@ -202,7 +170,6 @@ const Profile = () => {
     );
   };
 
-  // Enhanced password strength evaluation
   const evaluatePasswordStrength = (password: string) => {
     const checks = {
       length: password.length >= 8,
@@ -218,7 +185,6 @@ const Profile = () => {
     return { score, checks };
   };
 
-  // Password change functionality
   const validatePasswordForm = () => {
     const errors = {
       currentPassword: "",
@@ -272,13 +238,11 @@ const Profile = () => {
       [field]: value,
     }));
 
-    // Clear error for this field
     setPasswordErrors((prev) => ({
       ...prev,
       [field]: "",
     }));
 
-    // Evaluate password strength for new password
     if (field === "newPassword") {
       evaluatePasswordStrength(value);
     }
@@ -307,14 +271,7 @@ const Profile = () => {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-blue-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-violet-200 border-t-violet-600 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 text-lg">Loading your profile...</p>
-        </div>
-      </div>
-    );
+    return <Loading />;
   }
 
   if (!user) {
