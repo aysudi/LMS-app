@@ -19,6 +19,7 @@ export interface User {
     twitter?: string;
     website?: string;
   };
+  wishlist?: string[];
   createdAt: string;
 }
 

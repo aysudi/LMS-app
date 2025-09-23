@@ -78,6 +78,7 @@ export interface UserProfileDto {
   role: UserRole;
   bio?: string;
   skills: string[];
+  wishlist: string[];
   socialLinks: {
     website?: string;
     linkedin?: string;

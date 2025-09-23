@@ -27,6 +27,99 @@ import {
 const MAX_ATTEMPTS = 5;
 const LOCK_TIME = 15 * 60 * 1000;
 
+export const getAllUsers = async (
+  page: number = 1,
+  limit: number = 10,
+  role?: string,
+  search?: string
+): Promise<{
+  users: UserProfileDto[];
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalUsers: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
+}> => {
+  const skip = (page - 1) * limit;
+  const query: any = { isActive: true };
+
+  if (role) {
+    query.role = role;
+  }
+
+  if (search) {
+    query.$or = [
+      { firstName: { $regex: search, $options: "i" } },
+      { lastName: { $regex: search, $options: "i" } },
+      { email: { $regex: search, $options: "i" } },
+      { username: { $regex: search, $options: "i" } },
+    ];
+  }
+
+  const [users, totalUsers] = await Promise.all([
+    User.find(query)
+      .select("-password -emailVerificationToken -passwordResetToken")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+    User.countDocuments(query).populate(
+      "wishlist",
+      "title description category"
+    ),
+  ]);
+
+  const totalPages = Math.ceil(totalUsers / limit);
+
+  const userProfiles = users.map((user) => createUserProfile(user));
+
+  return {
+    users: userProfiles.map((user) => formatMongoData(user)),
+    pagination: {
+      currentPage: page,
+      totalPages,
+      totalUsers,
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1,
+    },
+  };
+};
+
+export const getUserById = async (userId: string): Promise<UserProfileDto> => {
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    throw new Error("Invalid user ID");
+  }
+
+  const user = await User.findOne({ _id: userId, isActive: true })
+    .select("-password -emailVerificationToken -passwordResetToken")
+    .populate("wishlist", "title description category");
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const userProfile = createUserProfile(user);
+  return formatMongoData(userProfile);
+};
+
+export const getUserByUsername = async (
+  username: string
+): Promise<UserProfileDto> => {
+  const user = await User.findOne({ username, isActive: true })
+    .select("-password -emailVerificationToken -passwordResetToken")
+    .populate("wishlist", "title description category")
+    .lean();
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const userProfile = createUserProfile(user);
+  return formatMongoData(userProfile);
+};
+
 const checkAndUnlockAccount = async (user: any): Promise<void> => {
   if (user.lockUntil && user.lockUntil <= new Date()) {
     await User.findByIdAndUpdate(user._id, {
@@ -282,7 +375,6 @@ export const getUserAccountStatus = async (email: string) => {
   };
 };
 
-// Forgot password function
 export const forgotPassword = async (
   email: string
 ): Promise<{ message: string }> => {
@@ -331,7 +423,6 @@ export const forgotPassword = async (
   };
 };
 
-// Reset password function
 export const resetPassword = async (
   token: string,
   newPassword: string
@@ -363,95 +454,6 @@ export const resetPassword = async (
     message:
       "Password reset successful! You can now login with your new password.",
   };
-};
-
-export const getAllUsers = async (
-  page: number = 1,
-  limit: number = 10,
-  role?: string,
-  search?: string
-): Promise<{
-  users: UserProfileDto[];
-  pagination: {
-    currentPage: number;
-    totalPages: number;
-    totalUsers: number;
-    hasNextPage: boolean;
-    hasPreviousPage: boolean;
-  };
-}> => {
-  const skip = (page - 1) * limit;
-  const query: any = { isActive: true };
-
-  if (role) {
-    query.role = role;
-  }
-
-  if (search) {
-    query.$or = [
-      { firstName: { $regex: search, $options: "i" } },
-      { lastName: { $regex: search, $options: "i" } },
-      { email: { $regex: search, $options: "i" } },
-      { username: { $regex: search, $options: "i" } },
-    ];
-  }
-
-  const [users, totalUsers] = await Promise.all([
-    User.find(query)
-      .select("-password -emailVerificationToken -passwordResetToken")
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean(),
-    User.countDocuments(query),
-  ]);
-
-  const totalPages = Math.ceil(totalUsers / limit);
-
-  const userProfiles = users.map((user) => createUserProfile(user));
-
-  return {
-    users: userProfiles.map((user) => formatMongoData(user)),
-    pagination: {
-      currentPage: page,
-      totalPages,
-      totalUsers,
-      hasNextPage: page < totalPages,
-      hasPreviousPage: page > 1,
-    },
-  };
-};
-
-export const getUserById = async (userId: string): Promise<UserProfileDto> => {
-  if (!mongoose.Types.ObjectId.isValid(userId)) {
-    throw new Error("Invalid user ID");
-  }
-
-  const user = await User.findOne({ _id: userId, isActive: true }).select(
-    "-password -emailVerificationToken -passwordResetToken"
-  );
-
-  if (!user) {
-    throw new Error("User not found");
-  }
-
-  const userProfile = createUserProfile(user);
-  return formatMongoData(userProfile);
-};
-
-export const getUserByUsername = async (
-  username: string
-): Promise<UserProfileDto> => {
-  const user = await User.findOne({ username, isActive: true })
-    .select("-password -emailVerificationToken -passwordResetToken")
-    .lean();
-
-  if (!user) {
-    throw new Error("User not found");
-  }
-
-  const userProfile = createUserProfile(user);
-  return formatMongoData(userProfile);
 };
 
 export const refreshAccessToken = async (
