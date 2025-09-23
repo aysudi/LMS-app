@@ -36,7 +36,6 @@ const Login = () => {
   const { refetchUser } = useAuthContext();
   const loginMutation = useLogin();
 
-  // Show success message if coming from email verification
   useEffect(() => {
     const { fromVerification, message } = location.state || {};
     if (fromVerification && message) {
@@ -48,7 +47,6 @@ const Login = () => {
           horizontal: "right",
         },
       });
-      // Clear the state to prevent showing message on refresh
       navigate("/auth/login", { replace: true });
     }
   }, [location.state, enqueueSnackbar, navigate]);
@@ -65,10 +63,8 @@ const Login = () => {
 
         const result = await loginMutation.mutateAsync(values);
 
-        // Wait a bit for the authentication context to update
         await new Promise((resolve) => setTimeout(resolve, 300));
 
-        // Trigger user refetch to sync the auth context
         await refetchUser();
 
         setLoginStatus("success");
@@ -96,7 +92,6 @@ const Login = () => {
           );
         }
 
-        // Navigate after ensuring auth state is properly set
         setTimeout(() => {
           navigate("/", { replace: true });
         }, 1000);

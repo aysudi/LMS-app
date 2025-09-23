@@ -22,3 +22,18 @@ export interface ResetPasswordFormValues {
   newPassword: string;
   confirmPassword: string;
 }
+
+export interface EditProfileFormData {
+  firstName: string;
+  lastName: string;
+  username: string;
+  email: string;
+  bio: string;
+  skills: string[];
+  socialLinks: {
+    website: string;
+    linkedin: string;
+    github: string;
+    twitter: string;
+  };
+}

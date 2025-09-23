@@ -50,7 +50,6 @@ const VerifyEmail = () => {
     const { email, fromRegistration } = location.state || {};
 
     if (!token) {
-      // If coming from registration, show instructions instead of error
       if (fromRegistration) {
         setVerificationStatus("awaiting-verification");
         setMessage(

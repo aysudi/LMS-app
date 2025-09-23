@@ -94,7 +94,6 @@ const ResetPassword = () => {
     },
   });
 
-  // Calculate password strength
   useEffect(() => {
     const password = formik.values.password;
     let strength = 0;
