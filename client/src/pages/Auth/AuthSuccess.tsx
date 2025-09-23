@@ -29,16 +29,12 @@ const AuthSuccess = () => {
           throw new Error("No access token received");
         }
 
-        // Set token first
         setAuthToken(accessToken);
 
-        // Wait a bit longer for the token to be set properly
         await new Promise((resolve) => setTimeout(resolve, 300));
 
-        // Trigger user refetch
         await refetchUser();
 
-        // Wait a bit more to ensure user data is loaded
         await new Promise((resolve) => setTimeout(resolve, 500));
 
         setStatus("success");

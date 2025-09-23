@@ -2,18 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { useCurrentUser } from "../hooks/useUserQueries";
 import { getAuthToken, removeAuthToken } from "../utils/auth-storage";
-
-interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  username: string;
-  email: string;
-  role: string;
-  isEmailVerified: boolean;
-  avatar?: string;
-  avatarOrInitials: string;
-}
+import type { User } from "../types/user.type";
 
 interface AuthContextType {
   user: User | null;
