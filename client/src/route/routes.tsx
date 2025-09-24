@@ -11,7 +11,7 @@ import Basket from "../pages/Client/Basket";
 import Contact from "../pages/Client/Contact";
 import CourseDetails from "../pages/Client/CourseDetails";
 import Courses from "../pages/Client/Courses";
-import Favorites from "../pages/Client/Favorites";
+import Wishlist from "../pages/Client/Wishlist";
 import Home from "../pages/Client/Home";
 import Profile from "../pages/Client/Profile";
 import PublicRoute from "./PublicRoute";
@@ -36,10 +36,10 @@ const ROUTES = [
         ),
       },
       {
-        path: "favorites",
+        path: "wishlist",
         element: (
           <ProtectedRoute>
-            <Favorites />
+            <Wishlist />
           </ProtectedRoute>
         ),
       },

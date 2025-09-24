@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useAuthContext } from "../context/AuthContext";
+import Loading from "../components/Common/Loading";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -9,7 +10,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { isAuthenticated, isLoading } = useAuthContext();
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <Loading variant="overlay" message="Verifying access..." />;
   }
 
   return isAuthenticated ? (

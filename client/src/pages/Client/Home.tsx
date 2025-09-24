@@ -24,132 +24,8 @@ import {
   useTrendingCourses,
 } from "../../hooks/useCourseQueries";
 import Loading from "../../components/Common/Loading";
-
-const CourseCard = ({ course, index }: { course: any; index: number }) => {
-  const navigate = useNavigate();
-  const { isAuthenticated } = useAuthContext();
-  const { addViewedCourse } = usePersonalization();
-
-  const handleCourseClick = (courseId: string | number) => {
-    if (isAuthenticated) {
-      addViewedCourse(courseId.toString());
-    }
-    navigate(`/course/${courseId}`);
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{
-        duration: 0.5,
-        delay: index * 0.1,
-        ease: [0.25, 0.25, 0, 1],
-      }}
-      className="group relative bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-gray-200 transform hover:-translate-y-1 cursor-pointer"
-      onClick={() => handleCourseClick(course.id)}
-    >
-      {/* Image Container with Enhanced Overlay */}
-      <div className="relative h-40 overflow-hidden">
-        <img
-          src={
-            course.image ||
-            "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&h=200&fit=crop"
-          }
-          alt={course.title}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-        />
-
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-        {/* Course Level Badge */}
-        <div className="absolute top-3 left-3">
-          <span className="px-2 py-1 bg-white/95 backdrop-blur-sm text-gray-800 text-xs font-semibold rounded-full shadow-lg">
-            {course.level}
-          </span>
-        </div>
-
-        {/* Play Button Overlay */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
-
-        {/* Price Badge */}
-        <div className="absolute bottom-3 right-3">
-          <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-3 py-1 rounded-full shadow-lg">
-            <span className="text-sm font-bold">
-              {course.isFree || course.originalPrice === 0
-                ? "FREE"
-                : `$${course.discountPrice || course.originalPrice}`}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Content Section */}
-      <div className="p-4 space-y-3">
-        {/* Category Tag */}
-        <div className="flex items-center justify-between">
-          <span className="inline-flex items-center px-2 py-1 bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-700 text-xs font-semibold rounded-full border border-indigo-100">
-            {course.category}
-          </span>
-        </div>
-
-        {/* Title */}
-        <h3 className="font-bold text-gray-900 text-base leading-tight line-clamp-2 group-hover:text-indigo-600 transition-colors duration-300">
-          {course.title}
-        </h3>
-
-        {/* Instructor */}
-        <div className="flex items-center space-x-2">
-          <div className="w-6 h-6 bg-gradient-to-r from-indigo-400 to-purple-500 rounded-full flex items-center justify-center">
-            <span className="text-white text-xs font-semibold">
-              {course.instructor?.firstName?.charAt(0) || "I"}
-            </span>
-          </div>
-          <p className="text-sm text-gray-600">
-            {course.instructor?.firstName
-              ? `${course.instructor.firstName} ${course.instructor.lastName}`
-              : "Expert Instructor"}
-          </p>
-        </div>
-
-        {/* Stats Row */}
-        <div className="flex items-center justify-between text-sm">
-          <div className="flex items-center space-x-3">
-            <div className="flex items-center space-x-1">
-              <FaStar className="text-yellow-400" />
-              <span className="font-semibold text-gray-700">
-                {course.rating || 0}
-              </span>
-              <span className="text-gray-500 text-xs">
-                ({course.ratingsCount || 0})
-              </span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <FaUsers className="text-indigo-500" />
-              <span className="text-gray-600 text-xs">
-                {Number(course.enrollmentCount || 0).toLocaleString()}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Action Button */}
-        <div className="pt-1">
-          <button
-            onClick={() => {
-              navigate(`/course/${course.id}`);
-            }}
-            className="w-full py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] flex items-center justify-center space-x-2 cursor-pointer"
-          >
-            <span className="text-sm">Enroll Now</span>
-            <FaArrowRight className="text-sm" />
-          </button>
-        </div>
-      </div>
-    </motion.div>
-  );
-};
+import CourseCard from "../../components/Common/CourseCard";
+import type { Course } from "../../types/course.type";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -538,7 +414,7 @@ const Home = () => {
                       View All <FaArrowRight className="text-sm" />
                     </motion.button>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {featuredLoading
                       ? // Loading skeleton for recommended courses
                         Array.from({ length: 4 }).map((_, index) => (
@@ -554,7 +430,7 @@ const Home = () => {
                           : featuredCourses
                         )
                           .slice(0, 4)
-                          .map((course, index) => (
+                          .map((course: Course, index: number) => (
                             <CourseCard
                               key={index}
                               course={course}
@@ -584,10 +460,10 @@ const Home = () => {
                       View All <FaArrowRight className="text-sm" />
                     </button>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {freeLoading
                       ? // Loading skeleton for free courses
-                        Array.from({ length: 3 }).map((_, index) => (
+                        Array.from({ length: 4 }).map((_, index) => (
                           <Loading
                             key={index}
                             variant="card"
@@ -599,8 +475,8 @@ const Home = () => {
                           ? recommendations.free
                           : freeCourses
                         )
-                          .slice(0, 3)
-                          .map((course, index) => (
+                          .slice(0, 4)
+                          .map((course: Course, index: number) => (
                             <motion.div
                               key={index}
                               initial={{ opacity: 0, y: 20 }}
@@ -931,7 +807,7 @@ const Home = () => {
                     id: categoryName,
                     name: categoryName,
                     description: `Explore ${categoryName} courses and enhance your skills`,
-                    icon: FaGraduationCap, // Use consistent icon for all dynamic categories
+                    icon: FaGraduationCap,
                     ...colorPalettes[colorIndex],
                   };
                 });
@@ -943,7 +819,6 @@ const Home = () => {
                 .map((category, categoryIndex) => {
                   const courses = getCoursesForCategory(category.id);
 
-                  // Only render the category if it has courses
                   if (courses.length === 0) return null;
 
                   return (
@@ -979,8 +854,8 @@ const Home = () => {
                           View All <FaArrowRight className="text-sm" />
                         </button>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {courses.map((course, index) => (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {courses.map((course: Course, index: number) => (
                           <CourseCard
                             key={`${category.id.toLowerCase()}-${course.id}`}
                             course={course}
