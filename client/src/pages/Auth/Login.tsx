@@ -12,7 +12,6 @@ import {
   FaGraduationCap,
   FaArrowRight,
   FaCheckCircle,
-  FaSpinner,
   FaExclamationTriangle,
   FaHome,
   FaArrowLeft,
@@ -22,6 +21,7 @@ import { useLogin } from "../../hooks/useAuth";
 import { useAuthContext } from "../../context/AuthContext";
 import { getErrorMessage } from "../../utils/errorUtils";
 import loginValidationSchema from "../../validations/loginValidation";
+import Loading from "../../components/Common/Loading";
 
 type LoginStatus = "idle" | "loading" | "success" | "error";
 
@@ -128,8 +128,7 @@ const Login = () => {
       case "loading":
         return (
           <>
-            <FaSpinner className="animate-spin text-sm" />
-            <span>Signing In...</span>
+            <Loading message="Signing In..." />
           </>
         );
       case "success":

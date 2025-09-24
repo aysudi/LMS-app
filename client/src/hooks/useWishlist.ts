@@ -21,15 +21,14 @@ export const useWishlistHelpers = () => {
     error,
   } = useWishlist();
 
-  const getWishlistItems = () => wishlistData?.data.wishlist || [];
+  const getWishlistItems = () => wishlistData?.data || [];
 
-  const getWishlistCount = () => wishlistData?.data.wishlist.length || 0;
+  const getWishlistCount = () => wishlistData?.data.length || 0;
 
   const checkIfInWishlist = (courseId: string) => {
     return (
-      wishlistData?.data.wishlist.some(
-        (course: Course) => course.id === courseId
-      ) || false
+      wishlistData?.data.some((course: Course) => course.id === courseId) ||
+      false
     );
   };
 

@@ -15,9 +15,7 @@ export interface Wishlist {
 export interface WishlistResponse {
   success: boolean;
   message: string;
-  data: {
-    wishlist: Course[];
-  };
+  data: Course[];
 }
 
 export interface WishlistActionResponse {

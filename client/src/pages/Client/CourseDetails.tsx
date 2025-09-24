@@ -26,6 +26,8 @@ import {
   FaTv,
 } from "react-icons/fa";
 import { useCourse } from "../../hooks/useCourseQueries";
+import { useToggleWishlist, useIsInWishlist } from "../../hooks/useWishlist";
+import { useAuthContext } from "../../context/AuthContext";
 import type { Course, Lesson } from "../../types/course.type";
 
 const CoursePreviewCard: React.FC<{
@@ -33,18 +35,20 @@ const CoursePreviewCard: React.FC<{
   calculateDiscountPercentage: () => number;
   formatDuration: (seconds: number) => string;
   isWishlisted: boolean;
-  setIsWishlisted: (value: boolean) => void;
+  onWishlistToggle: () => void;
   setIsVideoModalOpen: (value: boolean) => void;
+  isAuthenticated: boolean;
 }> = ({
   course,
   calculateDiscountPercentage,
   formatDuration,
   isWishlisted,
-  setIsWishlisted,
+  onWishlistToggle,
   setIsVideoModalOpen,
+  isAuthenticated,
 }) => {
   return (
-    <div className="bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
+    <div className="bg-white border border-gray-200 rounded-2xl shadow-lg overflow-hidden">
       {/* Video Preview */}
       <div className="relative aspect-video bg-gray-100">
         {course.image ? (
@@ -57,6 +61,45 @@ const CoursePreviewCard: React.FC<{
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
             <FaBook className="text-4xl text-gray-400" />
           </div>
+        )}
+
+        {/* Wishlist Button - Top Right Overlay (only for authenticated users) */}
+        {isAuthenticated && (
+          <motion.button
+            onClick={onWishlistToggle}
+            className={`absolute top-4 right-4 z-10 p-3 rounded-full backdrop-blur-md border transition-all duration-300 cursor-pointer ${
+              isWishlisted
+                ? "bg-red-50/90 text-red-600 border-red-200 hover:bg-red-100/90"
+                : "bg-white/90 text-gray-600 border-gray-200 hover:bg-red-50/90 hover:text-red-600 hover:border-red-200"
+            }`}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <motion.div
+              animate={isWishlisted ? { scale: [1, 1.2, 1] } : { scale: 1 }}
+              transition={{ duration: 0.3 }}
+              className="relative"
+            >
+              {isWishlisted ? (
+                <FaHeart className="text-red-500 w-5 h-5" />
+              ) : (
+                <FaRegHeart className="w-5 h-5" />
+              )}
+              {/* Subtle pulse animation when wishlisted */}
+              {isWishlisted && (
+                <motion.div
+                  className="absolute inset-0 bg-red-400 rounded-full"
+                  initial={{ scale: 1, opacity: 0.3 }}
+                  animate={{ scale: 1.5, opacity: 0 }}
+                  transition={{
+                    duration: 0.6,
+                    repeat: Infinity,
+                    repeatDelay: 2,
+                  }}
+                />
+              )}
+            </motion.div>
+          </motion.button>
         )}
 
         {/* Play Button Overlay */}
@@ -111,12 +154,12 @@ const CoursePreviewCard: React.FC<{
 
         {/* Action Buttons */}
         <div className="space-y-3 mb-6">
-          <button className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold text-center rounded transition-colors duration-200 cursor-pointer">
+          <button className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold text-center rounded-lg transition-colors duration-200 cursor-pointer">
             {course.isFree ? "Enroll for Free" : "Add to Cart"}
           </button>
 
           {!course.isFree && (
-            <button className="w-full py-3 border border-gray-800 hover:bg-gray-50 text-gray-900 font-bold text-center rounded transition-colors duration-200 cursor-pointer">
+            <button className="w-full py-3 border border-gray-800 hover:bg-gray-50 text-gray-900 font-bold text-center rounded-lg transition-colors duration-200 cursor-pointer">
               Buy Now
             </button>
           )}
@@ -158,19 +201,30 @@ const CoursePreviewCard: React.FC<{
           </div>
         </div>
 
-        {/* Wishlist and Share */}
-        <div className="flex gap-4 pt-6 border-t border-gray-200">
-          <button
-            onClick={() => setIsWishlisted(!isWishlisted)}
-            className="flex items-center gap-2 text-purple-600 hover:text-purple-700 font-medium transition-colors"
+        {/* Share Section */}
+        <div className="flex justify-center pt-6 border-t border-gray-200">
+          {/* Enhanced Share Button */}
+          <motion.button
+            className="group relative flex items-center gap-2 px-6 py-3 rounded-xl font-medium bg-gray-50 text-gray-600 border border-gray-200 hover:bg-purple-50 hover:text-purple-600 hover:border-purple-200 transition-all duration-300 cursor-pointer"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => {
+              navigator.clipboard.writeText(window.location.href);
+            }}
           >
-            {isWishlisted ? <FaHeart /> : <FaRegHeart />}
-            Wishlist
-          </button>
-          <button className="flex items-center gap-2 text-purple-600 hover:text-purple-700 font-medium transition-colors">
-            <FaShare />
-            Share
-          </button>
+            <motion.div
+              whileHover={{ rotate: 15 }}
+              transition={{ duration: 0.2 }}
+            >
+              <FaShare className="group-hover:text-purple-500 transition-colors" />
+            </motion.div>
+            <span className="text-sm">Share Course</span>
+
+            {/* Tooltip */}
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+              Copy link
+            </div>
+          </motion.button>
         </div>
       </div>
     </div>
@@ -222,11 +276,21 @@ const CourseDetails = () => {
   const { courseId } = useParams<{ courseId: string }>();
   const navigate = useNavigate();
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
-  const [isWishlisted, setIsWishlisted] = useState(false);
   const [activeTab, setActiveTab] = useState<
     "overview" | "curriculum" | "instructor" | "reviews"
   >("overview");
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+
+  const { isAuthenticated } = useAuthContext();
+
+  const { isInWishlist } = useIsInWishlist(courseId || "");
+  const { toggleWishlist } = useToggleWishlist();
+
+  const handleWishlistToggle = () => {
+    if (courseId && isAuthenticated) {
+      toggleWishlist(courseId, isInWishlist);
+    }
+  };
 
   const {
     data: courseResponse,
@@ -402,9 +466,10 @@ const CourseDetails = () => {
                 course={course}
                 calculateDiscountPercentage={calculateDiscountPercentage}
                 formatDuration={formatDuration}
-                isWishlisted={isWishlisted}
-                setIsWishlisted={setIsWishlisted}
+                isWishlisted={isInWishlist}
+                onWishlistToggle={handleWishlistToggle}
                 setIsVideoModalOpen={setIsVideoModalOpen}
+                isAuthenticated={isAuthenticated}
               />
             </div>
 
@@ -506,9 +571,10 @@ const CourseDetails = () => {
                 course={course}
                 calculateDiscountPercentage={calculateDiscountPercentage}
                 formatDuration={formatDuration}
-                isWishlisted={isWishlisted}
-                setIsWishlisted={setIsWishlisted}
+                isWishlisted={isInWishlist}
+                onWishlistToggle={handleWishlistToggle}
                 setIsVideoModalOpen={setIsVideoModalOpen}
+                isAuthenticated={isAuthenticated}
               />
             </div>
           </div>

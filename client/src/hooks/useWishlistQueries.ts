@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { UseQueryOptions } from "@tanstack/react-query";
 import { getWishlist } from "../services/wishlist.service";
 import type { WishlistResponse } from "../types/wishlist.type";
+import { useAuthContext } from "../context/AuthContext";
 
 export const wishlistQueryKeys = {
   all: ["wishlist"] as const,
@@ -14,9 +15,12 @@ export const useWishlist = (
     "queryKey" | "queryFn"
   >
 ) => {
+  const { isAuthenticated } = useAuthContext();
+
   return useQuery({
     queryKey: wishlistQueryKeys.list(),
     queryFn: getWishlist,
+    enabled: isAuthenticated, // Only run when user is authenticated
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
     retry: (failureCount, error: any) => {
@@ -31,11 +35,10 @@ export const useIsInWishlist = (courseId: string) => {
   const { data: wishlistData } = useWishlist();
 
   const isInWishlist =
-    wishlistData?.data.wishlist.some((course) => course.id === courseId) ||
-    false;
+    wishlistData?.data?.some((course) => course.id === courseId) || false;
 
   return {
     isInWishlist,
-    wishlistCount: wishlistData?.data.wishlist.length || 0,
+    wishlistCount: wishlistData?.data?.length || 0,
   };
 };

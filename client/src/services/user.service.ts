@@ -9,7 +9,7 @@ import { api } from "./api";
 // Get current user (me)
 export const getCurrentUser = async (): Promise<User> => {
   const response = await api.get("/api/auth/me");
-  return response.data.data.user;
+  return response.data.data;
 };
 
 // Get all users with pagination and filtering
