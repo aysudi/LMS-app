@@ -15,7 +15,7 @@ import type {
   GetUsersResponse,
   GetUserResponse,
   GetUsersParams,
-} from "../services/user.service";
+} from "../types/user.type";
 
 // Query keys for consistent cache management
 export const userQueryKeys = {
@@ -42,6 +42,8 @@ export const useCurrentUser = (
       if (error?.response?.status === 401) return false;
       return failureCount < 3;
     },
+    throwOnError: false, // Prevent throwing errors to the component
+    refetchOnWindowFocus: false, // Don't refetch on window focus
     ...options,
   });
 };
