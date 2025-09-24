@@ -28,6 +28,7 @@ import {
 } from "react-icons/fa";
 import { useAuthContext } from "../../context/AuthContext";
 import { useLogout } from "../../hooks/useAuth";
+import { useWishlistHelpers } from "../../hooks/useWishlist";
 import {
   getSearchSuggestions,
   getSearchHistory,
@@ -43,8 +44,10 @@ const Header: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [notifications] = useState(3);
-  const [favorites] = useState(5);
   const [cartItems] = useState(2);
+
+  // Get real wishlist count
+  const { wishlistCount } = useWishlistHelpers();
 
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
@@ -562,14 +565,14 @@ const Header: React.FC = () => {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={() => navigate("/favorites")}
+                    onClick={() => navigate("/wishlist")}
                     className="relative p-2 text-gray-700 hover:text-red-500 transition-colors duration-200 group cursor-pointer"
-                    title="Favorites"
+                    title="Wishlist"
                   >
                     <FaHeart className="text-lg" />
-                    {favorites > 0 && (
+                    {wishlistCount > 0 && (
                       <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
-                        {favorites > 9 ? "9+" : favorites}
+                        {wishlistCount > 9 ? "9+" : wishlistCount}
                       </span>
                     )}
                   </motion.button>
@@ -802,17 +805,17 @@ const Header: React.FC = () => {
               {isAuthenticated && userDisplayData && (
                 <div className="border-t border-gray-200 pt-4 space-y-2">
                   <Link
-                    to="/favorites"
+                    to="/wishlist"
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="flex items-center justify-between p-3 text-gray-700 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200"
                   >
                     <div className="flex items-center space-x-3">
                       <FaHeart />
-                      <span>Favorites</span>
+                      <span>Wishlist</span>
                     </div>
-                    {favorites > 0 && (
+                    {wishlistCount > 0 && (
                       <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                        {favorites > 9 ? "9+" : favorites}
+                        {wishlistCount > 9 ? "9+" : wishlistCount}
                       </span>
                     )}
                   </Link>
