@@ -6,17 +6,17 @@ import {
   FaUsers,
   FaArrowRight,
   FaGraduationCap,
-  FaCode,
-  FaPalette,
-  FaChartLine,
-  FaCamera,
   FaRocket,
   FaFire,
   FaTrophy,
   FaLightbulb,
+  FaHeart,
+  FaShoppingCart,
 } from "react-icons/fa";
 import { useAuthContext } from "../../context/AuthContext";
 import { usePersonalization } from "../../hooks/usePersonalization";
+import { useToggleWishlist, useWishlistHelpers } from "../../hooks/useWishlist";
+import { useSnackbar } from "notistack";
 import {
   useCourses,
   useFeaturedCourses,
@@ -26,11 +26,20 @@ import {
 import Loading from "../../components/Common/Loading";
 import CourseCard from "../../components/Common/CourseCard";
 import type { Course } from "../../types/course.type";
+import { generateCategoriesWithCounts } from "../../constants/categories";
 
 const Home = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthContext();
   const { recommendations, addViewedCourse } = usePersonalization();
+  const { enqueueSnackbar } = useSnackbar();
+  const { toggleWishlist } = useToggleWishlist();
+  const { checkIfInWishlist } = useWishlistHelpers();
+
+  const [processingWishlist, setProcessingWishlist] = useState<Set<string>>(
+    new Set()
+  );
+  const [processingCart, setProcessingCart] = useState<Set<string>>(new Set());
 
   const { data: allCoursesData, isLoading: allCoursesLoading } = useCourses({
     limit: 12,
@@ -51,56 +60,87 @@ const Home = () => {
   const freeCourses = freeCoursesData?.data || [];
   const trendingCourse = trendingCoursesData?.data?.[0];
 
-  const categories = [
-    {
-      id: "all",
-      name: "All Courses",
-      icon: FaGraduationCap,
-      count: allCourses.length,
-    },
-    {
-      id: "development",
-      name: "Development",
-      icon: FaCode,
-      count: allCourses.filter(
-        (c) => c.category.toLowerCase() === "development"
-      ).length,
-    },
-    {
-      id: "design",
-      name: "Design",
-      icon: FaPalette,
-      count: allCourses.filter((c) => c.category.toLowerCase() === "design")
-        .length,
-    },
-    {
-      id: "data-science",
-      name: "Data Science",
-      icon: FaChartLine,
-      count: allCourses.filter((c) => c.category.toLowerCase().includes("data"))
-        .length,
-    },
-    {
-      id: "marketing",
-      name: "Marketing",
-      icon: FaRocket,
-      count: allCourses.filter((c) => c.category.toLowerCase() === "marketing")
-        .length,
-    },
-    {
-      id: "photography",
-      name: "Photography",
-      icon: FaCamera,
-      count: allCourses.filter(
-        (c) => c.category.toLowerCase() === "photography"
-      ).length,
-    },
-  ];
+  const categories = generateCategoriesWithCounts(allCourses);
 
   const handleEnroll = () => {
     if (!isAuthenticated) {
       navigate("/auth/login");
       return;
+    }
+  };
+
+  const handleWishlistToggle = async (e: React.MouseEvent, course: Course) => {
+    e.stopPropagation();
+
+    if (!isAuthenticated) {
+      navigate("/auth/login");
+      return;
+    }
+
+    // Add course to processing state
+    setProcessingWishlist((prev) => new Set([...prev, course.id]));
+
+    try {
+      const wasInWishlist = checkIfInWishlist(course.id);
+      await toggleWishlist(course.id, wasInWishlist);
+
+      enqueueSnackbar(
+        wasInWishlist
+          ? `"${course.title}" removed from wishlist`
+          : `"${course.title}" added to wishlist`,
+        { variant: "success", autoHideDuration: 3000 }
+      );
+    } catch (error) {
+      enqueueSnackbar("Failed to update wishlist", {
+        variant: "error",
+        autoHideDuration: 3000,
+      });
+    } finally {
+      // Remove course from processing state
+      setTimeout(() => {
+        setProcessingWishlist((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(course.id);
+          return newSet;
+        });
+      }, 500); // Small delay to show the effect
+    }
+  };
+
+  const handleCartToggle = async (e: React.MouseEvent, course: Course) => {
+    e.stopPropagation();
+
+    if (!isAuthenticated) {
+      navigate("/auth/login");
+      return;
+    }
+
+    // Add course to processing state
+    setProcessingCart((prev) => new Set([...prev, course.id]));
+
+    try {
+      // Here you would add the cart logic
+      // For now, just simulate the process
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      enqueueSnackbar(`"${course.title}" added to cart`, {
+        variant: "success",
+        autoHideDuration: 3000,
+      });
+    } catch (error) {
+      enqueueSnackbar("Failed to add to cart", {
+        variant: "error",
+        autoHideDuration: 3000,
+      });
+    } finally {
+      // Remove course from processing state
+      setTimeout(() => {
+        setProcessingCart((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(course.id);
+          return newSet;
+        });
+      }, 500); // Small delay to show the effect
     }
   };
 
@@ -499,6 +539,87 @@ const Home = () => {
                                     FREE
                                   </span>
                                 </div>
+
+                                {/* Action Buttons */}
+                                <div className="absolute top-2 right-2 flex space-x-2">
+                                  <motion.button
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={(e) =>
+                                      handleWishlistToggle(e, course)
+                                    }
+                                    disabled={processingWishlist.has(course.id)}
+                                    className={`p-3 bg-white/90 rounded-full custom-icon-shadow transition-all duration-200 cursor-pointer ${
+                                      processingWishlist.has(course.id)
+                                        ? "text-purple-500 opacity-70"
+                                        : checkIfInWishlist(course.id)
+                                        ? "text-red-500 hover:bg-red-50"
+                                        : "text-gray-500 hover:bg-gray-50 hover:text-red-500"
+                                    }`}
+                                    title={
+                                      processingWishlist.has(course.id)
+                                        ? "Processing..."
+                                        : checkIfInWishlist(course.id)
+                                        ? "Remove from wishlist"
+                                        : "Add to wishlist"
+                                    }
+                                    animate={
+                                      processingWishlist.has(course.id)
+                                        ? { scale: [1, 1.1, 1] }
+                                        : {}
+                                    }
+                                    transition={
+                                      processingWishlist.has(course.id)
+                                        ? {
+                                            duration: 0.8,
+                                            repeat: Infinity,
+                                            ease: "easeInOut",
+                                          }
+                                        : {}
+                                    }
+                                  >
+                                    <FaHeart
+                                      className={`text-lg ${
+                                        checkIfInWishlist(course.id)
+                                          ? "fill-current"
+                                          : ""
+                                      }`}
+                                    />
+                                  </motion.button>
+
+                                  <motion.button
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={(e) => handleCartToggle(e, course)}
+                                    disabled={processingCart.has(course.id)}
+                                    className={`p-3 bg-white/90 rounded-full custom-icon-shadow transition-all duration-200 cursor-pointer ${
+                                      processingCart.has(course.id)
+                                        ? "text-orange-500 opacity-70"
+                                        : "text-green-600 hover:bg-green-50"
+                                    }`}
+                                    title={
+                                      processingCart.has(course.id)
+                                        ? "Adding to cart..."
+                                        : "Add to cart"
+                                    }
+                                    animate={
+                                      processingCart.has(course.id)
+                                        ? { scale: [1, 1.1, 1] }
+                                        : {}
+                                    }
+                                    transition={
+                                      processingCart.has(course.id)
+                                        ? {
+                                            duration: 0.8,
+                                            repeat: Infinity,
+                                            ease: "easeInOut",
+                                          }
+                                        : {}
+                                    }
+                                  >
+                                    <FaShoppingCart className="text-lg" />
+                                  </motion.button>
+                                </div>
                               </div>
                               <div className="p-4">
                                 <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-indigo-600 transition-colors">
@@ -621,6 +742,91 @@ const Home = () => {
                               alt={displayCourse.title}
                               className="w-full h-64 md:h-full object-cover group-hover:scale-110 transition-transform duration-700"
                             />
+
+                            {/* Action Buttons */}
+                            <div className="absolute top-4 right-4 flex space-x-2 z-10">
+                              <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={(e) =>
+                                  handleWishlistToggle(e, displayCourse)
+                                }
+                                disabled={processingWishlist.has(
+                                  displayCourse.id
+                                )}
+                                className={`p-3 bg-white/90 rounded-full custom-icon-shadow transition-all duration-200 cursor-pointer ${
+                                  processingWishlist.has(displayCourse.id)
+                                    ? "text-purple-500 opacity-70"
+                                    : checkIfInWishlist(displayCourse.id)
+                                    ? "text-red-500 hover:bg-red-50"
+                                    : "text-gray-500 hover:bg-gray-50 hover:text-red-500"
+                                }`}
+                                title={
+                                  processingWishlist.has(displayCourse.id)
+                                    ? "Processing..."
+                                    : checkIfInWishlist(displayCourse.id)
+                                    ? "Remove from wishlist"
+                                    : "Add to wishlist"
+                                }
+                                animate={
+                                  processingWishlist.has(displayCourse.id)
+                                    ? { scale: [1, 1.1, 1] }
+                                    : {}
+                                }
+                                transition={
+                                  processingWishlist.has(displayCourse.id)
+                                    ? {
+                                        duration: 0.8,
+                                        repeat: Infinity,
+                                        ease: "easeInOut",
+                                      }
+                                    : {}
+                                }
+                              >
+                                <FaHeart
+                                  className={`text-xl ${
+                                    checkIfInWishlist(displayCourse.id)
+                                      ? "fill-current"
+                                      : ""
+                                  }`}
+                                />
+                              </motion.button>
+
+                              <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={(e) =>
+                                  handleCartToggle(e, displayCourse)
+                                }
+                                disabled={processingCart.has(displayCourse.id)}
+                                className={`p-3 bg-white/90 rounded-full custom-icon-shadow transition-all duration-200 cursor-pointer ${
+                                  processingCart.has(displayCourse.id)
+                                    ? "text-orange-500 opacity-70"
+                                    : "text-green-600 hover:bg-green-50"
+                                }`}
+                                title={
+                                  processingCart.has(displayCourse.id)
+                                    ? "Adding to cart..."
+                                    : "Add to cart"
+                                }
+                                animate={
+                                  processingCart.has(displayCourse.id)
+                                    ? { scale: [1, 1.1, 1] }
+                                    : {}
+                                }
+                                transition={
+                                  processingCart.has(displayCourse.id)
+                                    ? {
+                                        duration: 0.8,
+                                        repeat: Infinity,
+                                        ease: "easeInOut",
+                                      }
+                                    : {}
+                                }
+                              >
+                                <FaShoppingCart className="text-xl" />
+                              </motion.button>
+                            </div>
 
                             {/* Play Button Overlay */}
                             <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>

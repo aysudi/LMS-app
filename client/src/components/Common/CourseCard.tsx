@@ -123,10 +123,10 @@ const CourseCard: React.FC<CourseCardProps> = ({
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={handleRemove}
-              className="p-2 bg-white/90 hover:bg-red-50 text-red-500 rounded-full shadow-sm transition-all duration-200 cursor-pointer"
+              className="p-3 bg-white/90 hover:bg-red-50 text-red-500 rounded-full custom-icon-shadow transition-all duration-200 cursor-pointer"
               title="Remove from wishlist"
             >
-              <FaHeart className="text-md" />
+              <FaHeart className="text-lg" />
             </motion.button>
           ) : showWishlistButton ? (
             <motion.button
@@ -134,7 +134,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
               whileTap={{ scale: 0.9 }}
               onClick={handleWishlistToggle}
               disabled={isToggling}
-              className={`p-2 bg-white/90 rounded-full shadow-sm transition-all duration-200 cursor-pointer ${
+              className={`p-3 bg-white/90 rounded-full custom-icon-shadow transition-all duration-200 cursor-pointer ${
                 checkIfInWishlist(course.id)
                   ? "text-red-500 hover:bg-red-50"
                   : "text-gray-500 hover:bg-gray-50 hover:text-red-500"
@@ -146,7 +146,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
               }
             >
               <FaHeart
-                className={`text-md ${
+                className={`text-lg ${
                   checkIfInWishlist(course.id) ? "fill-current" : ""
                 }`}
               />
@@ -157,10 +157,10 @@ const CourseCard: React.FC<CourseCardProps> = ({
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={handleShare}
-            className="p-2 bg-white/90 hover:bg-green-50 text-green-600 rounded-full shadow-sm transition-all duration-200 cursor-pointer"
+            className="p-3 bg-white/90 hover:bg-green-50 text-green-600 rounded-full custom-icon-shadow transition-all duration-200 cursor-pointer"
             title="Add to cart"
           >
-            <FaShoppingCart className="text-md" />
+            <FaShoppingCart className="text-lg" />
           </motion.button>
         </div>
 
