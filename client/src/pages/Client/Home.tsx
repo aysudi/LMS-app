@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
@@ -27,6 +27,7 @@ import Loading from "../../components/Common/Loading";
 import CourseCard from "../../components/Common/CourseCard";
 import type { Course } from "../../types/course.type";
 import { generateCategoriesWithCounts } from "../../constants/categories";
+import { addToCart, checkIfInCart, getCart } from "../../services/cart.service";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -40,6 +41,31 @@ const Home = () => {
     new Set()
   );
   const [processingCart, setProcessingCart] = useState<Set<string>>(new Set());
+  const [cartItems, setCartItems] = useState<Set<string>>(new Set());
+
+  // Helper function to check if course is in cart locally
+  const checkIfInCartLocal = (courseId: string) => {
+    return cartItems.has(courseId);
+  };
+
+  // Load cart items when component mounts
+  useEffect(() => {
+    const loadCartItems = async () => {
+      if (isAuthenticated) {
+        try {
+          const response = await getCart();
+          if (response.success && response.data) {
+            const cartCourseIds = response.data.map((course) => course.id);
+            setCartItems(new Set(cartCourseIds));
+          }
+        } catch (error) {
+          console.error("Failed to load cart items:", error);
+        }
+      }
+    };
+
+    loadCartItems();
+  }, [isAuthenticated]);
 
   const { data: allCoursesData, isLoading: allCoursesLoading } = useCourses({
     limit: 12,
@@ -110,6 +136,13 @@ const Home = () => {
   const handleCartToggle = async (e: React.MouseEvent, course: Course) => {
     e.stopPropagation();
 
+    console.log("Cart button clicked:", {
+      courseTitle: course.title,
+      isAuthenticated,
+      isFree: course.isFree,
+      originalPrice: course.originalPrice,
+    });
+
     if (!isAuthenticated) {
       navigate("/auth/login");
       return;
@@ -119,19 +152,51 @@ const Home = () => {
     setProcessingCart((prev) => new Set([...prev, course.id]));
 
     try {
-      // Here you would add the cart logic
-      // For now, just simulate the process
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Check if course is already in cart locally first (faster UI feedback)
+      if (checkIfInCartLocal(course.id)) {
+        enqueueSnackbar(`"${course.title}" is already in your cart! 📚`, {
+          variant: "info",
+          autoHideDuration: 3000,
+        });
+        return;
+      }
 
-      enqueueSnackbar(`"${course.title}" added to cart`, {
-        variant: "success",
-        autoHideDuration: 3000,
-      });
-    } catch (error) {
-      enqueueSnackbar("Failed to add to cart", {
-        variant: "error",
-        autoHideDuration: 3000,
-      });
+      // Double-check with server
+      const cartCheckResponse = await checkIfInCart(course.id);
+
+      if (cartCheckResponse.data.isInCart) {
+        // Update local state to match server
+        setCartItems((prev) => new Set([...prev, course.id]));
+        enqueueSnackbar(`"${course.title}" is already in your cart! 📚`, {
+          variant: "info",
+          autoHideDuration: 3000,
+        });
+        return;
+      }
+
+      // Add course to cart
+      const response = await addToCart(course.id);
+
+      if (response.success) {
+        // Update local cart state
+        setCartItems((prev) => new Set([...prev, course.id]));
+
+        enqueueSnackbar(`"${course.title}" added to cart successfully! 🛒`, {
+          variant: "success",
+          autoHideDuration: 3000,
+        });
+      } else {
+        throw new Error(response.message || "Failed to add to cart");
+      }
+    } catch (error: any) {
+      console.error("Cart error:", error);
+      enqueueSnackbar(
+        error.message || "Failed to add to cart. Please try again.",
+        {
+          variant: "error",
+          autoHideDuration: 3000,
+        }
+      );
     } finally {
       // Remove course from processing state
       setTimeout(() => {
@@ -587,38 +652,46 @@ const Home = () => {
                                     />
                                   </motion.button>
 
-                                  <motion.button
-                                    whileHover={{ scale: 1.1 }}
-                                    whileTap={{ scale: 0.9 }}
-                                    onClick={(e) => handleCartToggle(e, course)}
-                                    disabled={processingCart.has(course.id)}
-                                    className={`p-3 bg-white/90 rounded-full custom-icon-shadow transition-all duration-200 cursor-pointer ${
-                                      processingCart.has(course.id)
-                                        ? "text-orange-500 opacity-70"
-                                        : "text-green-600 hover:bg-green-50"
-                                    }`}
-                                    title={
-                                      processingCart.has(course.id)
-                                        ? "Adding to cart..."
-                                        : "Add to cart"
-                                    }
-                                    animate={
-                                      processingCart.has(course.id)
-                                        ? { scale: [1, 1.1, 1] }
-                                        : {}
-                                    }
-                                    transition={
-                                      processingCart.has(course.id)
-                                        ? {
-                                            duration: 0.8,
-                                            repeat: Infinity,
-                                            ease: "easeInOut",
-                                          }
-                                        : {}
-                                    }
-                                  >
-                                    <FaShoppingCart className="text-lg" />
-                                  </motion.button>
+                                  {!course.isFree && (
+                                    <motion.button
+                                      whileHover={{ scale: 1.1 }}
+                                      whileTap={{ scale: 0.9 }}
+                                      onClick={(e) =>
+                                        handleCartToggle(e, course)
+                                      }
+                                      disabled={processingCart.has(course.id)}
+                                      className={`p-3 bg-white/90 rounded-full custom-icon-shadow transition-all duration-200 ${
+                                        processingCart.has(course.id)
+                                          ? "text-orange-500 opacity-70 cursor-pointer"
+                                          : checkIfInCartLocal(course.id)
+                                          ? "text-blue-600 bg-blue-50 hover:bg-blue-100 cursor-pointer"
+                                          : "text-green-600 hover:bg-green-50 cursor-pointer"
+                                      }`}
+                                      title={
+                                        processingCart.has(course.id)
+                                          ? "Adding to cart..."
+                                          : checkIfInCartLocal(course.id)
+                                          ? "Already in cart"
+                                          : "Add to cart"
+                                      }
+                                      animate={
+                                        processingCart.has(course.id)
+                                          ? { scale: [1, 1.1, 1] }
+                                          : {}
+                                      }
+                                      transition={
+                                        processingCart.has(course.id)
+                                          ? {
+                                              duration: 0.8,
+                                              repeat: Infinity,
+                                              ease: "easeInOut",
+                                            }
+                                          : {}
+                                      }
+                                    >
+                                      <FaShoppingCart className="text-lg" />
+                                    </motion.button>
+                                  )}
                                 </div>
                               </div>
                               <div className="p-4">
@@ -792,40 +865,48 @@ const Home = () => {
                                 />
                               </motion.button>
 
-                              <motion.button
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                onClick={(e) =>
-                                  handleCartToggle(e, displayCourse)
-                                }
-                                disabled={processingCart.has(displayCourse.id)}
-                                className={`p-3 bg-white/90 rounded-full custom-icon-shadow transition-all duration-200 cursor-pointer ${
-                                  processingCart.has(displayCourse.id)
-                                    ? "text-orange-500 opacity-70"
-                                    : "text-green-600 hover:bg-green-50"
-                                }`}
-                                title={
-                                  processingCart.has(displayCourse.id)
-                                    ? "Adding to cart..."
-                                    : "Add to cart"
-                                }
-                                animate={
-                                  processingCart.has(displayCourse.id)
-                                    ? { scale: [1, 1.1, 1] }
-                                    : {}
-                                }
-                                transition={
-                                  processingCart.has(displayCourse.id)
-                                    ? {
-                                        duration: 0.8,
-                                        repeat: Infinity,
-                                        ease: "easeInOut",
-                                      }
-                                    : {}
-                                }
-                              >
-                                <FaShoppingCart className="text-xl" />
-                              </motion.button>
+                              {!displayCourse.isFree && (
+                                <motion.button
+                                  whileHover={{ scale: 1.1 }}
+                                  whileTap={{ scale: 0.9 }}
+                                  onClick={(e) =>
+                                    handleCartToggle(e, displayCourse)
+                                  }
+                                  disabled={processingCart.has(
+                                    displayCourse.id
+                                  )}
+                                  className={`p-3 bg-white/90 rounded-full custom-icon-shadow transition-all duration-200 ${
+                                    processingCart.has(displayCourse.id)
+                                      ? "text-orange-500 opacity-70 cursor-pointer"
+                                      : checkIfInCartLocal(displayCourse.id)
+                                      ? "text-blue-600 bg-blue-50 hover:bg-blue-100 cursor-pointer"
+                                      : "text-green-600 hover:bg-green-50 cursor-pointer"
+                                  }`}
+                                  title={
+                                    processingCart.has(displayCourse.id)
+                                      ? "Adding to cart..."
+                                      : checkIfInCartLocal(displayCourse.id)
+                                      ? "Already in cart"
+                                      : "Add to cart"
+                                  }
+                                  animate={
+                                    processingCart.has(displayCourse.id)
+                                      ? { scale: [1, 1.1, 1] }
+                                      : {}
+                                  }
+                                  transition={
+                                    processingCart.has(displayCourse.id)
+                                      ? {
+                                          duration: 0.8,
+                                          repeat: Infinity,
+                                          ease: "easeInOut",
+                                        }
+                                      : {}
+                                  }
+                                >
+                                  <FaShoppingCart className="text-xl" />
+                                </motion.button>
+                              )}
                             </div>
 
                             {/* Play Button Overlay */}
