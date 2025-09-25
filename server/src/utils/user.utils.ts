@@ -60,6 +60,7 @@ export const createUserProfile = (user: any): UserProfileDto => {
     bio: user.bio,
     skills: user.skills || [],
     wishlist: user.wishlist || [],
+    cart: user.cart || [],
     socialLinks: user.socialLinks || {},
     isEmailVerified: user.isEmailVerified,
     createdAt: user.createdAt,

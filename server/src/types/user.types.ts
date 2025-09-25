@@ -39,6 +39,8 @@ export interface IUser extends Document {
   };
   enrolledCourses: string[];
   createdCourses: string[];
+  wishlist: string[];
+  cart: string[];
   lastLoginAt?: Date;
   loginAttempts?: number;
   lockUntil?: Date;
@@ -79,6 +81,7 @@ export interface UserProfileDto {
   bio?: string;
   skills: string[];
   wishlist: string[];
+  cart: string[];
   socialLinks: {
     website?: string;
     linkedin?: string;
