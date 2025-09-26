@@ -48,7 +48,6 @@ const ModernCourseCard: React.FC<ModernCourseCardProps> = ({
       clearTimeout(hoverTimeout);
     }
     const timeout = setTimeout(() => {
-      // Check if we need to show the panel on the left side
       if (cardRef.current) {
         const rect = cardRef.current.getBoundingClientRect();
         const screenWidth = window.innerWidth;
@@ -61,7 +60,7 @@ const ModernCourseCard: React.FC<ModernCourseCardProps> = ({
         }
       }
       setIsHovered(true);
-    }, 300); // 300ms delay before showing hover panel
+    }, 200); // 200ms delay before showing hover panel
     setHoverTimeout(timeout);
   };
 

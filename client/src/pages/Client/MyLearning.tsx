@@ -12,7 +12,6 @@ import {
 const MyLearning = () => {
   const navigate = useNavigate();
 
-  // This would typically come from an API call
   const enrolledCourses = [
     {
       id: "1",

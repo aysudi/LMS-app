@@ -19,7 +19,6 @@ const Checkout = () => {
   const { isAuthenticated } = useAuthContext();
   const { cartItems } = useCartHelpers();
 
-  // Get selected items from cart page
   const selectedItemIds = location.state?.selectedItems || [];
   const selectedCourses = cartItems.filter((course) =>
     selectedItemIds.includes(course.id)
