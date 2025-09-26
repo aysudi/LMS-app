@@ -107,7 +107,6 @@ const CourseCard: React.FC<CourseCardProps> = ({
       return;
     }
 
-    // Check if course is already in cart locally first
     if (isInCart) {
       enqueueSnackbar(`"${course.title}" is already in your cart! 📚`, {
         variant: "info",
@@ -119,11 +118,9 @@ const CourseCard: React.FC<CourseCardProps> = ({
     setProcessingCart(true);
 
     try {
-      // Double-check with server
       const cartCheckResponse = await checkIfInCart(course.id);
 
       if (cartCheckResponse.data.isInCart) {
-        // Update local state to match server
         setIsInCart(true);
         enqueueSnackbar(`"${course.title}" is already in your cart! 📚`, {
           variant: "info",
@@ -132,11 +129,9 @@ const CourseCard: React.FC<CourseCardProps> = ({
         return;
       }
 
-      // Add course to cart
       const response = await addToCart(course.id);
 
       if (response.success) {
-        // Update local cart state
         setIsInCart(true);
 
         enqueueSnackbar(`"${course.title}" added to cart successfully! 🛒`, {

@@ -22,7 +22,7 @@ import {
 } from "../../hooks/useWishlist";
 
 import { useSnackbar } from "notistack";
-import CourseCard from "../../components/Common/CourseCard";
+import CourseCard from "../../components/Client/HomeCourseCard";
 import Loading from "../../components/Common/Loading";
 
 type ViewMode = "grid" | "list";

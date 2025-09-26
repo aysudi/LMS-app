@@ -24,7 +24,7 @@ import {
   useTrendingCourses,
 } from "../../hooks/useCourseQueries";
 import Loading from "../../components/Common/Loading";
-import CourseCard from "../../components/Common/CourseCard";
+import ModernCourseCard from "../../components/Client/ModernCourseCard";
 import type { Course } from "../../types/course.type";
 import { generateCategoriesWithCounts } from "../../constants/categories";
 import { addToCart, checkIfInCart, getCart } from "../../services/cart.service";
@@ -536,10 +536,17 @@ const Home = () => {
                         )
                           .slice(0, 4)
                           .map((course: Course, index: number) => (
-                            <CourseCard
+                            <ModernCourseCard
                               key={index}
                               course={course}
                               index={index}
+                              onWishlistToggle={handleWishlistToggle}
+                              onCartToggle={handleCartToggle}
+                              checkIfInWishlist={checkIfInWishlist}
+                              checkIfInCart={checkIfInCartLocal}
+                              processingWishlist={processingWishlist}
+                              processingCart={processingCart}
+                              showCartButton={true}
                             />
                           ))}
                   </div>
@@ -1143,10 +1150,17 @@ const Home = () => {
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {courses.map((course: Course, index: number) => (
-                          <CourseCard
+                          <ModernCourseCard
                             key={`${category.id.toLowerCase()}-${course.id}`}
                             course={course}
                             index={index}
+                            onWishlistToggle={handleWishlistToggle}
+                            onCartToggle={handleCartToggle}
+                            checkIfInWishlist={checkIfInWishlist}
+                            checkIfInCart={checkIfInCartLocal}
+                            processingWishlist={processingWishlist}
+                            processingCart={processingCart}
+                            showCartButton={true}
                           />
                         ))}
                       </div>
