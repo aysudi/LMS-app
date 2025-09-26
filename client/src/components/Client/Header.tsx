@@ -29,6 +29,7 @@ import {
 import { useAuthContext } from "../../context/AuthContext";
 import { useLogout } from "../../hooks/useAuth";
 import { useWishlistHelpers } from "../../hooks/useWishlist";
+import { useCartHelpers } from "../../hooks/useCart";
 import {
   getSearchSuggestions,
   getSearchHistory,
@@ -44,10 +45,10 @@ const Header: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [notifications] = useState(3);
-  const [cartItems] = useState(2);
 
-  // Get real wishlist count
   const { wishlistCount } = useWishlistHelpers();
+
+  const { cartCount } = useCartHelpers();
 
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
@@ -311,7 +312,6 @@ const Header: React.FC = () => {
         setSearchQuery(urlSearchQuery);
       }
     } else if (!isSearchFocused) {
-      // Clear search query when navigating to any page other than courses
       setSearchQuery("");
     }
   }, [location.pathname, searchParams]);
@@ -586,9 +586,9 @@ const Header: React.FC = () => {
                     title="Shopping Cart"
                   >
                     <FaShoppingCart className="text-lg" />
-                    {cartItems > 0 && (
+                    {cartCount > 0 && (
                       <span className="absolute -top-1 -right-1 bg-indigo-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
-                        {cartItems > 9 ? "9+" : cartItems}
+                        {cartCount > 9 ? "9+" : cartCount}
                       </span>
                     )}
                   </motion.button>
@@ -829,9 +829,9 @@ const Header: React.FC = () => {
                       <FaShoppingCart />
                       <span>Shopping Cart</span>
                     </div>
-                    {cartItems > 0 && (
+                    {cartCount > 0 && (
                       <span className="bg-indigo-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                        {cartItems > 9 ? "9+" : cartItems}
+                        {cartCount > 9 ? "9+" : cartCount}
                       </span>
                     )}
                   </Link>
