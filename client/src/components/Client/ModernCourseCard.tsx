@@ -54,7 +54,6 @@ const ModernCourseCard: React.FC<ModernCourseCardProps> = ({
         const screenWidth = window.innerWidth;
         const panelWidth = 320; // 80 * 4 = 320px (w-80)
 
-        // If there's not enough space on the right, show on the left
         if (rect.right + panelWidth > screenWidth - 20) {
           setShowOnLeft(true);
         } else {
@@ -130,7 +129,7 @@ const ModernCourseCard: React.FC<ModernCourseCardProps> = ({
         transition={{ duration: 0.2 }}
       >
         {/* Image Container */}
-        <div className="relative h-52 overflow-hidden">
+        <div className="relative h-48 overflow-hidden">
           <img
             src={
               course.image ||
@@ -165,7 +164,7 @@ const ModernCourseCard: React.FC<ModernCourseCardProps> = ({
         {/* Content Section */}
         <div className="p-4 space-y-3">
           {/* Title */}
-          <h3 className="font-semibold text-gray-900 text-base leading-tight line-clamp-1 group-hover:text-indigo-600 transition-colors duration-300">
+          <h3 className="font-semibold text-gray-900 text-lg leading-tight line-clamp-1 group-hover:text-indigo-600 transition-colors duration-300">
             {course.title}
           </h3>
 
@@ -197,7 +196,7 @@ const ModernCourseCard: React.FC<ModernCourseCardProps> = ({
 
           {/* Category */}
           <div>
-            <span className="inline-flex items-center px-2 py-1 bg-indigo-50 text-indigo-700 text-xs font-medium rounded-full">
+            <span className="inline-flex items-center px-4 py-1 bg-indigo-50 text-indigo-700 text-sm font-medium rounded-xl mt-1">
               {course.category}
             </span>
           </div>
@@ -228,7 +227,7 @@ const ModernCourseCard: React.FC<ModernCourseCardProps> = ({
               showOnLeft ? "right-full mr-2" : "left-full ml-2"
             }`}
             style={{
-              maxHeight: "520px",
+              maxHeight: "590px",
               minHeight: "420px",
             }}
           >
