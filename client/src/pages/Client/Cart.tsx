@@ -50,14 +50,12 @@ const Cart = () => {
   const [discount, setDiscount] = useState(0);
   const [showPromo, setShowPromo] = useState(false);
 
-  // Redirect if not authenticated
   useEffect(() => {
     if (!isAuthenticated) {
       navigate("/auth/login");
     }
   }, [isAuthenticated, navigate]);
 
-  // Calculate totals
   const selectedItemsArray = cartItems.filter((item) =>
     selectedItems.has(item.id)
   );
@@ -68,7 +66,6 @@ const Cart = () => {
   const discountAmount = subtotal * (discount / 100);
   const total = subtotal - discountAmount;
 
-  // Handlers
   const handleSelectAll = () => {
     if (selectedItems.size === cartItems.length) {
       setSelectedItems(new Set());
@@ -180,7 +177,6 @@ const Cart = () => {
       });
       return;
     }
-    // Navigate to checkout with selected items
     navigate("/checkout", {
       state: { selectedItems: Array.from(selectedItems) },
     });
