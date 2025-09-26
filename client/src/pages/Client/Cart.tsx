@@ -33,18 +33,15 @@ const Cart = () => {
   const { enqueueSnackbar } = useSnackbar();
   const { isAuthenticated } = useAuthContext();
 
-  // Cart hooks
   const { cartItems, cartCount, isLoadingCart, cartError } = useCartHelpers();
 
   const { mutateAsync: removeFromCart, isPending: isRemoving } =
     useRemoveFromCart();
   const { mutateAsync: clearCart, isPending: isClearing } = useClearCart();
 
-  // Wishlist hooks
   const { toggleWishlist } = useToggleWishlist();
   const { checkIfInWishlist } = useWishlistHelpers();
 
-  // Local state
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [promoCode, setPromoCode] = useState("");
   const [discount, setDiscount] = useState(0);
@@ -368,7 +365,6 @@ const Cart = () => {
   );
 };
 
-// Cart Item Component
 interface CartItemProps {
   course: Course;
   index: number;
@@ -519,7 +515,6 @@ const CartItem: React.FC<CartItemProps> = ({
   );
 };
 
-// Checkout Sidebar Component
 interface CheckoutSidebarProps {
   selectedItems: Course[];
   subtotal: number;

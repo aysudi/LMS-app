@@ -13,7 +13,6 @@ interface CartStatsProps {
 }
 
 const CartStats: React.FC<CartStatsProps> = ({ courses }) => {
-  // Calculate statistics
   const totalCourses = courses.length;
   const totalDuration = courses.reduce(
     (sum, course) => sum + (course.totalDuration || 0),
