@@ -296,3 +296,36 @@
     box-shadow: 0 0 0 10px rgba(37, 99, 235, 0);
   }
 }
+
+/* Performance optimizations for floating actions */
+.floating-action {
+  will-change: transform, opacity;
+  transform: translateZ(0); /* Force GPU acceleration */
+  backface-visibility: hidden;
+}
+
+.floating-action:hover {
+  transform: translateZ(0) scale(1.05);
+}
+
+.floating-action:active {
+  transform: translateZ(0) scale(0.95);
+}
+
+/* Optimize scroll performance */
+.scroll-optimized {
+  contain: layout style paint;
+  will-change: scroll-position;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .floating-action {
+    transition: none;
+    animation: none;
+  }
+
+  .cart-fab-pulse {
+    animation: none;
+  }
+}

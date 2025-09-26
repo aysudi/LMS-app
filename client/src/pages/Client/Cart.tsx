@@ -273,13 +273,13 @@ const Cart = () => {
               <div className="space-y-3">
                 <button
                   onClick={() => navigate("/courses")}
-                  className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+                  className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl cursor-pointer"
                 >
                   Browse Courses
                 </button>
                 <button
                   onClick={() => navigate("/wishlist")}
-                  className="w-full py-3 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center space-x-2"
+                  className="w-full py-3 border border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-colors flex items-center justify-center space-x-2 cursor-pointer"
                 >
                   <FaHeart className="text-red-500" />
                   <span>View Wishlist</span>
