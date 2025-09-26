@@ -4,6 +4,7 @@ import HeaderSkeleton from "../components/UI/HeaderSkeleton";
 import { useAuthContext } from "../context/AuthContext";
 import Footer from "../components/Client/Footer";
 import ScrollToTop from "../components/Common/ScrollToTop";
+import FloatingActions from "../components/Client/FloatingActions";
 
 const ClientLayout = () => {
   const { isLoading } = useAuthContext();
@@ -28,6 +29,7 @@ const ClientLayout = () => {
         <Outlet />
       </div>
       <Footer />
+      <FloatingActions />
     </>
   );
 };

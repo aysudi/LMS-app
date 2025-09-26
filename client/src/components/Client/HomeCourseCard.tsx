@@ -37,11 +37,9 @@ const CourseCard: React.FC<CourseCardProps> = ({
   const { toggleWishlist, isLoading: isToggling } = useToggleWishlist();
   const { checkIfInWishlist } = useWishlistHelpers();
 
-  // Cart state management
   const [processingCart, setProcessingCart] = useState(false);
   const [isInCart, setIsInCart] = useState(false);
 
-  // Load cart status when component mounts
   useEffect(() => {
     const loadCartStatus = async () => {
       if (isAuthenticated) {

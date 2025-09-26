@@ -7,7 +7,6 @@ import Register from "../pages/Auth/Register";
 import ResetPassword from "../pages/Auth/ResetPassword";
 import VerifyEmail from "../pages/Auth/VerifyEmail";
 import About from "../pages/Client/About";
-import Basket from "../pages/Client/Basket";
 import Contact from "../pages/Client/Contact";
 import CourseDetails from "../pages/Client/CourseDetails";
 import Courses from "../pages/Client/Courses";
@@ -16,6 +15,9 @@ import Home from "../pages/Client/Home";
 import Profile from "../pages/Client/Profile";
 import PublicRoute from "./PublicRoute";
 import ProtectedRoute from "./ProtectedRoute";
+import Cart from "../pages/Client/Cart";
+import Checkout from "../pages/Client/Checkout";
+import MyLearning from "../pages/Client/MyLearning";
 
 const ROUTES = [
   //client routes
@@ -44,10 +46,26 @@ const ROUTES = [
         ),
       },
       {
-        path: "basket",
+        path: "cart",
         element: (
           <ProtectedRoute>
-            <Basket />
+            <Cart />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "checkout",
+        element: (
+          <ProtectedRoute>
+            <Checkout />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "my-learning",
+        element: (
+          <ProtectedRoute>
+            <MyLearning />
           </ProtectedRoute>
         ),
       },
