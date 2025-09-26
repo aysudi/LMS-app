@@ -27,7 +27,6 @@ const Checkout = () => {
   const [paymentMethod, setPaymentMethod] = useState("credit-card");
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Redirect if not authenticated
   useEffect(() => {
     if (!isAuthenticated) {
       navigate("/auth/login");
@@ -41,7 +40,6 @@ const Checkout = () => {
     }
   }, [selectedCourses.length, navigate]);
 
-  // Calculate totals
   const subtotal = selectedCourses.reduce(
     (sum, course) => sum + (course.discountPrice || course.originalPrice),
     0
