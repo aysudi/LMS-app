@@ -26,7 +26,6 @@ export const useCreateOrder = () => {
   });
 };
 
-// Hook for creating payment intent
 export const useCreatePaymentIntent = () => {
   const { enqueueSnackbar } = useSnackbar();
 
@@ -41,7 +40,6 @@ export const useCreatePaymentIntent = () => {
   });
 };
 
-// Hook for confirming payment
 export const useConfirmPayment = () => {
   const { enqueueSnackbar } = useSnackbar();
   const queryClient = useQueryClient();
@@ -65,7 +63,6 @@ export const useConfirmPayment = () => {
   });
 };
 
-// Hook for creating checkout session (alternative method)
 export const useCreateCheckoutSession = () => {
   const { enqueueSnackbar } = useSnackbar();
 
@@ -84,7 +81,6 @@ export const useCreateCheckoutSession = () => {
   });
 };
 
-// Hook for fetching user orders
 export const useUserOrders = (page = 1, limit = 10) => {
   return useQuery({
     queryKey: ["orders", page, limit],
@@ -93,7 +89,6 @@ export const useUserOrders = (page = 1, limit = 10) => {
   });
 };
 
-// Hook for fetching specific order
 export const useOrder = (orderId: string) => {
   return useQuery({
     queryKey: ["order", orderId],
@@ -103,7 +98,6 @@ export const useOrder = (orderId: string) => {
   });
 };
 
-// Hook for canceling order
 export const useCancelOrder = () => {
   const { enqueueSnackbar } = useSnackbar();
   const queryClient = useQueryClient();

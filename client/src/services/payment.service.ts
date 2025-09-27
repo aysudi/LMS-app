@@ -75,7 +75,6 @@ export interface ConfirmPaymentResponse {
 }
 
 class PaymentService {
-  // Create order before payment
   async createOrder(
     orderData: CreateOrderRequest
   ): Promise<CreateOrderResponse> {
@@ -83,25 +82,21 @@ class PaymentService {
     return response.data;
   }
 
-  // Get user orders
   async getUserOrders(page = 1, limit = 10) {
     const response = await api.get(`/api/orders?page=${page}&limit=${limit}`);
     return response.data;
   }
 
-  // Get specific order
   async getOrderById(orderId: string) {
     const response = await api.get(`/api/orders/${orderId}`);
     return response.data;
   }
 
-  // Cancel order
   async cancelOrder(orderId: string) {
     const response = await api.patch(`/api/orders/${orderId}/cancel`);
     return response.data;
   }
 
-  // Create Stripe Payment Intent
   async createPaymentIntent(
     request: PaymentIntentRequest
   ): Promise<PaymentIntentResponse> {
@@ -115,7 +110,6 @@ class PaymentService {
     return response.data;
   }
 
-  // Create Stripe Checkout Session (alternative to Payment Intent)
   async createCheckoutSession(request: {
     orderId: string;
     lineItems: any[];
@@ -134,7 +128,6 @@ class PaymentService {
     return response.data;
   }
 
-  // Confirm payment (called after Stripe payment succeeds)
   async confirmPayment(
     request: ConfirmPaymentRequest
   ): Promise<ConfirmPaymentResponse> {

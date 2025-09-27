@@ -17,7 +17,7 @@ stripeRouter.post("/create-checkout-session", async (req, res) => {
       successUrl,
       cancelUrl,
       customer,
-      metadata, // <-- extract metadata from req.body
+      metadata,
     } = req.body;
 
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
