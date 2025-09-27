@@ -18,6 +18,7 @@ import searchRouter from "./routes/searchRoutes.js";
 import wishlistRouter from "./routes/wishlistRoutes.js";
 import cartRouter from "./routes/cartRoutes.js";
 import orderRouter from "./routes/orderRoutes.js";
+import stripeRouter from "./routes/stripeRoute.js";
 
 const app = express();
 
@@ -66,6 +67,7 @@ app.use("/api/search", searchRouter);
 app.use("/api/wishlist", wishlistRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/orders", orderRouter);
+app.use("/api/payments", stripeRouter);
 
 // 404 handler
 app.use(notFoundHandler);
