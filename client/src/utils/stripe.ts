@@ -1,6 +1,5 @@
 import { loadStripe } from "@stripe/stripe-js";
 
-// Get publishable key from environment variables
 const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
 
 if (!stripePublishableKey) {
@@ -9,10 +8,8 @@ if (!stripePublishableKey) {
   );
 }
 
-// Create Stripe instance
 export const stripePromise = loadStripe(stripePublishableKey);
 
-// Stripe configuration
 export const stripeConfig = {
   publishableKey: stripePublishableKey,
   appearance: {

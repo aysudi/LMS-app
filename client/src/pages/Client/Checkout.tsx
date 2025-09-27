@@ -26,7 +26,6 @@ const Checkout = () => {
   const { isAuthenticated, user } = useAuthContext();
   const { cartItems } = useCartHelpers();
 
-  // Payment hooks
   const createOrderMutation = useCreateOrder();
   const createPaymentIntentMutation = useCreatePaymentIntent();
   const confirmPaymentMutation = useConfirmPayment();
@@ -126,7 +125,6 @@ const Checkout = () => {
     }
   };
 
-  // Handle payment error
   const handlePaymentError = (error: string) => {
     console.error("Payment error:", error);
     setPaymentStep("payment");
