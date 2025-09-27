@@ -323,3 +323,103 @@ export const completeOrder = async (orderId: string, paymentDetails: any) => {
     throw error;
   }
 };
+
+// Confirm payment after successful Stripe payment
+export const confirmPayment = async (req: AuthRequest, res: Response) => {
+  try {
+    const { orderId } = req.params;
+    const { paymentIntentId, paymentMethodId } = req.body;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    // Find the order
+    const order = await Order.findOne({
+      _id: orderId,
+      user: userId,
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    if (order.status === OrderStatus.COMPLETED) {
+      return res.status(200).json({
+        success: true,
+        data: {
+          order: order,
+          message: "Payment already confirmed",
+        },
+      });
+    }
+
+    if (
+      order.status !== OrderStatus.PENDING &&
+      order.status !== OrderStatus.PROCESSING
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: `Order cannot be processed. Current status: ${order.status}`,
+      });
+    }
+
+    // Update order with payment details
+    order.status = OrderStatus.COMPLETED;
+    order.paymentStatus = PaymentStatus.COMPLETED;
+
+    // Use set() method to ensure the subdocument is properly updated
+    order.set("paymentDetails", {
+      method: PaymentMethod.CREDIT_CARD,
+      stripePaymentIntentId: paymentIntentId,
+      transactionId: paymentIntentId,
+    });
+
+    order.completedAt = new Date();
+
+    await order.save();
+
+    // Create enrollments for all courses in the order
+    const enrollments = order.items.map(
+      (item) =>
+        new Enrollment({
+          user: order.user,
+          course: item.course,
+          order: order._id,
+          status: EnrollmentStatus.ACTIVE,
+          enrolledAt: new Date(),
+        })
+    );
+
+    await Enrollment.insertMany(enrollments);
+
+    // Update user's enrolled courses and spending
+    const courseIds = order.items.map((item) => item.course);
+    await User.findByIdAndUpdate(order.user, {
+      $push: { enrolledCourses: { $each: courseIds } },
+      $inc: { totalSpent: order.total },
+      lastPurchaseAt: new Date(),
+    });
+
+    res.json({
+      success: true,
+      data: {
+        order: order,
+        message: "Payment confirmed successfully",
+      },
+    });
+  } catch (error: any) {
+    console.error("Confirm payment error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to confirm payment",
+    });
+  }
+};

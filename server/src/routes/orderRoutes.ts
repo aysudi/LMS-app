@@ -4,6 +4,7 @@ import {
   getUserOrders,
   getOrderById,
   cancelOrder,
+  confirmPayment,
 } from "../controllers/orderController";
 import { authenticateToken } from "../middlewares/auth.middleware";
 
@@ -29,6 +30,11 @@ orderRouter.get("/:orderId", authenticateToken, (req, res) =>
 // PATCH /api/orders/:orderId/cancel - Cancel an order
 orderRouter.patch("/:orderId/cancel", authenticateToken, (req, res) =>
   cancelOrder(req as AuthRequest, res)
+);
+
+// POST /api/orders/:orderId/confirm-payment - Confirm payment
+orderRouter.post("/:orderId/confirm-payment", authenticateToken, (req, res) =>
+  confirmPayment(req as AuthRequest, res)
 );
 
 export default orderRouter;

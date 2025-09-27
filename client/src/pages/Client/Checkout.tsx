@@ -8,24 +8,47 @@ import {
   FaCheckCircle,
   FaInfoCircle,
 } from "react-icons/fa";
-import { useSnackbar } from "notistack";
+import { Elements } from "@stripe/react-stripe-js";
 import { useCartHelpers } from "../../hooks/useCart";
 import { useAuthContext } from "../../context/AuthContext";
+import {
+  useCreateOrder,
+  useCreatePaymentIntent,
+  useConfirmPayment,
+} from "../../hooks/usePayment";
+import { stripePromise, stripeConfig } from "../../utils/stripe";
+import StripePaymentForm from "../../components/Common/StripePaymentForm";
+import type { CreateOrderRequest } from "../../services/payment.service";
 
 const Checkout = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { enqueueSnackbar } = useSnackbar();
-  const { isAuthenticated } = useAuthContext();
+  const { isAuthenticated, user } = useAuthContext();
   const { cartItems } = useCartHelpers();
+
+  // Payment hooks
+  const createOrderMutation = useCreateOrder();
+  const createPaymentIntentMutation = useCreatePaymentIntent();
+  const confirmPaymentMutation = useConfirmPayment();
 
   const selectedItemIds = location.state?.selectedItems || [];
   const selectedCourses = cartItems.filter((course) =>
     selectedItemIds.includes(course.id)
   );
 
-  const [paymentMethod, setPaymentMethod] = useState("credit-card");
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [currentOrder, setCurrentOrder] = useState<any>(null);
+  const [clientSecret, setClientSecret] = useState<string>("");
+  const [paymentStep, setPaymentStep] = useState<
+    "order" | "payment" | "processing" | "success"
+  >("order");
+  const [billingInfo, setBillingInfo] = useState({
+    fullName: user?.firstName ? `${user.firstName} ${user.lastName}` : "",
+    email: user?.email || "",
+    country: "",
+    state: "",
+    city: "",
+    postalCode: "",
+  });
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -45,18 +68,68 @@ const Checkout = () => {
     0
   );
 
-  const handleProcessPayment = async () => {
-    setIsProcessing(true);
+  // Step 1: Create order
+  const handleCreateOrder = async () => {
+    try {
+      const orderData: CreateOrderRequest = {
+        items: selectedCourses.map((course) => ({
+          course: course.id,
+          price: course.originalPrice,
+          discountPrice: course.discountPrice,
+        })),
+        billingAddress: billingInfo,
+      };
 
-    // Simulate payment processing
-    setTimeout(() => {
-      setIsProcessing(false);
-      enqueueSnackbar("Payment successful! Welcome to your courses!", {
-        variant: "success",
-        autoHideDuration: 4000,
+      const response = await createOrderMutation.mutateAsync(orderData);
+      const order = response.data.order;
+      setCurrentOrder(order);
+
+      // Step 2: Create payment intent
+      const paymentResponse = await createPaymentIntentMutation.mutateAsync({
+        orderId: order._id,
+        amount: order.total,
+        currency: "usd",
       });
-      navigate("/my-learning");
-    }, 3000);
+
+      setClientSecret(paymentResponse.clientSecret);
+      setPaymentStep("payment");
+    } catch (error) {
+      console.error("Order creation failed:", error);
+    }
+  };
+
+  // Step 3: Handle successful payment
+  const handlePaymentSuccess = async (paymentIntent: any) => {
+    try {
+      setPaymentStep("processing");
+
+      await confirmPaymentMutation.mutateAsync({
+        orderId: currentOrder._id,
+        paymentIntentId: paymentIntent.id,
+        paymentMethodId: paymentIntent.payment_method,
+      });
+
+      // Remove items from cart
+      selectedCourses.forEach((course) => {
+        // Note: You'll need to implement removeFromCart in useCartHelpers
+        // removeFromCart(course.id);
+      });
+
+      setPaymentStep("success");
+
+      setTimeout(() => {
+        navigate("/my-learning");
+      }, 2000);
+    } catch (error) {
+      console.error("Payment confirmation failed:", error);
+      setPaymentStep("payment");
+    }
+  };
+
+  // Handle payment error
+  const handlePaymentError = (error: string) => {
+    console.error("Payment error:", error);
+    setPaymentStep("payment");
   };
 
   if (!isAuthenticated || selectedCourses.length === 0) {
@@ -104,81 +177,219 @@ const Checkout = () => {
                 Payment Information
               </h2>
 
-              {/* Payment Method Selection */}
-              <div className="mb-8">
-                <h3 className="text-lg font-semibold text-gray-700 mb-4">
-                  Payment Method
-                </h3>
-                <div className="space-y-3">
-                  <label className="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50 border-blue-500 bg-blue-50">
-                    <input
-                      type="radio"
-                      name="payment"
-                      value="credit-card"
-                      checked={paymentMethod === "credit-card"}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="w-5 h-5 text-blue-600"
-                    />
-                    <FaCreditCard className="ml-3 text-blue-600" />
-                    <span className="ml-3 font-medium">Credit/Debit Card</span>
-                  </label>
-                </div>
-              </div>
+              {/* Billing Information Form */}
+              {paymentStep === "order" && (
+                <div className="space-y-6">
+                  <h3 className="text-lg font-semibold text-gray-700 mb-4">
+                    Billing Information
+                  </h3>
 
-              {/* Card Form */}
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Card Number
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="1234 5678 9012 3456"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Full Name
+                      </label>
+                      <input
+                        type="text"
+                        value={billingInfo.fullName}
+                        onChange={(e) =>
+                          setBillingInfo({
+                            ...billingInfo,
+                            fullName: e.target.value,
+                          })
+                        }
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="John Doe"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        value={billingInfo.email}
+                        onChange={(e) =>
+                          setBillingInfo({
+                            ...billingInfo,
+                            email: e.target.value,
+                          })
+                        }
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="john@example.com"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Country
+                      </label>
+                      <input
+                        type="text"
+                        value={billingInfo.country}
+                        onChange={(e) =>
+                          setBillingInfo({
+                            ...billingInfo,
+                            country: e.target.value,
+                          })
+                        }
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="United States"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        State/Province
+                      </label>
+                      <input
+                        type="text"
+                        value={billingInfo.state}
+                        onChange={(e) =>
+                          setBillingInfo({
+                            ...billingInfo,
+                            state: e.target.value,
+                          })
+                        }
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="California"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        City
+                      </label>
+                      <input
+                        type="text"
+                        value={billingInfo.city}
+                        onChange={(e) =>
+                          setBillingInfo({
+                            ...billingInfo,
+                            city: e.target.value,
+                          })
+                        }
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Los Angeles"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Postal Code
+                      </label>
+                      <input
+                        type="text"
+                        value={billingInfo.postalCode}
+                        onChange={(e) =>
+                          setBillingInfo({
+                            ...billingInfo,
+                            postalCode: e.target.value,
+                          })
+                        }
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="90210"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleCreateOrder}
+                    disabled={createOrderMutation.isPending}
+                    className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                  >
+                    {createOrderMutation.isPending ? (
+                      <>
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{
+                            duration: 1,
+                            repeat: Infinity,
+                            ease: "linear",
+                          }}
+                          className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                        />
+                        <span>Creating Order...</span>
+                      </>
+                    ) : (
+                      <>
+                        <FaCreditCard className="text-lg" />
+                        <span>Proceed to Payment</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+
+              {/* Stripe Payment Form */}
+              {paymentStep === "payment" && clientSecret && (
+                <Elements
+                  stripe={stripePromise}
+                  options={{
+                    clientSecret,
+                    appearance: stripeConfig.appearance,
+                  }}
+                >
+                  <StripePaymentForm
+                    clientSecret={clientSecret}
+                    onPaymentSuccess={handlePaymentSuccess}
+                    onPaymentError={handlePaymentError}
+                    amount={subtotal}
+                  />
+                </Elements>
+              )}
+
+              {/* Processing State */}
+              {paymentStep === "processing" && (
+                <div className="text-center py-12">
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
+                    className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"
+                  />
+                  <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                    Processing Payment...
+                  </h3>
+                  <p className="text-gray-600">
+                    Please wait while we confirm your payment
+                  </p>
+                </div>
+              )}
+
+              {/* Success State */}
+              {paymentStep === "success" && (
+                <div className="text-center py-12">
+                  <FaCheckCircle className="text-6xl text-green-600 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                    Payment Successful!
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Welcome to your new courses! Redirecting to My Learning...
+                  </p>
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
+                    className="w-6 h-6 border-2 border-green-600 border-t-transparent rounded-full mx-auto"
                   />
                 </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Expiry Date
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="MM/YY"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      CVV
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="123"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Cardholder Name
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="John Doe"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
+              )}
 
               {/* Security Notice */}
               <div className="mt-8 p-4 bg-green-50 rounded-lg border border-green-200">
                 <div className="flex items-center space-x-2 text-green-700">
                   <FaLock className="text-sm" />
                   <span className="text-sm font-medium">
-                    Your payment information is secure and encrypted
+                    Your payment information is secure and encrypted by Stripe
                   </span>
                 </div>
               </div>
@@ -246,32 +457,26 @@ const Checkout = () => {
                   </div>
                 </div>
 
-                {/* Complete Purchase Button */}
-                <button
-                  onClick={handleProcessPayment}
-                  disabled={isProcessing}
-                  className="w-full mt-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-                >
-                  {isProcessing ? (
-                    <>
-                      <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{
-                          duration: 1,
-                          repeat: Infinity,
-                          ease: "linear",
-                        }}
-                        className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
-                      />
-                      <span>Processing...</span>
-                    </>
-                  ) : (
-                    <>
-                      <FaCreditCard className="text-lg" />
-                      <span>Complete Purchase</span>
-                    </>
-                  )}
-                </button>
+                {/* Order Status Info */}
+                {paymentStep === "order" && (
+                  <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="flex items-center space-x-2 text-blue-700 text-sm">
+                      <FaInfoCircle />
+                      <span>
+                        Complete billing information to proceed to payment
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {paymentStep === "payment" && (
+                  <div className="mt-8 p-4 bg-green-50 rounded-lg border border-green-200">
+                    <div className="flex items-center space-x-2 text-green-700 text-sm">
+                      <FaLock />
+                      <span>Secure payment powered by Stripe</span>
+                    </div>
+                  </div>
+                )}
 
                 <div className="mt-4 flex items-center justify-center space-x-2 text-xs text-gray-500">
                   <FaInfoCircle />

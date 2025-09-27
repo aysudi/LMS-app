@@ -18,6 +18,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import Cart from "../pages/Client/Cart";
 import Checkout from "../pages/Client/Checkout";
 import MyLearning from "../pages/Client/MyLearning";
+import PaymentSuccess from "../pages/Client/PaymentSuccess";
 
 const ROUTES = [
   //client routes
@@ -66,6 +67,14 @@ const ROUTES = [
         element: (
           <ProtectedRoute>
             <MyLearning />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "payment/success",
+        element: (
+          <ProtectedRoute>
+            <PaymentSuccess />
           </ProtectedRoute>
         ),
       },
