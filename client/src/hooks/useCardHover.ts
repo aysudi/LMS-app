@@ -23,7 +23,7 @@ export const useCardHover = () => {
         }
       }
       setIsHovered(true);
-    }, 200); // 200ms delay before showing hover panel
+    }, 100); // 100ms delay before showing hover panel
     setHoverTimeout(timeout);
   };
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
@@ -28,7 +28,10 @@ import ModernCourseCard from "../../components/Client/ModernCourseCard";
 import FreeCourseCard from "../../components/Client/FreeCourseCard";
 import type { Course } from "../../types/course.type";
 import { generateCategoriesWithCounts } from "../../constants/categories";
-import { addToCart, checkIfInCart, getCart } from "../../services/cart.service";
+import { useAddToCart, useCartHelpers } from "../../hooks/useCart";
+import AddToCartModal from "../../components/Common/AddToCartModal";
+import { useAddToCartModal } from "../../hooks/useAddToCartModal";
+import { useToast } from "../../components/UI/ToastProvider";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -37,36 +40,15 @@ const Home = () => {
   const { enqueueSnackbar } = useSnackbar();
   const { toggleWishlist } = useToggleWishlist();
   const { checkIfInWishlist } = useWishlistHelpers();
+  const { showToast } = useToast();
 
   const [processingWishlist, setProcessingWishlist] = useState<Set<string>>(
     new Set()
   );
   const [processingCart, setProcessingCart] = useState<Set<string>>(new Set());
-  const [cartItems, setCartItems] = useState<Set<string>>(new Set());
 
-  // Helper function to check if course is in cart locally
-  const checkIfInCartLocal = (courseId: string) => {
-    return cartItems.has(courseId);
-  };
-
-  // Load cart items when component mounts
-  useEffect(() => {
-    const loadCartItems = async () => {
-      if (isAuthenticated) {
-        try {
-          const response = await getCart();
-          if (response.success && response.data) {
-            const cartCourseIds = response.data.map((course) => course.id);
-            setCartItems(new Set(cartCourseIds));
-          }
-        } catch (error) {
-          console.error("Failed to load cart items:", error);
-        }
-      }
-    };
-
-    loadCartItems();
-  }, [isAuthenticated]);
+  const { checkIfInCartLocal } = useCartHelpers();
+  const addToCartMutation = useAddToCart();
 
   const { data: allCoursesData, isLoading: allCoursesLoading } = useCourses({
     limit: 12,
@@ -89,6 +71,81 @@ const Home = () => {
 
   const categories = generateCategoriesWithCounts(allCourses);
 
+  const {
+    isModalOpen,
+    addedCourse,
+    recommendedCourses,
+    openModal,
+    closeModal,
+  } = useAddToCartModal(allCourses);
+
+  const handleAddAllToCart = async (courses: Course[]) => {
+    if (!isAuthenticated) {
+      navigate("/auth/login");
+      return;
+    }
+
+    if (courses.length === 0) {
+      showToast({
+        title: "📚 No Courses Available",
+        message: "All recommended courses are already in your cart!",
+        type: "info",
+        duration: 3000,
+      });
+      return;
+    }
+
+    try {
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (const course of courses) {
+        try {
+          if (!checkIfInCartLocal(course.id)) {
+            await addToCartMutation.mutateAsync(course.id);
+            successCount++;
+          }
+        } catch (error) {
+          console.error(`Failed to add course ${course.id} to cart:`, error);
+          errorCount++;
+        }
+      }
+
+      if (successCount > 0) {
+        showToast({
+          title: "🎉 Courses Added Successfully!",
+          message: `${successCount} ${
+            successCount > 1 ? "courses" : "course"
+          } ${successCount > 1 ? "have" : "has"} been added to your cart. ${
+            successCount > 1 ? "All courses are" : "Course is"
+          } ready for checkout!`,
+          type: "success",
+          duration: 3200,
+        });
+      }
+
+      if (errorCount > 0) {
+        showToast({
+          title: "⚠️ Partial Success",
+          message: `${errorCount} course${
+            errorCount > 1 ? "s" : ""
+          } couldn't be added. Please try again.`,
+          type: "warning",
+          duration: 4000,
+        });
+      }
+
+      closeModal();
+    } catch (error) {
+      showToast({
+        title: "❌ Operation Failed",
+        message: "Failed to add courses to cart. Please try again later.",
+        type: "error",
+        duration: 4000,
+      });
+    }
+  };
+
   const handleEnroll = () => {
     if (!isAuthenticated) {
       navigate("/auth/login");
@@ -104,7 +161,6 @@ const Home = () => {
       return;
     }
 
-    // Add course to processing state
     setProcessingWishlist((prev) => new Set([...prev, course.id]));
 
     try {
@@ -137,13 +193,6 @@ const Home = () => {
   const handleCartToggle = async (e: React.MouseEvent, course: Course) => {
     e.stopPropagation();
 
-    console.log("Cart button clicked:", {
-      courseTitle: course.title,
-      isAuthenticated,
-      isFree: course.isFree,
-      originalPrice: course.originalPrice,
-    });
-
     if (!isAuthenticated) {
       navigate("/auth/login");
       return;
@@ -155,49 +204,29 @@ const Home = () => {
     try {
       // Check if course is already in cart locally first (faster UI feedback)
       if (checkIfInCartLocal(course.id)) {
-        enqueueSnackbar(`"${course.title}" is already in your cart! 📚`, {
-          variant: "info",
-          autoHideDuration: 3000,
+        showToast({
+          title: "📚 Already in Cart",
+          message: `"${course.title}" is already in your cart!`,
+          type: "info",
+          duration: 3000,
         });
         return;
       }
 
-      // Double-check with server
-      const cartCheckResponse = await checkIfInCart(course.id);
+      // Add course to cart using the mutation
+      await addToCartMutation.mutateAsync(course.id);
 
-      if (cartCheckResponse.data.isInCart) {
-        // Update local state to match server
-        setCartItems((prev) => new Set([...prev, course.id]));
-        enqueueSnackbar(`"${course.title}" is already in your cart! 📚`, {
-          variant: "info",
-          autoHideDuration: 3000,
-        });
-        return;
-      }
-
-      // Add course to cart
-      const response = await addToCart(course.id);
-
-      if (response.success) {
-        // Update local cart state
-        setCartItems((prev) => new Set([...prev, course.id]));
-
-        enqueueSnackbar(`"${course.title}" added to cart successfully! 🛒`, {
-          variant: "success",
-          autoHideDuration: 3000,
-        });
-      } else {
-        throw new Error(response.message || "Failed to add to cart");
-      }
+      // Open the add to cart modal
+      openModal(course);
     } catch (error: any) {
       console.error("Cart error:", error);
-      enqueueSnackbar(
-        error.message || "Failed to add to cart. Please try again.",
-        {
-          variant: "error",
-          autoHideDuration: 3000,
-        }
-      );
+      showToast({
+        title: "❌ Failed to Add",
+        message:
+          error.message || "Failed to add course to cart. Please try again.",
+        type: "error",
+        duration: 4000,
+      });
     } finally {
       // Remove course from processing state
       setTimeout(() => {
@@ -1051,6 +1080,16 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* Add to Cart Modal */}
+      <AddToCartModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        addedCourse={addedCourse}
+        recommendedCourses={recommendedCourses}
+        onAddAllToCart={handleAddAllToCart}
+        checkIfInCart={checkIfInCartLocal}
+      />
     </div>
   );
 };

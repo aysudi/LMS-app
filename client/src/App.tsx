@@ -22,8 +22,9 @@ function App() {
               horizontal: "right",
             }}
             preventDuplicate
-          />
-          <RouterProvider router={router} />
+          >
+            <RouterProvider router={router} />
+          </SnackbarProvider>
         </ToastProvider>
       </AuthProvider>
     </QueryClientProvider>

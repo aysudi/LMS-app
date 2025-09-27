@@ -243,7 +243,7 @@ const Cart = () => {
               <button
                 onClick={handleClearCart}
                 disabled={isClearing}
-                className="px-4 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors flex items-center space-x-2 disabled:opacity-50"
+                className="px-4 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors flex items-center space-x-2 disabled:opacity-50 cursor-pointer"
               >
                 <FaTrash className="text-sm" />
                 <span>Clear Cart</span>
@@ -485,7 +485,7 @@ const CartItem: React.FC<CartItemProps> = ({
                 <button
                   onClick={onRemove}
                   disabled={isRemoving}
-                  className="text-red-600 hover:text-red-700 text-sm font-medium flex items-center space-x-1 disabled:opacity-50"
+                  className="text-red-600 hover:text-red-700 text-sm font-medium flex items-center space-x-1 disabled:opacity-50 cursor-pointer"
                 >
                   <FaTrash className="text-xs" />
                   <span>Remove</span>
@@ -493,7 +493,7 @@ const CartItem: React.FC<CartItemProps> = ({
                 {!isInWishlist && (
                   <button
                     onClick={onMoveToWishlist}
-                    className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center space-x-1"
+                    className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center space-x-1 cursor-pointer"
                   >
                     <FaHeart className="text-xs" />
                     <span>Save for Later</span>
