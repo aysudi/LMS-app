@@ -25,6 +25,7 @@ import {
 } from "../../hooks/useCourseQueries";
 import Loading from "../../components/Common/Loading";
 import ModernCourseCard from "../../components/Client/ModernCourseCard";
+import FreeCourseCard from "../../components/Client/FreeCourseCard";
 import type { Course } from "../../types/course.type";
 import { generateCategoriesWithCounts } from "../../constants/categories";
 import { addToCart, checkIfInCart, getCart } from "../../services/cart.service";
@@ -589,140 +590,18 @@ const Home = () => {
                         )
                           .slice(0, 4)
                           .map((course: Course, index: number) => (
-                            <motion.div
+                            <FreeCourseCard
                               key={index}
-                              initial={{ opacity: 0, y: 20 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ duration: 0.4, delay: index * 0.1 }}
-                              className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl shadow-md border border-green-200 overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer"
+                              course={course}
+                              index={index}
+                              onWishlistToggle={handleWishlistToggle}
+                              onCartToggle={handleCartToggle}
+                              checkIfInWishlist={checkIfInWishlist}
+                              checkIfInCart={checkIfInCartLocal}
+                              processingWishlist={processingWishlist}
+                              processingCart={processingCart}
                               onClick={() => handleCourseClick(course.id)}
-                            >
-                              <div className="relative">
-                                <img
-                                  src={
-                                    course.image ||
-                                    "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&h=200&fit=crop"
-                                  }
-                                  alt={course.title}
-                                  className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
-                                />
-                                <div className="absolute top-2 left-2">
-                                  <span className="px-2 py-1 bg-green-500 text-white text-xs font-medium rounded-full">
-                                    FREE
-                                  </span>
-                                </div>
-
-                                {/* Action Buttons */}
-                                <div className="absolute top-2 right-2 flex space-x-2">
-                                  <motion.button
-                                    whileHover={{ scale: 1.1 }}
-                                    whileTap={{ scale: 0.9 }}
-                                    onClick={(e) =>
-                                      handleWishlistToggle(e, course)
-                                    }
-                                    disabled={processingWishlist.has(course.id)}
-                                    className={`p-3 bg-white/90 rounded-full custom-icon-shadow transition-all duration-200 cursor-pointer ${
-                                      processingWishlist.has(course.id)
-                                        ? "text-purple-500 opacity-70"
-                                        : checkIfInWishlist(course.id)
-                                        ? "text-red-500 hover:bg-red-50"
-                                        : "text-gray-500 hover:bg-gray-50 hover:text-red-500"
-                                    }`}
-                                    title={
-                                      processingWishlist.has(course.id)
-                                        ? "Processing..."
-                                        : checkIfInWishlist(course.id)
-                                        ? "Remove from wishlist"
-                                        : "Add to wishlist"
-                                    }
-                                    animate={
-                                      processingWishlist.has(course.id)
-                                        ? { scale: [1, 1.1, 1] }
-                                        : {}
-                                    }
-                                    transition={
-                                      processingWishlist.has(course.id)
-                                        ? {
-                                            duration: 0.8,
-                                            repeat: Infinity,
-                                            ease: "easeInOut",
-                                          }
-                                        : {}
-                                    }
-                                  >
-                                    <FaHeart
-                                      className={`text-lg ${
-                                        checkIfInWishlist(course.id)
-                                          ? "fill-current"
-                                          : ""
-                                      }`}
-                                    />
-                                  </motion.button>
-
-                                  {!course.isFree && (
-                                    <motion.button
-                                      whileHover={{ scale: 1.1 }}
-                                      whileTap={{ scale: 0.9 }}
-                                      onClick={(e) =>
-                                        handleCartToggle(e, course)
-                                      }
-                                      disabled={processingCart.has(course.id)}
-                                      className={`p-3 bg-white/90 rounded-full custom-icon-shadow transition-all duration-200 ${
-                                        processingCart.has(course.id)
-                                          ? "text-orange-500 opacity-70 cursor-pointer"
-                                          : checkIfInCartLocal(course.id)
-                                          ? "text-blue-600 bg-blue-50 hover:bg-blue-100 cursor-pointer"
-                                          : "text-green-600 hover:bg-green-50 cursor-pointer"
-                                      }`}
-                                      title={
-                                        processingCart.has(course.id)
-                                          ? "Adding to cart..."
-                                          : checkIfInCartLocal(course.id)
-                                          ? "Already in cart"
-                                          : "Add to cart"
-                                      }
-                                      animate={
-                                        processingCart.has(course.id)
-                                          ? { scale: [1, 1.1, 1] }
-                                          : {}
-                                      }
-                                      transition={
-                                        processingCart.has(course.id)
-                                          ? {
-                                              duration: 0.8,
-                                              repeat: Infinity,
-                                              ease: "easeInOut",
-                                            }
-                                          : {}
-                                      }
-                                    >
-                                      <FaShoppingCart className="text-lg" />
-                                    </motion.button>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="p-4">
-                                <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-indigo-600 transition-colors">
-                                  {course.title}
-                                </h3>
-                                <p className="text-sm text-gray-600 mb-2">
-                                  by {course.instructor?.firstName}{" "}
-                                  {course.instructor?.lastName}
-                                </p>
-                                <div className="flex items-center gap-2 mb-2">
-                                  <div className="flex items-center gap-1">
-                                    <FaStar className="text-yellow-400 text-sm" />
-                                    <span className="text-sm font-medium">
-                                      {course.rating}
-                                    </span>
-                                  </div>
-                                  <span className="text-gray-300">•</span>
-                                  <span className="text-sm text-gray-600">
-                                    {course.enrollmentCount} students
-                                  </span>
-                                </div>
-                              </div>
-                            </motion.div>
+                            />
                           ))}
                   </div>
                 </motion.div>
@@ -1151,7 +1030,7 @@ const Home = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {courses.map((course: Course, index: number) => (
                           <ModernCourseCard
-                            key={`${category.id.toLowerCase()}-${course.id}`}
+                            key={index}
                             course={course}
                             index={index}
                             onWishlistToggle={handleWishlistToggle}
