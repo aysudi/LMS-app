@@ -4,6 +4,7 @@ import { SnackbarProvider } from "notistack";
 import ROUTES from "./route/routes";
 import { queryClient } from "./utils/queryClient";
 import { AuthProvider } from "./context/AuthContext";
+import { ToastProvider } from "./components/UI/ToastProvider";
 
 const router = createBrowserRouter(ROUTES);
 
@@ -11,17 +12,19 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <SnackbarProvider
-          maxSnack={3}
-          dense={false}
-          autoHideDuration={5000}
-          anchorOrigin={{
-            vertical: "top",
-            horizontal: "right",
-          }}
-          preventDuplicate
-        />
-        <RouterProvider router={router} />
+        <ToastProvider>
+          <SnackbarProvider
+            maxSnack={3}
+            dense={false}
+            autoHideDuration={5000}
+            anchorOrigin={{
+              vertical: "top",
+              horizontal: "right",
+            }}
+            preventDuplicate
+          />
+          <RouterProvider router={router} />
+        </ToastProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
