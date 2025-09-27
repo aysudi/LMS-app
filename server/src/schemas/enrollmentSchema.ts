@@ -1,0 +1,208 @@
+import mongoose from "mongoose";
+import { EnrollmentStatus } from "../types/enrollment.types";
+
+const enrollmentSchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    course: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Course",
+      required: true,
+    },
+    order: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Order",
+      required: true,
+    },
+    status: {
+      type: String,
+      enum: Object.values(EnrollmentStatus),
+      default: EnrollmentStatus.ACTIVE,
+    },
+    enrolledAt: {
+      type: Date,
+      default: Date.now,
+      required: true,
+    },
+    startedAt: {
+      type: Date,
+    },
+    completedAt: {
+      type: Date,
+    },
+    certificateIssued: {
+      type: Boolean,
+      default: false,
+    },
+    certificateIssuedAt: {
+      type: Date,
+    },
+    certificateId: {
+      type: String,
+      sparse: true,
+    },
+    progressPercentage: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 100,
+    },
+    totalWatchTime: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    lastAccessedAt: {
+      type: Date,
+    },
+    currentLesson: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Lesson",
+    },
+    completedLessons: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Lesson",
+      },
+    ],
+    bookmarkedLessons: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Lesson",
+      },
+    ],
+    notes: [
+      {
+        lesson: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Lesson",
+        },
+        content: {
+          type: String,
+          required: true,
+          maxlength: 1000,
+        },
+        timestamp: {
+          type: Number, // Video timestamp in seconds
+          required: true,
+        },
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
+    rating: {
+      type: Number,
+      min: 1,
+      max: 5,
+    },
+    review: {
+      type: String,
+      maxlength: 500,
+      trim: true,
+    },
+    reviewedAt: {
+      type: Date,
+    },
+    refundRequested: {
+      type: Boolean,
+      default: false,
+    },
+    refundRequestedAt: {
+      type: Date,
+    },
+    refundReason: {
+      type: String,
+      maxlength: 500,
+      trim: true,
+    },
+  },
+  {
+    timestamps: true,
+    versionKey: false,
+  }
+);
+
+enrollmentSchema.index({ user: 1, course: 1 }, { unique: true });
+enrollmentSchema.index({ user: 1, status: 1 });
+enrollmentSchema.index({ course: 1, status: 1 });
+enrollmentSchema.index({ user: 1, lastAccessedAt: -1 });
+enrollmentSchema.index({ user: 1, progressPercentage: -1 });
+
+enrollmentSchema.virtual("isCompleted").get(function () {
+  return (
+    this.progressPercentage === 100 &&
+    this.status === EnrollmentStatus.COMPLETED
+  );
+});
+
+enrollmentSchema.virtual("isInProgress").get(function () {
+  return (
+    this.progressPercentage > 0 &&
+    this.progressPercentage < 100 &&
+    this.status === EnrollmentStatus.ACTIVE
+  );
+});
+
+enrollmentSchema.methods.updateProgress = function (
+  completedLessonsCount: number,
+  totalLessonsCount: number
+) {
+  this.progressPercentage = Math.round(
+    (completedLessonsCount / totalLessonsCount) * 100
+  );
+
+  if (
+    this.progressPercentage === 100 &&
+    this.status === EnrollmentStatus.ACTIVE
+  ) {
+    this.status = EnrollmentStatus.COMPLETED;
+    this.completedAt = new Date();
+  }
+
+  this.lastAccessedAt = new Date();
+  return this.save();
+};
+
+enrollmentSchema.methods.addNote = function (
+  lessonId: string,
+  content: string,
+  timestamp: number
+) {
+  this.notes.push({
+    lesson: lessonId,
+    content: content.trim(),
+    timestamp,
+    createdAt: new Date(),
+  });
+  return this.save();
+};
+
+enrollmentSchema.methods.toggleBookmark = function (lessonId: string) {
+  const bookmarkIndex = this.bookmarkedLessons.indexOf(lessonId);
+
+  if (bookmarkIndex > -1) {
+    this.bookmarkedLessons.splice(bookmarkIndex, 1);
+  } else {
+    this.bookmarkedLessons.push(lessonId);
+  }
+
+  return this.save();
+};
+
+enrollmentSchema.methods.addReview = function (rating: number, review: string) {
+  this.rating = rating;
+  this.review = review.trim();
+  this.reviewedAt = new Date();
+  return this.save();
+};
+
+enrollmentSchema.set("toJSON", { virtuals: true });
+enrollmentSchema.set("toObject", { virtuals: true });
+
+export default enrollmentSchema;

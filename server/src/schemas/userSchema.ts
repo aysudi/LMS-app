@@ -177,6 +177,41 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    // Payment & Learning related fields
+    totalSpent: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    totalCoursesCompleted: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    totalLearningTime: {
+      type: Number,
+      default: 0,
+      min: 0, // in minutes
+    },
+    certificatesEarned: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    stripeCustomerId: {
+      type: String,
+      sparse: true,
+    },
+    preferredCurrency: {
+      type: String,
+      default: "USD",
+      uppercase: true,
+      minlength: 3,
+      maxlength: 3,
+    },
+    lastPurchaseAt: {
+      type: Date,
+    },
     emailVerificationToken: {
       type: String,
       select: false,
