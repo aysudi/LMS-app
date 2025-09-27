@@ -17,6 +17,7 @@ import personalizationRouter from "./routes/personalization.js";
 import searchRouter from "./routes/searchRoutes.js";
 import wishlistRouter from "./routes/wishlistRoutes.js";
 import cartRouter from "./routes/cartRoutes.js";
+import orderRouter from "./routes/orderRoutes.js";
 
 const app = express();
 
@@ -64,6 +65,7 @@ app.use("/api/personalization", personalizationRouter);
 app.use("/api/search", searchRouter);
 app.use("/api/wishlist", wishlistRouter);
 app.use("/api/cart", cartRouter);
+app.use("/api/orders", orderRouter);
 
 // 404 handler
 app.use(notFoundHandler);
