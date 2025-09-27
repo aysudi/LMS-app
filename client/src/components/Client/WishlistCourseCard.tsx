@@ -1,18 +1,10 @@
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import {
-  FaStar,
-  FaUsers,
-  FaArrowRight,
-  FaHeart,
-  FaShoppingCart,
-} from "react-icons/fa";
+import { FaStar, FaUsers, FaArrowRight, FaHeart } from "react-icons/fa";
 import { useAuthContext } from "../../context/AuthContext";
 import { usePersonalization } from "../../hooks/usePersonalization";
 import { useToggleWishlist, useWishlistHelpers } from "../../hooks/useWishlist";
 import { useSnackbar } from "notistack";
-import { addToCart, checkIfInCart } from "../../services/cart.service";
 import type { Course } from "../../types/course.type";
 
 interface CourseCardProps {
@@ -36,26 +28,6 @@ const CourseCard: React.FC<CourseCardProps> = ({
   const { addViewedCourse } = usePersonalization();
   const { toggleWishlist, isLoading: isToggling } = useToggleWishlist();
   const { checkIfInWishlist } = useWishlistHelpers();
-
-  const [processingCart, setProcessingCart] = useState(false);
-  const [isInCart, setIsInCart] = useState(false);
-
-  useEffect(() => {
-    const loadCartStatus = async () => {
-      if (isAuthenticated) {
-        try {
-          const response = await checkIfInCart(course.id);
-          if (response.success) {
-            setIsInCart(response.data.isInCart);
-          }
-        } catch (error) {
-          console.error("Failed to check cart status:", error);
-        }
-      }
-    };
-
-    loadCartStatus();
-  }, [isAuthenticated, course.id]);
 
   const handleCourseClick = (courseId: string | number) => {
     if (isAuthenticated) {
@@ -87,69 +59,6 @@ const CourseCard: React.FC<CourseCardProps> = ({
         variant: "error",
         autoHideDuration: 3000,
       });
-    }
-  };
-
-  const handleCartToggle = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-
-    console.log("Cart button clicked:", {
-      courseTitle: course.title,
-      isAuthenticated,
-      isFree: course.isFree,
-      originalPrice: course.originalPrice,
-    });
-
-    if (!isAuthenticated) {
-      navigate("/auth/login");
-      return;
-    }
-
-    if (isInCart) {
-      enqueueSnackbar(`"${course.title}" is already in your cart! 📚`, {
-        variant: "info",
-        autoHideDuration: 3000,
-      });
-      return;
-    }
-
-    setProcessingCart(true);
-
-    try {
-      const cartCheckResponse = await checkIfInCart(course.id);
-
-      if (cartCheckResponse.data.isInCart) {
-        setIsInCart(true);
-        enqueueSnackbar(`"${course.title}" is already in your cart! 📚`, {
-          variant: "info",
-          autoHideDuration: 3000,
-        });
-        return;
-      }
-
-      const response = await addToCart(course.id);
-
-      if (response.success) {
-        setIsInCart(true);
-
-        enqueueSnackbar(`"${course.title}" added to cart successfully! 🛒`, {
-          variant: "success",
-          autoHideDuration: 3000,
-        });
-      } else {
-        throw new Error(response.message || "Failed to add to cart");
-      }
-    } catch (error: any) {
-      console.error("Cart error:", error);
-      enqueueSnackbar(
-        error.message || "Failed to add to cart. Please try again.",
-        {
-          variant: "error",
-          autoHideDuration: 3000,
-        }
-      );
-    } finally {
-      setProcessingCart(false);
     }
   };
 
@@ -229,41 +138,6 @@ const CourseCard: React.FC<CourseCardProps> = ({
               />
             </motion.button>
           ) : null}
-
-          {!course.isFree && (
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={handleCartToggle}
-              disabled={processingCart}
-              className={`p-3 bg-white/90 rounded-full custom-icon-shadow transition-all duration-200 ${
-                processingCart
-                  ? "text-orange-500 opacity-70 cursor-pointer"
-                  : isInCart
-                  ? "text-blue-600 bg-blue-50 hover:bg-blue-100 cursor-pointer"
-                  : "text-green-600 hover:bg-green-50 cursor-pointer"
-              }`}
-              title={
-                processingCart
-                  ? "Adding to cart..."
-                  : isInCart
-                  ? "Already in cart"
-                  : "Add to cart"
-              }
-              animate={processingCart ? { scale: [1, 1.1, 1] } : {}}
-              transition={
-                processingCart
-                  ? {
-                      duration: 0.8,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }
-                  : {}
-              }
-            >
-              <FaShoppingCart className="text-lg" />
-            </motion.button>
-          )}
         </div>
 
         {/* Price Badge */}

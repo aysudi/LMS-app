@@ -15,14 +15,10 @@ import {
 } from "react-icons/fa";
 import { FaGrip } from "react-icons/fa6";
 
-import {
-  useWishlistHelpers,
-  useToggleWishlist,
-  useRemoveFromWishlist,
-} from "../../hooks/useWishlist";
+import { useWishlistHelpers, useToggleWishlist } from "../../hooks/useWishlist";
+import { useWishlistToast } from "../../hooks/useWishlistToast";
 
-import { useSnackbar } from "notistack";
-import CourseCard from "../../components/Client/HomeCourseCard";
+import CourseCard from "../../components/Client/WishlistCourseCard";
 import Loading from "../../components/Common/Loading";
 
 type ViewMode = "grid" | "list";
@@ -48,12 +44,21 @@ const Wishlist: React.FC = () => {
   const [isSortOpen, setIsSortOpen] = useState(false);
 
   const navigate = useNavigate();
-  const { enqueueSnackbar } = useSnackbar();
 
   const { wishlistItems, wishlistCount, isLoadingWishlist, error } =
     useWishlistHelpers();
-  const { toggleWishlist, isLoading: isToggling } = useToggleWishlist();
-  const removeFromWishlistMutation = useRemoveFromWishlist();
+  const { isLoading: isToggling } = useToggleWishlist();
+
+  const { removeFromWishlistWithToast, removeBulkFromWishlistWithToast } =
+    useWishlistToast({
+      onRemoveSuccess: (courseId) => {
+        setSelectedCourses((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(courseId);
+          return newSet;
+        });
+      },
+    });
 
   const filteredAndSortedCourses = useMemo(() => {
     let courses = [...wishlistItems];
@@ -61,21 +66,20 @@ const Wishlist: React.FC = () => {
     if (searchQuery.trim()) {
       courses = courses.filter(
         (course) =>
-          course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          course.title?.toLowerCase()?.includes(searchQuery.toLowerCase()) ||
           course.description
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase()) ||
-          course.instructor.firstName
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase()) ||
-          course.instructor.lastName
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase()) ||
-          course.category.toLowerCase().includes(searchQuery.toLowerCase())
+            ?.toLowerCase()
+            ?.includes(searchQuery.toLowerCase()) ||
+          course.instructor?.firstName
+            ?.toLowerCase()
+            ?.includes(searchQuery.toLowerCase()) ||
+          course.instructor?.lastName
+            ?.toLowerCase()
+            ?.includes(searchQuery.toLowerCase()) ||
+          course.category?.toLowerCase()?.includes(searchQuery.toLowerCase())
       );
     }
 
-    // Apply category filter
     if (filterBy !== "all") {
       courses = courses.filter((course) => {
         switch (filterBy) {
@@ -86,24 +90,23 @@ const Wishlist: React.FC = () => {
           case "beginner":
           case "intermediate":
           case "advanced":
-            return course.level.toLowerCase() === filterBy;
+            return course.level?.toLowerCase() === filterBy;
           default:
             return true;
         }
       });
     }
 
-    // Apply sorting
     courses.sort((a, b) => {
       switch (sortBy) {
         case "title":
-          return a.title.localeCompare(b.title);
+          return (a.title || "").localeCompare(b.title || "");
         case "price":
           const priceA = a.currentPrice || a.originalPrice || 0;
           const priceB = b.currentPrice || b.originalPrice || 0;
           return priceA - priceB;
         case "rating":
-          return b.rating - a.rating;
+          return (b.rating || 0) - (a.rating || 0);
         case "date":
         default:
           return (
@@ -119,23 +122,7 @@ const Wishlist: React.FC = () => {
     courseId: string,
     courseTitle: string
   ) => {
-    try {
-      await toggleWishlist(courseId, true);
-      enqueueSnackbar(`"${courseTitle}" removed from wishlist`, {
-        variant: "success",
-        autoHideDuration: 3000,
-      });
-      setSelectedCourses((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(courseId);
-        return newSet;
-      });
-    } catch (error) {
-      enqueueSnackbar("Failed to remove from wishlist", {
-        variant: "error",
-        autoHideDuration: 3000,
-      });
-    }
+    await removeFromWishlistWithToast(courseId, courseTitle, true);
   };
 
   const handleSelectCourse = (courseId: string) => {
@@ -161,45 +148,18 @@ const Wishlist: React.FC = () => {
   };
 
   const handleRemoveSelected = async () => {
-    const coursesToRemove = Array.from(selectedCourses);
-    const courseCount = coursesToRemove.length;
+    const coursesToRemove = Array.from(selectedCourses).map((courseId) => {
+      const course = wishlistItems.find((c) => c.id === courseId);
+      return {
+        id: courseId,
+        title: course?.title || "Unknown Course",
+      };
+    });
 
-    try {
-      for (let i = 0; i < coursesToRemove.length; i++) {
-        const courseId = coursesToRemove[i];
+    await removeBulkFromWishlistWithToast(coursesToRemove);
 
-        try {
-          await removeFromWishlistMutation.mutateAsync(courseId);
-        } catch (courseError) {
-          console.error(`Failed to remove course ${courseId}:`, courseError);
-        }
-
-        if (i < coursesToRemove.length - 1) {
-          await new Promise((resolve) => setTimeout(resolve, 100));
-        }
-      }
-
-      enqueueSnackbar(
-        `${courseCount} course${
-          courseCount > 1 ? "s" : ""
-        } removed from wishlist`,
-        {
-          variant: "success",
-          autoHideDuration: 3000,
-        }
-      );
-
-      setSelectedCourses(new Set());
-      setIsSelectionMode(false);
-    } catch (error) {
-      enqueueSnackbar("Failed to remove courses", {
-        variant: "error",
-        autoHideDuration: 3000,
-      });
-      console.error("Error in bulk removal:", error);
-      setSelectedCourses(new Set());
-      setIsSelectionMode(false);
-    }
+    setSelectedCourses(new Set());
+    setIsSelectionMode(false);
   };
 
   if (isLoadingWishlist) {
@@ -271,7 +231,7 @@ const Wishlist: React.FC = () => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setIsSelectionMode(true)}
-                    className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-all duration-200 flex items-center space-x-2"
+                    className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-all duration-200 flex items-center space-x-2 cursor-pointer"
                   >
                     <FaCheckCircle className="text-sm" />
                     <span>Select</span>
@@ -282,7 +242,7 @@ const Wishlist: React.FC = () => {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={handleSelectAll}
-                      className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-all duration-200"
+                      className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-all duration-200 cursor-pointer"
                     >
                       {selectedCourses.size === filteredAndSortedCourses.length
                         ? "Deselect All"
@@ -295,7 +255,7 @@ const Wishlist: React.FC = () => {
                         whileTap={{ scale: 0.95 }}
                         onClick={handleRemoveSelected}
                         disabled={isToggling}
-                        className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-medium rounded-lg transition-all duration-200 flex items-center space-x-2"
+                        className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-medium rounded-lg transition-all duration-200 flex items-center space-x-2 cursor-pointer"
                       >
                         {isToggling ? (
                           <FaSpinner className="text-sm animate-spin" />
@@ -313,7 +273,7 @@ const Wishlist: React.FC = () => {
                         setIsSelectionMode(false);
                         setSelectedCourses(new Set());
                       }}
-                      className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-all duration-200"
+                      className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-all duration-200 cursor-pointer"
                     >
                       Cancel
                     </motion.button>
