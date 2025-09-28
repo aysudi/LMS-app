@@ -203,6 +203,33 @@ courseSchema.methods.calculateDiscountPercentage = function () {
   return 0;
 };
 
+// Virtual to populate sections
+courseSchema.virtual("sections", {
+  ref: "Section",
+  localField: "_id",
+  foreignField: "course",
+  options: { sort: { order: 1 } },
+});
+
+// Method to recalculate course statistics
+courseSchema.methods.recalculateStats = async function () {
+  const Lesson = mongoose.model("Lesson");
+
+  // Get all lessons for this course
+  const lessons = await Lesson.find({ course: this._id });
+
+  // Calculate totals
+  this.totalLessons = lessons.length;
+  this.totalDuration = lessons.reduce(
+    (total, lesson) => total + lesson.duration,
+    0
+  );
+
+  // Save the updated course
+  await this.save();
+  return this;
+};
+
 // Indexes for better performance
 courseSchema.index({ title: "text", description: "text", tags: "text" });
 courseSchema.index({ category: 1, level: 1 });

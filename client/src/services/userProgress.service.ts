@@ -10,12 +10,12 @@ import { api } from "./api";
 class UserProgressService {
   async getUserProgress(courseId?: string): Promise<UserProgressResponse> {
     const params = courseId ? `?courseId=${courseId}` : "";
-    const response = await api.get(`/user-progress${params}`);
+    const response = await api.get(`/api/user-progress${params}`);
     return response.data;
   }
 
   async getCourseProgress(courseId: string): Promise<CourseProgressResponse> {
-    const response = await api.get(`/user-progress/course/${courseId}`);
+    const response = await api.get(`/api/user-progress/course/${courseId}`);
     return response.data;
   }
 
@@ -24,14 +24,14 @@ class UserProgressService {
     progressData: UpdateUserProgressRequest
   ): Promise<UpdateUserProgressResponse> {
     const response = await api.patch(
-      `/user-progress/course/${courseId}`,
+      `/api/user-progress/course/${courseId}`,
       progressData
     );
     return response.data;
   }
 
   async getLearningAnalytics(): Promise<LearningAnalyticsResponse> {
-    const response = await api.get("/user-progress/analytics");
+    const response = await api.get("/api/user-progress/analytics");
     return response.data;
   }
 }

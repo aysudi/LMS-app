@@ -195,11 +195,49 @@ enrollmentSchema.methods.toggleBookmark = function (lessonId: string) {
   return this.save();
 };
 
-enrollmentSchema.methods.addReview = function (rating: number, review: string) {
+enrollmentSchema.methods.addReview = async function (
+  rating: number,
+  review: string
+) {
+  // Update enrollment review
   this.rating = rating;
   this.review = review.trim();
   this.reviewedAt = new Date();
-  return this.save();
+
+  // Save enrollment first
+  await this.save();
+
+  // Also add review to course reviews array
+  const Course = mongoose.model("Course");
+  const course = await Course.findById(this.course);
+
+  if (course) {
+    // Check if user already has a review for this course
+    const existingReviewIndex = course.reviews.findIndex(
+      (r: any) => r.user.toString() === this.user.toString()
+    );
+
+    const reviewData = {
+      user: this.user,
+      rating: rating,
+      comment: review.trim(),
+      date: new Date(),
+    };
+
+    if (existingReviewIndex > -1) {
+      // Update existing review
+      course.reviews[existingReviewIndex] = reviewData;
+    } else {
+      // Add new review
+      course.reviews.push(reviewData);
+    }
+
+    // Recalculate course rating
+    course.calculateAverageRating();
+    await course.save();
+  }
+
+  return this;
 };
 
 enrollmentSchema.set("toJSON", { virtuals: true });
