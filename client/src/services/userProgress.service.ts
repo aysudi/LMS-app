@@ -75,20 +75,17 @@ export interface LearningAnalyticsResponse {
 }
 
 class UserProgressService {
-  // Get all user progress (optionally filtered by course)
   async getUserProgress(courseId?: string): Promise<UserProgressResponse> {
     const params = courseId ? `?courseId=${courseId}` : "";
     const response = await api.get(`/user-progress${params}`);
     return response.data;
   }
 
-  // Get course progress details
   async getCourseProgress(courseId: string): Promise<CourseProgressResponse> {
     const response = await api.get(`/user-progress/course/${courseId}`);
     return response.data;
   }
 
-  // Update lesson progress
   async updateLessonProgress(
     courseId: string,
     progressData: UpdateUserProgressRequest
@@ -100,7 +97,6 @@ class UserProgressService {
     return response.data;
   }
 
-  // Get learning analytics
   async getLearningAnalytics(): Promise<LearningAnalyticsResponse> {
     const response = await api.get("/user-progress/analytics");
     return response.data;
