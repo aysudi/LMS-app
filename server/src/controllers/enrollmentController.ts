@@ -232,7 +232,7 @@ export const addEnrollmentNote = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
     const { enrollmentId } = req.params;
-    const { lessonId, content, timestamp }: AddNoteRequest = req.body;
+    const { lesson, content, timestamp }: AddNoteRequest = req.body;
 
     if (!userId) {
       return res.status(401).json({
@@ -260,7 +260,7 @@ export const addEnrollmentNote = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    await enrollment.addNote(lessonId, content, timestamp);
+    await enrollment.addNote(lesson, content, timestamp);
 
     const addedNote = enrollment.notes[enrollment.notes.length - 1];
 

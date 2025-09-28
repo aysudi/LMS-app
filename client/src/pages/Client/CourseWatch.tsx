@@ -82,6 +82,7 @@ const CourseWatch: React.FC = () => {
 
   // Course state
   const [course, setCourse] = useState<Course | null>(null);
+  const [enrollmentId, setEnrollmentId] = useState<string | null>(null);
   const [currentSection, setCurrentSection] = useState(0);
   const [currentLesson, setCurrentLesson] = useState(0);
   const [userProgress, setUserProgress] = useState<UserProgress[]>([]);
@@ -135,7 +136,9 @@ const CourseWatch: React.FC = () => {
     };
 
     const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.target !== document.body) return;
+      // Allow keyboard shortcuts even when input elements are focused, except for textareas and inputs
+      const target = e.target as HTMLElement;
+      if (target.tagName === "TEXTAREA" || target.tagName === "INPUT") return;
 
       switch (e.code) {
         case "Space":
@@ -143,15 +146,19 @@ const CourseWatch: React.FC = () => {
           togglePlayPause();
           break;
         case "ArrowLeft":
+          e.preventDefault();
           seek(currentTime - 10);
           break;
         case "ArrowRight":
+          e.preventDefault();
           seek(currentTime + 10);
           break;
         case "KeyF":
+          e.preventDefault();
           toggleFullscreen();
           break;
         case "KeyM":
+          e.preventDefault();
           toggleMute();
           break;
       }
@@ -189,6 +196,23 @@ const CourseWatch: React.FC = () => {
 
       const courseData = await courseResponse.json();
       setCourse(courseData.data);
+
+      // Fetch user enrollment to get enrollmentId
+      const enrollmentResponse = await fetch(`${baseURL}/api/enrollments`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
+
+      if (enrollmentResponse.ok) {
+        const enrollmentData = await enrollmentResponse.json();
+        const enrollment = enrollmentData.data.enrollments.find(
+          (e: any) => e.course._id === courseId
+        );
+        if (enrollment) {
+          setEnrollmentId(enrollment.id);
+        }
+      }
 
       // Fetch user progress
       const progressResponse = await fetch(
@@ -399,7 +423,7 @@ const CourseWatch: React.FC = () => {
   };
 
   const addNote = async () => {
-    if (!newNote.trim() || !course) return;
+    if (!newNote.trim() || !course || !enrollmentId) return;
 
     const lesson = course.sections[currentSection]?.lessons[currentLesson];
     if (!lesson) return;
@@ -408,7 +432,7 @@ const CourseWatch: React.FC = () => {
       const baseURL = import.meta.env.VITE_API_URL || "http://localhost:4040";
 
       const response = await fetch(
-        `${baseURL}/api/enrollments/${courseId}/notes`,
+        `${baseURL}/api/enrollments/${enrollmentId}/notes`,
         {
           method: "POST",
           headers: {
@@ -416,7 +440,7 @@ const CourseWatch: React.FC = () => {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
           body: JSON.stringify({
-            lessonId: lesson._id,
+            lesson: lesson._id,
             content: newNote.trim(),
             timestamp: Math.floor(currentTime),
           }),
@@ -427,7 +451,6 @@ const CourseWatch: React.FC = () => {
         const noteData = await response.json();
         setNotes((prev) => [...prev, noteData.data]);
         setNewNote("");
-        console.log("Note added!");
       }
     } catch (error) {
       console.error("Error adding note:", error);
@@ -470,7 +493,41 @@ const CourseWatch: React.FC = () => {
     <div className="min-h-screen bg-gray-900 text-white flex">
       {/* Video Player */}
       <div className={`flex-1 relative ${showSidebar ? "mr-80" : ""}`}>
-        <div className="relative h-screen">
+        {/* Top Navigation Bar */}
+        <div className="absolute top-0 left-0 right-0 bg-gray-800/95 backdrop-blur-sm z-30 border-b border-gray-700">
+          <div className="flex items-center justify-between p-4">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => navigate("/my-learning")}
+                className="text-gray-300 hover:text-white transition-colors"
+              >
+                ← Back to My Learning
+              </button>
+              <div className="h-4 w-px bg-gray-600"></div>
+              <h1 className="text-lg font-semibold text-white truncate max-w-96">
+                {course.title}
+              </h1>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <div className="text-sm text-gray-300">
+                {currentSection + 1}.{currentLesson + 1} /{" "}
+                {course.sections.reduce(
+                  (total, section) => total + section.lessons.length,
+                  0
+                )}
+              </div>
+              <button
+                onClick={() => setShowSidebar(!showSidebar)}
+                className="p-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded"
+              >
+                <FaList />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="relative h-screen pt-16">
           <video
             ref={videoRef}
             className="w-full h-full object-contain bg-black"
@@ -519,13 +576,23 @@ const CourseWatch: React.FC = () => {
                   onClick={goToPreviousLesson}
                   className="p-2 hover:bg-white/20 rounded"
                   disabled={currentSection === 0 && currentLesson === 0}
+                  title="Previous Lesson"
                 >
                   <FaBackward />
                 </button>
 
                 <button
+                  onClick={() => seek(currentTime - 10)}
+                  className="p-2 hover:bg-white/20 rounded text-sm"
+                  title="Rewind 10 seconds (←)"
+                >
+                  -10s
+                </button>
+
+                <button
                   onClick={togglePlayPause}
                   className="p-3 hover:bg-white/20 rounded-full"
+                  title="Play/Pause (Spacebar)"
                 >
                   {isPlaying ? (
                     <FaPause className="text-xl" />
@@ -535,8 +602,17 @@ const CourseWatch: React.FC = () => {
                 </button>
 
                 <button
+                  onClick={() => seek(currentTime + 10)}
+                  className="p-2 hover:bg-white/20 rounded text-sm"
+                  title="Forward 10 seconds (→)"
+                >
+                  +10s
+                </button>
+
+                <button
                   onClick={goToNextLesson}
                   className="p-2 hover:bg-white/20 rounded"
+                  title="Next Lesson"
                 >
                   <FaForward />
                 </button>
@@ -571,6 +647,7 @@ const CourseWatch: React.FC = () => {
                     changePlaybackRate(parseFloat(e.target.value))
                   }
                   className="bg-black/50 border border-gray-600 rounded px-2 py-1 text-sm"
+                  title="Playback Speed"
                 >
                   <option value="0.5">0.5x</option>
                   <option value="0.75">0.75x</option>
@@ -581,15 +658,9 @@ const CourseWatch: React.FC = () => {
                 </select>
 
                 <button
-                  onClick={() => setShowSidebar(!showSidebar)}
-                  className="p-2 hover:bg-white/20 rounded"
-                >
-                  <FaList />
-                </button>
-
-                <button
                   onClick={toggleFullscreen}
                   className="p-2 hover:bg-white/20 rounded"
+                  title="Fullscreen (F)"
                 >
                   {isFullscreen ? <FaCompress /> : <FaExpand />}
                 </button>
@@ -598,12 +669,14 @@ const CourseWatch: React.FC = () => {
           </div>
 
           {/* Lesson Info Overlay */}
-          <div className="absolute top-4 left-4 right-4">
+          <div className="absolute top-20 left-4 right-4">
             <div className="bg-black/50 rounded-lg p-4">
               <h1 className="text-xl font-bold mb-1">
                 {currentLessonObj?.title}
               </h1>
-              <p className="text-gray-300 text-sm">{course.title}</p>
+              <p className="text-gray-300 text-sm">
+                Section: {course.sections[currentSection]?.title}
+              </p>
               {lessonProgress?.completed && (
                 <div className="flex items-center mt-2 text-green-400 text-sm">
                   <FaCheck className="mr-1" />
@@ -614,7 +687,7 @@ const CourseWatch: React.FC = () => {
           </div>
 
           {/* Action Buttons */}
-          <div className="absolute top-4 right-4 flex flex-col space-y-2">
+          <div className="absolute top-20 right-4 flex flex-col space-y-2">
             <button
               onClick={markLessonComplete}
               className="p-3 bg-green-600 hover:bg-green-700 rounded-full"
@@ -654,16 +727,29 @@ const CourseWatch: React.FC = () => {
 
       {/* Sidebar */}
       {showSidebar && (
-        <div className="w-80 bg-gray-800 h-screen overflow-y-auto fixed right-0 top-0 border-l border-gray-700">
+        <div className="w-80 bg-gray-800 h-screen overflow-y-auto fixed right-0 top-0 border-l border-gray-700 z-40">
           <div className="p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold">Course Content</h2>
-              <button
-                onClick={() => setShowSidebar(false)}
-                className="p-1 hover:bg-gray-700 rounded"
-              >
-                <FaTimes />
-              </button>
+            {/* Header with course info */}
+            <div className="bg-gray-900 -m-4 p-4 mb-4 border-b border-gray-700">
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-lg font-bold">Course Content</h2>
+                <button
+                  onClick={() => setShowSidebar(false)}
+                  className="p-1 hover:bg-gray-700 rounded"
+                >
+                  <FaTimes />
+                </button>
+              </div>
+              <h3 className="text-sm font-medium text-gray-300 truncate">
+                {course.title}
+              </h3>
+              <p className="text-xs text-gray-400 mt-1">
+                {course.sections.reduce(
+                  (total, section) => total + section.lessons.length,
+                  0
+                )}{" "}
+                lessons
+              </p>
             </div>
 
             {/* Course Sections */}
@@ -729,6 +815,34 @@ const CourseWatch: React.FC = () => {
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* Footer-like section with course info */}
+            <div className="sticky bottom-0 bg-gray-900 -mx-4 px-4 py-3 border-t border-gray-700 mt-4">
+              <div className="text-xs text-gray-400 space-y-1">
+                <div>
+                  Instructor: {course.instructor.firstName}{" "}
+                  {course.instructor.lastName}
+                </div>
+                <div>
+                  Total Duration: {Math.floor(course.totalDuration / 3600)}h{" "}
+                  {Math.floor((course.totalDuration % 3600) / 60)}m
+                </div>
+                <div className="flex items-center space-x-4 pt-2">
+                  <button
+                    onClick={() => navigate("/my-learning")}
+                    className="text-blue-400 hover:text-blue-300 text-xs"
+                  >
+                    My Learning
+                  </button>
+                  <button
+                    onClick={() => navigate(`/course/${courseId}`)}
+                    className="text-blue-400 hover:text-blue-300 text-xs"
+                  >
+                    Course Details
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
