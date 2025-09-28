@@ -15,6 +15,7 @@ import type {
   AddReviewResponse,
   LearningStatsResponse,
 } from "../types/enrollment.types";
+import formatMongoData from "../utils/formatMongoData";
 
 // Get user's enrollments with optional filtering
 export const getUserEnrollments = async (req: AuthRequest, res: Response) => {
@@ -39,13 +40,11 @@ export const getUserEnrollments = async (req: AuthRequest, res: Response) => {
     const limitNum = Math.min(50, parseInt(limit as string));
     const skip = (pageNum - 1) * limitNum;
 
-    // Build query filter
     const filter: any = { user: userId };
     if (status && status !== "all") {
       filter.status = status;
     }
 
-    // Build sort object
     const sortObj: any = {};
     sortObj[sortBy as string] = sortOrder === "desc" ? -1 : 1;
 
@@ -73,7 +72,7 @@ export const getUserEnrollments = async (req: AuthRequest, res: Response) => {
     const response: EnrollmentListResponse = {
       success: true,
       data: {
-        enrollments,
+        enrollments: formatMongoData(enrollments),
         total,
         page: pageNum,
         totalPages: Math.ceil(total / limitNum),
@@ -109,16 +108,12 @@ export const getEnrollmentById = async (req: AuthRequest, res: Response) => {
     })
       .populate({
         path: "course",
-        populate: [
-          {
-            path: "instructor",
-            select: "firstName lastName avatar bio",
-          },
-          {
-            path: "sections.lessons",
-            select: "title description duration order type videoUrl",
-          },
-        ],
+        select:
+          "title description image instructor category originalPrice discountPrice totalLessons totalDuration rating studentsEnrolled",
+        populate: {
+          path: "instructor",
+          select: "firstName lastName avatar",
+        },
       })
       .populate({
         path: "completedLessons",
@@ -136,13 +131,12 @@ export const getEnrollmentById = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Update last accessed time
     enrollment.lastAccessedAt = new Date();
     await enrollment.save();
 
     const response: EnrollmentDetailsResponse = {
       success: true,
-      data: enrollment,
+      data: formatMongoData(enrollment),
     };
 
     res.json(response);
@@ -367,7 +361,7 @@ export const addCourseReview = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    await enrollment.addReview(rating, review || "");
+    const reviewRes = await enrollment.addReview(rating, review || "");
 
     const response: AddReviewResponse = {
       success: true,

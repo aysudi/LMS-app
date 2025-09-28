@@ -17,7 +17,6 @@ import {
 const MyLearning = () => {
   const navigate = useNavigate();
 
-  // Fetch user's enrollments and learning stats
   const {
     data: enrollmentsData,
     isLoading: enrollmentsLoading,
@@ -197,7 +196,7 @@ const MyLearning = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {enrolledCourses.map((enrollment, index) => (
               <motion.div
-                key={enrollment._id}
+                key={index}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
