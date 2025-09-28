@@ -323,7 +323,6 @@ export const toggleLessonBookmark = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Add course review
 export const addCourseReview = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
@@ -373,7 +372,6 @@ export const addCourseReview = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Get learning statistics
 export const getLearningStats = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
@@ -385,7 +383,6 @@ export const getLearningStats = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Get all user enrollments
     const enrollments = await Enrollment.find({ user: userId }).populate(
       "course",
       "category"

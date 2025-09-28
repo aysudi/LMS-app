@@ -26,7 +26,7 @@ userProgressRouter.get("/course/:courseId", authenticateToken, (req, res) =>
 );
 
 // PATCH /api/user-progress/course/:courseId - Update lesson progress
-userProgressRouter.patch("/course/:courseId", authenticateToken, (req, res) =>
+userProgressRouter.patch("/:courseId", authenticateToken, (req, res) =>
   updateLessonProgress(req as AuthRequest, res)
 );
 
