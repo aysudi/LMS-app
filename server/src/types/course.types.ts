@@ -42,6 +42,7 @@ export interface ICourse extends Document {
     enrollmentDate: Date;
   }[];
   calculateAverageRating(): void;
+  recalculateStats(): Promise<void>;
 }
 
 export interface CourseQuery {

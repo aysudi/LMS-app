@@ -11,7 +11,6 @@ import {
 import UserNote from "../models/UserNote";
 import UserProgress from "../models/UserProgress";
 
-// Get all courses with filtering, pagination, and search
 export const getAllCoursesService = async (query: CourseQuery = {}) => {
   const {
     page = 1,
@@ -26,32 +25,26 @@ export const getAllCoursesService = async (query: CourseQuery = {}) => {
     sortOrder = "desc",
   } = query;
 
-  // Build filter query
   const filter: FilterQuery<ICourse> = {};
 
   if (category) filter.category = category;
   if (level) filter.level = level;
   if (instructor) filter.instructor = instructor;
 
-  // Price range filter
   if (minPrice !== undefined || maxPrice !== undefined) {
     filter.originalPrice = {};
     if (minPrice !== undefined) filter.originalPrice.$gte = minPrice;
     if (maxPrice !== undefined) filter.originalPrice.$lte = maxPrice;
   }
 
-  // Text search
   if (search) {
     filter.$text = { $search: search };
   }
 
-  // Only show published courses by default
   filter.isPublished = true;
 
-  // Build sort object
   const sort: any = {};
   if (sortBy === "studentsCount") {
-    // Sort by number of enrolled students
     sort["studentsEnrolled"] = sortOrder === "asc" ? 1 : -1;
   } else {
     sort[sortBy] = sortOrder === "asc" ? 1 : -1;
@@ -62,6 +55,7 @@ export const getAllCoursesService = async (query: CourseQuery = {}) => {
   const [courses, total] = await Promise.all([
     Course.find(filter)
       .populate("instructor", "firstName lastName email avatar")
+      .populate("sections")
       .sort(sort)
       .skip(skip)
       .limit(limit)
