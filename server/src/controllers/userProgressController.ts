@@ -103,7 +103,7 @@ export const updateLessonProgress = async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
     const { courseId } = req.params;
     const {
-      lessonId,
+      lesson,
       completed,
       watchTime = 0,
     }: UpdateUserProgressRequest = req.body;
@@ -119,14 +119,14 @@ export const updateLessonProgress = async (req: AuthRequest, res: Response) => {
     let userProgress = await UserProgress.findOne({
       user: userId,
       course: courseId,
-      lesson: lessonId,
+      lesson: lesson,
     });
 
     if (!userProgress) {
       userProgress = new UserProgress({
         user: userId,
         course: courseId,
-        lesson: lessonId,
+        lesson: lesson,
         completed: false,
         watchTime: 0,
       });
@@ -180,11 +180,11 @@ export const updateLessonProgress = async (req: AuthRequest, res: Response) => {
       };
 
       // Update lesson in enrollment's completedLessons array
-      if (completed && !enrollment.completedLessons.includes(lessonId)) {
-        enrollment.completedLessons.push(lessonId);
+      if (completed && !enrollment.completedLessons.includes(lesson)) {
+        enrollment.completedLessons.push(lesson);
         await enrollment.save();
-      } else if (!completed && enrollment.completedLessons.includes(lessonId)) {
-        const index = enrollment.completedLessons.indexOf(lessonId);
+      } else if (!completed && enrollment.completedLessons.includes(lesson)) {
+        const index = enrollment.completedLessons.indexOf(lesson);
         enrollment.completedLessons.splice(index, 1);
         await enrollment.save();
       }

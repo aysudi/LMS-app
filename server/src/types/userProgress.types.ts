@@ -11,7 +11,6 @@ export interface IUserProgress extends Document {
   updatedAt: Date;
 }
 
-// Request/Response types
 export interface UserProgressResponse {
   success: boolean;
   data?: IUserProgress[];
@@ -19,7 +18,7 @@ export interface UserProgressResponse {
 }
 
 export interface UpdateUserProgressRequest {
-  lessonId: string;
+  lesson: string;
   completed?: boolean;
   watchTime?: number;
 }
