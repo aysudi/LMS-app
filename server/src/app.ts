@@ -19,6 +19,8 @@ import wishlistRouter from "./routes/wishlistRoutes.js";
 import cartRouter from "./routes/cartRoutes.js";
 import orderRouter from "./routes/orderRoutes.js";
 import stripeRouter from "./routes/stripeRoute.js";
+import enrollmentRouter from "./routes/enrollmentRoutes.js";
+import userProgressRouter from "./routes/userProgressRoutes.js";
 
 const app = express();
 
@@ -68,6 +70,8 @@ app.use("/api/wishlist", wishlistRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/orders", orderRouter);
 app.use("/api/payments", stripeRouter);
+app.use("/api/enrollments", enrollmentRouter);
+app.use("/api/user-progress", userProgressRouter);
 
 // 404 handler
 app.use(notFoundHandler);
