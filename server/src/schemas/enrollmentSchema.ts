@@ -169,6 +169,35 @@ enrollmentSchema.methods.updateProgress = function (
   return this.save();
 };
 
+enrollmentSchema.methods.recalculateProgress = async function () {
+  const UserProgress = mongoose.model("UserProgress");
+  const Course = mongoose.model("Course");
+
+  // Get course to know total lessons
+  const course = await Course.findById(this.course);
+  if (!course) return this;
+
+  // Get completed lessons count from UserProgress
+  const completedCount = await UserProgress.countDocuments({
+    user: this.user,
+    course: this.course,
+    completed: true,
+  });
+
+  // Get all user progress for this course to update completedLessons array
+  const allProgress = await UserProgress.find({
+    user: this.user,
+    course: this.course,
+    completed: true,
+  });
+
+  // Update completedLessons array
+  this.completedLessons = allProgress.map((p) => p.lesson);
+
+  // Calculate and update progress
+  return this.updateProgress(completedCount, course.totalLessons || 0);
+};
+
 enrollmentSchema.methods.addNote = function (
   lessonId: string,
   content: string,

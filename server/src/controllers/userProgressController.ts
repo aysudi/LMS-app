@@ -160,34 +160,13 @@ export const updateLessonProgress = async (req: AuthRequest, res: Response) => {
     };
 
     if (enrollment) {
-      // Get total lessons in course
-      const course = await Course.findById(courseId);
-      const totalLessons = course?.totalLessons || 0;
-
-      // Get completed lessons count
-      const completedLessonsCount = await UserProgress.countDocuments({
-        user: userId,
-        course: courseId,
-        completed: true,
-      });
-
-      // Update enrollment progress
-      await enrollment.updateProgress(completedLessonsCount, totalLessons);
+      // Recalculate progress based on actual UserProgress records
+      await (enrollment as any).recalculateProgress();
 
       enrollmentProgress = {
         progressPercentage: enrollment.progressPercentage,
         isCompleted: enrollment.status === "completed",
       };
-
-      // Update lesson in enrollment's completedLessons array
-      if (completed && !enrollment.completedLessons.includes(lesson)) {
-        enrollment.completedLessons.push(lesson);
-        await enrollment.save();
-      } else if (!completed && enrollment.completedLessons.includes(lesson)) {
-        const index = enrollment.completedLessons.indexOf(lesson);
-        enrollment.completedLessons.splice(index, 1);
-        await enrollment.save();
-      }
     }
 
     // Update user's total learning time
