@@ -2,10 +2,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSnackbar } from "notistack";
 import enrollmentService from "../services/enrollment.service";
 import type {
-  UpdateProgressRequest,
   AddNoteRequest,
   AddReviewRequest,
-} from "../services/enrollment.service";
+  UpdateProgressRequest,
+} from "../types/enrollment.type";
 
 // Hook for getting user enrollments
 export const useUserEnrollments = (
