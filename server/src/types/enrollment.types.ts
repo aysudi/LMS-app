@@ -96,7 +96,7 @@ export interface UpdateProgressResponse {
 }
 
 export interface AddNoteRequest {
-  lessonId: string;
+  lesson: string;
   content: string;
   timestamp: number;
 }

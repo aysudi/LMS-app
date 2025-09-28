@@ -1,4 +1,5 @@
 import ClientLayout from "../layout/ClientLayout";
+import StudentLearningLayout from "../layout/StudentLearningLayout";
 import AuthError from "../pages/Auth/AuthError";
 import AuthSuccess from "../pages/Auth/AuthSuccess";
 import ForgotPassword from "../pages/Auth/ForgotPassword";
@@ -88,20 +89,27 @@ const ROUTES = [
         element: <CourseDetails />,
       },
       {
-        path: "course/:courseId/learn",
-        element: (
-          <ProtectedRoute>
-            <CourseWatch />
-          </ProtectedRoute>
-        ),
-      },
-      {
         path: "about",
         element: <About />,
       },
       {
         path: "contact",
         element: <Contact />,
+      },
+    ],
+  },
+  //student learning routes (no header/footer for focused learning)
+  {
+    path: "/course",
+    element: <StudentLearningLayout />,
+    children: [
+      {
+        path: ":courseId/learn",
+        element: (
+          <ProtectedRoute>
+            <CourseWatch />
+          </ProtectedRoute>
+        ),
       },
     ],
   },

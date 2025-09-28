@@ -27,7 +27,7 @@ export const getCourseProgress = async (req: AuthRequest, res: Response) => {
 
     // Get course with lessons
     const course = await Course.findById(courseId).populate(
-      "sections.lessons",
+      "sections",
       "_id title order duration"
     );
 
@@ -42,6 +42,9 @@ export const getCourseProgress = async (req: AuthRequest, res: Response) => {
     const allLessons = (course as any).sections.flatMap(
       (section: any) => section.lessons
     );
+    console.log("sections:", (course as any).sections);
+
+    // console.log("lessons:", allLessons);
 
     // Get user progress for all lessons in the course
     const userProgresses = await UserProgress.find({
