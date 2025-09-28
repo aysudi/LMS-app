@@ -51,6 +51,7 @@ export interface IEnrollment extends Document {
     completedLessonsCount: number,
     totalLessonsCount: number
   ): Promise<IEnrollment>;
+  recalculateProgress(): Promise<IEnrollment>;
   addNote(
     lessonId: string,
     content: string,

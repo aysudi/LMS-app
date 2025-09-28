@@ -7,6 +7,8 @@ import {
   toggleLessonBookmark,
   addCourseReview,
   getLearningStats,
+  recalculateEnrollmentProgress,
+  recalculateAllUserProgress,
 } from "../controllers/enrollmentController";
 import { authenticateToken } from "../middlewares/auth.middleware";
 import { AuthRequest } from "../types/common.types";
@@ -47,6 +49,20 @@ enrollmentRouter.patch(
 // POST /api/enrollments/:enrollmentId/review - Add course review
 enrollmentRouter.post("/:enrollmentId/review", authenticateToken, (req, res) =>
   addCourseReview(req as AuthRequest, res)
+);
+
+// POST /api/enrollments/:enrollmentId/recalculate-progress - Recalculate enrollment progress
+enrollmentRouter.post(
+  "/:enrollmentId/recalculate-progress",
+  authenticateToken,
+  (req, res) => recalculateEnrollmentProgress(req as AuthRequest, res)
+);
+
+// POST /api/enrollments/recalculate-all-progress - Recalculate all user enrollments progress
+enrollmentRouter.post(
+  "/recalculate-all-progress",
+  authenticateToken,
+  (req, res) => recalculateAllUserProgress(req as AuthRequest, res)
 );
 
 export default enrollmentRouter;

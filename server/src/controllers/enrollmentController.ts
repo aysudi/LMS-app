@@ -439,3 +439,96 @@ export const getLearningStats = async (req: AuthRequest, res: Response) => {
     });
   }
 };
+
+// Recalculate enrollment progress (for fixing inconsistencies)
+export const recalculateEnrollmentProgress = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  try {
+    const userId = req.user?.id;
+    const { enrollmentId } = req.params;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    const enrollment = await Enrollment.findOne({
+      _id: enrollmentId,
+      user: userId,
+    });
+
+    if (!enrollment) {
+      return res.status(404).json({
+        success: false,
+        message: "Enrollment not found",
+      });
+    }
+
+    // Recalculate progress
+    await (enrollment as any).recalculateProgress();
+
+    res.json({
+      success: true,
+      message: "Progress recalculated successfully",
+      data: {
+        progressPercentage: enrollment.progressPercentage,
+        completedLessons: enrollment.completedLessons.length,
+        status: enrollment.status,
+      },
+    });
+  } catch (error: any) {
+    console.error("Recalculate progress error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to recalculate progress",
+    });
+  }
+};
+
+// Recalculate all user enrollments progress
+export const recalculateAllUserProgress = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    const enrollments = await Enrollment.find({ user: userId });
+
+    let updated = 0;
+    for (const enrollment of enrollments) {
+      try {
+        await (enrollment as any).recalculateProgress();
+        updated++;
+      } catch (error) {
+        console.error(`Error updating enrollment ${enrollment._id}:`, error);
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Successfully updated ${updated} out of ${enrollments.length} enrollments`,
+      data: {
+        totalEnrollments: enrollments.length,
+        updated,
+      },
+    });
+  } catch (error: any) {
+    console.error("Recalculate all progress error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to recalculate progress",
+    });
+  }
+};

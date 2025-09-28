@@ -19,6 +19,7 @@ import Cart from "../pages/Client/Cart";
 import Checkout from "../pages/Client/Checkout";
 import MyLearning from "../pages/Client/MyLearning";
 import PaymentSuccess from "../pages/Client/PaymentSuccess";
+import CourseWatch from "../pages/Client/CourseWatch";
 
 const ROUTES = [
   //client routes
@@ -85,6 +86,14 @@ const ROUTES = [
       {
         path: "course/:courseId",
         element: <CourseDetails />,
+      },
+      {
+        path: "course/:courseId/learn",
+        element: (
+          <ProtectedRoute>
+            <CourseWatch />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "about",
