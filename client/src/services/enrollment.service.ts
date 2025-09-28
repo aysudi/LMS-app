@@ -29,14 +29,16 @@ class EnrollmentService {
     if (params.sortBy) queryParams.append("sortBy", params.sortBy);
     if (params.sortOrder) queryParams.append("sortOrder", params.sortOrder);
 
-    const response = await api.get(`/enrollments?${queryParams.toString()}`);
+    const response = await api.get(
+      `/api/enrollments?${queryParams.toString()}`
+    );
     return response.data;
   }
 
   async getEnrollmentById(
     enrollmentId: string
   ): Promise<EnrollmentDetailsResponse> {
-    const response = await api.get(`/enrollments/${enrollmentId}`);
+    const response = await api.get(`/api/enrollments/${enrollmentId}`);
     return response.data;
   }
 
@@ -45,7 +47,7 @@ class EnrollmentService {
     progressData: UpdateProgressRequest
   ): Promise<UpdateProgressResponse> {
     const response = await api.patch(
-      `/enrollments/${enrollmentId}/progress`,
+      `/api/enrollments/${enrollmentId}/progress`,
       progressData
     );
     return response.data;
@@ -56,16 +58,19 @@ class EnrollmentService {
     noteData: AddNoteRequest
   ): Promise<AddNoteResponse> {
     const response = await api.post(
-      `/enrollments/${enrollmentId}/notes`,
+      `/api/enrollments/${enrollmentId}/notes`,
       noteData
     );
     return response.data;
   }
 
   async toggleLessonBookmark(enrollmentId: string, lessonId: string) {
-    const response = await api.patch(`/enrollments/${enrollmentId}/bookmark`, {
-      lessonId,
-    });
+    const response = await api.patch(
+      `/api/enrollments/${enrollmentId}/bookmark`,
+      {
+        lessonId,
+      }
+    );
     return response.data;
   }
 
@@ -74,14 +79,14 @@ class EnrollmentService {
     reviewData: AddReviewRequest
   ): Promise<AddReviewResponse> {
     const response = await api.post(
-      `/enrollments/${enrollmentId}/review`,
+      `/api/enrollments/${enrollmentId}/review`,
       reviewData
     );
     return response.data;
   }
 
   async getLearningStats(): Promise<LearningStatsResponse> {
-    const response = await api.get("/enrollments/stats");
+    const response = await api.get("/api/enrollments/stats");
     return response.data;
   }
 }

@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSnackbar } from "notistack";
 import userProgressService from "../services/userProgress.service";
-import type { UpdateUserProgressRequest } from "../services/userProgress.service";
+import type { UpdateUserProgressRequest } from "../types/user-progress.type";
 
 // Hook for getting user progress
 export const useUserProgress = (courseId?: string) => {
