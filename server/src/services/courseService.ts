@@ -86,6 +86,7 @@ export const getCourseByIdService = async (
 
   const course = await Course.findOne(filter)
     .populate("instructor", "firstName lastName email avatar bio")
+    .populate("sections")
     .populate("reviews.user", "firstName lastName avatar")
     .lean();
 
@@ -183,15 +184,14 @@ export const getUserCoursesService = async (userId: string) => {
     isPublished: true,
   })
     .populate("instructor", "firstName lastName avatar")
+    .populate("sections")
     .select(
       "title description image price level rating totalDuration totalLessons"
     )
     .lean();
 
-  // Get user progress for each course using UserProgress model
   const coursesWithProgress = await Promise.all(
     courses.map(async (course) => {
-      // Import UserProgress here to avoid circular dependencies
       const UserProgress = require("../models/UserProgress").default;
 
       const userProgress = await UserProgress.find({

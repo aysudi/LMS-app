@@ -111,7 +111,7 @@ export interface AddNoteResponse {
 
 export interface AddReviewRequest {
   rating: number;
-  review: string;
+  comment: string;
 }
 
 export interface AddReviewResponse {

@@ -163,7 +163,6 @@ const courseSchema = new mongoose.Schema(
   }
 );
 
-// Method to calculate average rating
 courseSchema.methods.calculateAverageRating = function () {
   if (this.reviews.length === 0) {
     this.rating = 0;
@@ -179,7 +178,6 @@ courseSchema.methods.calculateAverageRating = function () {
   this.ratingsCount = this.reviews.length;
 };
 
-// Virtual property to get current price
 courseSchema.virtual("currentPrice").get(function () {
   if (this.isFree) return 0;
   if (this.discountPrice > 0 && this.discountPrice < this.originalPrice) {
@@ -188,12 +186,10 @@ courseSchema.virtual("currentPrice").get(function () {
   return this.originalPrice;
 });
 
-// Virtual property to check if course has discount
 courseSchema.virtual("hasDiscount").get(function () {
   return this.discountPrice > 0 && this.discountPrice < this.originalPrice;
 });
 
-// Method to calculate discount percentage
 courseSchema.methods.calculateDiscountPercentage = function () {
   if (this.hasDiscount) {
     return Math.round(
@@ -203,7 +199,6 @@ courseSchema.methods.calculateDiscountPercentage = function () {
   return 0;
 };
 
-// Virtual to populate sections
 courseSchema.virtual("sections", {
   ref: "Section",
   localField: "_id",
@@ -211,26 +206,21 @@ courseSchema.virtual("sections", {
   options: { sort: { order: 1 } },
 });
 
-// Method to recalculate course statistics
 courseSchema.methods.recalculateStats = async function () {
   const Lesson = mongoose.model("Lesson");
 
-  // Get all lessons for this course
   const lessons = await Lesson.find({ course: this._id });
 
-  // Calculate totals
   this.totalLessons = lessons.length;
   this.totalDuration = lessons.reduce(
     (total, lesson) => total + lesson.duration,
     0
   );
 
-  // Save the updated course
   await this.save();
   return this;
 };
 
-// Indexes for better performance
 courseSchema.index({ title: "text", description: "text", tags: "text" });
 courseSchema.index({ category: 1, level: 1 });
 courseSchema.index({ instructor: 1 });

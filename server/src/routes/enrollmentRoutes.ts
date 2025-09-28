@@ -13,17 +13,14 @@ import { AuthRequest } from "../types/common.types";
 
 const enrollmentRouter = Router();
 
-// GET /api/enrollments - Get user's enrollments
 enrollmentRouter.get("/", authenticateToken, (req, res) =>
   getUserEnrollments(req as AuthRequest, res)
 );
 
-// GET /api/enrollments/stats - Get learning statistics
 enrollmentRouter.get("/stats", authenticateToken, (req, res) =>
   getLearningStats(req as AuthRequest, res)
 );
 
-// GET /api/enrollments/:enrollmentId - Get specific enrollment
 enrollmentRouter.get("/:enrollmentId", authenticateToken, (req, res) =>
   getEnrollmentById(req as AuthRequest, res)
 );

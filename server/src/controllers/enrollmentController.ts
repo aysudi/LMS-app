@@ -17,7 +17,6 @@ import type {
 } from "../types/enrollment.types";
 import formatMongoData from "../utils/formatMongoData";
 
-// Get user's enrollments with optional filtering
 export const getUserEnrollments = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
@@ -89,7 +88,6 @@ export const getUserEnrollments = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Get specific enrollment details
 export const getEnrollmentById = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
@@ -149,7 +147,6 @@ export const getEnrollmentById = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Update enrollment progress (lesson completion)
 export const updateEnrollmentProgress = async (
   req: AuthRequest,
   res: Response
@@ -231,7 +228,6 @@ export const updateEnrollmentProgress = async (
   }
 };
 
-// Add note to enrollment
 export const addEnrollmentNote = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
@@ -286,7 +282,6 @@ export const addEnrollmentNote = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Toggle bookmark for lesson
 export const toggleLessonBookmark = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
@@ -333,7 +328,7 @@ export const addCourseReview = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
     const { enrollmentId } = req.params;
-    const { rating, review }: AddReviewRequest = req.body;
+    const { rating, comment }: AddReviewRequest = req.body;
 
     if (!userId) {
       return res.status(401).json({
@@ -361,7 +356,7 @@ export const addCourseReview = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    const reviewRes = await enrollment.addReview(rating, review || "");
+    await enrollment.addReview(rating, comment || "");
 
     const response: AddReviewResponse = {
       success: true,
