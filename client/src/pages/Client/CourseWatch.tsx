@@ -13,8 +13,6 @@ import {
   FaCompress,
   FaVolumeUp,
   FaVolumeMute,
-  FaBackward,
-  FaForward,
   FaBookmark,
   FaRegBookmark,
   FaQuestionCircle,
@@ -22,6 +20,8 @@ import {
   FaCheck,
   FaList,
   FaTimes,
+  FaStepBackward,
+  FaStepForward,
 } from "react-icons/fa";
 import { useCourse } from "../../hooks/useCourseQueries";
 import {
@@ -44,9 +44,11 @@ const CourseWatch: React.FC = () => {
   const [playbackRate, setPlaybackRate] = useState(1);
   const [showControls, setShowControls] = useState(true);
 
-  const { data: courseResponse, isLoading: courseLoading } = useCourse(
-    courseId!
-  );
+  const {
+    data: courseResponse,
+    isLoading: courseLoading,
+    refetch: refetchCourse,
+  } = useCourse(courseId!);
   const course = courseResponse?.data;
 
   const { data: courseProgress } = useCourseProgress(courseId!);
@@ -333,6 +335,8 @@ const CourseWatch: React.FC = () => {
         onSuccess: () => {
           setNewReview("");
           setNewRating(5);
+          // Refresh course data to show new review immediately
+          refetchCourse();
         },
       }
     );
@@ -442,7 +446,7 @@ const CourseWatch: React.FC = () => {
             {/* Progress Bar */}
             <div className="mb-4">
               <div
-                className="w-full h-1 bg-gray-600 rounded cursor-pointer"
+                className="w-full h-2 bg-gray-600 rounded cursor-pointer hover:h-3 transition-all duration-200 group"
                 onClick={(e) => {
                   const video = videoRef.current;
                   if (!video || !duration) return;
@@ -457,9 +461,11 @@ const CourseWatch: React.FC = () => {
                 }}
               >
                 <div
-                  className="h-full bg-red-500 rounded"
+                  className="h-full bg-gradient-to-r from-purple-500 to-purple-400 rounded relative"
                   style={{ width: `${(currentTime / duration) * 100}%` }}
-                />
+                >
+                  <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                </div>
               </div>
             </div>
 
@@ -468,24 +474,40 @@ const CourseWatch: React.FC = () => {
               <div className="flex items-center space-x-4">
                 <button
                   onClick={goToPreviousLesson}
-                  className="p-2 hover:bg-white/20 rounded"
+                  className="p-2 hover:bg-white/20 rounded transition-colors"
                   disabled={currentSection === 0 && currentLesson === 0}
                   title="Previous Lesson"
                 >
-                  <FaBackward />
+                  <FaStepBackward />
                 </button>
 
                 <button
                   onClick={() => seek(currentTime - 10)}
-                  className="p-2 hover:bg-white/20 rounded text-sm"
+                  className="p-2 hover:bg-white/20 rounded transition-colors"
                   title="Rewind 10 seconds (←)"
                 >
-                  -10s
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M11.99 5V1l-5 5 5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6h-2c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z" />
+                    <text
+                      x="12"
+                      y="15"
+                      textAnchor="middle"
+                      fontSize="8"
+                      fill="currentColor"
+                    >
+                      10
+                    </text>
+                  </svg>
                 </button>
 
                 <button
                   onClick={togglePlayPause}
-                  className="p-3 hover:bg-white/20 rounded-full"
+                  className="p-3 hover:bg-white/20 rounded-full transition-colors"
                   title="Play/Pause (Spacebar)"
                 >
                   {isPlaying ? (
@@ -497,18 +519,34 @@ const CourseWatch: React.FC = () => {
 
                 <button
                   onClick={() => seek(currentTime + 10)}
-                  className="p-2 hover:bg-white/20 rounded text-sm"
+                  className="p-2 hover:bg-white/20 rounded transition-colors"
                   title="Forward 10 seconds (→)"
                 >
-                  +10s
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M12 5V1l5 5-5 5V7c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8z" />
+                    <text
+                      x="12"
+                      y="15"
+                      textAnchor="middle"
+                      fontSize="8"
+                      fill="currentColor"
+                    >
+                      10
+                    </text>
+                  </svg>
                 </button>
 
                 <button
                   onClick={goToNextLesson}
-                  className="p-2 hover:bg-white/20 rounded"
+                  className="p-2 hover:bg-white/20 rounded transition-colors"
                   title="Next Lesson"
                 >
-                  <FaForward />
+                  <FaStepForward />
                 </button>
 
                 <div className="flex items-center space-x-2">
@@ -525,7 +563,7 @@ const CourseWatch: React.FC = () => {
                     step="0.1"
                     value={volume}
                     onChange={(e) => changeVolume(parseFloat(e.target.value))}
-                    className="w-20"
+                    className="w-20 accent-purple-500 bg-gray-600 h-1 rounded-lg appearance-none cursor-pointer"
                   />
                 </div>
 
@@ -561,60 +599,77 @@ const CourseWatch: React.FC = () => {
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Lesson Info Overlay */}
-          <div className="absolute top-20 left-4 right-4">
-            <div className="bg-black/50 rounded-lg p-4">
-              <h1 className="text-xl font-bold mb-1">
+        {/* Lesson Info Section Below Video */}
+        <div className="bg-gray-800 border-t border-gray-700 p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <h1 className="text-xl font-bold text-white mb-1">
                 {currentLessonObj?.title}
               </h1>
-              <p className="text-gray-300 text-sm">
-                Section: {course.sections[currentSection]?.title}
+              <p className="text-gray-400 text-sm">
+                Section {currentSection + 1}:{" "}
+                {course.sections[currentSection]?.title}
               </p>
-              {lessonProgress?.completed && (
-                <div className="flex items-center mt-2 text-green-400 text-sm">
-                  <FaCheck className="mr-1" />
-                  Completed
-                </div>
+              <div className="flex items-center space-x-4 mt-2 text-sm text-gray-400">
+                <span>
+                  Lesson {currentLesson + 1} of{" "}
+                  {course.sections[currentSection]?.lessons?.length || 0}
+                </span>
+                <span>•</span>
+                <span>
+                  Duration: {formatTime(currentLessonObj?.duration || 0)}
+                </span>
+                {currentLessonObj &&
+                  getLessonProgress(currentLessonObj.id)?.completed && (
+                    <>
+                      <span>•</span>
+                      <div className="flex items-center text-green-400">
+                        <FaCheck className="mr-1" />
+                        Completed
+                      </div>
+                    </>
+                  )}
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={markLessonComplete}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg flex items-center space-x-2 transition-colors"
+                title="Mark as Complete"
+              >
+                <FaCheck />
+                <span className="text-sm">Complete</span>
+              </button>
+
+              <button
+                onClick={() => setIsBookmarked(!isBookmarked)}
+                className="p-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
+                title="Bookmark"
+              >
+                {isBookmarked ? <FaBookmark /> : <FaRegBookmark />}
+              </button>
+
+              <button
+                onClick={() => setShowNotes(!showNotes)}
+                className="p-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
+                title="Notes"
+              >
+                <FaNotesMedical />
+              </button>
+
+              {currentLessonObj?.quiz && currentLessonObj.quiz.length > 0 && (
+                <button
+                  onClick={() => setShowQuiz(!showQuiz)}
+                  className="p-2 bg-orange-600 hover:bg-orange-700 rounded-lg transition-colors"
+                  title="Quiz"
+                >
+                  <FaQuestionCircle />
+                </button>
               )}
             </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="absolute top-20 right-4 flex flex-col space-y-2">
-            <button
-              onClick={markLessonComplete}
-              className="p-3 bg-green-600 hover:bg-green-700 rounded-full"
-              title="Mark as Complete"
-            >
-              <FaCheck />
-            </button>
-
-            <button
-              onClick={() => setIsBookmarked(!isBookmarked)}
-              className="p-3 bg-blue-600 hover:bg-blue-700 rounded-full"
-              title="Bookmark"
-            >
-              {isBookmarked ? <FaBookmark /> : <FaRegBookmark />}
-            </button>
-
-            <button
-              onClick={() => setShowNotes(!showNotes)}
-              className="p-3 bg-purple-600 hover:bg-purple-700 rounded-full"
-              title="Notes"
-            >
-              <FaNotesMedical />
-            </button>
-
-            {currentLessonObj?.quiz && currentLessonObj.quiz.length > 0 && (
-              <button
-                onClick={() => setShowQuiz(!showQuiz)}
-                className="p-3 bg-orange-600 hover:bg-orange-700 rounded-full"
-                title="Quiz"
-              >
-                <FaQuestionCircle />
-              </button>
-            )}
           </div>
         </div>
 
@@ -629,7 +684,7 @@ const CourseWatch: React.FC = () => {
                   onClick={() => setActiveTab(tab)}
                   className={`px-6 py-3 text-sm font-medium capitalize transition-colors ${
                     activeTab === tab
-                      ? "text-white border-b-2 border-blue-500 bg-gray-700"
+                      ? "text-white border-b-2 border-purple-500 bg-gray-700"
                       : "text-gray-300 hover:text-white hover:bg-gray-700"
                   }`}
                 >
@@ -690,7 +745,7 @@ const CourseWatch: React.FC = () => {
                         value={newNote}
                         onChange={(e) => setNewNote(e.target.value)}
                         placeholder="Add a note at current time..."
-                        className="w-full bg-gray-600 text-white p-3 rounded border border-gray-500 focus:border-blue-500 focus:outline-none resize-none"
+                        className="w-full bg-gray-600 text-white p-3 rounded border border-gray-500 focus:border-purple-500 focus:outline-none resize-none"
                         rows={3}
                       />
                       <div className="flex justify-between items-center mt-3">
@@ -700,7 +755,7 @@ const CourseWatch: React.FC = () => {
                         <button
                           onClick={addNote}
                           disabled={!newNote.trim()}
-                          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           Add Note
                         </button>
@@ -719,29 +774,55 @@ const CourseWatch: React.FC = () => {
                     allCourseNotes.map((note: any) => {
                       // Find the lesson info for this note
                       let lessonTitle = "Unknown Lesson";
+                      let sectionTitle = "Unknown Section";
                       let sectionIndex = -1;
                       let lessonIndex = -1;
 
                       if (course && course.sections) {
-                        course.sections.forEach(
-                          (section: any, sIdx: number) => {
-                            section.lessons.forEach(
-                              (lesson: any, lIdx: number) => {
-                                if (lesson.id === note.lesson) {
-                                  lessonTitle = lesson.title;
-                                  sectionIndex = sIdx;
-                                  lessonIndex = lIdx;
-                                }
+                        for (
+                          let sIdx = 0;
+                          sIdx < course.sections.length;
+                          sIdx++
+                        ) {
+                          const section = course.sections[sIdx];
+                          if (section.lessons) {
+                            for (
+                              let lIdx = 0;
+                              lIdx < section.lessons.length;
+                              lIdx++
+                            ) {
+                              const lesson = section.lessons[lIdx];
+                              // Try different ID formats for compatibility
+                              const lessonId = lesson._id || lesson.id;
+                              const noteLesson = note.lesson;
+
+                              if (
+                                lessonId &&
+                                noteLesson &&
+                                (lessonId.toString() ===
+                                  noteLesson.toString() ||
+                                  lessonId === noteLesson ||
+                                  lesson._id === noteLesson ||
+                                  lesson.id === noteLesson)
+                              ) {
+                                lessonTitle =
+                                  lesson.title || `Lesson ${lIdx + 1}`;
+                                sectionTitle =
+                                  section.title || `Section ${sIdx + 1}`;
+                                sectionIndex = sIdx;
+                                lessonIndex = lIdx;
+                                break;
                               }
-                            );
+                            }
                           }
-                        );
+                          if (sectionIndex !== -1) break;
+                        }
                       }
 
                       return (
                         <div
                           key={note._id}
-                          className="bg-gray-700 p-4 rounded-lg"
+                          className="bg-gray-700 p-4 rounded-lg hover:bg-gray-600 transition-colors"
                         >
                           <div className="flex justify-between items-start mb-2">
                             <div className="flex flex-col">
@@ -752,27 +833,53 @@ const CourseWatch: React.FC = () => {
                                     sectionIndex !== -1 &&
                                     lessonIndex !== -1
                                   ) {
+                                    // Always load the lesson first
+                                    loadLesson(sectionIndex, lessonIndex);
+
+                                    // Set up a delayed function to seek to timestamp
+                                    const seekToTime = () => {
+                                      const video = videoRef.current;
+                                      if (video && video.readyState >= 2) {
+                                        // Check if video is ready
+                                        video.currentTime = note.timestamp;
+                                        setCurrentTime(note.timestamp);
+                                      } else if (video) {
+                                        // Wait for video to be ready
+                                        const handleCanPlay = () => {
+                                          video.currentTime = note.timestamp;
+                                          setCurrentTime(note.timestamp);
+                                          video.removeEventListener(
+                                            "canplay",
+                                            handleCanPlay
+                                          );
+                                        };
+                                        video.addEventListener(
+                                          "canplay",
+                                          handleCanPlay
+                                        );
+                                      }
+                                    };
+
+                                    // Delay based on whether it's the same lesson or different
                                     if (
-                                      sectionIndex !== currentSection ||
-                                      lessonIndex !== currentLesson
+                                      sectionIndex === currentSection &&
+                                      lessonIndex === currentLesson
                                     ) {
-                                      loadLesson(sectionIndex, lessonIndex);
+                                      // Same lesson, seek immediately
+                                      setTimeout(seekToTime, 100);
+                                    } else {
+                                      // Different lesson, wait for load
+                                      setTimeout(seekToTime, 1500);
                                     }
                                   }
-
-                                  // Then jump to timestamp after a small delay
-                                  setTimeout(() => {
-                                    const video = videoRef.current;
-                                    if (video) {
-                                      video.currentTime = note.timestamp;
-                                      setCurrentTime(note.timestamp);
-                                    }
-                                  }, 500);
                                 }}
-                                className="text-blue-400 hover:text-blue-300 font-medium text-sm text-left"
+                                className="text-purple-400 hover:text-purple-300 font-medium text-sm text-left"
                               >
                                 {formatTime(note.timestamp)} - {lessonTitle}
                               </button>
+                              <p className="text-xs text-gray-500 mt-1">
+                                Section: {sectionTitle}
+                              </p>
                             </div>
                             <span className="text-gray-400 text-sm">
                               {new Date(note.createdAt).toLocaleDateString()}
@@ -789,7 +896,35 @@ const CourseWatch: React.FC = () => {
 
             {activeTab === "reviews" && (
               <div>
-                <h3 className="text-xl font-bold mb-4">Course Reviews</h3>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-bold">Course Reviews</h3>
+                  {course?.rating && course?.ratingsCount ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <span
+                            key={star}
+                            className={`text-lg ${
+                              star <= Math.round(course.rating)
+                                ? "text-yellow-400"
+                                : "text-gray-500"
+                            }`}
+                          >
+                            ★
+                          </span>
+                        ))}
+                      </div>
+                      <span className="text-white font-semibold">
+                        {course.rating.toFixed(1)}
+                      </span>
+                      <span className="text-gray-400">
+                        ({course.ratingsCount} reviews)
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="text-gray-400">No ratings yet</span>
+                  )}
+                </div>
 
                 {/* Add Review Form */}
                 <div className="bg-gray-700 p-4 rounded-lg mb-6">
@@ -823,14 +958,14 @@ const CourseWatch: React.FC = () => {
                     value={newReview}
                     onChange={(e) => setNewReview(e.target.value)}
                     placeholder="Write your review..."
-                    className="w-full bg-gray-600 text-white p-3 rounded border border-gray-500 focus:border-blue-500 focus:outline-none resize-none mb-3"
+                    className="w-full bg-gray-600 text-white p-3 rounded border border-gray-500 focus:border-purple-500 focus:outline-none resize-none mb-3"
                     rows={4}
                   />
 
                   <button
                     onClick={addReview}
                     disabled={!newReview.trim()}
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Submit Review
                   </button>
@@ -838,21 +973,25 @@ const CourseWatch: React.FC = () => {
 
                 {/* Reviews List */}
                 <div className="space-y-4">
-                  {course?.reviews && course.reviews.length === 0 ? (
+                  {!course?.reviews || course.reviews.length === 0 ? (
                     <p className="text-gray-400 text-center py-8">
                       No reviews yet. Be the first to review this course!
                     </p>
                   ) : (
-                    course?.reviews?.map((review: any, index: number) => (
-                      <div key={index} className="bg-gray-700 p-4 rounded-lg">
+                    course.reviews.map((review: any, index: number) => (
+                      <div
+                        key={review._id || index}
+                        className="bg-gray-700 p-4 rounded-lg"
+                      >
                         <div className="flex justify-between items-start mb-2">
                           <div className="flex items-center space-x-3">
-                            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                            <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
                               {review.user?.firstName?.[0] || "U"}
                             </div>
                             <div>
                               <p className="font-semibold text-white">
-                                {review.user?.firstName} {review.user?.lastName}
+                                {review.user?.firstName || "Anonymous"}{" "}
+                                {review.user?.lastName || "User"}
                               </p>
                               <div className="flex items-center space-x-2">
                                 <div className="flex space-x-1">
@@ -870,13 +1009,17 @@ const CourseWatch: React.FC = () => {
                                   ))}
                                 </div>
                                 <span className="text-sm text-gray-400">
-                                  {new Date(review.date).toLocaleDateString()}
+                                  {new Date(
+                                    review.date || review.createdAt
+                                  ).toLocaleDateString()}
                                 </span>
                               </div>
                             </div>
                           </div>
                         </div>
-                        <p className="text-gray-200 mt-2">{review.comment}</p>
+                        <p className="text-gray-200 mt-2">
+                          {review.comment || review.review}
+                        </p>
                       </div>
                     ))
                   )}
@@ -949,7 +1092,7 @@ const CourseWatch: React.FC = () => {
                           key={lessonIndex}
                           onClick={() => loadLesson(sectionIndex, lessonIndex)}
                           className={`w-full text-left p-3 hover:bg-gray-700 transition-colors ${
-                            isCurrentLesson ? "bg-blue-600" : ""
+                            isCurrentLesson ? "bg-purple-600" : ""
                           }`}
                         >
                           <div className="flex items-center space-x-3">
@@ -1002,13 +1145,13 @@ const CourseWatch: React.FC = () => {
                 <div className="flex items-center space-x-4 pt-2">
                   <button
                     onClick={() => navigate("/my-learning")}
-                    className="text-blue-400 hover:text-blue-300 text-xs"
+                    className="text-purple-400 hover:text-purple-300 text-xs"
                   >
                     My Learning
                   </button>
                   <button
                     onClick={() => navigate(`/course/${courseId}`)}
-                    className="text-blue-400 hover:text-blue-300 text-xs"
+                    className="text-purple-400 hover:text-purple-300 text-xs"
                   >
                     Course Details
                   </button>
@@ -1042,7 +1185,7 @@ const CourseWatch: React.FC = () => {
               />
               <button
                 onClick={addNote}
-                className="mt-2 w-full py-2 bg-blue-600 hover:bg-blue-700 rounded-lg"
+                className="mt-2 w-full py-2 bg-purple-600 hover:bg-purple-700 rounded-lg"
               >
                 Add Note
               </button>
