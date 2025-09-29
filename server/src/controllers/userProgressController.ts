@@ -3,6 +3,8 @@ import { AuthRequest } from "../types/common.types";
 import UserProgress from "../models/UserProgress";
 import Enrollment from "../models/Enrollment";
 import Course from "../models/Course";
+import Section from "../models/Section";
+import Lesson from "../models/Lesson";
 import User from "../models/User";
 import type {
   UserProgressResponse,
@@ -25,11 +27,8 @@ export const getCourseProgress = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Get course with lessons
-    const course = await Course.findById(courseId).populate(
-      "sections",
-      "_id title order duration"
-    );
+    // Get course and its sections with lessons
+    const course = await Course.findById(courseId);
 
     if (!course) {
       return res.status(404).json({
@@ -38,13 +37,18 @@ export const getCourseProgress = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Get all lessons from course
-    const allLessons = (course as any).sections.flatMap(
-      (section: any) => section.lessons
-    );
-    console.log("sections:", (course as any).sections);
+    // Get all lessons from sections
+    const sections = await Section.find({ course: courseId }).sort({
+      order: 1,
+    });
+    const allLessons = [];
 
-    // console.log("lessons:", allLessons);
+    for (const section of sections) {
+      const lessons = await Lesson.find({ section: section._id }).sort({
+        order: 1,
+      });
+      allLessons.push(...lessons);
+    }
 
     // Get user progress for all lessons in the course
     const userProgresses = await UserProgress.find({

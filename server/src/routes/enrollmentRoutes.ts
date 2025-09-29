@@ -3,7 +3,9 @@ import {
   getUserEnrollments,
   getEnrollmentById,
   updateEnrollmentProgress,
+  getEnrollmentNotes,
   addEnrollmentNote,
+  getEnrollmentReviews,
   toggleLessonBookmark,
   addCourseReview,
   getLearningStats,
@@ -34,6 +36,11 @@ enrollmentRouter.patch(
   (req, res) => updateEnrollmentProgress(req as AuthRequest, res)
 );
 
+// GET /api/enrollments/:enrollmentId/notes - Get enrollment notes
+enrollmentRouter.get("/:enrollmentId/notes", authenticateToken, (req, res) =>
+  getEnrollmentNotes(req as AuthRequest, res)
+);
+
 // POST /api/enrollments/:enrollmentId/notes - Add note to enrollment
 enrollmentRouter.post("/:enrollmentId/notes", authenticateToken, (req, res) =>
   addEnrollmentNote(req as AuthRequest, res)
@@ -44,6 +51,11 @@ enrollmentRouter.patch(
   "/:enrollmentId/bookmark",
   authenticateToken,
   (req, res) => toggleLessonBookmark(req as AuthRequest, res)
+);
+
+// GET /api/enrollments/:enrollmentId/review - Get enrollment review
+enrollmentRouter.get("/:enrollmentId/review", authenticateToken, (req, res) =>
+  getEnrollmentReviews(req as AuthRequest, res)
 );
 
 // POST /api/enrollments/:enrollmentId/review - Add course review

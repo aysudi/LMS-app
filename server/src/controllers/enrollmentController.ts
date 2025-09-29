@@ -228,6 +228,49 @@ export const updateEnrollmentProgress = async (
   }
 };
 
+export const getEnrollmentNotes = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const { enrollmentId } = req.params;
+    const { lessonId } = req.query;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    const enrollment = await Enrollment.findOne({
+      _id: enrollmentId,
+      user: userId,
+    });
+
+    if (!enrollment) {
+      return res.status(404).json({
+        success: false,
+        message: "Enrollment not found",
+      });
+    }
+
+    let notes = enrollment.notes;
+    if (lessonId) {
+      notes = notes.filter((note) => note.lesson.toString() === lessonId);
+    }
+
+    res.json({
+      success: true,
+      data: notes,
+    });
+  } catch (error: any) {
+    console.error("Get enrollment notes error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to get notes",
+    });
+  }
+};
+
 export const addEnrollmentNote = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
@@ -319,6 +362,46 @@ export const toggleLessonBookmark = async (req: AuthRequest, res: Response) => {
     res.status(500).json({
       success: false,
       message: "Failed to toggle bookmark",
+    });
+  }
+};
+
+export const getEnrollmentReviews = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const { enrollmentId } = req.params;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    const enrollment = await Enrollment.findOne({
+      _id: enrollmentId,
+      user: userId,
+    }).populate("course", "title");
+
+    if (!enrollment) {
+      return res.status(404).json({
+        success: false,
+        message: "Enrollment not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        review: enrollment.review,
+        course: enrollment.course,
+      },
+    });
+  } catch (error: any) {
+    console.error("Get enrollment reviews error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to get reviews",
     });
   }
 };

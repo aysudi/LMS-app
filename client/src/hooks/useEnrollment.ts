@@ -173,3 +173,23 @@ export const useLearningStats = () => {
     staleTime: 10 * 60 * 1000, // 10 minutes
   });
 };
+
+// Hook for getting enrollment notes
+export const useEnrollmentNotes = (enrollmentId: string, lessonId?: string) => {
+  return useQuery({
+    queryKey: ["enrollment-notes", enrollmentId, lessonId],
+    queryFn: () => enrollmentService.getEnrollmentNotes(enrollmentId, lessonId),
+    enabled: !!enrollmentId,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+  });
+};
+
+// Hook for getting enrollment reviews
+export const useEnrollmentReviews = (enrollmentId: string) => {
+  return useQuery({
+    queryKey: ["enrollment-reviews", enrollmentId],
+    queryFn: () => enrollmentService.getEnrollmentReviews(enrollmentId),
+    enabled: !!enrollmentId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
