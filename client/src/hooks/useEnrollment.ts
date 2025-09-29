@@ -168,8 +168,13 @@ export const useAddCourseReview = () => {
           typeof data.data.course === "string"
             ? data.data.course
             : data.data.course._id;
+        // Use the same query key format as useCourse hook
         queryClient.invalidateQueries({
           queryKey: ["courses", "detail", courseId],
+        });
+        // Also invalidate all course lists
+        queryClient.invalidateQueries({
+          queryKey: ["courses"],
         });
       }
 
