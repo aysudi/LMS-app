@@ -245,12 +245,11 @@ const CourseWatch: React.FC = () => {
 
     const lesson = course.sections[currentSection]?.lessons[currentLesson];
     if (!lesson) return;
-    // console.log(course);
 
     updateProgressMutation.mutate({
       courseId: course.id,
       progressData: {
-        lessonId: lesson.id,
+        lesson: lesson._id,
         watchTime: Math.floor(currentTime),
         completed: completed,
       },
@@ -307,9 +306,9 @@ const CourseWatch: React.FC = () => {
 
     addNoteMutation.mutate(
       {
-        enrollmentId: enrollment._id,
+        enrollmentId: enrollment.id,
         noteData: {
-          lessonId: lesson.id,
+          lesson: lesson._id,
           content: newNote.trim(),
           timestamp: Math.floor(currentTime),
         },
@@ -608,9 +607,9 @@ const CourseWatch: React.FC = () => {
           {/* Tab Headers */}
           <div className="flex border-b border-gray-700">
             {(["overview", "notes", "reviews", "announcements"] as const).map(
-              (tab) => (
+              (tab, index) => (
                 <button
-                  key={tab}
+                  key={index}
                   onClick={() => setActiveTab(tab)}
                   className={`px-6 py-3 text-sm font-medium capitalize transition-colors ${
                     activeTab === tab
@@ -783,7 +782,7 @@ const CourseWatch: React.FC = () => {
             <div className="space-y-2">
               {course.sections.map((section: any, sectionIndex: number) => (
                 <div
-                  key={section.id}
+                  key={sectionIndex}
                   className="border border-gray-700 rounded-lg"
                 >
                   <div className="p-3 bg-gray-700">
@@ -802,7 +801,7 @@ const CourseWatch: React.FC = () => {
 
                       return (
                         <button
-                          key={lesson.id}
+                          key={lessonIndex}
                           onClick={() => loadLesson(sectionIndex, lessonIndex)}
                           className={`w-full text-left p-3 hover:bg-gray-700 transition-colors ${
                             isCurrentLesson ? "bg-blue-600" : ""
@@ -905,8 +904,8 @@ const CourseWatch: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              {lessonNotes.map((note: any) => (
-                <div key={note.id} className="p-3 bg-gray-700 rounded-lg">
+              {lessonNotes.map((note: any, index: number) => (
+                <div key={index} className="p-3 bg-gray-700 rounded-lg">
                   <p className="text-sm mb-1">{note.content}</p>
                   <p className="text-xs text-gray-400">
                     {formatTime(note.timestamp)} •{" "}

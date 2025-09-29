@@ -25,6 +25,13 @@ enrollmentRouter.get("/stats", authenticateToken, (req, res) =>
   getLearningStats(req as AuthRequest, res)
 );
 
+// POST /api/enrollments/recalculate-all-progress - Recalculate all user enrollments progress
+enrollmentRouter.post(
+  "/recalculate-all-progress",
+  authenticateToken,
+  (req, res) => recalculateAllUserProgress(req as AuthRequest, res)
+);
+
 enrollmentRouter.get("/:enrollmentId", authenticateToken, (req, res) =>
   getEnrollmentById(req as AuthRequest, res)
 );
@@ -68,13 +75,6 @@ enrollmentRouter.post(
   "/:enrollmentId/recalculate-progress",
   authenticateToken,
   (req, res) => recalculateEnrollmentProgress(req as AuthRequest, res)
-);
-
-// POST /api/enrollments/recalculate-all-progress - Recalculate all user enrollments progress
-enrollmentRouter.post(
-  "/recalculate-all-progress",
-  authenticateToken,
-  (req, res) => recalculateAllUserProgress(req as AuthRequest, res)
 );
 
 export default enrollmentRouter;

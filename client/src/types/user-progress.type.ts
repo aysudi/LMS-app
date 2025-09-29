@@ -17,7 +17,7 @@ export interface UserProgressResponse {
 }
 
 export interface UpdateUserProgressRequest {
-  lessonId: string;
+  lesson: string;
   completed?: boolean;
   watchTime?: number;
 }

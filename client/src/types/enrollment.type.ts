@@ -1,5 +1,6 @@
 export interface Enrollment {
   _id: string;
+  id: string;
   user: string;
   course: any;
   order: string;
@@ -70,7 +71,7 @@ export interface UpdateProgressResponse {
 }
 
 export interface AddNoteRequest {
-  lessonId: string;
+  lesson: string;
   content: string;
   timestamp: number;
 }
