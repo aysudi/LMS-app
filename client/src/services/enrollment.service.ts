@@ -89,6 +89,19 @@ class EnrollmentService {
     const response = await api.get("/api/enrollments/stats");
     return response.data;
   }
+
+  async getEnrollmentNotes(enrollmentId: string, lessonId?: string) {
+    const queryParams = lessonId ? `?lessonId=${lessonId}` : "";
+    const response = await api.get(
+      `/api/enrollments/${enrollmentId}/notes${queryParams}`
+    );
+    return response.data;
+  }
+
+  async getEnrollmentReviews(enrollmentId: string) {
+    const response = await api.get(`/api/enrollments/${enrollmentId}/review`);
+    return response.data;
+  }
 }
 
 export default new EnrollmentService();

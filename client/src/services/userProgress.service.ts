@@ -24,7 +24,7 @@ class UserProgressService {
     progressData: UpdateUserProgressRequest
   ): Promise<UpdateUserProgressResponse> {
     const response = await api.patch(
-      `/api/user-progress/course/${courseId}`,
+      `/api/user-progress/${courseId}`,
       progressData
     );
     return response.data;

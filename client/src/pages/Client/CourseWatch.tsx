@@ -17,53 +17,16 @@ import {
   FaList,
   FaTimes,
 } from "react-icons/fa";
-
-interface Lesson {
-  _id: string;
-  title: string;
-  description?: string;
-  videoUrl: string;
-  duration: number;
-  order: number;
-  isPreview: boolean;
-  resources: Array<{
-    name: string;
-    url: string;
-    type: "pdf" | "zip" | "doc" | "other";
-  }>;
-  quiz: Array<{
-    question: string;
-    options: string[];
-    correctAnswer: number;
-  }>;
-}
-
-interface Section {
-  _id: string;
-  title: string;
-  order: number;
-  lessons: Lesson[];
-}
-
-interface Course {
-  _id: string;
-  title: string;
-  description: string;
-  instructor: {
-    firstName: string;
-    lastName: string;
-    avatar?: string;
-  };
-  sections: Section[];
-  totalLessons: number;
-  totalDuration: number;
-}
-
-interface UserProgress {
-  lessonId: string;
-  completed: boolean;
-  watchTime: number;
-}
+import { useCourse } from "../../hooks/useCourseQueries";
+import {
+  useCourseProgress,
+  useUpdateLessonProgress,
+} from "../../hooks/useUserProgress";
+import {
+  useUserEnrollments,
+  useEnrollmentNotes,
+  useAddEnrollmentNote,
+} from "../../hooks/useEnrollment";
 
 const CourseWatch: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>();
@@ -80,41 +43,54 @@ const CourseWatch: React.FC = () => {
   const [playbackRate, setPlaybackRate] = useState(1);
   const [showControls, setShowControls] = useState(true);
 
-  // Course state
-  const [course, setCourse] = useState<Course | null>(null);
-  const [enrollmentId, setEnrollmentId] = useState<string | null>(null);
+  // Course data using hooks
+  const { data: courseResponse, isLoading: courseLoading } = useCourse(
+    courseId!
+  );
+  const course = courseResponse?.data;
+
+  const { data: courseProgress } = useCourseProgress(courseId!);
+
+  // Get user enrollments to find the enrollment for this course
+  const { data: enrollmentsResponse } = useUserEnrollments();
+  const enrollment = enrollmentsResponse?.data?.enrollments?.find(
+    (e: any) => e.course._id === courseId
+  );
+
+  // Mutations
+  const updateProgressMutation = useUpdateLessonProgress();
+  const addNoteMutation = useAddEnrollmentNote();
+
+  // Local state
   const [currentSection, setCurrentSection] = useState(0);
   const [currentLesson, setCurrentLesson] = useState(0);
-  const [userProgress, setUserProgress] = useState<UserProgress[]>([]);
-  const [isBookmarked, setIsBookmarked] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
   const [showNotes, setShowNotes] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "notes" | "reviews" | "announcements"
+  >("overview");
 
   // Notes state
-  const [notes, setNotes] = useState<
-    Array<{
-      id: string;
-      content: string;
-      timestamp: number;
-      createdAt: string;
-    }>
-  >([]);
+
   const [newNote, setNewNote] = useState("");
+  const [isBookmarked, setIsBookmarked] = useState(false);
 
   // Quiz state
   const [quizAnswers, setQuizAnswers] = useState<{ [key: number]: number }>({});
-  // Loading states
-  const [loading, setLoading] = useState(true);
-  const [updating, setUpdating] = useState(false);
+
+  // Get notes for current lesson
+  const currentLessonObj =
+    course?.sections[currentSection]?.lessons[currentLesson];
+  const { data: lessonNotesResponse } = useEnrollmentNotes(
+    enrollment?._id || "",
+    currentLessonObj?.id
+  );
+  const lessonNotes = lessonNotesResponse?.data || [];
+
+  //   console.log(lessonNotes);
 
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    if (courseId) {
-      fetchCourseData();
-    }
-  }, [courseId]);
 
   useEffect(() => {
     if (course && course.sections.length > 0) {
@@ -176,67 +152,6 @@ const CourseWatch: React.FC = () => {
     };
   }, [isPlaying, currentTime]);
 
-  const fetchCourseData = async () => {
-    try {
-      setLoading(true);
-
-      // Get base URL from environment
-      const baseURL = import.meta.env.VITE_API_URL || "http://localhost:4040";
-
-      // Fetch course data
-      const courseResponse = await fetch(`${baseURL}/api/courses/${courseId}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-      });
-
-      if (!courseResponse.ok) {
-        throw new Error("Failed to fetch course data");
-      }
-
-      const courseData = await courseResponse.json();
-      setCourse(courseData.data);
-
-      // Fetch user enrollment to get enrollmentId
-      const enrollmentResponse = await fetch(`${baseURL}/api/enrollments`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-      });
-
-      if (enrollmentResponse.ok) {
-        const enrollmentData = await enrollmentResponse.json();
-        const enrollment = enrollmentData.data.enrollments.find(
-          (e: any) => e.course._id === courseId
-        );
-        if (enrollment) {
-          setEnrollmentId(enrollment.id);
-        }
-      }
-
-      // Fetch user progress
-      const progressResponse = await fetch(
-        `${baseURL}/api/user-progress/course/${courseId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        }
-      );
-
-      if (progressResponse.ok) {
-        const progressData = await progressResponse.json();
-        setUserProgress(progressData.data.lessons || []);
-      }
-    } catch (error) {
-      console.error("Error fetching course data:", error);
-      alert("Failed to load course data");
-      navigate("/my-learning");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const loadLesson = (sectionIndex: number, lessonIndex: number) => {
     if (!course || !course.sections[sectionIndex]?.lessons[lessonIndex]) return;
 
@@ -253,7 +168,7 @@ const CourseWatch: React.FC = () => {
       setIsPlaying(false);
 
       // Load user progress for this lesson
-      const progress = userProgress.find((p) => p.lessonId === lesson._id);
+      const progress = getLessonProgress(lesson.id);
       if (progress && progress.watchTime > 0) {
         video.currentTime = Math.min(progress.watchTime, lesson.duration);
       }
@@ -325,62 +240,24 @@ const CourseWatch: React.FC = () => {
     }
   };
 
-  const updateProgress = async (completed: boolean = false) => {
-    if (!course || updating) return;
+  const updateProgress = (completed: boolean = false) => {
+    if (!course) return;
 
     const lesson = course.sections[currentSection]?.lessons[currentLesson];
     if (!lesson) return;
+    // console.log(course);
 
-    setUpdating(true);
+    updateProgressMutation.mutate({
+      courseId: course.id,
+      progressData: {
+        lessonId: lesson.id,
+        watchTime: Math.floor(currentTime),
+        completed: completed,
+      },
+    });
 
-    try {
-      const baseURL = import.meta.env.VITE_API_URL || "http://localhost:4040";
-
-      await fetch(`${baseURL}/api/user-progress/course/${courseId}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-        body: JSON.stringify({
-          lesson: lesson._id,
-          watchTime: Math.floor(currentTime),
-          completed,
-        }),
-      });
-
-      // Update local progress state
-      setUserProgress((prev) => {
-        const updated = [...prev];
-        const existingIndex = updated.findIndex(
-          (p) => p.lessonId === lesson._id
-        );
-
-        if (existingIndex >= 0) {
-          updated[existingIndex] = {
-            ...updated[existingIndex],
-            watchTime: Math.floor(currentTime),
-            completed,
-          };
-        } else {
-          updated.push({
-            lessonId: lesson._id,
-            watchTime: Math.floor(currentTime),
-            completed,
-          });
-        }
-
-        return updated;
-      });
-
-      if (completed) {
-        console.log("Lesson completed!");
-      }
-    } catch (error) {
-      console.error("Error updating progress:", error);
-      alert("Failed to update progress");
-    } finally {
-      setUpdating(false);
+    if (completed) {
+      console.log("Lesson completed!");
     }
   };
 
@@ -422,40 +299,27 @@ const CourseWatch: React.FC = () => {
     }
   };
 
-  const addNote = async () => {
-    if (!newNote.trim() || !course || !enrollmentId) return;
+  const addNote = () => {
+    if (!newNote.trim() || !course || !enrollment) return;
 
     const lesson = course.sections[currentSection]?.lessons[currentLesson];
     if (!lesson) return;
 
-    try {
-      const baseURL = import.meta.env.VITE_API_URL || "http://localhost:4040";
-
-      const response = await fetch(
-        `${baseURL}/api/enrollments/${enrollmentId}/notes`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-          body: JSON.stringify({
-            lesson: lesson._id,
-            content: newNote.trim(),
-            timestamp: Math.floor(currentTime),
-          }),
-        }
-      );
-
-      if (response.ok) {
-        const noteData = await response.json();
-        setNotes((prev) => [...prev, noteData.data]);
-        setNewNote("");
+    addNoteMutation.mutate(
+      {
+        enrollmentId: enrollment._id,
+        noteData: {
+          lessonId: lesson.id,
+          content: newNote.trim(),
+          timestamp: Math.floor(currentTime),
+        },
+      },
+      {
+        onSuccess: () => {
+          setNewNote("");
+        },
       }
-    } catch (error) {
-      console.error("Error adding note:", error);
-      alert("Failed to add note");
-    }
+    );
   };
 
   const formatTime = (seconds: number) => {
@@ -472,10 +336,12 @@ const CourseWatch: React.FC = () => {
   };
 
   const getLessonProgress = (lessonId: string) => {
-    return userProgress.find((p) => p.lessonId === lessonId);
+    return courseProgress?.data?.lessons?.find(
+      (p: any) => p.lessonId === lessonId
+    );
   };
 
-  if (loading || !course) {
+  if (courseLoading || !course) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-white text-xl">Loading course...</div>
@@ -483,10 +349,8 @@ const CourseWatch: React.FC = () => {
     );
   }
 
-  const currentLessonObj =
-    course.sections[currentSection]?.lessons[currentLesson];
   const lessonProgress = currentLessonObj
-    ? getLessonProgress(currentLessonObj._id)
+    ? getLessonProgress(currentLessonObj.id)
     : null;
 
   return (
@@ -530,7 +394,8 @@ const CourseWatch: React.FC = () => {
         <div className="relative h-screen pt-16">
           <video
             ref={videoRef}
-            className="w-full h-full object-contain bg-black"
+            className="w-full h-full object-contain bg-black cursor-pointer"
+            onClick={togglePlayPause}
             onTimeUpdate={(e) => {
               const video = e.target as HTMLVideoElement;
               setCurrentTime(video.currentTime);
@@ -561,7 +426,21 @@ const CourseWatch: React.FC = () => {
           >
             {/* Progress Bar */}
             <div className="mb-4">
-              <div className="w-full h-1 bg-gray-600 rounded cursor-pointer">
+              <div
+                className="w-full h-1 bg-gray-600 rounded cursor-pointer"
+                onClick={(e) => {
+                  const video = videoRef.current;
+                  if (!video || !duration) return;
+
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const clickX = e.clientX - rect.left;
+                  const percentage = clickX / rect.width;
+                  const newTime = percentage * duration;
+
+                  video.currentTime = newTime;
+                  setCurrentTime(newTime);
+                }}
+              >
                 <div
                   className="h-full bg-red-500 rounded"
                   style={{ width: `${(currentTime / duration) * 100}%` }}
@@ -723,6 +602,154 @@ const CourseWatch: React.FC = () => {
             )}
           </div>
         </div>
+
+        {/* Tabs Section Below Video */}
+        <div className="bg-gray-800 border-t border-gray-700">
+          {/* Tab Headers */}
+          <div className="flex border-b border-gray-700">
+            {(["overview", "notes", "reviews", "announcements"] as const).map(
+              (tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`px-6 py-3 text-sm font-medium capitalize transition-colors ${
+                    activeTab === tab
+                      ? "text-white border-b-2 border-blue-500 bg-gray-700"
+                      : "text-gray-300 hover:text-white hover:bg-gray-700"
+                  }`}
+                >
+                  {tab}
+                </button>
+              )
+            )}
+          </div>
+
+          {/* Tab Content */}
+          <div className="p-6">
+            {activeTab === "overview" && (
+              <div>
+                <h3 className="text-xl font-bold mb-4">Course Overview</h3>
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-semibold mb-2">About This Course</h4>
+                    <p className="text-gray-300">{course.description}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-2">What You'll Learn</h4>
+                    <ul className="list-disc list-inside text-gray-300 space-y-1">
+                      <li>Comprehensive understanding of the subject matter</li>
+                      <li>Practical skills and knowledge application</li>
+                      <li>Step-by-step learning progression</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-2">Course Info</h4>
+                    <div className="flex flex-wrap gap-4 text-sm text-gray-300">
+                      <span>
+                        Instructor: {course.instructor.firstName}{" "}
+                        {course.instructor.lastName}
+                      </span>
+                      <span>Sections: {course.sections.length}</span>
+                      <span>
+                        Total Lessons:{" "}
+                        {course.sections.reduce(
+                          (total, section) => total + section.lessons.length,
+                          0
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "notes" && (
+              <div>
+                <h3 className="text-xl font-bold mb-4">My Notes</h3>
+
+                {/* Add Note */}
+                <div className="bg-gray-700 p-4 rounded-lg mb-6">
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-1">
+                      <textarea
+                        value={newNote}
+                        onChange={(e) => setNewNote(e.target.value)}
+                        placeholder="Add a note at current time..."
+                        className="w-full bg-gray-600 text-white p-3 rounded border border-gray-500 focus:border-blue-500 focus:outline-none resize-none"
+                        rows={3}
+                      />
+                      <div className="flex justify-between items-center mt-3">
+                        <span className="text-sm text-gray-400">
+                          Note will be added at {formatTime(currentTime)}
+                        </span>
+                        <button
+                          onClick={addNote}
+                          disabled={!newNote.trim()}
+                          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Add Note
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Notes List */}
+                <div className="space-y-4">
+                  {lessonNotes.length === 0 ? (
+                    <p className="text-gray-400 text-center py-8">
+                      No notes yet. Add your first note above!
+                    </p>
+                  ) : (
+                    lessonNotes.map((note: any) => (
+                      <div
+                        key={note._id}
+                        className="bg-gray-700 p-4 rounded-lg"
+                      >
+                        <div className="flex justify-between items-start mb-2">
+                          <button
+                            onClick={() => {
+                              const video = videoRef.current;
+                              if (video) {
+                                video.currentTime = note.timestamp;
+                                setCurrentTime(note.timestamp);
+                              }
+                            }}
+                            className="text-blue-400 hover:text-blue-300 font-medium text-sm"
+                          >
+                            {formatTime(note.timestamp)}
+                          </button>
+                          <span className="text-gray-400 text-sm">
+                            {new Date(note.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <p className="text-gray-200">{note.content}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+
+            {activeTab === "reviews" && (
+              <div>
+                <h3 className="text-xl font-bold mb-4">Course Reviews</h3>
+                <p className="text-gray-400">
+                  Course reviews will be displayed here.
+                </p>
+              </div>
+            )}
+
+            {activeTab === "announcements" && (
+              <div>
+                <h3 className="text-xl font-bold mb-4">Announcements</h3>
+                <p className="text-gray-400">
+                  Course announcements will be displayed here.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Sidebar */}
@@ -754,9 +781,9 @@ const CourseWatch: React.FC = () => {
 
             {/* Course Sections */}
             <div className="space-y-2">
-              {course.sections.map((section, sectionIndex) => (
+              {course.sections.map((section: any, sectionIndex: number) => (
                 <div
-                  key={section._id}
+                  key={section.id}
                   className="border border-gray-700 rounded-lg"
                 >
                   <div className="p-3 bg-gray-700">
@@ -767,15 +794,15 @@ const CourseWatch: React.FC = () => {
                   </div>
 
                   <div className="divide-y divide-gray-700">
-                    {section.lessons.map((lesson, lessonIndex) => {
-                      const progress = getLessonProgress(lesson._id);
+                    {section.lessons.map((lesson: any, lessonIndex: number) => {
+                      const progress = getLessonProgress(lesson.id);
                       const isCurrentLesson =
                         currentSection === sectionIndex &&
                         currentLesson === lessonIndex;
 
                       return (
                         <button
-                          key={lesson._id}
+                          key={lesson.id}
                           onClick={() => loadLesson(sectionIndex, lessonIndex)}
                           className={`w-full text-left p-3 hover:bg-gray-700 transition-colors ${
                             isCurrentLesson ? "bg-blue-600" : ""
@@ -878,7 +905,7 @@ const CourseWatch: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              {notes.map((note) => (
+              {lessonNotes.map((note: any) => (
                 <div key={note.id} className="p-3 bg-gray-700 rounded-lg">
                   <p className="text-sm mb-1">{note.content}</p>
                   <p className="text-xs text-gray-400">
