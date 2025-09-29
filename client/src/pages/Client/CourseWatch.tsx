@@ -161,14 +161,12 @@ const CourseWatch: React.FC = () => {
       setCurrentTime(0);
       setIsPlaying(false);
 
-      // Load user progress for this lesson
       const progress = getLessonProgress(lesson.id);
       if (progress && progress.watchTime > 0) {
         video.currentTime = Math.min(progress.watchTime, lesson.duration);
       }
     }
 
-    // Update URL
     window.history.replaceState(
       null,
       "",
@@ -319,9 +317,13 @@ const CourseWatch: React.FC = () => {
     if (!newReview.trim() || !enrollment || newRating < 1 || newRating > 5)
       return;
 
+    console.log("enrollment", enrollment);
+    console.log("newRating", newRating);
+    console.log("newReview", newReview);
+
     addReviewMutation.mutate(
       {
-        enrollmentId: enrollment._id,
+        enrollmentId: enrollment.id,
         reviewData: {
           rating: newRating,
           review: newReview.trim(),
