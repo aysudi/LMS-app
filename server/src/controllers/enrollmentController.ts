@@ -410,7 +410,7 @@ export const addCourseReview = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
     const { enrollmentId } = req.params;
-    const { rating, comment }: AddReviewRequest = req.body;
+    const { rating, review }: AddReviewRequest = req.body;
 
     if (!userId) {
       return res.status(401).json({
@@ -438,7 +438,7 @@ export const addCourseReview = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    await enrollment.addReview(rating, comment || "");
+    await enrollment.addReview(rating, review || "");
 
     const response: AddReviewResponse = {
       success: true,
