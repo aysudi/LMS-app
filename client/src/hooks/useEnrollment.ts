@@ -94,8 +94,13 @@ export const useAddEnrollmentNote = () => {
     }) => enrollmentService.addEnrollmentNote(enrollmentId, noteData),
 
     onSuccess: (_, variables) => {
+      // Invalidate enrollment data
       queryClient.invalidateQueries({
         queryKey: ["enrollment", variables.enrollmentId],
+      });
+      // Invalidate notes queries
+      queryClient.invalidateQueries({
+        queryKey: ["enrollment-notes", variables.enrollmentId],
       });
       enqueueSnackbar("Note added successfully", { variant: "success" });
     },
@@ -150,11 +155,24 @@ export const useAddCourseReview = () => {
       reviewData: AddReviewRequest;
     }) => enrollmentService.addCourseReview(enrollmentId, reviewData),
 
-    onSuccess: (_, variables) => {
+    onSuccess: (data, variables) => {
+      // Invalidate enrollment data
       queryClient.invalidateQueries({
         queryKey: ["enrollment", variables.enrollmentId],
       });
       queryClient.invalidateQueries({ queryKey: ["enrollments"] });
+
+      // Invalidate course data to refresh reviews
+      if (data?.data?.course) {
+        const courseId =
+          typeof data.data.course === "string"
+            ? data.data.course
+            : data.data.course._id;
+        queryClient.invalidateQueries({
+          queryKey: ["courses", "detail", courseId],
+        });
+      }
+
       enqueueSnackbar("Review added successfully!", { variant: "success" });
     },
 

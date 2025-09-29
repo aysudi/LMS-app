@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
+  useUserEnrollments,
+  useEnrollmentNotes,
+  useAddEnrollmentNote,
+  useAddCourseReview,
+} from "../../hooks/useEnrollment";
+import {
   FaPlay,
   FaPause,
   FaExpand,
@@ -22,11 +28,6 @@ import {
   useCourseProgress,
   useUpdateLessonProgress,
 } from "../../hooks/useUserProgress";
-import {
-  useUserEnrollments,
-  useEnrollmentNotes,
-  useAddEnrollmentNote,
-} from "../../hooks/useEnrollment";
 
 const CourseWatch: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>();
@@ -43,7 +44,6 @@ const CourseWatch: React.FC = () => {
   const [playbackRate, setPlaybackRate] = useState(1);
   const [showControls, setShowControls] = useState(true);
 
-  // Course data using hooks
   const { data: courseResponse, isLoading: courseLoading } = useCourse(
     courseId!
   );
@@ -51,17 +51,14 @@ const CourseWatch: React.FC = () => {
 
   const { data: courseProgress } = useCourseProgress(courseId!);
 
-  // Get user enrollments to find the enrollment for this course
   const { data: enrollmentsResponse } = useUserEnrollments();
   const enrollment = enrollmentsResponse?.data?.enrollments?.find(
     (e: any) => e.course._id === courseId
   );
 
-  // Mutations
   const updateProgressMutation = useUpdateLessonProgress();
   const addNoteMutation = useAddEnrollmentNote();
 
-  // Local state
   const [currentSection, setCurrentSection] = useState(0);
   const [currentLesson, setCurrentLesson] = useState(0);
   const [showSidebar, setShowSidebar] = useState(true);
@@ -71,24 +68,21 @@ const CourseWatch: React.FC = () => {
     "overview" | "notes" | "reviews" | "announcements"
   >("overview");
 
-  // Notes state
-
   const [newNote, setNewNote] = useState("");
   const [isBookmarked, setIsBookmarked] = useState(false);
 
-  // Quiz state
   const [quizAnswers, setQuizAnswers] = useState<{ [key: number]: number }>({});
 
-  // Get notes for current lesson
+  const [newReview, setNewReview] = useState("");
+  const [newRating, setNewRating] = useState(5);
+
   const currentLessonObj =
     course?.sections[currentSection]?.lessons[currentLesson];
-  const { data: lessonNotesResponse } = useEnrollmentNotes(
-    enrollment?._id || "",
-    currentLessonObj?.id
-  );
-  const lessonNotes = lessonNotesResponse?.data || [];
 
-  //   console.log(lessonNotes);
+  const { data: allNotesResponse } = useEnrollmentNotes(enrollment?.id || "");
+  const allCourseNotes = allNotesResponse?.data || [];
+
+  const addReviewMutation = useAddCourseReview();
 
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -321,6 +315,27 @@ const CourseWatch: React.FC = () => {
     );
   };
 
+  const addReview = () => {
+    if (!newReview.trim() || !enrollment || newRating < 1 || newRating > 5)
+      return;
+
+    addReviewMutation.mutate(
+      {
+        enrollmentId: enrollment._id,
+        reviewData: {
+          rating: newRating,
+          review: newReview.trim(),
+        },
+      },
+      {
+        onSuccess: () => {
+          setNewReview("");
+          setNewRating(5);
+        },
+      }
+    );
+  };
+
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
@@ -340,6 +355,10 @@ const CourseWatch: React.FC = () => {
     );
   };
 
+  const lessonProgress = currentLessonObj
+    ? getLessonProgress(currentLessonObj.id)
+    : null;
+
   if (courseLoading || !course) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
@@ -347,11 +366,6 @@ const CourseWatch: React.FC = () => {
       </div>
     );
   }
-
-  const lessonProgress = currentLessonObj
-    ? getLessonProgress(currentLessonObj.id)
-    : null;
-
   return (
     <div className="min-h-screen bg-gray-900 text-white flex">
       {/* Video Player */}
@@ -695,36 +709,77 @@ const CourseWatch: React.FC = () => {
 
                 {/* Notes List */}
                 <div className="space-y-4">
-                  {lessonNotes.length === 0 ? (
+                  {allCourseNotes.length === 0 ? (
                     <p className="text-gray-400 text-center py-8">
                       No notes yet. Add your first note above!
                     </p>
                   ) : (
-                    lessonNotes.map((note: any) => (
-                      <div
-                        key={note._id}
-                        className="bg-gray-700 p-4 rounded-lg"
-                      >
-                        <div className="flex justify-between items-start mb-2">
-                          <button
-                            onClick={() => {
-                              const video = videoRef.current;
-                              if (video) {
-                                video.currentTime = note.timestamp;
-                                setCurrentTime(note.timestamp);
+                    allCourseNotes.map((note: any) => {
+                      // Find the lesson info for this note
+                      let lessonTitle = "Unknown Lesson";
+                      let sectionIndex = -1;
+                      let lessonIndex = -1;
+
+                      if (course && course.sections) {
+                        course.sections.forEach(
+                          (section: any, sIdx: number) => {
+                            section.lessons.forEach(
+                              (lesson: any, lIdx: number) => {
+                                if (lesson.id === note.lesson) {
+                                  lessonTitle = lesson.title;
+                                  sectionIndex = sIdx;
+                                  lessonIndex = lIdx;
+                                }
                               }
-                            }}
-                            className="text-blue-400 hover:text-blue-300 font-medium text-sm"
-                          >
-                            {formatTime(note.timestamp)}
-                          </button>
-                          <span className="text-gray-400 text-sm">
-                            {new Date(note.createdAt).toLocaleDateString()}
-                          </span>
+                            );
+                          }
+                        );
+                      }
+
+                      return (
+                        <div
+                          key={note._id}
+                          className="bg-gray-700 p-4 rounded-lg"
+                        >
+                          <div className="flex justify-between items-start mb-2">
+                            <div className="flex flex-col">
+                              <button
+                                onClick={() => {
+                                  // Navigate to the lesson first if not current lesson
+                                  if (
+                                    sectionIndex !== -1 &&
+                                    lessonIndex !== -1
+                                  ) {
+                                    if (
+                                      sectionIndex !== currentSection ||
+                                      lessonIndex !== currentLesson
+                                    ) {
+                                      loadLesson(sectionIndex, lessonIndex);
+                                    }
+                                  }
+
+                                  // Then jump to timestamp after a small delay
+                                  setTimeout(() => {
+                                    const video = videoRef.current;
+                                    if (video) {
+                                      video.currentTime = note.timestamp;
+                                      setCurrentTime(note.timestamp);
+                                    }
+                                  }, 500);
+                                }}
+                                className="text-blue-400 hover:text-blue-300 font-medium text-sm text-left"
+                              >
+                                {formatTime(note.timestamp)} - {lessonTitle}
+                              </button>
+                            </div>
+                            <span className="text-gray-400 text-sm">
+                              {new Date(note.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <p className="text-gray-200">{note.content}</p>
                         </div>
-                        <p className="text-gray-200">{note.content}</p>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
               </div>
@@ -733,9 +788,97 @@ const CourseWatch: React.FC = () => {
             {activeTab === "reviews" && (
               <div>
                 <h3 className="text-xl font-bold mb-4">Course Reviews</h3>
-                <p className="text-gray-400">
-                  Course reviews will be displayed here.
-                </p>
+
+                {/* Add Review Form */}
+                <div className="bg-gray-700 p-4 rounded-lg mb-6">
+                  <h4 className="font-semibold mb-3">Leave a Review</h4>
+
+                  {/* Rating Stars */}
+                  <div className="flex items-center space-x-2 mb-3">
+                    <span className="text-sm text-gray-300">Rating:</span>
+                    <div className="flex space-x-1">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          onClick={() => setNewRating(star)}
+                          className={`text-2xl ${
+                            star <= newRating
+                              ? "text-yellow-400"
+                              : "text-gray-500"
+                          } hover:text-yellow-300 transition-colors`}
+                        >
+                          ★
+                        </button>
+                      ))}
+                    </div>
+                    <span className="text-sm text-gray-400">
+                      ({newRating}/5)
+                    </span>
+                  </div>
+
+                  {/* Review Text */}
+                  <textarea
+                    value={newReview}
+                    onChange={(e) => setNewReview(e.target.value)}
+                    placeholder="Write your review..."
+                    className="w-full bg-gray-600 text-white p-3 rounded border border-gray-500 focus:border-blue-500 focus:outline-none resize-none mb-3"
+                    rows={4}
+                  />
+
+                  <button
+                    onClick={addReview}
+                    disabled={!newReview.trim()}
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Submit Review
+                  </button>
+                </div>
+
+                {/* Reviews List */}
+                <div className="space-y-4">
+                  {course?.reviews && course.reviews.length === 0 ? (
+                    <p className="text-gray-400 text-center py-8">
+                      No reviews yet. Be the first to review this course!
+                    </p>
+                  ) : (
+                    course?.reviews?.map((review: any, index: number) => (
+                      <div key={index} className="bg-gray-700 p-4 rounded-lg">
+                        <div className="flex justify-between items-start mb-2">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                              {review.user?.firstName?.[0] || "U"}
+                            </div>
+                            <div>
+                              <p className="font-semibold text-white">
+                                {review.user?.firstName} {review.user?.lastName}
+                              </p>
+                              <div className="flex items-center space-x-2">
+                                <div className="flex space-x-1">
+                                  {[1, 2, 3, 4, 5].map((star) => (
+                                    <span
+                                      key={star}
+                                      className={`text-sm ${
+                                        star <= review.rating
+                                          ? "text-yellow-400"
+                                          : "text-gray-500"
+                                      }`}
+                                    >
+                                      ★
+                                    </span>
+                                  ))}
+                                </div>
+                                <span className="text-sm text-gray-400">
+                                  {new Date(review.date).toLocaleDateString()}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <p className="text-gray-200 mt-2">{review.comment}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
             )}
 
@@ -904,7 +1047,7 @@ const CourseWatch: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              {lessonNotes.map((note: any, index: number) => (
+              {allCourseNotes.map((note: any, index: number) => (
                 <div key={index} className="p-3 bg-gray-700 rounded-lg">
                   <p className="text-sm mb-1">{note.content}</p>
                   <p className="text-xs text-gray-400">
