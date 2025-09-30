@@ -27,7 +27,6 @@ export const getCourseProgress = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Get course and its sections with lessons
     const course = await Course.findById(courseId);
 
     if (!course) {
@@ -37,7 +36,6 @@ export const getCourseProgress = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Get all lessons from sections
     const sections = await Section.find({ course: courseId }).sort({
       order: 1,
     });
@@ -50,7 +48,6 @@ export const getCourseProgress = async (req: AuthRequest, res: Response) => {
       allLessons.push(...lessons);
     }
 
-    // Get user progress for all lessons in the course
     const userProgresses = await UserProgress.find({
       user: userId,
       course: courseId,
@@ -122,7 +119,6 @@ export const updateLessonProgress = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Find or create user progress
     let userProgress = await UserProgress.findOne({
       user: userId,
       course: courseId,
@@ -139,7 +135,6 @@ export const updateLessonProgress = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Update progress
     if (completed !== undefined) {
       userProgress.completed = completed;
       if (completed && !userProgress.completedAt) {
@@ -155,7 +150,6 @@ export const updateLessonProgress = async (req: AuthRequest, res: Response) => {
 
     await userProgress.save();
 
-    // Update enrollment progress
     const enrollment = await Enrollment.findOne({
       user: userId,
       course: courseId,
@@ -167,7 +161,6 @@ export const updateLessonProgress = async (req: AuthRequest, res: Response) => {
     };
 
     if (enrollment) {
-      // Recalculate progress based on actual UserProgress records
       await (enrollment as any).recalculateProgress();
 
       enrollmentProgress = {
@@ -176,7 +169,6 @@ export const updateLessonProgress = async (req: AuthRequest, res: Response) => {
       };
     }
 
-    // Update user's total learning time
     if (watchTime > 0) {
       await User.findByIdAndUpdate(userId, {
         $inc: { totalLearningTime: watchTime / 60 }, // Convert seconds to minutes
@@ -213,7 +205,6 @@ export const getLearningAnalytics = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Get all user progress
     const userProgresses = await UserProgress.find({ user: userId }).populate(
       "course",
       "category title"
@@ -227,14 +218,12 @@ export const getLearningAnalytics = async (req: AuthRequest, res: Response) => {
       (progress) => progress.completed
     ).length;
 
-    // Calculate average session time (rough estimate)
     const sessionsCount = userProgresses.filter(
       (progress) => progress.watchTime > 0
     ).length;
     const averageSessionTime =
       sessionsCount > 0 ? totalWatchTime / sessionsCount : 0;
 
-    // Calculate learning streak (consecutive days with activity)
     const today = new Date();
     const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
 
@@ -242,7 +231,6 @@ export const getLearningAnalytics = async (req: AuthRequest, res: Response) => {
       (progress) => progress.updatedAt >= sevenDaysAgo
     );
 
-    // Group by date
     const dailyActivity = new Map<
       string,
       { watchTime: number; lessonsCompleted: number }
@@ -263,7 +251,6 @@ export const getLearningAnalytics = async (req: AuthRequest, res: Response) => {
       dailyActivity.set(date, existing);
     });
 
-    // Convert to array and sort
     const weeklyProgress = Array.from(dailyActivity.entries())
       .map(([date, activity]) => ({
         date,
@@ -272,7 +259,6 @@ export const getLearningAnalytics = async (req: AuthRequest, res: Response) => {
       }))
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-    // Calculate learning streak
     let learningStreak = 0;
     const now = new Date();
     let currentDate = new Date(now.getTime());
@@ -287,7 +273,6 @@ export const getLearningAnalytics = async (req: AuthRequest, res: Response) => {
       currentDate = new Date(currentDate.getTime() - 24 * 60 * 60 * 1000);
     }
 
-    // Group by category
     const categoryStats = new Map<
       string,
       { watchTime: number; coursesCount: number }
@@ -305,7 +290,6 @@ export const getLearningAnalytics = async (req: AuthRequest, res: Response) => {
       }
     });
 
-    // Get unique courses per category
     const uniqueCourses = new Set();
     userProgresses.forEach((progress) => {
       const course = progress.course as any;
@@ -407,7 +391,6 @@ export const completeLessonProgress = async (
       });
     }
 
-    // Check if already completed
     let userProgress = await UserProgress.findOne({
       user: userId,
       course: courseId,
@@ -433,7 +416,6 @@ export const completeLessonProgress = async (
       });
       await userProgress.save();
     } else {
-      // If exists but not completed, mark as completed (never uncomplete)
       userProgress.completed = true;
       userProgress.completedAt = new Date();
       await userProgress.save();
