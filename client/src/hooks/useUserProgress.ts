@@ -72,3 +72,34 @@ export const useLearningAnalytics = () => {
     staleTime: 15 * 60 * 1000, // 15 minutes
   });
 };
+
+// Hook for completing lesson progress (POST, only once)
+export const useCompleteLessonProgress = () => {
+  const queryClient = useQueryClient();
+  const { enqueueSnackbar } = useSnackbar();
+
+  return useMutation({
+    mutationFn: ({
+      courseId,
+      progressData,
+    }: {
+      courseId: string;
+      progressData: UpdateUserProgressRequest;
+    }) => userProgressService.completeLessonProgress(courseId, progressData),
+
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["user-progress"] });
+      queryClient.invalidateQueries({
+        queryKey: ["course-progress", variables.courseId],
+      });
+      if (data.success) {
+        enqueueSnackbar("Lesson completed!", { variant: "success" });
+      }
+    },
+    onError: (error: any) => {
+      const message =
+        error.response?.data?.message || "Failed to complete lesson";
+      enqueueSnackbar(message, { variant: "error" });
+    },
+  });
+};
