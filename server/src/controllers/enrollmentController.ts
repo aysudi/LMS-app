@@ -393,7 +393,9 @@ export const getEnrollmentReviews = async (req: AuthRequest, res: Response) => {
     res.json({
       success: true,
       data: {
-        review: enrollment.review,
+        reviews: enrollment.reviews,
+        averageRating: enrollment.averageRating,
+        totalRatings: enrollment.totalRatings,
         course: enrollment.course,
       },
     });

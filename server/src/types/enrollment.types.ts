@@ -15,6 +15,12 @@ export interface EnrollmentNote {
   createdAt: Date;
 }
 
+export interface EnrollmentReview {
+  rating: number;
+  comment: string;
+  createdAt: Date;
+}
+
 export interface IEnrollment extends Document {
   user: Types.ObjectId | string;
   course: Types.ObjectId | string;
@@ -33,9 +39,9 @@ export interface IEnrollment extends Document {
   completedLessons: (Types.ObjectId | string)[];
   bookmarkedLessons: (Types.ObjectId | string)[];
   notes: EnrollmentNote[];
-  rating?: number;
-  review?: string;
-  reviewedAt?: Date;
+  reviews: EnrollmentReview[];
+  averageRating: number;
+  totalRatings: number;
   refundRequested: boolean;
   refundRequestedAt?: Date;
   refundReason?: string;
@@ -58,7 +64,8 @@ export interface IEnrollment extends Document {
     timestamp: number
   ): Promise<IEnrollment>;
   toggleBookmark(lessonId: string): Promise<IEnrollment>;
-  addReview(rating: number, review: string): Promise<IEnrollment>;
+  addReview(rating: number, comment: string): Promise<IEnrollment>;
+  calculateAverageRating(): void;
 }
 
 // Request/Response types

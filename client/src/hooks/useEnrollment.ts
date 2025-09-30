@@ -50,7 +50,6 @@ export const useUpdateEnrollmentProgress = () => {
       enrollmentService.updateEnrollmentProgress(enrollmentId, progressData),
 
     onSuccess: (data, variables) => {
-      // Invalidate related queries
       queryClient.invalidateQueries({ queryKey: ["enrollments"] });
       queryClient.invalidateQueries({
         queryKey: ["enrollment", variables.enrollmentId],
@@ -94,11 +93,9 @@ export const useAddEnrollmentNote = () => {
     }) => enrollmentService.addEnrollmentNote(enrollmentId, noteData),
 
     onSuccess: (_, variables) => {
-      // Invalidate enrollment data
       queryClient.invalidateQueries({
         queryKey: ["enrollment", variables.enrollmentId],
       });
-      // Invalidate notes queries
       queryClient.invalidateQueries({
         queryKey: ["enrollment-notes", variables.enrollmentId],
       });
@@ -156,23 +153,19 @@ export const useAddCourseReview = () => {
     }) => enrollmentService.addCourseReview(enrollmentId, reviewData),
 
     onSuccess: (data, variables) => {
-      // Invalidate enrollment data
       queryClient.invalidateQueries({
         queryKey: ["enrollment", variables.enrollmentId],
       });
       queryClient.invalidateQueries({ queryKey: ["enrollments"] });
 
-      // Invalidate course data to refresh reviews
       if (data?.data?.course) {
         const courseId =
           typeof data.data.course === "string"
             ? data.data.course
             : data.data.course._id;
-        // Use the same query key format as useCourse hook
         queryClient.invalidateQueries({
           queryKey: ["courses", "detail", courseId],
         });
-        // Also invalidate all course lists
         queryClient.invalidateQueries({
           queryKey: ["courses"],
         });
