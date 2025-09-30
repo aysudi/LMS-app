@@ -55,7 +55,7 @@ const MyLearning = () => {
             </div>
             <button
               onClick={() => navigate("/courses")}
-              className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg"
+              className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg cursor-pointer"
             >
               Browse More Courses
             </button>
@@ -284,7 +284,7 @@ const MyLearning = () => {
                       e.stopPropagation();
                       navigate(`/course/${enrollment.course._id}/learn`);
                     }}
-                    className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center space-x-2"
+                    className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center space-x-2 cursor-pointer"
                   >
                     <FaPlay className="text-sm" />
                     <span>Continue Learning</span>

@@ -373,7 +373,7 @@ const CourseWatch: React.FC = () => {
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => navigate("/my-learning")}
-                className="text-gray-300 hover:text-white transition-colors"
+                className="text-gray-300 hover:text-white transition-colors cursor-pointer"
               >
                 ← Back to My Learning
               </button>
@@ -468,7 +468,7 @@ const CourseWatch: React.FC = () => {
               <div className="flex items-center space-x-4">
                 <button
                   onClick={goToPreviousLesson}
-                  className="p-2 hover:bg-white/20 rounded transition-colors"
+                  className="p-2 hover:bg-white/20 rounded transition-colors cursor-pointer"
                   disabled={currentSection === 0 && currentLesson === 0}
                   title="Previous Lesson"
                 >
@@ -477,7 +477,7 @@ const CourseWatch: React.FC = () => {
 
                 <button
                   onClick={() => seek(currentTime - 10)}
-                  className="p-2 hover:bg-white/20 rounded transition-colors"
+                  className="p-2 hover:bg-white/20 rounded transition-colors cursor-pointer"
                   title="Rewind 10 seconds (←)"
                 >
                   <svg
@@ -501,7 +501,7 @@ const CourseWatch: React.FC = () => {
 
                 <button
                   onClick={togglePlayPause}
-                  className="p-3 hover:bg-white/20 rounded-full transition-colors"
+                  className="p-3 hover:bg-white/20 rounded-full transition-colors cursor-pointer"
                   title="Play/Pause (Spacebar)"
                 >
                   {isPlaying ? (
@@ -513,7 +513,7 @@ const CourseWatch: React.FC = () => {
 
                 <button
                   onClick={() => seek(currentTime + 10)}
-                  className="p-2 hover:bg-white/20 rounded transition-colors"
+                  className="p-2 hover:bg-white/20 rounded transition-colors cursor-pointer"
                   title="Forward 10 seconds (→)"
                 >
                   <svg
@@ -537,16 +537,16 @@ const CourseWatch: React.FC = () => {
 
                 <button
                   onClick={goToNextLesson}
-                  className="p-2 hover:bg-white/20 rounded transition-colors"
+                  className="p-2 hover:bg-white/20 rounded transition-colors cursor-pointer"
                   title="Next Lesson"
                 >
                   <FaStepForward />
                 </button>
 
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 cursor-pointer">
                   <button
                     onClick={toggleMute}
-                    className="p-2 hover:bg-white/20 rounded"
+                    className="p-2 hover:bg-white/20 rounded cursor-pointer"
                   >
                     {isMuted ? <FaVolumeMute /> : <FaVolumeUp />}
                   </button>
@@ -585,7 +585,7 @@ const CourseWatch: React.FC = () => {
 
                 <button
                   onClick={toggleFullscreen}
-                  className="p-2 hover:bg-white/20 rounded"
+                  className="p-2 hover:bg-white/20 rounded cursor-pointer"
                   title="Fullscreen (F)"
                 >
                   {isFullscreen ? <FaCompress /> : <FaExpand />}
@@ -643,11 +643,11 @@ const CourseWatch: React.FC = () => {
               <button
                 onClick={markLessonComplete}
                 disabled={!canCompleteLesson() && !isLessonCompleted()}
-                className={`px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors ${
+                className={`px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors  ${
                   isLessonCompleted()
                     ? "bg-green-500 text-white cursor-default"
                     : canCompleteLesson()
-                    ? "bg-green-600 hover:bg-green-700 text-white"
+                    ? "bg-green-600 hover:bg-green-700 text-white cursor-pointer"
                     : "bg-gray-600 text-gray-400 cursor-not-allowed"
                 }`}
                 title={
@@ -718,7 +718,7 @@ const CourseWatch: React.FC = () => {
               <button
                 key={index}
                 onClick={() => setActiveTab(tab)}
-                className={`px-6 py-3 text-sm font-medium capitalize transition-colors ${
+                className={`px-6 py-3 text-sm font-medium capitalize transition-colors cursor-pointer ${
                   activeTab === tab
                     ? "text-white border-b-2 border-purple-500 bg-gray-700"
                     : "text-gray-300 hover:text-white hover:bg-gray-700"
@@ -790,7 +790,7 @@ const CourseWatch: React.FC = () => {
                         <button
                           onClick={addNote}
                           disabled={!newNote.trim()}
-                          className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                         >
                           Add Note
                         </button>
@@ -1000,7 +1000,7 @@ const CourseWatch: React.FC = () => {
                   <button
                     onClick={addReview}
                     disabled={!newReview.trim()}
-                    className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                   >
                     Submit Review
                   </button>
@@ -1206,7 +1206,7 @@ const CourseWatch: React.FC = () => {
                 <h2 className="text-lg font-bold">Course Content</h2>
                 <button
                   onClick={() => setShowSidebar(false)}
-                  className="p-1 hover:bg-gray-700 rounded"
+                  className="p-1 hover:bg-gray-700 rounded cursor-pointer"
                 >
                   <FaTimes />
                 </button>
@@ -1315,13 +1315,13 @@ const CourseWatch: React.FC = () => {
                 <div className="flex items-center space-x-4 pt-2">
                   <button
                     onClick={() => navigate("/my-learning")}
-                    className="text-purple-400 hover:text-purple-300 text-xs"
+                    className="text-purple-400 hover:text-purple-300 text-xs cursor-pointer"
                   >
                     My Learning
                   </button>
                   <button
                     onClick={() => navigate(`/course/${courseId}`)}
-                    className="text-purple-400 hover:text-purple-300 text-xs"
+                    className="text-purple-400 hover:text-purple-300 text-xs cursor-pointer"
                   >
                     Course Details
                   </button>
@@ -1355,7 +1355,7 @@ const CourseWatch: React.FC = () => {
               />
               <button
                 onClick={addNote}
-                className="mt-2 w-full py-2 bg-purple-600 hover:bg-purple-700 rounded-lg"
+                className="mt-2 w-full py-2 bg-purple-600 hover:bg-purple-700 rounded-lg cursor-pointer"
               >
                 Add Note
               </button>
