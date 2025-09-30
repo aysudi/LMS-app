@@ -96,18 +96,36 @@ const enrollmentSchema = new mongoose.Schema(
         },
       },
     ],
-    rating: {
+    reviews: [
+      {
+        rating: {
+          type: Number,
+          required: true,
+          min: 1,
+          max: 5,
+        },
+        comment: {
+          type: String,
+          required: true,
+          maxlength: 500,
+          trim: true,
+        },
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
+    averageRating: {
       type: Number,
-      min: 1,
+      default: 0,
+      min: 0,
       max: 5,
     },
-    review: {
-      type: String,
-      maxlength: 500,
-      trim: true,
-    },
-    reviewedAt: {
-      type: Date,
+    totalRatings: {
+      type: Number,
+      default: 0,
+      min: 0,
     },
     refundRequested: {
       type: Boolean,
@@ -226,12 +244,17 @@ enrollmentSchema.methods.toggleBookmark = function (lessonId: string) {
 
 enrollmentSchema.methods.addReview = async function (
   rating: number,
-  review: string
+  comment: string
 ) {
-  // Update enrollment review
-  this.rating = rating;
-  this.review = review.trim();
-  this.reviewedAt = new Date();
+  // Add review to enrollment reviews array
+  this.reviews.push({
+    rating: rating,
+    comment: comment.trim(),
+    createdAt: new Date(),
+  });
+
+  // Recalculate enrollment average rating
+  this.calculateAverageRating();
 
   // Save enrollment first
   await this.save();
@@ -241,25 +264,15 @@ enrollmentSchema.methods.addReview = async function (
   const course = await Course.findById(this.course);
 
   if (course) {
-    // Check if user already has a review for this course
-    const existingReviewIndex = course.reviews.findIndex(
-      (r: any) => r.user.toString() === this.user.toString()
-    );
-
+    // Add new review to course (each enrollment can add multiple reviews)
     const reviewData = {
       user: this.user,
       rating: rating,
-      comment: review.trim(),
+      comment: comment.trim(),
       date: new Date(),
     };
 
-    if (existingReviewIndex > -1) {
-      // Update existing review
-      course.reviews[existingReviewIndex] = reviewData;
-    } else {
-      // Add new review
-      course.reviews.push(reviewData);
-    }
+    course.reviews.push(reviewData);
 
     // Recalculate course rating
     course.calculateAverageRating();
@@ -267,6 +280,22 @@ enrollmentSchema.methods.addReview = async function (
   }
 
   return this;
+};
+
+// Method to calculate average rating for enrollment
+enrollmentSchema.methods.calculateAverageRating = function () {
+  if (this.reviews.length === 0) {
+    this.averageRating = 0;
+    this.totalRatings = 0;
+    return;
+  }
+
+  const sum = this.reviews.reduce(
+    (acc: number, review: any) => acc + review.rating,
+    0
+  );
+  this.averageRating = Number((sum / this.reviews.length).toFixed(1));
+  this.totalRatings = this.reviews.length;
 };
 
 enrollmentSchema.set("toJSON", { virtuals: true });

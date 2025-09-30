@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import {
   useUserEnrollments,
   useEnrollmentNotes,
+  useEnrollmentReviews,
   useAddEnrollmentNote,
   useAddCourseReview,
 } from "../../hooks/useEnrollment";
@@ -84,6 +85,11 @@ const CourseWatch: React.FC = () => {
   const { data: allNotesResponse } = useEnrollmentNotes(enrollment?.id || "");
   const allCourseNotes = allNotesResponse?.data || [];
 
+  const { data: enrollmentReviewsResponse } = useEnrollmentReviews(
+    enrollment?.id || ""
+  );
+  const enrollmentReviews = enrollmentReviewsResponse?.data?.reviews || [];
+
   const addReviewMutation = useAddCourseReview();
 
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -108,7 +114,6 @@ const CourseWatch: React.FC = () => {
     };
 
     const handleKeyPress = (e: KeyboardEvent) => {
-      // Allow keyboard shortcuts even when input elements are focused, except for textareas and inputs
       const target = e.target as HTMLElement;
       if (target.tagName === "TEXTAREA" || target.tagName === "INPUT") return;
 
@@ -269,10 +274,8 @@ const CourseWatch: React.FC = () => {
 
     const currentSectionObj = course.sections[currentSection];
     if (currentLesson < currentSectionObj.lessons.length - 1) {
-      // Next lesson in same section
       loadLesson(currentSection, currentLesson + 1);
     } else if (currentSection < course.sections.length - 1) {
-      // First lesson of next section
       loadLesson(currentSection + 1, 0);
     } else {
       alert("Congratulations! You've completed the entire course!");
@@ -283,10 +286,8 @@ const CourseWatch: React.FC = () => {
     if (!course) return;
 
     if (currentLesson > 0) {
-      // Previous lesson in same section
       loadLesson(currentSection, currentLesson - 1);
     } else if (currentSection > 0) {
-      // Last lesson of previous section
       const prevSection = course.sections[currentSection - 1];
       loadLesson(currentSection - 1, prevSection.lessons.length - 1);
     }
@@ -335,7 +336,6 @@ const CourseWatch: React.FC = () => {
         onSuccess: () => {
           setNewReview("");
           setNewRating(5);
-          // Refresh course data to show new review immediately
           refetchCourse();
         },
       }
@@ -971,8 +971,54 @@ const CourseWatch: React.FC = () => {
                   </button>
                 </div>
 
-                {/* Reviews List */}
+                {/* My Reviews Section */}
+                {enrollmentReviews && enrollmentReviews.length > 0 && (
+                  <div className="mb-6">
+                    <h4 className="text-lg font-semibold mb-3 text-purple-400">
+                      My Reviews for this Course
+                    </h4>
+                    <div className="space-y-3">
+                      {enrollmentReviews.map((review: any, index: number) => (
+                        <div
+                          key={index}
+                          className="bg-purple-900/20 border border-purple-500/30 p-4 rounded-lg"
+                        >
+                          <div className="flex justify-between items-start mb-2">
+                            <div className="flex items-center space-x-2">
+                              <div className="flex space-x-1">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <span
+                                    key={star}
+                                    className={`text-sm ${
+                                      star <= review.rating
+                                        ? "text-yellow-400"
+                                        : "text-gray-500"
+                                    }`}
+                                  >
+                                    ★
+                                  </span>
+                                ))}
+                              </div>
+                              <span className="text-purple-300 text-sm font-medium">
+                                My Review
+                              </span>
+                            </div>
+                            <span className="text-gray-400 text-sm">
+                              {new Date(review.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <p className="text-gray-200">{review.comment}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* All Course Reviews */}
                 <div className="space-y-4">
+                  <h4 className="text-lg font-semibold mb-3">
+                    All Course Reviews
+                  </h4>
                   {!course?.reviews || course.reviews.length === 0 ? (
                     <p className="text-gray-400 text-center py-8">
                       No reviews yet. Be the first to review this course!
