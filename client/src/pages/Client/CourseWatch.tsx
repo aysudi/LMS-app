@@ -14,8 +14,6 @@ import {
   FaCompress,
   FaVolumeUp,
   FaVolumeMute,
-  FaBookmark,
-  FaRegBookmark,
   FaQuestionCircle,
   FaNotesMedical,
   FaCheck,
@@ -68,11 +66,10 @@ const CourseWatch: React.FC = () => {
   const [showNotes, setShowNotes] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
   const [activeTab, setActiveTab] = useState<
-    "overview" | "notes" | "reviews" | "announcements"
+    "overview" | "notes" | "reviews" | "resources" | "announcements"
   >("overview");
 
   const [newNote, setNewNote] = useState("");
-  const [isBookmarked, setIsBookmarked] = useState(false);
 
   const [quizAnswers, setQuizAnswers] = useState<{ [key: number]: number }>({});
 
@@ -263,6 +260,19 @@ const CourseWatch: React.FC = () => {
     updateProgress(true);
   };
 
+  // Check if user can complete the lesson (must be in last 1 minute)
+  const canCompleteLesson = () => {
+    if (!currentLessonObj || !duration || duration === 0) return false;
+    const remainingTime = duration - currentTime;
+    return remainingTime <= 60; // 60 seconds = 1 minute
+  };
+
+  // Check if lesson is already completed
+  const isLessonCompleted = () => {
+    if (!currentLessonObj) return false;
+    return getLessonProgress(currentLessonObj.id)?.completed || false;
+  };
+
   const goToNextLesson = () => {
     if (!course) return;
 
@@ -446,7 +456,7 @@ const CourseWatch: React.FC = () => {
             {/* Progress Bar */}
             <div className="mb-4">
               <div
-                className="w-full h-2 bg-gray-600 rounded cursor-pointer hover:h-3 transition-all duration-200 group"
+                className="w-full h-2 bg-gray-600 rounded cursor-pointer hover:h-3 transition-all duration-200 group relative"
                 onClick={(e) => {
                   const video = videoRef.current;
                   if (!video || !duration) return;
@@ -460,6 +470,15 @@ const CourseWatch: React.FC = () => {
                   setCurrentTime(newTime);
                 }}
               >
+                {/* Completion threshold indicator */}
+                {duration > 60 && (
+                  <div
+                    className="absolute top-0 h-full w-0.5 bg-green-400 z-10"
+                    style={{ left: `${((duration - 60) / duration) * 100}%` }}
+                    title="Complete button becomes available here"
+                  />
+                )}
+
                 <div
                   className="h-full bg-gradient-to-r from-purple-500 to-purple-400 rounded relative"
                   style={{ width: `${(currentTime / duration) * 100}%` }}
@@ -621,6 +640,16 @@ const CourseWatch: React.FC = () => {
                 <span>
                   Duration: {formatTime(currentLessonObj?.duration || 0)}
                 </span>
+                {currentLessonObj?.resources &&
+                  currentLessonObj.resources.length > 0 && (
+                    <>
+                      <span>•</span>
+                      <span className="text-blue-400">
+                        {currentLessonObj.resources.length} Resource
+                        {currentLessonObj.resources.length !== 1 ? "s" : ""}
+                      </span>
+                    </>
+                  )}
                 {currentLessonObj &&
                   getLessonProgress(currentLessonObj.id)?.completed && (
                     <>
@@ -637,19 +666,26 @@ const CourseWatch: React.FC = () => {
             <div className="flex items-center space-x-2">
               <button
                 onClick={markLessonComplete}
-                className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg flex items-center space-x-2 transition-colors"
-                title="Mark as Complete"
+                disabled={!canCompleteLesson() && !isLessonCompleted()}
+                className={`px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors ${
+                  isLessonCompleted()
+                    ? "bg-green-500 text-white cursor-default"
+                    : canCompleteLesson()
+                    ? "bg-green-600 hover:bg-green-700 text-white"
+                    : "bg-gray-600 text-gray-400 cursor-not-allowed"
+                }`}
+                title={
+                  isLessonCompleted()
+                    ? "Lesson Completed"
+                    : canCompleteLesson()
+                    ? "Mark as Complete"
+                    : "Complete the video to the last minute to mark as complete"
+                }
               >
                 <FaCheck />
-                <span className="text-sm">Complete</span>
-              </button>
-
-              <button
-                onClick={() => setIsBookmarked(!isBookmarked)}
-                className="p-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
-                title="Bookmark"
-              >
-                {isBookmarked ? <FaBookmark /> : <FaRegBookmark />}
+                <span className="text-sm">
+                  {isLessonCompleted() ? "Completed" : "Complete"}
+                </span>
               </button>
 
               <button
@@ -659,6 +695,23 @@ const CourseWatch: React.FC = () => {
               >
                 <FaNotesMedical />
               </button>
+
+              {currentLessonObj?.resources &&
+                currentLessonObj.resources.length > 0 && (
+                  <button
+                    onClick={() => setActiveTab("resources")}
+                    className="p-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                    title="Lesson Resources"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+                    </svg>
+                  </button>
+                )}
 
               {currentLessonObj?.quiz && currentLessonObj.quiz.length > 0 && (
                 <button
@@ -677,21 +730,27 @@ const CourseWatch: React.FC = () => {
         <div className="bg-gray-800 border-t border-gray-700">
           {/* Tab Headers */}
           <div className="flex border-b border-gray-700">
-            {(["overview", "notes", "reviews", "announcements"] as const).map(
-              (tab, index) => (
-                <button
-                  key={index}
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-6 py-3 text-sm font-medium capitalize transition-colors ${
-                    activeTab === tab
-                      ? "text-white border-b-2 border-purple-500 bg-gray-700"
-                      : "text-gray-300 hover:text-white hover:bg-gray-700"
-                  }`}
-                >
-                  {tab}
-                </button>
-              )
-            )}
+            {(
+              [
+                "overview",
+                "notes",
+                "reviews",
+                "resources",
+                "announcements",
+              ] as const
+            ).map((tab, index) => (
+              <button
+                key={index}
+                onClick={() => setActiveTab(tab)}
+                className={`px-6 py-3 text-sm font-medium capitalize transition-colors ${
+                  activeTab === tab
+                    ? "text-white border-b-2 border-purple-500 bg-gray-700"
+                    : "text-gray-300 hover:text-white hover:bg-gray-700"
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
           </div>
 
           {/* Tab Content */}
@@ -1073,6 +1132,82 @@ const CourseWatch: React.FC = () => {
               </div>
             )}
 
+            {activeTab === "resources" && (
+              <div>
+                <h3 className="text-xl font-bold mb-4">Lesson Resources</h3>
+                {currentLessonObj?.resources &&
+                currentLessonObj.resources.length > 0 ? (
+                  <div className="space-y-3">
+                    {currentLessonObj.resources.map(
+                      (resource: any, index: number) => (
+                        <div
+                          key={index}
+                          className="bg-gray-700 p-4 rounded-lg hover:bg-gray-600 transition-colors"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              <div
+                                className={`w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold ${
+                                  resource.type === "pdf"
+                                    ? "bg-red-500"
+                                    : resource.type === "zip"
+                                    ? "bg-yellow-500"
+                                    : resource.type === "doc"
+                                    ? "bg-blue-500"
+                                    : "bg-gray-500"
+                                }`}
+                              >
+                                {resource.type === "pdf"
+                                  ? "PDF"
+                                  : resource.type === "zip"
+                                  ? "ZIP"
+                                  : resource.type === "doc"
+                                  ? "DOC"
+                                  : "FILE"}
+                              </div>
+                              <div>
+                                <h4 className="font-semibold text-white">
+                                  {resource.name}
+                                </h4>
+                                <p className="text-sm text-gray-400 capitalize">
+                                  {resource.type} file
+                                </p>
+                              </div>
+                            </div>
+                            <a
+                              href={resource.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors flex items-center space-x-2"
+                            >
+                              <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                />
+                              </svg>
+                              <span>Download</span>
+                            </a>
+                          </div>
+                        </div>
+                      )
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-gray-400 text-center py-8">
+                    No resources available for this lesson.
+                  </p>
+                )}
+              </div>
+            )}
+
             {activeTab === "announcements" && (
               <div>
                 <h3 className="text-xl font-bold mb-4">Announcements</h3>
@@ -1163,11 +1298,22 @@ const CourseWatch: React.FC = () => {
                                 {formatTime(lesson.duration)}
                               </p>
                             </div>
-                            {lesson.isPreview && (
-                              <span className="text-xs bg-green-600 px-2 py-1 rounded">
-                                Preview
-                              </span>
-                            )}
+                            <div className="flex items-center space-x-1">
+                              {lesson.isPreview && (
+                                <span className="text-xs bg-green-600 px-2 py-1 rounded">
+                                  Preview
+                                </span>
+                              )}
+                              {lesson.resources &&
+                                lesson.resources.length > 0 && (
+                                  <span
+                                    className="text-xs bg-blue-600 px-2 py-1 rounded"
+                                    title="Has Resources"
+                                  >
+                                    📁
+                                  </span>
+                                )}
+                            </div>
                           </div>
                         </button>
                       );
