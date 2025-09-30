@@ -421,6 +421,23 @@ export const completeLessonProgress = async (
       await userProgress.save();
     }
 
+    const enrollment = await Enrollment.findOne({
+      user: userId,
+      course: courseId,
+    });
+    if (enrollment) {
+      await enrollment.recalculateProgress();
+      const allProgress = await UserProgress.find({
+        user: userId,
+        course: courseId,
+      });
+      enrollment.totalWatchTime = allProgress.reduce(
+        (sum, p) => sum + (p.watchTime || 0),
+        0
+      );
+      await enrollment.save();
+    }
+
     return res.json({
       success: true,
       message: "Lesson marked as completed",
