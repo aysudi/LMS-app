@@ -389,3 +389,66 @@ export const getUserProgress = async (req: AuthRequest, res: Response) => {
     });
   }
 };
+
+// POST: Complete lesson progress (only once, never uncomplete)
+export const completeLessonProgress = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  try {
+    const userId = req.user?.id;
+    const { courseId } = req.params;
+    const { lesson, watchTime } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    // Check if already completed
+    let userProgress = await UserProgress.findOne({
+      user: userId,
+      course: courseId,
+      lesson: lesson,
+    });
+
+    if (userProgress && userProgress.completed) {
+      return res.json({
+        success: true,
+        message: "Lesson already completed",
+        data: userProgress,
+      });
+    }
+
+    if (!userProgress) {
+      userProgress = new UserProgress({
+        user: userId,
+        course: courseId,
+        lesson: lesson,
+        watchTime: watchTime || 0,
+        completed: true,
+        completedAt: new Date(),
+      });
+      await userProgress.save();
+    } else {
+      // If exists but not completed, mark as completed (never uncomplete)
+      userProgress.completed = true;
+      userProgress.completedAt = new Date();
+      await userProgress.save();
+    }
+
+    return res.json({
+      success: true,
+      message: "Lesson marked as completed",
+      data: userProgress,
+    });
+  } catch (error: any) {
+    console.error("Complete lesson progress error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to complete lesson progress",
+    });
+  }
+};

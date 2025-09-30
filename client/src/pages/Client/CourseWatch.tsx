@@ -24,8 +24,8 @@ import {
 } from "react-icons/fa";
 import { useCourse } from "../../hooks/useCourseQueries";
 import {
+  useCompleteLessonProgress,
   useCourseProgress,
-  useUpdateLessonProgress,
 } from "../../hooks/useUserProgress";
 
 const CourseWatch: React.FC = () => {
@@ -50,14 +50,14 @@ const CourseWatch: React.FC = () => {
   } = useCourse(courseId!);
   const course = courseResponse?.data;
 
-  const { data: courseProgress } = useCourseProgress(courseId!);
+  const { data: courseProgress, refetch: _ } = useCourseProgress(courseId!);
 
   const { data: enrollmentsResponse } = useUserEnrollments();
   const enrollment = enrollmentsResponse?.data?.enrollments?.find(
     (e: any) => e.course._id === courseId
   );
 
-  const updateProgressMutation = useUpdateLessonProgress();
+  const completeLessonMutation = useCompleteLessonProgress();
   const addNoteMutation = useAddEnrollmentNote();
 
   const [currentSection, setCurrentSection] = useState(0);
@@ -165,7 +165,8 @@ const CourseWatch: React.FC = () => {
       setCurrentTime(0);
       setIsPlaying(false);
 
-      const progress = getLessonProgress(lesson.id);
+      const lessonId = lesson._id || lesson.id;
+      const progress = getLessonProgress(lessonId);
       if (progress && progress.watchTime > 0) {
         video.currentTime = Math.min(progress.watchTime, lesson.duration);
       }
@@ -236,28 +237,20 @@ const CourseWatch: React.FC = () => {
     }
   };
 
-  const updateProgress = (completed: boolean = false) => {
-    if (!course) return;
-
-    const lesson = course.sections[currentSection]?.lessons[currentLesson];
-    if (!lesson) return;
-
-    updateProgressMutation.mutate({
-      courseId: course.id,
-      progressData: {
-        lesson: lesson._id,
-        watchTime: Math.floor(currentTime),
-        completed: completed,
-      },
-    });
-
-    if (completed) {
-      console.log("Lesson completed!");
-    }
-  };
-
   const markLessonComplete = () => {
-    updateProgress(true);
+    // Only allow completion if lesson is not already completed
+    if (!isLessonCompleted() && canCompleteLesson()) {
+      if (!course) return;
+      const lesson = course.sections[currentSection]?.lessons[currentLesson];
+      if (!lesson) return;
+      completeLessonMutation.mutate({
+        courseId: course.id,
+        progressData: {
+          lesson: lesson._id,
+          watchTime: Math.floor(currentTime),
+        },
+      });
+    }
   };
 
   // Check if user can complete the lesson (must be in last 1 minute)
@@ -270,17 +263,13 @@ const CourseWatch: React.FC = () => {
   // Check if lesson is already completed
   const isLessonCompleted = () => {
     if (!currentLessonObj) return false;
-    return getLessonProgress(currentLessonObj.id)?.completed || false;
+    const lessonId = currentLessonObj._id;
+    const progress = getLessonProgress(lessonId);
+    return progress?.completed || false;
   };
 
   const goToNextLesson = () => {
     if (!course) return;
-
-    const currentLessonObj =
-      course.sections[currentSection]?.lessons[currentLesson];
-    if (currentLessonObj) {
-      updateProgress(false); // Save current progress
-    }
 
     const currentSectionObj = course.sections[currentSection];
     if (currentLesson < currentSectionObj.lessons.length - 1) {
@@ -330,10 +319,6 @@ const CourseWatch: React.FC = () => {
     if (!newReview.trim() || !enrollment || newRating < 1 || newRating > 5)
       return;
 
-    console.log("enrollment", enrollment);
-    console.log("newRating", newRating);
-    console.log("newReview", newReview);
-
     addReviewMutation.mutate(
       {
         enrollmentId: enrollment.id,
@@ -370,10 +355,6 @@ const CourseWatch: React.FC = () => {
       (p: any) => p.lessonId === lessonId
     );
   };
-
-  const lessonProgress = currentLessonObj
-    ? getLessonProgress(currentLessonObj.id)
-    : null;
 
   if (courseLoading || !course) {
     return (
@@ -428,11 +409,6 @@ const CourseWatch: React.FC = () => {
             onTimeUpdate={(e) => {
               const video = e.target as HTMLVideoElement;
               setCurrentTime(video.currentTime);
-
-              // Auto-save progress every 10 seconds
-              if (Math.floor(video.currentTime) % 10 === 0) {
-                updateProgress(false);
-              }
             }}
             onLoadedMetadata={(e) => {
               const video = e.target as HTMLVideoElement;
@@ -440,7 +416,6 @@ const CourseWatch: React.FC = () => {
             }}
             onEnded={() => {
               setIsPlaying(false);
-              updateProgress(true); // Mark as completed
               goToNextLesson();
             }}
             onPlay={() => setIsPlaying(true)}
@@ -651,7 +626,8 @@ const CourseWatch: React.FC = () => {
                     </>
                   )}
                 {currentLessonObj &&
-                  getLessonProgress(currentLessonObj.id)?.completed && (
+                  getLessonProgress(currentLessonObj._id || currentLessonObj.id)
+                    ?.completed && (
                     <>
                       <span>•</span>
                       <div className="flex items-center text-green-400">
@@ -1263,7 +1239,9 @@ const CourseWatch: React.FC = () => {
 
                   <div className="divide-y divide-gray-700">
                     {section.lessons.map((lesson: any, lessonIndex: number) => {
-                      const progress = getLessonProgress(lesson.id);
+                      const progress = getLessonProgress(
+                        lesson._id || lesson.id
+                      );
                       const isCurrentLesson =
                         currentSection === sectionIndex &&
                         currentLesson === lessonIndex;

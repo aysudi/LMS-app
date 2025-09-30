@@ -8,6 +8,16 @@ import type {
 import { api } from "./api";
 
 class UserProgressService {
+  async completeLessonProgress(
+    courseId: string,
+    progressData: UpdateUserProgressRequest
+  ): Promise<UpdateUserProgressResponse> {
+    const response = await api.post(
+      `/api/user-progress/${courseId}`,
+      progressData
+    );
+    return response.data;
+  }
   async getUserProgress(courseId?: string): Promise<UserProgressResponse> {
     const params = courseId ? `?courseId=${courseId}` : "";
     const response = await api.get(`/api/user-progress${params}`);

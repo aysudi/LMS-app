@@ -4,6 +4,7 @@ import {
   updateLessonProgress,
   getLearningAnalytics,
   getUserProgress,
+  completeLessonProgress,
 } from "../controllers/userProgressController";
 import { authenticateToken } from "../middlewares/auth.middleware";
 import { AuthRequest } from "../types/common.types";
@@ -28,6 +29,11 @@ userProgressRouter.get("/course/:courseId", authenticateToken, (req, res) =>
 // PATCH /api/user-progress/course/:courseId - Update lesson progress
 userProgressRouter.patch("/:courseId", authenticateToken, (req, res) =>
   updateLessonProgress(req as AuthRequest, res)
+);
+
+// POST /api/user-progress/:courseId - Complete lesson (only once)
+userProgressRouter.post("/:courseId", authenticateToken, (req, res) =>
+  completeLessonProgress(req as AuthRequest, res)
 );
 
 export default userProgressRouter;
