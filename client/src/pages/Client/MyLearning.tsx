@@ -119,7 +119,8 @@ const MyLearning = () => {
                 <div>
                   <p className="text-sm text-gray-600">Watch Time</p>
                   <p className="text-2xl font-bold text-gray-800">
-                    {Math.round(stats.totalWatchTime / 3600)}h
+                    {Math.round(stats.totalWatchTime / 3600)}h{" "}
+                    {Math.round((stats.totalWatchTime % 3600) / 60)}m
                   </p>
                 </div>
               </div>
