@@ -14,6 +14,7 @@ interface ModernCourseCardProps {
   onCartToggle?: (e: React.MouseEvent, course: Course) => void;
   checkIfInWishlist?: (courseId: string) => boolean;
   checkIfInCart?: (courseId: string) => boolean;
+  checkIfEnrolled?: (courseId: string) => boolean;
   processingWishlist?: Set<string>;
   processingCart?: Set<string>;
   showCartButton?: boolean;
@@ -26,6 +27,7 @@ const ModernCourseCard: React.FC<ModernCourseCardProps> = ({
   onCartToggle,
   checkIfInWishlist = () => false,
   checkIfInCart = () => false,
+  checkIfEnrolled = () => false,
   processingWishlist = new Set(),
   processingCart = new Set(),
   showCartButton = true,
@@ -143,6 +145,7 @@ const ModernCourseCard: React.FC<ModernCourseCardProps> = ({
           onCartToggle={onCartToggle}
           checkIfInWishlist={checkIfInWishlist}
           checkIfInCart={checkIfInCart}
+          checkIfEnrolled={checkIfEnrolled}
           processingWishlist={processingWishlist}
           processingCart={processingCart}
           showCartButton={showCartButton}

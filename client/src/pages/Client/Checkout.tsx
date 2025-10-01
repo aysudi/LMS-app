@@ -9,7 +9,7 @@ import {
   FaInfoCircle,
 } from "react-icons/fa";
 import { Elements } from "@stripe/react-stripe-js";
-import { useCartHelpers } from "../../hooks/useCart";
+import { useCartHelpers, useClearCart } from "../../hooks/useCart";
 import { useAuthContext } from "../../context/AuthContext";
 import {
   useCreateOrder,
@@ -29,6 +29,7 @@ const Checkout = () => {
   const createOrderMutation = useCreateOrder();
   const createPaymentIntentMutation = useCreatePaymentIntent();
   const confirmPaymentMutation = useConfirmPayment();
+  const clearCartMutation = useClearCart();
 
   const selectedItemIds = location.state?.selectedItems || [];
   const selectedCourses = cartItems.filter((course) =>
@@ -108,11 +109,8 @@ const Checkout = () => {
         paymentMethodId: paymentIntent.payment_method,
       });
 
-      // Remove items from cart
-      selectedCourses.forEach((course) => {
-        // Note: You'll need to implement removeFromCart in useCartHelpers
-        // removeFromCart(course.id);
-      });
+      // Clear entire cart after successful purchase
+      await clearCartMutation.mutateAsync();
 
       setPaymentStep("success");
 

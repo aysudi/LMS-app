@@ -9,6 +9,7 @@ interface ActionButtonsProps {
   onCartToggle?: (e: React.MouseEvent, course: Course) => void;
   checkIfInWishlist?: (courseId: string) => boolean;
   checkIfInCart?: (courseId: string) => boolean;
+  checkIfEnrolled?: (courseId: string) => boolean;
   processingWishlist?: Set<string>;
   processingCart?: Set<string>;
   showCartButton?: boolean;
@@ -20,6 +21,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
   onCartToggle,
   checkIfInWishlist = () => false,
   checkIfInCart = () => false,
+  checkIfEnrolled = () => false,
   processingWishlist = new Set(),
   processingCart = new Set(),
   showCartButton = true,
@@ -40,8 +42,21 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
 
       {/* Buttons Row */}
       <div className="flex space-x-3">
-        {/* Cart Button */}
-        {showCartButton && !course.isFree && (
+        {/* Cart Button or Enrolled Status */}
+        {checkIfEnrolled(course.id) ? (
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/course/${course.id}/watch`);
+            }}
+            className="flex-1 py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center justify-center space-x-2 cursor-pointer bg-green-600 text-white hover:bg-green-700"
+          >
+            <FaCheck className="text-sm" />
+            <span>Continue Learning</span>
+          </motion.button>
+        ) : showCartButton && !course.isFree ? (
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -87,7 +102,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
               </>
             )}
           </motion.button>
-        )}
+        ) : null}
 
         {/* Wishlist Button */}
         <motion.button
