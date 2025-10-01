@@ -1,0 +1,356 @@
+import UserProgress from "../models/UserProgress";
+import Enrollment from "../models/Enrollment";
+import Course from "../models/Course";
+import Section from "../models/Section";
+import Lesson from "../models/Lesson";
+import User from "../models/User";
+// Get user progress for a specific course
+export const getCourseProgress = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        const { courseId } = req.params;
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: "Authentication required",
+            });
+        }
+        const course = await Course.findById(courseId);
+        if (!course) {
+            return res.status(404).json({
+                success: false,
+                message: "Course not found",
+            });
+        }
+        const sections = await Section.find({ course: courseId }).sort({
+            order: 1,
+        });
+        const allLessons = [];
+        for (const section of sections) {
+            const lessons = await Lesson.find({ section: section._id }).sort({
+                order: 1,
+            });
+            allLessons.push(...lessons);
+        }
+        const userProgresses = await UserProgress.find({
+            user: userId,
+            course: courseId,
+            lesson: { $in: allLessons.map((lesson) => lesson._id) },
+        });
+        const completedLessons = userProgresses.filter((progress) => progress.completed).length;
+        const totalLessons = allLessons.length;
+        const progressPercentage = totalLessons > 0
+            ? Math.round((completedLessons / totalLessons) * 100)
+            : 0;
+        const totalWatchTime = userProgresses.reduce((sum, progress) => sum + progress.watchTime, 0);
+        const lessonsProgress = allLessons.map((lesson) => {
+            const progress = userProgresses.find((p) => p.lesson.toString() === lesson._id.toString());
+            return {
+                lessonId: lesson._id.toString(),
+                completed: progress ? progress.completed : false,
+                watchTime: progress ? progress.watchTime : 0,
+            };
+        });
+        const response = {
+            success: true,
+            data: {
+                courseId,
+                totalLessons,
+                completedLessons,
+                progressPercentage,
+                totalWatchTime,
+                lessons: lessonsProgress,
+            },
+        };
+        res.json(response);
+    }
+    catch (error) {
+        console.error("Get course progress error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to get course progress",
+        });
+    }
+};
+// Update user progress for a specific lesson
+export const updateLessonProgress = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        const { courseId } = req.params;
+        const { lesson, completed, watchTime = 0, } = req.body;
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: "Authentication required",
+            });
+        }
+        let userProgress = await UserProgress.findOne({
+            user: userId,
+            course: courseId,
+            lesson: lesson,
+        });
+        if (!userProgress) {
+            userProgress = new UserProgress({
+                user: userId,
+                course: courseId,
+                lesson: lesson,
+                completed: false,
+                watchTime: 0,
+            });
+        }
+        if (completed !== undefined) {
+            userProgress.completed = completed;
+            if (completed && !userProgress.completedAt) {
+                userProgress.completedAt = new Date();
+            }
+            else if (!completed) {
+                userProgress.completedAt = undefined;
+            }
+        }
+        if (watchTime !== undefined && watchTime > 0) {
+            userProgress.watchTime = Math.max(userProgress.watchTime, watchTime);
+        }
+        await userProgress.save();
+        const enrollment = await Enrollment.findOne({
+            user: userId,
+            course: courseId,
+        });
+        let enrollmentProgress = {
+            progressPercentage: 0,
+            isCompleted: false,
+        };
+        if (enrollment) {
+            await enrollment.recalculateProgress();
+            enrollmentProgress = {
+                progressPercentage: enrollment.progressPercentage,
+                isCompleted: enrollment.status === "completed",
+            };
+        }
+        if (watchTime > 0) {
+            await User.findByIdAndUpdate(userId, {
+                $inc: { totalLearningTime: watchTime / 60 }, // Convert seconds to minutes
+            });
+        }
+        const response = {
+            success: true,
+            data: {
+                userProgress: userProgress,
+                enrollmentProgress,
+            },
+        };
+        res.json(response);
+    }
+    catch (error) {
+        console.error("Update lesson progress error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to update lesson progress",
+        });
+    }
+};
+// Get user's learning analytics
+export const getLearningAnalytics = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: "Authentication required",
+            });
+        }
+        const userProgresses = await UserProgress.find({ user: userId }).populate("course", "category title");
+        const totalWatchTime = userProgresses.reduce((sum, progress) => sum + progress.watchTime, 0);
+        const totalLessonsCompleted = userProgresses.filter((progress) => progress.completed).length;
+        const sessionsCount = userProgresses.filter((progress) => progress.watchTime > 0).length;
+        const averageSessionTime = sessionsCount > 0 ? totalWatchTime / sessionsCount : 0;
+        const today = new Date();
+        const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+        const recentProgress = userProgresses.filter((progress) => progress.updatedAt >= sevenDaysAgo);
+        const dailyActivity = new Map();
+        recentProgress.forEach((progress) => {
+            const date = progress.updatedAt.toISOString().split("T")[0];
+            const existing = dailyActivity.get(date) || {
+                watchTime: 0,
+                lessonsCompleted: 0,
+            };
+            existing.watchTime += progress.watchTime;
+            if (progress.completed) {
+                existing.lessonsCompleted += 1;
+            }
+            dailyActivity.set(date, existing);
+        });
+        const weeklyProgress = Array.from(dailyActivity.entries())
+            .map(([date, activity]) => ({
+            date,
+            watchTime: activity.watchTime,
+            lessonsCompleted: activity.lessonsCompleted,
+        }))
+            .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        let learningStreak = 0;
+        const now = new Date();
+        let currentDate = new Date(now.getTime());
+        while (currentDate >= sevenDaysAgo) {
+            const dateStr = currentDate.toISOString().split("T")[0];
+            if (dailyActivity.has(dateStr)) {
+                learningStreak++;
+            }
+            else {
+                break;
+            }
+            currentDate = new Date(currentDate.getTime() - 24 * 60 * 60 * 1000);
+        }
+        const categoryStats = new Map();
+        userProgresses.forEach((progress) => {
+            const course = progress.course;
+            if (course && course.category) {
+                const existing = categoryStats.get(course.category) || {
+                    watchTime: 0,
+                    coursesCount: 0,
+                };
+                existing.watchTime += progress.watchTime;
+                categoryStats.set(course.category, existing);
+            }
+        });
+        const uniqueCourses = new Set();
+        userProgresses.forEach((progress) => {
+            const course = progress.course;
+            if (course && course.category) {
+                const key = `${course.category}-${course._id}`;
+                if (!uniqueCourses.has(key)) {
+                    uniqueCourses.add(key);
+                    const existing = categoryStats.get(course.category);
+                    if (existing) {
+                        existing.coursesCount++;
+                    }
+                }
+            }
+        });
+        const topCategories = Array.from(categoryStats.entries())
+            .map(([category, stats]) => ({
+            category,
+            watchTime: stats.watchTime,
+            coursesCount: stats.coursesCount,
+        }))
+            .sort((a, b) => b.watchTime - a.watchTime)
+            .slice(0, 5);
+        const response = {
+            success: true,
+            data: {
+                totalWatchTime,
+                totalLessonsCompleted,
+                averageSessionTime: Math.round(averageSessionTime),
+                learningStreak,
+                weeklyProgress,
+                topCategories,
+            },
+        };
+        res.json(response);
+    }
+    catch (error) {
+        console.error("Get learning analytics error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to get learning analytics",
+        });
+    }
+};
+// Get all user progress
+export const getUserProgress = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        const { courseId } = req.query;
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: "Authentication required",
+            });
+        }
+        const filter = { user: userId };
+        if (courseId) {
+            filter.course = courseId;
+        }
+        const userProgresses = await UserProgress.find(filter)
+            .populate("course", "title image category")
+            .populate("lesson", "title order duration")
+            .sort({ updatedAt: -1 });
+        const response = {
+            success: true,
+            data: userProgresses,
+        };
+        res.json(response);
+    }
+    catch (error) {
+        console.error("Get user progress error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to get user progress",
+        });
+    }
+};
+// POST: Complete lesson progress (only once, never uncomplete)
+export const completeLessonProgress = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        const { courseId } = req.params;
+        const { lesson, watchTime } = req.body;
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: "Authentication required",
+            });
+        }
+        let userProgress = await UserProgress.findOne({
+            user: userId,
+            course: courseId,
+            lesson: lesson,
+        });
+        if (userProgress && userProgress.completed) {
+            return res.json({
+                success: true,
+                message: "Lesson already completed",
+                data: userProgress,
+            });
+        }
+        if (!userProgress) {
+            userProgress = new UserProgress({
+                user: userId,
+                course: courseId,
+                lesson: lesson,
+                watchTime: watchTime || 0,
+                completed: true,
+                completedAt: new Date(),
+            });
+            await userProgress.save();
+        }
+        else {
+            userProgress.completed = true;
+            userProgress.completedAt = new Date();
+            await userProgress.save();
+        }
+        const enrollment = await Enrollment.findOne({
+            user: userId,
+            course: courseId,
+        });
+        if (enrollment) {
+            await enrollment.recalculateProgress();
+            const allProgress = await UserProgress.find({
+                user: userId,
+                course: courseId,
+            });
+            enrollment.totalWatchTime = allProgress.reduce((sum, p) => sum + (p.watchTime || 0), 0);
+            await enrollment.save();
+        }
+        return res.json({
+            success: true,
+            message: "Lesson marked as completed",
+            data: userProgress,
+        });
+    }
+    catch (error) {
+        console.error("Complete lesson progress error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to complete lesson progress",
+        });
+    }
+};

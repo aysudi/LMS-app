@@ -3,10 +3,8 @@ import Section from "../models/Section";
 import Lesson from "../models/Lesson";
 import UserNote from "../models/UserNote";
 import UserProgress from "../models/UserProgress";
-// Get all courses with filtering, pagination, and search
 export const getAllCoursesService = async (query = {}) => {
     const { page = 1, limit = 10, category, level, search, instructor, minPrice, maxPrice, sortBy = "createdAt", sortOrder = "desc", } = query;
-    // Build filter query
     const filter = {};
     if (category)
         filter.category = category;
@@ -14,24 +12,19 @@ export const getAllCoursesService = async (query = {}) => {
         filter.level = level;
     if (instructor)
         filter.instructor = instructor;
-    // Price range filter
     if (minPrice !== undefined || maxPrice !== undefined) {
-        filter.price = {};
+        filter.originalPrice = {};
         if (minPrice !== undefined)
-            filter.price.$gte = minPrice;
+            filter.originalPrice.$gte = minPrice;
         if (maxPrice !== undefined)
-            filter.price.$lte = maxPrice;
+            filter.originalPrice.$lte = maxPrice;
     }
-    // Text search
     if (search) {
         filter.$text = { $search: search };
     }
-    // Only show published courses by default
     filter.isPublished = true;
-    // Build sort object
     const sort = {};
     if (sortBy === "studentsCount") {
-        // Sort by number of enrolled students
         sort["studentsEnrolled"] = sortOrder === "asc" ? 1 : -1;
     }
     else {
@@ -41,6 +34,7 @@ export const getAllCoursesService = async (query = {}) => {
     const [courses, total] = await Promise.all([
         Course.find(filter)
             .populate("instructor", "firstName lastName email avatar")
+            .populate("sections")
             .sort(sort)
             .skip(skip)
             .limit(limit)
@@ -65,6 +59,7 @@ export const getCourseByIdService = async (id, includeUnpublished = false) => {
     }
     const course = await Course.findOne(filter)
         .populate("instructor", "firstName lastName email avatar bio")
+        .populate("sections")
         .populate("reviews.user", "firstName lastName avatar")
         .lean();
     if (!course) {
@@ -132,11 +127,10 @@ export const getUserCoursesService = async (userId) => {
         isPublished: true,
     })
         .populate("instructor", "firstName lastName avatar")
+        .populate("sections")
         .select("title description image price level rating totalDuration totalLessons")
         .lean();
-    // Get user progress for each course using UserProgress model
     const coursesWithProgress = await Promise.all(courses.map(async (course) => {
-        // Import UserProgress here to avoid circular dependencies
         const UserProgress = require("../models/UserProgress").default;
         const userProgress = await UserProgress.find({
             user: userId,
@@ -191,7 +185,7 @@ export const getCourseStatisticsService = async (courseId, instructorId) => {
             isPublished: course.isPublished,
             studentsEnrolled: totalEnrollments,
             rating: course.rating,
-            totalEarnings: course.price * totalEnrollments,
+            totalEarnings: course.originalPrice * totalEnrollments,
         },
         statistics: {
             sectionsCount,

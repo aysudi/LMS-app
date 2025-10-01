@@ -117,6 +117,46 @@ const userSchema = new mongoose.Schema({
             ref: "Course",
         },
     ],
+    wishlist: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Course",
+        },
+    ],
+    cart: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Course",
+        },
+    ],
+    searchHistory: [
+        {
+            query: {
+                type: String,
+                trim: true,
+            },
+            category: {
+                type: String,
+                trim: true,
+            },
+            timestamp: {
+                type: Date,
+                default: Date.now,
+            },
+        },
+    ],
+    viewedCourses: [
+        {
+            course: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Course",
+            },
+            timestamp: {
+                type: Date,
+                default: Date.now,
+            },
+        },
+    ],
     lastLoginAt: {
         type: Date,
     },
@@ -126,6 +166,41 @@ const userSchema = new mongoose.Schema({
     isActive: {
         type: Boolean,
         default: true,
+    },
+    // Payment & Learning related fields
+    totalSpent: {
+        type: Number,
+        default: 0,
+        min: 0,
+    },
+    totalCoursesCompleted: {
+        type: Number,
+        default: 0,
+        min: 0,
+    },
+    totalLearningTime: {
+        type: Number,
+        default: 0,
+        min: 0, // in minutes
+    },
+    certificatesEarned: {
+        type: Number,
+        default: 0,
+        min: 0,
+    },
+    stripeCustomerId: {
+        type: String,
+        sparse: true,
+    },
+    preferredCurrency: {
+        type: String,
+        default: "USD",
+        uppercase: true,
+        minlength: 3,
+        maxlength: 3,
+    },
+    lastPurchaseAt: {
+        type: Date,
     },
     emailVerificationToken: {
         type: String,

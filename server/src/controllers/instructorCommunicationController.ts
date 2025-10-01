@@ -1,8 +1,12 @@
 import { Response } from "express";
 import { AuthRequest } from "../types/common.types.js";
-import InstructorCommunication from "../models/InstructorCommunication.js";
-import Course from "../models/Course.js";
-import { MessageStatus } from "../schemas/instructorCommunicationSchema.js";
+import {
+  getInstructorMessagesService,
+  replyToMessageService,
+  markMessageAsReadService,
+  markMessageAsResolvedService,
+  getMessageStatsService
+} from "../services/instructorCommunicationService.js";
 
 // Get all messages for instructor
 export const getInstructorMessages = async (
@@ -26,43 +30,18 @@ export const getInstructorMessages = async (
       });
     }
 
-    const skip = (Number(page) - 1) * Number(limit);
-
-    let filter: any = { instructor: instructorId };
-
-    if (status !== "all") filter.status = status;
-    if (type !== "all") filter.type = type;
-    if (courseId) filter.course = courseId;
-
-    const messages = await InstructorCommunication.find(filter)
-      .populate("student", "firstName lastName email avatar")
-      .populate("course", "title")
-      .populate("lesson", "title")
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(Number(limit));
-
-    const totalMessages = await InstructorCommunication.countDocuments(filter);
-
-    // Get unread count
-    const unreadCount = await InstructorCommunication.countDocuments({
-      instructor: instructorId,
-      status: MessageStatus.UNREAD,
-    });
+    const data = await getInstructorMessagesService(
+      instructorId,
+      Number(page),
+      Number(limit),
+      status as string,
+      type as string,
+      courseId as string
+    );
 
     res.json({
       success: true,
-      data: {
-        messages,
-        pagination: {
-          currentPage: Number(page),
-          totalPages: Math.ceil(totalMessages / Number(limit)),
-          totalMessages,
-          hasNext: Number(page) * Number(limit) < totalMessages,
-          hasPrev: Number(page) > 1,
-        },
-        unreadCount,
-      },
+      data
     });
   } catch (error: any) {
     console.error("Get instructor messages error:", error);
@@ -94,41 +73,19 @@ export const replyToMessage = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Find and verify message ownership
-    const communication = await InstructorCommunication.findOne({
-      _id: messageId,
-      instructor: instructorId,
-    });
+    const data = await replyToMessageService(instructorId, messageId, message.trim());
 
-    if (!communication) {
+    if (!data) {
       return res.status(404).json({
         success: false,
         message: "Message not found or access denied",
       });
     }
 
-    // Add reply
-    communication.replies.push({
-      sender: instructorId,
-      message: message.trim(),
-      timestamp: new Date(),
-      isInstructorReply: true,
-    });
-
-    // Update status and last reply time
-    communication.status = MessageStatus.REPLIED;
-    communication.lastReplyAt = new Date();
-
-    await communication.save();
-
-    // Populate the updated message
-    await communication.populate("student", "firstName lastName email avatar");
-    await communication.populate("course", "title");
-
     res.json({
       success: true,
       message: "Reply sent successfully",
-      data: communication,
+      data
     });
   } catch (error: any) {
     console.error("Reply to message error:", error);
@@ -152,19 +109,9 @@ export const markMessageAsRead = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    const communication = await InstructorCommunication.findOneAndUpdate(
-      {
-        _id: messageId,
-        instructor: instructorId,
-        status: MessageStatus.UNREAD,
-      },
-      {
-        status: MessageStatus.READ,
-      },
-      { new: true }
-    );
+    const success = await markMessageAsReadService(instructorId, messageId);
 
-    if (!communication) {
+    if (!success) {
       return res.status(404).json({
         success: false,
         message: "Message not found or already read",
@@ -200,18 +147,9 @@ export const markMessageAsResolved = async (
       });
     }
 
-    const communication = await InstructorCommunication.findOneAndUpdate(
-      {
-        _id: messageId,
-        instructor: instructorId,
-      },
-      {
-        status: MessageStatus.RESOLVED,
-      },
-      { new: true }
-    );
+    const success = await markMessageAsResolvedService(instructorId, messageId);
 
-    if (!communication) {
+    if (!success) {
       return res.status(404).json({
         success: false,
         message: "Message not found or access denied",
@@ -243,51 +181,11 @@ export const getMessageStats = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Get counts by status
-    const statusStats = await InstructorCommunication.aggregate([
-      { $match: { instructor: instructorId } },
-      {
-        $group: {
-          _id: "$status",
-          count: { $sum: 1 },
-        },
-      },
-    ]);
-
-    // Get counts by type
-    const typeStats = await InstructorCommunication.aggregate([
-      { $match: { instructor: instructorId } },
-      {
-        $group: {
-          _id: "$type",
-          count: { $sum: 1 },
-        },
-      },
-    ]);
-
-    // Get recent messages (last 7 days)
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    const recentCount = await InstructorCommunication.countDocuments({
-      instructor: instructorId,
-      createdAt: { $gte: sevenDaysAgo },
-    });
-
-    // Format stats
-    const stats = {
-      byStatus: statusStats.reduce((acc, stat) => {
-        acc[stat._id] = stat.count;
-        return acc;
-      }, {} as Record<string, number>),
-      byType: typeStats.reduce((acc, stat) => {
-        acc[stat._id] = stat.count;
-        return acc;
-      }, {} as Record<string, number>),
-      recentMessages: recentCount,
-    };
+    const data = await getMessageStatsService(instructorId);
 
     res.json({
       success: true,
-      data: stats,
+      data
     });
   } catch (error: any) {
     console.error("Get message stats error:", error);

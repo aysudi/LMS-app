@@ -1,0 +1,10 @@
+import { Router } from "express";
+import { createOrder, getUserOrders, getOrderById, cancelOrder, confirmPayment, } from "../controllers/orderController";
+import { authenticateToken } from "../middlewares/auth.middleware";
+const orderRouter = Router();
+orderRouter.get("/", authenticateToken, (req, res) => getUserOrders(req, res));
+orderRouter.post("/", authenticateToken, (req, res) => createOrder(req, res));
+orderRouter.get("/:orderId", authenticateToken, (req, res) => getOrderById(req, res));
+orderRouter.patch("/:orderId/cancel", authenticateToken, (req, res) => cancelOrder(req, res));
+orderRouter.post("/:orderId/confirm-payment", authenticateToken, (req, res) => confirmPayment(req, res));
+export default orderRouter;
