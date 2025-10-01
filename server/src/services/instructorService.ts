@@ -16,7 +16,6 @@ export const getInstructorOverviewService = async (instructorId: string) => {
 
   const courseIds = courses.map((course) => course._id);
 
-  // Get total students
   const totalStudents = await Enrollment.countDocuments({
     course: { $in: courseIds },
     status: "active",
@@ -48,13 +47,11 @@ export const getInstructorOverviewService = async (instructorId: string) => {
 
   const monthlyRevenue = monthlyEarnings[0]?.total || 0;
 
-  // Get course completions
   const completions = await Enrollment.countDocuments({
     course: { $in: courseIds },
     status: "completed",
   });
 
-  // Get average rating
   const avgRatingData = await Course.aggregate([
     {
       $match: {
@@ -151,13 +148,11 @@ export const getInstructorCoursesWithStatsService = async (
   // Get detailed stats for each course
   const coursesWithStats = await Promise.all(
     courses.map(async (course) => {
-      // Get enrollments count
       const enrollmentsCount = await Enrollment.countDocuments({
         course: course._id,
         status: "active",
       });
 
-      // Get revenue for this course
       const revenue = await InstructorEarnings.aggregate([
         {
           $match: {
@@ -168,7 +163,6 @@ export const getInstructorCoursesWithStatsService = async (
         { $group: { _id: null, total: { $sum: "$instructorShare" } } },
       ]);
 
-      // Get completion rate
       const completions = await Enrollment.countDocuments({
         course: course._id,
         status: "completed",
@@ -210,7 +204,6 @@ export const getCourseStudentsService = async (
   page: number = 1,
   limit: number = 20
 ) => {
-  // Verify course ownership
   const course = await Course.findOne({
     _id: courseId,
     instructor: instructorId,
@@ -222,7 +215,6 @@ export const getCourseStudentsService = async (
 
   const skip = (page - 1) * limit;
 
-  // Get enrollments with student details
   const enrollments = await Enrollment.find({ course: courseId })
     .populate("user", "firstName lastName email avatar createdAt")
     .sort({ createdAt: -1 })
@@ -234,7 +226,6 @@ export const getCourseStudentsService = async (
   // Get additional stats for each student
   const studentsWithStats = await Promise.all(
     enrollments.map(async (enrollment) => {
-      // Get user progress
       const progress = await UserProgress.find({
         user: enrollment.user,
         course: courseId,
