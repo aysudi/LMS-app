@@ -10,7 +10,10 @@ import {
   FaEnvelope,
   FaEye,
 } from "react-icons/fa";
-import { useCourseStudents } from "../../hooks/useInstructor";
+import {
+  useInstructorCoursesWithStats,
+  useCourseStudents,
+} from "../../hooks/useInstructor";
 import Loading from "../../components/Common/Loading";
 
 const InstructorStudents = () => {
@@ -21,19 +24,66 @@ const InstructorStudents = () => {
   >("name");
   const [page, setPage] = useState(1);
 
-  // Fetch students data (we'll use a sample course ID for now)
+  // Fetch instructor courses
+  const { data: coursesData, isLoading: coursesLoading } =
+    useInstructorCoursesWithStats({
+      page: 1,
+      limit: 100, // Get all courses
+      status: "published",
+    });
+
+  const instructorCourses = coursesData?.data?.courses || [];
+  const firstCourseId = instructorCourses[0]?._id;
+
+  // Fetch students for the selected course (or first course if "all" is selected)
+  const targetCourseId =
+    selectedCourse === "all" ? firstCourseId : selectedCourse;
+
   const {
     data: studentsData,
-    isLoading,
+    isLoading: studentsLoading,
     error,
-  } = useCourseStudents("sample-course-id", {
-    page,
-    limit: 20,
-  });
+  } = useCourseStudents(
+    targetCourseId,
+    {
+      page,
+      limit: 20,
+    },
+    {
+      enabled: !!targetCourseId,
+    }
+  );
 
   const students = studentsData?.data?.students || [];
   const totalPages = studentsData?.data?.pagination?.totalPages || 1;
-  const totalStudents = studentsData?.data?.pagination?.totalStudents || 0;
+
+  // Calculate total students across all courses
+  const totalStudents = instructorCourses.reduce(
+    (acc, course) => acc + (course.enrollmentsCount || 0),
+    0
+  );
+
+  // Calculate stats from real data
+  const completedStudents = students.filter(
+    (s) => s.enrollment?.progressPercentage === 100
+  ).length;
+  const activeToday = students.filter((s) => {
+    const lastActive = new Date(s.enrollment?.lastAccessedAt || 0);
+    const today = new Date();
+    return lastActive.toDateString() === today.toDateString();
+  }).length;
+
+  const averageProgress =
+    students.length > 0
+      ? Math.round(
+          students.reduce(
+            (acc, s) => acc + (s.enrollment?.progressPercentage || 0),
+            0
+          ) / students.length
+        )
+      : 0;
+
+  const isLoading = coursesLoading || studentsLoading;
 
   const handleExportData = () => {
     console.log("Exporting student data...");
@@ -124,7 +174,9 @@ const InstructorStudents = () => {
                 <p className="text-sm font-medium text-gray-500">
                   Average Progress
                 </p>
-                <p className="text-2xl font-bold text-gray-900">67%</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {averageProgress}%
+                </p>
               </div>
             </div>
           </div>
@@ -136,7 +188,9 @@ const InstructorStudents = () => {
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-500">Completed</p>
-                <p className="text-2xl font-bold text-gray-900">234</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {completedStudents}
+                </p>
               </div>
             </div>
           </div>
@@ -150,7 +204,9 @@ const InstructorStudents = () => {
                 <p className="text-sm font-medium text-gray-500">
                   Active Today
                 </p>
-                <p className="text-2xl font-bold text-gray-900">89</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {activeToday}
+                </p>
               </div>
             </div>
           </div>
@@ -184,9 +240,11 @@ const InstructorStudents = () => {
                 className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               >
                 <option value="all">All Courses</option>
-                <option value="javascript">JavaScript Course</option>
-                <option value="react">React Course</option>
-                <option value="python">Python Course</option>
+                {instructorCourses.map((course) => (
+                  <option key={course._id} value={course._id}>
+                    {course.title}
+                  </option>
+                ))}
               </select>
 
               <select
@@ -337,8 +395,12 @@ const StudentRow: React.FC<StudentRowProps> = ({ student, onSendMessage }) => {
         </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
-        <p className="text-sm text-gray-900">JavaScript Fundamentals</p>
-        <p className="text-sm text-gray-500">Web Development</p>
+        <p className="text-sm text-gray-900">
+          {student.course?.title || "Course Title"}
+        </p>
+        <p className="text-sm text-gray-500">
+          {student.course?.category || "Category"}
+        </p>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="flex items-center">
