@@ -12,7 +12,6 @@ import {
 } from "react-icons/fa";
 import { useInstructorAnalytics } from "../../hooks/useInstructorHelpers";
 
-// Sample data for charts
 const revenueData = [
   { month: "Jan", revenue: 4200, students: 28 },
   { month: "Feb", revenue: 5800, students: 45 },
@@ -52,7 +51,6 @@ const InstructorAnalytics = () => {
     "30d"
   );
 
-  // Helper hooks
   const { formatCurrency } = useInstructorAnalytics();
 
   const handleExportReport = () => {

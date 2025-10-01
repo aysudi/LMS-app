@@ -24,7 +24,6 @@ const InstructorMessages = () => {
   const [replyText, setReplyText] = useState("");
   const [page, setPage] = useState(1);
 
-  // Fetch messages
   const {
     data: messagesData,
     isLoading,
@@ -35,7 +34,6 @@ const InstructorMessages = () => {
     status: statusFilter !== "all" ? statusFilter : undefined,
   });
 
-  // Helper hooks for message actions
   const { handleReply, handleMarkAsRead, handleMarkAsResolved, isReplying } =
     useInstructorMessaging();
 
