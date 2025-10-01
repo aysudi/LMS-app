@@ -13,9 +13,9 @@ import {
   FaClock,
 } from "react-icons/fa";
 
-import { 
+import {
   useInstructorEarnings,
-  useInstructorEarningsByCourse
+  useInstructorEarningsByCourse,
 } from "../../hooks/useInstructor";
 import { useInstructorAnalytics } from "../../hooks/useInstructorHelpers";
 import Loading from "../../components/Common/Loading";
@@ -28,8 +28,10 @@ const InstructorEarnings = () => {
   const { formatCurrency } = useInstructorAnalytics();
 
   // Fetch real earnings data
-  const { data: earningsData, isLoading: earningsLoading } = useInstructorEarnings();
-  const { data: courseEarningsData, isLoading: courseEarningsLoading } = useInstructorEarningsByCourse();
+  const { data: earningsData, isLoading: earningsLoading } =
+    useInstructorEarnings();
+  const { data: courseEarningsData, isLoading: courseEarningsLoading } =
+    useInstructorEarningsByCourse();
 
   if (earningsLoading || courseEarningsLoading) {
     return (
@@ -38,6 +40,8 @@ const InstructorEarnings = () => {
       </div>
     );
   }
+
+  console.log("Earnings Data:", earningsData);
 
   const earnings = earningsData?.data || {
     totalEarnings: 0,
@@ -48,10 +52,10 @@ const InstructorEarnings = () => {
     earningsLastMonth: 0,
     growthRate: 0,
     topPerformingCourse: {
-      courseId: '',
-      title: '',
-      earnings: 0
-    }
+      courseId: "",
+      title: "",
+      earnings: 0,
+    },
   };
 
   const courseEarnings = courseEarningsData?.data || [];
@@ -176,12 +180,16 @@ const InstructorEarnings = () => {
           </div>
 
           <div className="h-80 flex items-end justify-between space-x-4 px-4">
-            {                              // Generate mock monthly data from current earnings
-                              Array.from({ length: 6 }, (_, i) => ({
-                                month: new Date(Date.now() - (5 - i) * 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 7),
-                                amount: Math.round((earnings.monthlyEarnings || 0) * (0.8 + Math.random() * 0.4))
-                              }))
-              .map((data: any, index: number) => (
+            {
+              // Generate mock monthly data from current earnings
+              Array.from({ length: 6 }, (_, i) => ({
+                month: new Date(Date.now() - (5 - i) * 30 * 24 * 60 * 60 * 1000)
+                  .toISOString()
+                  .slice(0, 7),
+                amount: Math.round(
+                  (earnings.monthlyEarnings || 0) * (0.8 + Math.random() * 0.4)
+                ),
+              })).map((data: any, index: number) => (
                 <div
                   key={index}
                   className="flex flex-col items-center space-y-2 flex-1"
@@ -196,11 +204,17 @@ const InstructorEarnings = () => {
                             Math.max(
                               // Use the same mock data for bar chart
                               ...Array.from({ length: 6 }, (_, i) => ({
-                                month: new Date(Date.now() - (5 - i) * 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 7),
-                                amount: Math.round((earnings.monthlyEarnings || 0) * (0.8 + Math.random() * 0.4))
-                              })).map(
-                                (d: any) => d.amount
-                              )
+                                month: new Date(
+                                  Date.now() -
+                                    (5 - i) * 30 * 24 * 60 * 60 * 1000
+                                )
+                                  .toISOString()
+                                  .slice(0, 7),
+                                amount: Math.round(
+                                  (earnings.monthlyEarnings || 0) *
+                                    (0.8 + Math.random() * 0.4)
+                                ),
+                              })).map((d: any) => d.amount)
                             )) *
                             100
                         )}%`,
@@ -217,7 +231,8 @@ const InstructorEarnings = () => {
                     })}
                   </span>
                 </div>
-              )) || []}
+              )) || []
+            }
           </div>
         </motion.div>
 
@@ -305,12 +320,18 @@ const InstructorEarnings = () => {
               </div>
             ) : (
               <div className="space-y-4">
-                {// Create mock recent payouts for demo
-                Array.from({ length: 3 }, (_, i) => ({
-                  amount: Math.round((earnings.completedPayouts || 0) * (0.2 + Math.random() * 0.3)),
-                  date: new Date(Date.now() - i * 30 * 24 * 60 * 60 * 1000).toISOString(),
-                  status: "completed"
-                })).map((payout: any, index: number) => (
+                {
+                  // Create mock recent payouts for demo
+                  Array.from({ length: 3 }, (_, i) => ({
+                    amount: Math.round(
+                      (earnings.completedPayouts || 0) *
+                        (0.2 + Math.random() * 0.3)
+                    ),
+                    date: new Date(
+                      Date.now() - i * 30 * 24 * 60 * 60 * 1000
+                    ).toISOString(),
+                    status: "completed",
+                  })).map((payout: any, index: number) => (
                     <div
                       key={index}
                       className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
@@ -352,7 +373,8 @@ const InstructorEarnings = () => {
                         </span>
                       </div>
                     </div>
-                  ))}
+                  ))
+                }
               </div>
             )}
           </motion.div>
