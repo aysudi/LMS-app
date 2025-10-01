@@ -224,7 +224,7 @@ const Cart = () => {
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => navigate(-1)}
-                className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-full transition-colors"
+                className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
               >
                 <FaArrowLeft className="text-lg" />
               </button>
@@ -306,7 +306,7 @@ const Cart = () => {
                         cartItems.length > 0
                       }
                       onChange={handleSelectAll}
-                      className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                      className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 cursor-pointer"
                     />
                     <span className="font-semibold text-gray-800">
                       Select All ({cartItems.length} items)
@@ -403,12 +403,12 @@ const CartItem: React.FC<CartItemProps> = ({
       <div className="p-6">
         <div className="flex items-start space-x-4">
           {/* Checkbox */}
-          <div className="pt-1">
+          <div className="pt-1 cursor-pointer">
             <input
               type="checkbox"
               checked={isSelected}
               onChange={onSelect}
-              className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+              className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 cursor-pointer"
             />
           </div>
 
@@ -453,7 +453,9 @@ const CartItem: React.FC<CartItemProps> = ({
                   </div>
                   <div className="flex items-center space-x-1">
                     <FaClock className="text-green-500" />
-                    <span>{Math.round(course.totalDuration / 60)} min</span>
+                    <span>
+                      {Math.round(course.totalDuration / 60) || 0} min
+                    </span>
                   </div>
                 </div>
 
@@ -470,12 +472,6 @@ const CartItem: React.FC<CartItemProps> = ({
                 <div className="text-2xl font-bold text-gray-900">
                   ${course.discountPrice || course.originalPrice}
                 </div>
-                {course.discountPrice &&
-                  course.discountPrice < course.originalPrice && (
-                    <div className="text-sm text-gray-500 line-through">
-                      ${course.originalPrice}
-                    </div>
-                  )}
               </div>
             </div>
 
@@ -650,7 +646,7 @@ const CheckoutSidebar: React.FC<CheckoutSidebarProps> = ({
       <button
         onClick={onCheckout}
         disabled={selectedItems.length === 0}
-        className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+        className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 cursor-pointer"
       >
         <FaCreditCard className="text-lg" />
         <span>
