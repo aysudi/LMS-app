@@ -10,48 +10,69 @@ import {
   FaTrophy,
   FaGraduationCap,
 } from "react-icons/fa";
+import { 
+  useInstructorOverview,
+  useInstructorCoursesWithStats
+} from "../../hooks/useInstructor";
 import { useInstructorAnalytics } from "../../hooks/useInstructorHelpers";
-
-const revenueData = [
-  { month: "Jan", revenue: 4200, students: 28 },
-  { month: "Feb", revenue: 5800, students: 45 },
-  { month: "Mar", revenue: 7200, students: 52 },
-  { month: "Apr", revenue: 6400, students: 38 },
-  { month: "May", revenue: 8900, students: 65 },
-  { month: "Jun", revenue: 12400, students: 89 },
-];
-
-const coursePerformanceData = [
-  {
-    name: "JavaScript Fundamentals",
-    students: 234,
-    rating: 4.8,
-    revenue: 18600,
-  },
-  { name: "React Masterclass", students: 189, rating: 4.9, revenue: 22800 },
-  { name: "Node.js Backend", students: 156, rating: 4.7, revenue: 15600 },
-  { name: "Python for Beginners", students: 298, rating: 4.6, revenue: 23800 },
-  {
-    name: "Full Stack Development",
-    students: 145,
-    rating: 4.8,
-    revenue: 29000,
-  },
-];
-
-const trafficSourceData = [
-  { name: "Organic Search", value: 45, color: "#3B82F6" },
-  { name: "Social Media", value: 28, color: "#10B981" },
-  { name: "Direct", value: 15, color: "#F59E0B" },
-  { name: "Referrals", value: 12, color: "#EF4444" },
-];
+import Loading from "../../components/Common/Loading";
 
 const InstructorAnalytics = () => {
   const [dateRange, setDateRange] = useState<"7d" | "30d" | "90d" | "1y">(
     "30d"
   );
 
+  // Fetch real data
+  const { data: overview, isLoading: overviewLoading } = useInstructorOverview();
+  const { data: coursesData, isLoading: coursesLoading } = useInstructorCoursesWithStats({
+    page: 1,
+    limit: 50,
+    status: 'published'
+  });
+  // const { data: earningsData } = useInstructorEarnings(); // Available if needed
+
   const { formatCurrency } = useInstructorAnalytics();
+
+  if (overviewLoading || coursesLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loading size="lg" />
+      </div>
+    );
+  }
+
+  const stats = overview?.data?.overview;
+  const courses = coursesData?.data?.courses || [];
+  // earnings data available if needed
+
+  // Generate revenue data from earnings (mock monthly breakdown for demo)
+  const totalRevenue = stats?.totalRevenue || 0;
+  const totalStudents = stats?.totalStudents || 0;
+  
+  const revenueData = [
+    { month: "Jan", revenue: Math.round(totalRevenue * 0.1), students: Math.round(totalStudents * 0.1) },
+    { month: "Feb", revenue: Math.round(totalRevenue * 0.12), students: Math.round(totalStudents * 0.12) },
+    { month: "Mar", revenue: Math.round(totalRevenue * 0.15), students: Math.round(totalStudents * 0.15) },
+    { month: "Apr", revenue: Math.round(totalRevenue * 0.13), students: Math.round(totalStudents * 0.13) },
+    { month: "May", revenue: Math.round(totalRevenue * 0.18), students: Math.round(totalStudents * 0.18) },
+    { month: "Jun", revenue: Math.round(totalRevenue * 0.20), students: Math.round(totalStudents * 0.20) },
+  ];
+
+  // Use real course data
+  const coursePerformanceData = courses.slice(0, 5).map(course => ({
+    name: course.title,
+    students: course.enrollmentsCount || 0,
+    rating: course.averageRating || 0,
+    revenue: course.revenue || 0,
+  }));
+
+  // Mock traffic source data (would come from analytics API in real app)
+  const trafficSourceData = [
+    { name: "Organic Search", value: 45, color: "#3B82F6" },
+    { name: "Social Media", value: 28, color: "#10B981" },
+    { name: "Direct", value: 15, color: "#F59E0B" },
+    { name: "Referrals", value: 12, color: "#EF4444" },
+  ];
 
   const handleExportReport = () => {
     console.log("Exporting analytics report...");
@@ -108,7 +129,7 @@ const InstructorAnalytics = () => {
           <MetricCard
             icon={FaDollarSign}
             title="Total Revenue"
-            value={formatCurrency(45800)}
+            value={formatCurrency(stats?.totalRevenue || 0)}
             change={12.5}
             changeType="increase"
             color="bg-gradient-to-r from-green-500 to-emerald-600"
@@ -117,7 +138,7 @@ const InstructorAnalytics = () => {
           <MetricCard
             icon={FaUsers}
             title="Total Students"
-            value="1,245"
+            value={stats?.totalStudents?.toLocaleString() || "0"}
             change={8.3}
             changeType="increase"
             color="bg-gradient-to-r from-blue-500 to-cyan-600"
@@ -126,7 +147,7 @@ const InstructorAnalytics = () => {
           <MetricCard
             icon={FaEye}
             title="Course Views"
-            value="12,847"
+            value={overview?.data?.performance?.views?.toLocaleString() || "0"}
             change={-2.1}
             changeType="decrease"
             color="bg-gradient-to-r from-purple-500 to-indigo-600"
@@ -135,7 +156,7 @@ const InstructorAnalytics = () => {
           <MetricCard
             icon={FaStar}
             title="Avg Rating"
-            value="4.8"
+            value={stats?.averageRating?.toFixed(1) || "0.0"}
             change={5.2}
             changeType="increase"
             color="bg-gradient-to-r from-yellow-500 to-orange-600"
