@@ -20,10 +20,8 @@ const InstructorEarnings = () => {
     "30d"
   );
 
-  // Helper hooks
   const { formatCurrency } = useInstructorAnalytics();
 
-  // Mock data for demonstration
   const earnings = {
     totalEarnings: 45800,
     currentBalance: 3240,
