@@ -1,5 +1,6 @@
 import ClientLayout from "../layout/ClientLayout";
 import StudentLearningLayout from "../layout/StudentLearningLayout";
+import InstructorLayout from "../layout/InstructorLayout";
 import AuthError from "../pages/Auth/AuthError";
 import AuthSuccess from "../pages/Auth/AuthSuccess";
 import ForgotPassword from "../pages/Auth/ForgotPassword";
@@ -21,6 +22,13 @@ import Checkout from "../pages/Client/Checkout";
 import MyLearning from "../pages/Client/MyLearning";
 import PaymentSuccess from "../pages/Client/PaymentSuccess";
 import CourseWatch from "../pages/Client/CourseWatch";
+// Instructor Pages
+import InstructorDashboard from "../pages/Instructor/Dashboard";
+import InstructorCourses from "../pages/Instructor/Courses";
+import InstructorStudents from "../pages/Instructor/Students";
+import InstructorAnalytics from "../pages/Instructor/Analytics";
+import InstructorMessages from "../pages/Instructor/Messages";
+import InstructorEarnings from "../pages/Instructor/Earnings";
 
 const ROUTES = [
   //client routes
@@ -149,6 +157,44 @@ const ROUTES = [
     ],
   },
   //instructor routes
+  {
+    path: "/instructor",
+    element: (
+      <ProtectedRoute>
+        <InstructorLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        index: true,
+        element: <InstructorDashboard />,
+      },
+      {
+        path: "dashboard",
+        element: <InstructorDashboard />,
+      },
+      {
+        path: "courses",
+        element: <InstructorCourses />,
+      },
+      {
+        path: "students",
+        element: <InstructorStudents />,
+      },
+      {
+        path: "analytics",
+        element: <InstructorAnalytics />,
+      },
+      {
+        path: "messages",
+        element: <InstructorMessages />,
+      },
+      {
+        path: "earnings",
+        element: <InstructorEarnings />,
+      },
+    ],
+  },
   //admin routes
 ];
 
