@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import instructorEarningsSchema from "../schemas/instructorEarningsSchema";
+import instructorEarningsSchema from "../schemas/instructorEarningsSchema.js";
 
 const InstructorEarnings = mongoose.model(
   "InstructorEarnings",

@@ -1,8 +1,8 @@
 import { Response } from "express";
-import { AuthRequest } from "../types/common.types";
-import InstructorCommunication from "../models/InstructorCommunication";
-import Course from "../models/Course";
-import { MessageStatus } from "../schemas/instructorCommunicationSchema";
+import { AuthRequest } from "../types/common.types.js";
+import InstructorCommunication from "../models/InstructorCommunication.js";
+import Course from "../models/Course.js";
+import { MessageStatus } from "../schemas/instructorCommunicationSchema.js";
 
 // Get all messages for instructor
 export const getInstructorMessages = async (
