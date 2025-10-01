@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import instructorAnalyticsSchema from "../schemas/instructorAnalyticsSchema";
+import instructorAnalyticsSchema from "../schemas/instructorAnalyticsSchema.js";
 
 const InstructorAnalytics = mongoose.model(
   "InstructorAnalytics",
