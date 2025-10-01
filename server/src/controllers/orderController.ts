@@ -5,6 +5,8 @@ import { Types } from "mongoose";
 import Course from "../models/Course";
 import User from "../models/User";
 import Enrollment from "../models/Enrollment";
+import InstructorEarnings from "../models/InstructorEarnings";
+import { createInstructorEarningsForOrder } from "../services/instructorEarningsService.js";
 import {
   OrderStatus,
   PaymentStatus,
@@ -309,6 +311,9 @@ export const completeOrder = async (orderId: string, paymentDetails: any) => {
 
     await Enrollment.insertMany(enrollments);
 
+    // Create instructor earnings for each course in the order
+    await createInstructorEarningsForOrder(order);
+
     // Update user's enrolled courses and spending
     const courseIds = order.items.map((item) => item.course);
     await User.findByIdAndUpdate(order.user, {
@@ -399,6 +404,9 @@ export const confirmPayment = async (req: AuthRequest, res: Response) => {
     );
 
     await Enrollment.insertMany(enrollments);
+
+    // Create instructor earnings for each course in the order
+    await createInstructorEarningsForOrder(order);
 
     // Update user's enrolled courses and spending
     const courseIds = order.items.map((item) => item.course);

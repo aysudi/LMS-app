@@ -9,18 +9,17 @@ export const getInstructorOverviewService = async (instructorId) => {
     // Get instructor's courses
     const courses = await Course.find({
         instructor: instructorId,
-        isPublished: true
+        isPublished: true,
     });
-    const courseIds = courses.map(course => course._id);
-    // Get total students
+    const courseIds = courses.map((course) => course._id);
     const totalStudents = await Enrollment.countDocuments({
         course: { $in: courseIds },
-        status: "active"
+        status: "active",
     });
     // Get total revenue
     const earnings = await InstructorEarnings.aggregate([
         { $match: { instructor: new mongoose.Types.ObjectId(instructorId) } },
-        { $group: { _id: null, total: { $sum: "$instructorShare" } } }
+        { $group: { _id: null, total: { $sum: "$instructorShare" } } },
     ]);
     const totalRevenue = earnings[0]?.total || 0;
     // Get monthly revenue
@@ -32,28 +31,31 @@ export const getInstructorOverviewService = async (instructorId) => {
             $match: {
                 instructor: new mongoose.Types.ObjectId(instructorId),
                 month: currentMonth,
-                year: currentYear
-            }
+                year: currentYear,
+            },
         },
-        { $group: { _id: null, total: { $sum: "$instructorShare" } } }
+        { $group: { _id: null, total: { $sum: "$instructorShare" } } },
     ]);
     const monthlyRevenue = monthlyEarnings[0]?.total || 0;
-    // Get course completions
     const completions = await Enrollment.countDocuments({
         course: { $in: courseIds },
-        status: "completed"
+        status: "completed",
     });
-    // Get average rating
     const avgRatingData = await Course.aggregate([
-        { $match: { instructor: new mongoose.Types.ObjectId(instructorId), isPublished: true } },
-        { $group: { _id: null, avgRating: { $avg: "$rating" } } }
+        {
+            $match: {
+                instructor: new mongoose.Types.ObjectId(instructorId),
+                isPublished: true,
+            },
+        },
+        { $group: { _id: null, avgRating: { $avg: "$rating" } } },
     ]);
     const averageRating = avgRatingData[0]?.avgRating || 0;
     // Get recent enrollments (last 7 days)
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     const recentEnrollments = await Enrollment.countDocuments({
         course: { $in: courseIds },
-        createdAt: { $gte: sevenDaysAgo }
+        createdAt: { $gte: sevenDaysAgo },
     });
     // Get performance metrics for last 30 days
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
@@ -61,8 +63,8 @@ export const getInstructorOverviewService = async (instructorId) => {
         {
             $match: {
                 instructor: new mongoose.Types.ObjectId(instructorId),
-                date: { $gte: thirtyDaysAgo }
-            }
+                date: { $gte: thirtyDaysAgo },
+            },
         },
         {
             $group: {
@@ -70,15 +72,15 @@ export const getInstructorOverviewService = async (instructorId) => {
                 totalViews: { $sum: "$courseViews" },
                 totalEnrollments: { $sum: "$newEnrollments" },
                 totalWatchTime: { $sum: "$totalWatchTime" },
-                avgConversion: { $avg: "$conversionRate" }
-            }
-        }
+                avgConversion: { $avg: "$conversionRate" },
+            },
+        },
     ]);
     const performance = performanceData[0] || {
         totalViews: 0,
         totalEnrollments: 0,
         totalWatchTime: 0,
-        avgConversion: 0
+        avgConversion: 0,
     };
     return {
         overview: {
@@ -88,21 +90,21 @@ export const getInstructorOverviewService = async (instructorId) => {
             monthlyRevenue,
             completions,
             averageRating: Number(averageRating.toFixed(1)),
-            recentEnrollments
+            recentEnrollments,
         },
         performance: {
             views: performance.totalViews,
             enrollments: performance.totalEnrollments,
             watchTime: Math.round(performance.totalWatchTime / 3600), // Convert to hours
-            conversionRate: Number(performance.avgConversion.toFixed(1))
+            conversionRate: Number(performance.avgConversion.toFixed(1)),
         },
-        courses: courses.map(course => ({
+        courses: courses.map((course) => ({
             _id: course._id,
             title: course.title,
             studentsCount: course.studentsEnrolled?.length || 0,
             rating: course.rating,
-            isPublished: course.isPublished
-        }))
+            isPublished: course.isPublished,
+        })),
     };
 };
 // Get instructor courses with detailed stats
@@ -121,31 +123,34 @@ export const getInstructorCoursesWithStatsService = async (instructorId, page = 
     const totalCourses = await Course.countDocuments(filter);
     // Get detailed stats for each course
     const coursesWithStats = await Promise.all(courses.map(async (course) => {
-        // Get enrollments count
         const enrollmentsCount = await Enrollment.countDocuments({
             course: course._id,
-            status: "active"
+            status: "active",
         });
-        // Get revenue for this course
         const revenue = await InstructorEarnings.aggregate([
-            { $match: { instructor: new mongoose.Types.ObjectId(instructorId), course: course._id } },
-            { $group: { _id: null, total: { $sum: "$instructorShare" } } }
+            {
+                $match: {
+                    instructor: new mongoose.Types.ObjectId(instructorId),
+                    course: course._id,
+                },
+            },
+            { $group: { _id: null, total: { $sum: "$instructorShare" } } },
         ]);
-        // Get completion rate
         const completions = await Enrollment.countDocuments({
             course: course._id,
-            status: "completed"
+            status: "completed",
         });
-        const completionRate = enrollmentsCount > 0 ?
-            Math.round((completions / enrollmentsCount) * 100) : 0;
+        const completionRate = enrollmentsCount > 0
+            ? Math.round((completions / enrollmentsCount) * 100)
+            : 0;
         return {
             ...course,
             stats: {
                 enrollments: enrollmentsCount,
                 revenue: revenue[0]?.total || 0,
                 completionRate,
-                completions
-            }
+                completions,
+            },
         };
     }));
     return {
@@ -155,36 +160,33 @@ export const getInstructorCoursesWithStatsService = async (instructorId, page = 
             totalPages: Math.ceil(totalCourses / limit),
             totalCourses,
             hasNext: page * limit < totalCourses,
-            hasPrev: page > 1
-        }
+            hasPrev: page > 1,
+        },
     };
 };
 // Get instructor students for a specific course
 export const getCourseStudentsService = async (instructorId, courseId, page = 1, limit = 20) => {
-    // Verify course ownership
     const course = await Course.findOne({
         _id: courseId,
-        instructor: instructorId
+        instructor: instructorId,
     });
     if (!course) {
         throw new Error("Course not found or access denied");
     }
     const skip = (page - 1) * limit;
-    // Get enrollments with student details
     const enrollments = await Enrollment.find({ course: courseId })
-        .populate('user', 'firstName lastName email avatar createdAt')
+        .populate("user", "firstName lastName email avatar createdAt")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit);
     const totalStudents = await Enrollment.countDocuments({ course: courseId });
     // Get additional stats for each student
     const studentsWithStats = await Promise.all(enrollments.map(async (enrollment) => {
-        // Get user progress
         const progress = await UserProgress.find({
             user: enrollment.user,
-            course: courseId
+            course: courseId,
         });
-        const completedLessons = progress.filter(p => p.completed).length;
+        const completedLessons = progress.filter((p) => p.completed).length;
         const totalWatchTime = progress.reduce((sum, p) => sum + (p.watchTime || 0), 0);
         return {
             enrollment: {
@@ -192,21 +194,21 @@ export const getCourseStudentsService = async (instructorId, courseId, page = 1,
                 enrolledAt: enrollment.enrolledAt,
                 progressPercentage: enrollment.progressPercentage,
                 status: enrollment.status,
-                lastAccessedAt: enrollment.lastAccessedAt
+                lastAccessedAt: enrollment.lastAccessedAt,
             },
             student: enrollment.user,
             progress: {
                 completedLessons,
                 totalWatchTime: Math.round(totalWatchTime / 60), // Convert to minutes
-                progressPercentage: enrollment.progressPercentage
-            }
+                progressPercentage: enrollment.progressPercentage,
+            },
         };
     }));
     return {
         course: {
             _id: course._id,
             title: course.title,
-            totalLessons: course.totalLessons
+            totalLessons: course.totalLessons,
         },
         students: studentsWithStats,
         pagination: {
@@ -214,7 +216,7 @@ export const getCourseStudentsService = async (instructorId, courseId, page = 1,
             totalPages: Math.ceil(totalStudents / limit),
             totalStudents,
             hasNext: page * limit < totalStudents,
-            hasPrev: page > 1
-        }
+            hasPrev: page > 1,
+        },
     };
 };

@@ -2,6 +2,7 @@ import { Router } from "express";
 import { authenticateToken } from "../middlewares/auth.middleware.js";
 import { getInstructorOverview, getInstructorCoursesWithStats, getCourseStudents, } from "../controllers/instructorController";
 import { getInstructorMessages, replyToMessage, markMessageAsRead, markMessageAsResolved, getMessageStats, } from "../controllers/instructorCommunicationController";
+import { getInstructorEarnings, getInstructorEarningsByCourseController, updateInstructorPayoutStatus, } from "../controllers/instructorEarningsController";
 const instructorRouter = Router();
 // Dashboard & Overview
 instructorRouter.get("/overview", authenticateToken, (req, res) => getInstructorOverview(req, res));
@@ -14,4 +15,8 @@ instructorRouter.post("/messages/:messageId/reply", authenticateToken, (req, res
 instructorRouter.patch("/messages/:messageId/read", authenticateToken, (req, res) => markMessageAsRead(req, res));
 instructorRouter.patch("/messages/:messageId/resolve", authenticateToken, (req, res) => markMessageAsResolved(req, res));
 instructorRouter.get("/messages/stats", authenticateToken, (req, res) => getMessageStats(req, res));
+// Earnings & Revenue
+instructorRouter.get("/earnings", authenticateToken, (req, res) => getInstructorEarnings(req, res));
+instructorRouter.get("/earnings/by-course", authenticateToken, (req, res) => getInstructorEarningsByCourseController(req, res));
+instructorRouter.patch("/earnings/payout-status", authenticateToken, (req, res) => updateInstructorPayoutStatus(req, res));
 export default instructorRouter;
