@@ -21,6 +21,7 @@ import orderRouter from "./routes/orderRoutes.js";
 import stripeRouter from "./routes/stripeRoute.js";
 import enrollmentRouter from "./routes/enrollmentRoutes.js";
 import userProgressRouter from "./routes/userProgressRoutes.js";
+import instructorRouter from "./routes/instructorRoutes.js";
 
 const app = express();
 
@@ -72,6 +73,7 @@ app.use("/api/orders", orderRouter);
 app.use("/api/payments", stripeRouter);
 app.use("/api/enrollments", enrollmentRouter);
 app.use("/api/user-progress", userProgressRouter);
+app.use("/api/instructor", instructorRouter);
 
 // 404 handler
 app.use(notFoundHandler);

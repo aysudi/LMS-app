@@ -3,6 +3,13 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import config from "./config.js";
 import { Strategy as GitHubStrategy, } from "passport-github2";
 import UserModel from "../models/User.js";
+const sanitizeUsername = (input) => {
+    return input
+        .toLowerCase()
+        .replace(/[^a-z0-9_]/g, "_")
+        .replace(/_+/g, "_")
+        .replace(/^_|_$/g, "");
+};
 passport.use(new GoogleStrategy({
     clientID: config.GOOGLE_CLIENT_ID,
     clientSecret: config.GOOGLE_CLIENT_SECRET,
@@ -26,15 +33,23 @@ passport.use(new GoogleStrategy({
                 message: "Email is already used",
             });
         }
+        const displayName = profile.displayName || "";
+        const nameParts = displayName.trim().split(" ");
+        const firstName = nameParts[0] || "User";
+        const lastName = nameParts.slice(1).join(" ") || "Google";
+        const emailPrefix = profile.emails?.[0]?.value.split("@")[0] || "user";
+        const sanitizedPrefix = sanitizeUsername(emailPrefix);
+        const username = `${sanitizedPrefix}_${Date.now()}`;
         const newUser = await UserModel.create({
-            fullName: profile.displayName,
-            username: `${profile.emails?.[0]?.value.split("@")[0]}-${Date.now()}`,
+            firstName,
+            lastName,
+            username,
             email: profile.emails?.[0]?.value,
-            profileImage: profile.photos?.[0]?.value,
-            provider: "google",
+            avatar: profile.photos?.[0]?.value,
+            authProvider: "google",
             providerId: profile.id,
-            isVerified: true,
-            lastLogin: new Date(),
+            isEmailVerified: true,
+            lastLoginAt: new Date(),
         });
         return done(null, newUser);
     }
@@ -50,6 +65,7 @@ passport.use(new GitHubStrategy({
 }, async (_accessToken, _refreshToken, profile, done) => {
     try {
         if (!profile.id) {
+            console.log("❌ No profile ID found");
             return done(new Error("Invalid GitHub profile"), false);
         }
         const existingUser = await UserModel.findOne({
@@ -69,19 +85,28 @@ passport.use(new GitHubStrategy({
                 message: "Email is already used",
             });
         }
+        const displayName = profile.displayName || profile.username || "";
+        const nameParts = displayName.trim().split(" ");
+        const firstName = nameParts[0] || profile.username || "User";
+        const lastName = nameParts.slice(1).join(" ") || "GitHub";
+        const githubUsername = profile.username || "user";
+        const sanitizedUsername = sanitizeUsername(githubUsername);
+        const username = `${sanitizedUsername}_${Date.now()}`;
         const newUser = await UserModel.create({
-            fullName: profile.displayName || profile.username,
-            username: `${profile.username}-${Date.now()}`,
+            firstName,
+            lastName,
+            username,
             email,
-            profileImage: profile.photos?.[0]?.value,
-            provider: "github",
+            avatar: profile.photos?.[0]?.value,
+            authProvider: "github",
             providerId: profile.id,
-            isVerified: true,
-            lastLogin: new Date(),
+            isEmailVerified: true,
+            lastLoginAt: new Date(),
         });
         return done(null, newUser);
     }
     catch (error) {
+        console.error("💥 GitHub strategy error:", error);
         return done(error, false);
     }
 }));

@@ -30,7 +30,7 @@ const courseSchema = new mongoose.Schema({
         ref: "User",
         required: true,
     },
-    price: {
+    originalPrice: {
         type: Number,
         required: true,
         default: 0,
@@ -40,6 +40,11 @@ const courseSchema = new mongoose.Schema({
         type: Number,
         default: 0,
         min: 0,
+    },
+    isFree: {
+        type: Boolean,
+        required: true,
+        default: false,
     },
     rating: {
         type: Number,
@@ -109,6 +114,7 @@ const courseSchema = new mongoose.Schema({
     },
     certificateProvided: {
         type: Boolean,
+        required: true,
         default: false,
     },
     isPublished: {
@@ -149,8 +155,9 @@ const courseSchema = new mongoose.Schema({
 }, {
     timestamps: true,
     versionKey: false,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
 });
-// Method to calculate average rating
 courseSchema.methods.calculateAverageRating = function () {
     if (this.reviews.length === 0) {
         this.rating = 0;
@@ -161,7 +168,37 @@ courseSchema.methods.calculateAverageRating = function () {
     this.rating = Number((sum / this.reviews.length).toFixed(1));
     this.ratingsCount = this.reviews.length;
 };
-// Indexes for better performance
+courseSchema.virtual("currentPrice").get(function () {
+    if (this.isFree)
+        return 0;
+    if (this.discountPrice > 0 && this.discountPrice < this.originalPrice) {
+        return this.discountPrice;
+    }
+    return this.originalPrice;
+});
+courseSchema.virtual("hasDiscount").get(function () {
+    return this.discountPrice > 0 && this.discountPrice < this.originalPrice;
+});
+courseSchema.methods.calculateDiscountPercentage = function () {
+    if (this.hasDiscount) {
+        return Math.round(((this.originalPrice - this.discountPrice) / this.originalPrice) * 100);
+    }
+    return 0;
+};
+courseSchema.virtual("sections", {
+    ref: "Section",
+    localField: "_id",
+    foreignField: "course",
+    options: { sort: { order: 1 } },
+});
+courseSchema.methods.recalculateStats = async function () {
+    const Lesson = mongoose.model("Lesson");
+    const lessons = await Lesson.find({ course: this._id });
+    this.totalLessons = lessons.length;
+    this.totalDuration = lessons.reduce((total, lesson) => total + lesson.duration, 0);
+    await this.save();
+    return this;
+};
 courseSchema.index({ title: "text", description: "text", tags: "text" });
 courseSchema.index({ category: 1, level: 1 });
 courseSchema.index({ instructor: 1 });

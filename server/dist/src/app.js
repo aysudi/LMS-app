@@ -1,15 +1,28 @@
 import cors from "cors";
 import passport from "passport";
-import "./config/passport.js";
+import "./configs/passport.js";
 import express from "express";
+import cookieParser from "cookie-parser";
 import { errorHandler, notFoundHandler, } from "./middlewares/error.middleware.js";
 import userRouter from "./routes/userRoutes.js";
 import courseRouter from "./routes/courseRoutes.js";
 import sectionRouter from "./routes/sectionRoute.js";
 import lessonRouter from "./routes/lessonRoute.js";
+import googleRouter from "./routes/googleRoutes.js";
+import githubRouter from "./routes/githubRoutes.js";
+import personalizationRouter from "./routes/personalization.js";
+import searchRouter from "./routes/searchRoutes.js";
+import wishlistRouter from "./routes/wishlistRoutes.js";
+import cartRouter from "./routes/cartRoutes.js";
+import orderRouter from "./routes/orderRoutes.js";
+import stripeRouter from "./routes/stripeRoute.js";
+import enrollmentRouter from "./routes/enrollmentRoutes.js";
+import userProgressRouter from "./routes/userProgressRoutes.js";
+import instructorRouter from "./routes/instructorRoutes.js";
 const app = express();
 app.use(passport.initialize());
 // Middleware
+app.use(cookieParser());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cors({
@@ -34,12 +47,21 @@ app.get("/health", (_, res) => {
     });
 });
 // API Routes
-// app.use("/auth", googleRouter);
-// app.use("/auth", githubRouter);
+app.use("/auth", googleRouter);
+app.use("/auth", githubRouter);
 app.use("/api/auth", userRouter);
 app.use("/api/courses", courseRouter);
 app.use("/api/sections", sectionRouter);
 app.use("/api/lessons", lessonRouter);
+app.use("/api/personalization", personalizationRouter);
+app.use("/api/search", searchRouter);
+app.use("/api/wishlist", wishlistRouter);
+app.use("/api/cart", cartRouter);
+app.use("/api/orders", orderRouter);
+app.use("/api/payments", stripeRouter);
+app.use("/api/enrollments", enrollmentRouter);
+app.use("/api/user-progress", userProgressRouter);
+app.use("/api/instructor", instructorRouter);
 // 404 handler
 app.use(notFoundHandler);
 // Global error handler
