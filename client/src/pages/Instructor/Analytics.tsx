@@ -10,9 +10,9 @@ import {
   FaTrophy,
   FaGraduationCap,
 } from "react-icons/fa";
-import { 
+import {
   useInstructorOverview,
-  useInstructorCoursesWithStats
+  useInstructorCoursesWithStats,
 } from "../../hooks/useInstructor";
 import { useInstructorAnalytics } from "../../hooks/useInstructorHelpers";
 import Loading from "../../components/Common/Loading";
@@ -23,12 +23,14 @@ const InstructorAnalytics = () => {
   );
 
   // Fetch real data
-  const { data: overview, isLoading: overviewLoading } = useInstructorOverview();
-  const { data: coursesData, isLoading: coursesLoading } = useInstructorCoursesWithStats({
-    page: 1,
-    limit: 50,
-    status: 'published'
-  });
+  const { data: overview, isLoading: overviewLoading } =
+    useInstructorOverview();
+  const { data: coursesData, isLoading: coursesLoading } =
+    useInstructorCoursesWithStats({
+      page: 1,
+      limit: 50,
+      status: "published",
+    });
   // const { data: earningsData } = useInstructorEarnings(); // Available if needed
 
   const { formatCurrency } = useInstructorAnalytics();
@@ -48,18 +50,42 @@ const InstructorAnalytics = () => {
   // Generate revenue data from earnings (mock monthly breakdown for demo)
   const totalRevenue = stats?.totalRevenue || 0;
   const totalStudents = stats?.totalStudents || 0;
-  
+
   const revenueData = [
-    { month: "Jan", revenue: Math.round(totalRevenue * 0.1), students: Math.round(totalStudents * 0.1) },
-    { month: "Feb", revenue: Math.round(totalRevenue * 0.12), students: Math.round(totalStudents * 0.12) },
-    { month: "Mar", revenue: Math.round(totalRevenue * 0.15), students: Math.round(totalStudents * 0.15) },
-    { month: "Apr", revenue: Math.round(totalRevenue * 0.13), students: Math.round(totalStudents * 0.13) },
-    { month: "May", revenue: Math.round(totalRevenue * 0.18), students: Math.round(totalStudents * 0.18) },
-    { month: "Jun", revenue: Math.round(totalRevenue * 0.20), students: Math.round(totalStudents * 0.20) },
+    {
+      month: "Jan",
+      revenue: Math.round(totalRevenue * 0.1),
+      students: Math.round(totalStudents * 0.1),
+    },
+    {
+      month: "Feb",
+      revenue: Math.round(totalRevenue * 0.12),
+      students: Math.round(totalStudents * 0.12),
+    },
+    {
+      month: "Mar",
+      revenue: Math.round(totalRevenue * 0.15),
+      students: Math.round(totalStudents * 0.15),
+    },
+    {
+      month: "Apr",
+      revenue: Math.round(totalRevenue * 0.13),
+      students: Math.round(totalStudents * 0.13),
+    },
+    {
+      month: "May",
+      revenue: Math.round(totalRevenue * 0.18),
+      students: Math.round(totalStudents * 0.18),
+    },
+    {
+      month: "Jun",
+      revenue: Math.round(totalRevenue * 0.2),
+      students: Math.round(totalStudents * 0.2),
+    },
   ];
 
   // Use real course data
-  const coursePerformanceData = courses.slice(0, 5).map(course => ({
+  const coursePerformanceData = courses.slice(0, 5).map((course) => ({
     name: course.title,
     students: course.enrollmentsCount || 0,
     rating: course.averageRating || 0,
