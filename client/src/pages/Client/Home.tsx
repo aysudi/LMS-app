@@ -22,6 +22,7 @@ import {
   useFeaturedCourses,
   useFreeCourses,
   useTrendingCourses,
+  useUserCourses,
 } from "../../hooks/useCourseQueries";
 import Loading from "../../components/Common/Loading";
 import ModernCourseCard from "../../components/Client/ModernCourseCard";
@@ -62,14 +63,21 @@ const Home = () => {
   const { data: trendingCoursesData, isLoading: trendingLoading } =
     useTrendingCourses(1);
 
+  const { data: userCoursesData } = useUserCourses();
+
   const [selectedCategory, setSelectedCategory] = useState("all");
 
   const allCourses = allCoursesData?.data || [];
   const featuredCourses = featuredCoursesData?.data || [];
   const freeCourses = freeCoursesData?.data || [];
   const trendingCourse = trendingCoursesData?.data?.[0];
+  const userCourses = userCoursesData?.data || [];
 
   const categories = generateCategoriesWithCounts(allCourses);
+
+  const checkIfEnrolled = (courseId: string): boolean => {
+    return userCourses.some((course: any) => course.id === courseId);
+  };
 
   const {
     isModalOpen,
@@ -574,6 +582,7 @@ const Home = () => {
                               onCartToggle={handleCartToggle}
                               checkIfInWishlist={checkIfInWishlist}
                               checkIfInCart={checkIfInCartLocal}
+                              checkIfEnrolled={checkIfEnrolled}
                               processingWishlist={processingWishlist}
                               processingCart={processingCart}
                               showCartButton={true}
@@ -878,7 +887,8 @@ const Home = () => {
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-3">
                                 <span className="text-3xl font-bold text-gray-900">
-                                  {displayCourse.originalPrice === 0
+                                  {displayCourse.isFree ||
+                                  displayCourse.originalPrice === 0
                                     ? "Free"
                                     : `$${
                                         displayCourse.discountPrice ||
@@ -1066,6 +1076,7 @@ const Home = () => {
                             onCartToggle={handleCartToggle}
                             checkIfInWishlist={checkIfInWishlist}
                             checkIfInCart={checkIfInCartLocal}
+                            checkIfEnrolled={checkIfEnrolled}
                             processingWishlist={processingWishlist}
                             processingCart={processingCart}
                             showCartButton={true}

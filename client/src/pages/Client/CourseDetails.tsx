@@ -24,10 +24,14 @@ import {
   FaInfinity,
   FaMobile,
   FaTv,
+  FaShoppingCart,
 } from "react-icons/fa";
+import { useSnackbar } from "notistack";
 import { useCourse } from "../../hooks/useCourseQueries";
 import { useToggleWishlist, useIsInWishlist } from "../../hooks/useWishlist";
 import { useAuthContext } from "../../context/AuthContext";
+import { useAddToCart, useIsInCart } from "../../hooks/useCart";
+import { useUserCourses } from "../../hooks/useCourseQueries";
 import type { Course, Lesson } from "../../types/course.type";
 
 const CoursePreviewCard: React.FC<{
@@ -38,6 +42,12 @@ const CoursePreviewCard: React.FC<{
   onWishlistToggle: () => void;
   setIsVideoModalOpen: (value: boolean) => void;
   isAuthenticated: boolean;
+  isInCart: boolean;
+  isEnrolled: boolean;
+  handleAddToCart: () => void;
+  handleBuyNow: () => void;
+  addToCartMutation: any;
+  navigate: any;
 }> = ({
   course,
   calculateDiscountPercentage,
@@ -46,6 +56,12 @@ const CoursePreviewCard: React.FC<{
   onWishlistToggle,
   setIsVideoModalOpen,
   isAuthenticated,
+  isInCart,
+  isEnrolled,
+  handleAddToCart,
+  handleBuyNow,
+  addToCartMutation,
+  navigate,
 }) => {
   return (
     <div className="bg-white border border-gray-200 rounded-2xl shadow-lg overflow-hidden">
@@ -154,12 +170,79 @@ const CoursePreviewCard: React.FC<{
 
         {/* Action Buttons */}
         <div className="space-y-3 mb-6">
-          <button className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold text-center rounded-lg transition-colors duration-200 cursor-pointer">
-            {course.isFree ? "Enroll for Free" : "Add to Cart"}
-          </button>
+          {isEnrolled ? (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/course/${course.id}/watch`);
+              }}
+              className="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-bold text-center rounded-lg transition-colors duration-200 cursor-pointer flex items-center justify-center space-x-2"
+            >
+              <FaPlay />
+              <span>Continue Learning</span>
+            </button>
+          ) : course.isFree ? (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                // Handle free enrollment
+                navigate(`/course/${course.id}/watch`);
+              }}
+              className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold text-center rounded-lg transition-colors duration-200 cursor-pointer"
+            >
+              Enroll for Free
+            </button>
+          ) : isInCart ? (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate("/cart");
+              }}
+              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-center rounded-lg transition-colors duration-200 cursor-pointer flex items-center justify-center space-x-2"
+            >
+              <FaShoppingCart />
+              <span>Go to Cart</span>
+            </button>
+          ) : (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleAddToCart();
+              }}
+              disabled={addToCartMutation.isPending}
+              className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold text-center rounded-lg transition-colors duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+            >
+              {addToCartMutation.isPending ? (
+                <>
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
+                    className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                  />
+                  <span>Adding...</span>
+                </>
+              ) : (
+                <>
+                  <FaShoppingCart />
+                  <span>Add to Cart</span>
+                </>
+              )}
+            </button>
+          )}
 
-          {!course.isFree && (
-            <button className="w-full py-3 border border-gray-800 hover:bg-gray-50 text-gray-900 font-bold text-center rounded-lg transition-colors duration-200 cursor-pointer">
+          {!course.isFree && !isEnrolled && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleBuyNow();
+              }}
+              disabled={addToCartMutation.isPending}
+              className="w-full py-3 border border-gray-800 hover:bg-gray-50 text-gray-900 font-bold text-center rounded-lg transition-colors duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               Buy Now
             </button>
           )}
@@ -282,13 +365,68 @@ const CourseDetails = () => {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
   const { isAuthenticated } = useAuthContext();
+  const { enqueueSnackbar } = useSnackbar();
 
   const { isInWishlist } = useIsInWishlist(courseId || "");
   const { toggleWishlist } = useToggleWishlist();
+  const { data: isInCartData } = useIsInCart(courseId || "");
+  const { data: userCoursesData } = useUserCourses();
+  const addToCartMutation = useAddToCart();
+
+  const isInCart = isInCartData?.data?.isInCart || false;
+  const userCourses = userCoursesData?.data || [];
+  const isEnrolled = userCourses.some((c: any) => c.id === courseId);
 
   const handleWishlistToggle = () => {
     if (courseId && isAuthenticated) {
       toggleWishlist(courseId, isInWishlist);
+    }
+  };
+
+  const handleAddToCart = async () => {
+    if (!isAuthenticated) {
+      navigate("/auth/login");
+      return;
+    }
+
+    if (!courseId) return;
+
+    try {
+      await addToCartMutation.mutateAsync(courseId);
+      enqueueSnackbar("Course added to cart successfully!", {
+        variant: "success",
+        autoHideDuration: 3000,
+      });
+    } catch (error: any) {
+      const message = error.response?.data?.message || "Failed to add to cart";
+      enqueueSnackbar(message, {
+        variant: "error",
+        autoHideDuration: 3000,
+      });
+    }
+  };
+
+  const handleBuyNow = async () => {
+    if (!isAuthenticated) {
+      navigate("/auth/login");
+      return;
+    }
+
+    if (!courseId) return;
+
+    try {
+      // Add to cart first if not already in cart
+      if (!isInCart) {
+        await addToCartMutation.mutateAsync(courseId);
+      }
+      // Navigate to cart
+      navigate("/cart");
+    } catch (error: any) {
+      const message = error.response?.data?.message || "Failed to add to cart";
+      enqueueSnackbar(message, {
+        variant: "error",
+        autoHideDuration: 3000,
+      });
     }
   };
 
@@ -470,6 +608,12 @@ const CourseDetails = () => {
                 onWishlistToggle={handleWishlistToggle}
                 setIsVideoModalOpen={setIsVideoModalOpen}
                 isAuthenticated={isAuthenticated}
+                isInCart={isInCart}
+                isEnrolled={isEnrolled}
+                handleAddToCart={handleAddToCart}
+                handleBuyNow={handleBuyNow}
+                addToCartMutation={addToCartMutation}
+                navigate={navigate}
               />
             </div>
 
@@ -575,6 +719,12 @@ const CourseDetails = () => {
                 onWishlistToggle={handleWishlistToggle}
                 setIsVideoModalOpen={setIsVideoModalOpen}
                 isAuthenticated={isAuthenticated}
+                isInCart={isInCart}
+                isEnrolled={isEnrolled}
+                handleAddToCart={handleAddToCart}
+                handleBuyNow={handleBuyNow}
+                addToCartMutation={addToCartMutation}
+                navigate={navigate}
               />
             </div>
           </div>
