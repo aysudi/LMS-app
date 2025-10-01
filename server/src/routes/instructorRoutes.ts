@@ -13,6 +13,11 @@ import {
   markMessageAsResolved,
   getMessageStats,
 } from "../controllers/instructorCommunicationController";
+import {
+  getInstructorEarnings,
+  getInstructorEarningsByCourseController,
+  updateInstructorPayoutStatus,
+} from "../controllers/instructorEarningsController";
 
 const instructorRouter = Router();
 
@@ -57,6 +62,21 @@ instructorRouter.patch(
 
 instructorRouter.get("/messages/stats", authenticateToken, (req, res) =>
   getMessageStats(req as AuthRequest, res)
+);
+
+// Earnings & Revenue
+instructorRouter.get("/earnings", authenticateToken, (req, res) =>
+  getInstructorEarnings(req as AuthRequest, res)
+);
+
+instructorRouter.get("/earnings/by-course", authenticateToken, (req, res) =>
+  getInstructorEarningsByCourseController(req as AuthRequest, res)
+);
+
+instructorRouter.patch(
+  "/earnings/payout-status",
+  authenticateToken,
+  (req, res) => updateInstructorPayoutStatus(req as AuthRequest, res)
 );
 
 export default instructorRouter;

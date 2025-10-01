@@ -3,6 +3,7 @@ import { Types } from "mongoose";
 import Course from "../models/Course";
 import User from "../models/User";
 import Enrollment from "../models/Enrollment";
+import { createInstructorEarningsForOrder } from "../services/instructorEarningsService.js";
 import { OrderStatus, PaymentStatus, PaymentMethod, } from "../types/order.types";
 import { EnrollmentStatus } from "../types/enrollment.types";
 import Order from "../models/Order";
@@ -246,6 +247,8 @@ export const completeOrder = async (orderId, paymentDetails) => {
             enrolledAt: new Date(),
         }));
         await Enrollment.insertMany(enrollments);
+        // Create instructor earnings for each course in the order
+        await createInstructorEarningsForOrder(order);
         // Update user's enrolled courses and spending
         const courseIds = order.items.map((item) => item.course);
         await User.findByIdAndUpdate(order.user, {
@@ -319,6 +322,8 @@ export const confirmPayment = async (req, res) => {
             enrolledAt: new Date(),
         }));
         await Enrollment.insertMany(enrollments);
+        // Create instructor earnings for each course in the order
+        await createInstructorEarningsForOrder(order);
         // Update user's enrolled courses and spending
         const courseIds = order.items.map((item) => item.course);
         await User.findByIdAndUpdate(order.user, {
