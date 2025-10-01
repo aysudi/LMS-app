@@ -28,7 +28,6 @@ export const getInstructorMessagesService = async (
 
   const totalMessages = await InstructorCommunication.countDocuments(filter);
 
-  // Get unread count
   const unreadCount = await InstructorCommunication.countDocuments({
     instructor: instructorId,
     status: MessageStatus.UNREAD,
@@ -77,7 +76,6 @@ export const replyToMessageService = async (
 
   await communication.save();
 
-  // Populate the updated message
   await communication.populate("student", "firstName lastName email avatar");
   await communication.populate("course", "title");
 
