@@ -70,8 +70,10 @@ qaRouter.post("/answers/:answerId/vote", authenticateToken, (req, res) =>
 );
 
 // POST /api/questions/:questionId/answers/:answerId/accept - Accept answer (question author only)
-qaRouter.post("/questions/:questionId/answers/:answerId/accept", authenticateToken, (req, res) =>
-  acceptAnswerController(req as AuthRequest, res)
+qaRouter.post(
+  "/questions/:questionId/answers/:answerId/accept",
+  authenticateToken,
+  (req, res) => acceptAnswerController(req as AuthRequest, res)
 );
 
 export default qaRouter;

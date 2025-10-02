@@ -57,7 +57,10 @@ export const createQuestionController = async (
   }
 };
 
-export const getQuestionsController = async (req: AuthRequest, res: Response) => {
+export const getQuestionsController = async (
+  req: AuthRequest,
+  res: Response
+) => {
   try {
     const { courseId } = req.params;
     const query: QuestionsQuery = req.query;
@@ -77,7 +80,10 @@ export const getQuestionsController = async (req: AuthRequest, res: Response) =>
   }
 };
 
-export const getQuestionController = async (req: AuthRequest, res: Response) => {
+export const getQuestionController = async (
+  req: AuthRequest,
+  res: Response
+) => {
   try {
     const { questionId } = req.params;
     const userId = req.user?.id;
@@ -124,8 +130,11 @@ export const updateQuestionController = async (
     });
   } catch (error: any) {
     console.error("Update question error:", error);
-    const statusCode = error.message.includes("not found") ? 404 : 
-                       error.message.includes("only update your own") ? 403 : 400;
+    const statusCode = error.message.includes("not found")
+      ? 404
+      : error.message.includes("only update your own")
+      ? 403
+      : 400;
     res.status(statusCode).json({
       success: false,
       message: error.message || "Failed to update question",
@@ -156,8 +165,11 @@ export const deleteQuestionController = async (
     });
   } catch (error: any) {
     console.error("Delete question error:", error);
-    const statusCode = error.message.includes("not found") ? 404 : 
-                       error.message.includes("only delete your own") ? 403 : 400;
+    const statusCode = error.message.includes("not found")
+      ? 404
+      : error.message.includes("only delete your own")
+      ? 403
+      : 400;
     res.status(statusCode).json({
       success: false,
       message: error.message || "Failed to delete question",
@@ -165,7 +177,10 @@ export const deleteQuestionController = async (
   }
 };
 
-export const voteQuestionController = async (req: AuthRequest, res: Response) => {
+export const voteQuestionController = async (
+  req: AuthRequest,
+  res: Response
+) => {
   try {
     const userId = req.user?.id;
     const { questionId } = req.params;
@@ -196,8 +211,11 @@ export const voteQuestionController = async (req: AuthRequest, res: Response) =>
     });
   } catch (error: any) {
     console.error("Vote question error:", error);
-    const statusCode = error.message.includes("not found") ? 404 : 
-                       error.message.includes("cannot vote on your own") ? 403 : 400;
+    const statusCode = error.message.includes("not found")
+      ? 404
+      : error.message.includes("cannot vote on your own")
+      ? 403
+      : 400;
     res.status(statusCode).json({
       success: false,
       message: error.message || "Failed to vote on question",
@@ -206,7 +224,10 @@ export const voteQuestionController = async (req: AuthRequest, res: Response) =>
 };
 
 // Answer Controllers
-export const createAnswerController = async (req: AuthRequest, res: Response) => {
+export const createAnswerController = async (
+  req: AuthRequest,
+  res: Response
+) => {
   try {
     const userId = req.user?.id;
     const { questionId } = req.params;
@@ -237,7 +258,10 @@ export const createAnswerController = async (req: AuthRequest, res: Response) =>
   }
 };
 
-export const updateAnswerController = async (req: AuthRequest, res: Response) => {
+export const updateAnswerController = async (
+  req: AuthRequest,
+  res: Response
+) => {
   try {
     const userId = req.user?.id;
     const { answerId } = req.params;
@@ -261,8 +285,11 @@ export const updateAnswerController = async (req: AuthRequest, res: Response) =>
     });
   } catch (error: any) {
     console.error("Update answer error:", error);
-    const statusCode = error.message.includes("not found") ? 404 : 
-                       error.message.includes("only update your own") ? 403 : 400;
+    const statusCode = error.message.includes("not found")
+      ? 404
+      : error.message.includes("only update your own")
+      ? 403
+      : 400;
     res.status(statusCode).json({
       success: false,
       message: error.message || "Failed to update answer",
@@ -270,7 +297,10 @@ export const updateAnswerController = async (req: AuthRequest, res: Response) =>
   }
 };
 
-export const deleteAnswerController = async (req: AuthRequest, res: Response) => {
+export const deleteAnswerController = async (
+  req: AuthRequest,
+  res: Response
+) => {
   try {
     const userId = req.user?.id;
     const { answerId } = req.params;
@@ -290,8 +320,11 @@ export const deleteAnswerController = async (req: AuthRequest, res: Response) =>
     });
   } catch (error: any) {
     console.error("Delete answer error:", error);
-    const statusCode = error.message.includes("not found") ? 404 : 
-                       error.message.includes("only delete your own") ? 403 : 400;
+    const statusCode = error.message.includes("not found")
+      ? 404
+      : error.message.includes("only delete your own")
+      ? 403
+      : 400;
     res.status(statusCode).json({
       success: false,
       message: error.message || "Failed to delete answer",
@@ -330,8 +363,11 @@ export const voteAnswerController = async (req: AuthRequest, res: Response) => {
     });
   } catch (error: any) {
     console.error("Vote answer error:", error);
-    const statusCode = error.message.includes("not found") ? 404 : 
-                       error.message.includes("cannot vote on your own") ? 403 : 400;
+    const statusCode = error.message.includes("not found")
+      ? 404
+      : error.message.includes("cannot vote on your own")
+      ? 403
+      : 400;
     res.status(statusCode).json({
       success: false,
       message: error.message || "Failed to vote on answer",
@@ -339,7 +375,10 @@ export const voteAnswerController = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const acceptAnswerController = async (req: AuthRequest, res: Response) => {
+export const acceptAnswerController = async (
+  req: AuthRequest,
+  res: Response
+) => {
   try {
     const userId = req.user?.id;
     const { questionId, answerId } = req.params;
@@ -359,8 +398,11 @@ export const acceptAnswerController = async (req: AuthRequest, res: Response) =>
     });
   } catch (error: any) {
     console.error("Accept answer error:", error);
-    const statusCode = error.message.includes("not found") ? 404 : 
-                       error.message.includes("Only the question author") ? 403 : 400;
+    const statusCode = error.message.includes("not found")
+      ? 404
+      : error.message.includes("Only the question author")
+      ? 403
+      : 400;
     res.status(statusCode).json({
       success: false,
       message: error.message || "Failed to accept answer",
