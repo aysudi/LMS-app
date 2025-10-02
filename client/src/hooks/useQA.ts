@@ -346,6 +346,7 @@ export const useAcceptAnswer = () => {
       queryClient.invalidateQueries({
         queryKey: QA_QUERY_KEYS.questionDetails(questionId),
       });
+
       // Also invalidate course questions list to update answered status
       queryClient.invalidateQueries({
         predicate: (query) =>
@@ -353,6 +354,12 @@ export const useAcceptAnswer = () => {
           query.queryKey.includes("courses") &&
           query.queryKey.includes("questions"),
       });
+
+      // Force refetch the question details to ensure fresh data
+      queryClient.refetchQueries({
+        queryKey: QA_QUERY_KEYS.questionDetails(questionId),
+      });
+
       toast.success("Answer accepted successfully!");
     },
     onError: (error: any) => {

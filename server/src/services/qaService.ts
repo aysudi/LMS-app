@@ -163,8 +163,20 @@ export const getQuestionById = async (questionId: string, userId?: string) => {
     // Add userVoteType and isAccepted to answers
     answers.forEach((answer: any) => {
       answer.userVoteType = answer.getUserVoteType(userId);
-      answer.isAccepted =
+      const isAccepted =
         question.acceptedAnswer?.toString() === answer._id.toString();
+
+      // Set isAccepted in multiple ways to ensure it's serialized
+      answer.isAccepted = isAccepted;
+      answer._isAccepted = isAccepted;
+
+      // Force the property to be enumerable for JSON serialization
+      Object.defineProperty(answer, "isAccepted", {
+        value: isAccepted,
+        enumerable: true,
+        writable: true,
+        configurable: true,
+      });
     });
   }
 
@@ -383,11 +395,10 @@ export const acceptAnswer = async (
     throw new Error("Answer not found for this question");
   }
 
-  // Toggle accepted answer
   if (question.acceptedAnswer?.toString() === answerId) {
-    question.acceptedAnswer = undefined; // Unaccept if already accepted
+    question.acceptedAnswer = undefined;
   } else {
-    question.acceptedAnswer = answerId as any; // Accept this answer
+    question.acceptedAnswer = answerId as any;
   }
 
   await question.save();

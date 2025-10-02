@@ -12,7 +12,7 @@ export interface IAnswer extends Document {
 
   // Virtual properties
   voteScore: number;
-  isAccepted: boolean;
+  isAccepted?: boolean; // Set dynamically by service layer
 
   // Methods
   getUserVoteType(userId: string): "upvote" | "downvote" | null;
@@ -54,7 +54,16 @@ const answerSchema = new mongoose.Schema(
   {
     timestamps: true,
     versionKey: false,
-    toJSON: { virtuals: true },
+    toJSON: {
+      virtuals: true,
+      transform: function (doc: any, ret: any) {
+        // Ensure isAccepted is included in JSON output
+        if (doc._isAccepted !== undefined) {
+          ret.isAccepted = doc._isAccepted;
+        }
+        return ret;
+      },
+    },
     toObject: { virtuals: true },
   }
 );
@@ -64,10 +73,15 @@ answerSchema.virtual("voteScore").get(function () {
   return this.upvotes.length - this.downvotes.length;
 });
 
-// Virtual field: is this the accepted answer?
+// Virtual field: isAccepted (will be set by service layer)
 answerSchema.virtual("isAccepted").get(function () {
-  // This will be populated when we fetch with question data
-  return false; // Will be set dynamically
+  // This will be overridden by the service layer
+  // Default to false if not set
+  return (this as any)._isAccepted || false;
+});
+
+answerSchema.virtual("isAccepted").set(function (value: boolean) {
+  (this as any)._isAccepted = value;
 });
 
 // Method: check if user has voted

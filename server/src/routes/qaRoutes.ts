@@ -1,5 +1,8 @@
 import express from "express";
-import { authenticateToken } from "../middlewares/auth.middleware.js";
+import {
+  authenticateToken,
+  optionalAuth,
+} from "../middlewares/auth.middleware.js";
 import { AuthRequest } from "../types/common.types.js";
 import {
   createQuestionController,
@@ -19,7 +22,7 @@ const qaRouter = express.Router();
 
 // Question Routes
 // GET /api/courses/:courseId/questions - Get all questions for a course
-qaRouter.get("/courses/:courseId/questions", (req, res) =>
+qaRouter.get("/courses/:courseId/questions", optionalAuth, (req, res) =>
   getQuestionsController(req as AuthRequest, res)
 );
 
@@ -29,7 +32,7 @@ qaRouter.post("/courses/:courseId/questions", authenticateToken, (req, res) =>
 );
 
 // GET /api/questions/:questionId - Get specific question with answers
-qaRouter.get("/questions/:questionId", (req, res) =>
+qaRouter.get("/questions/:questionId", optionalAuth, (req, res) =>
   getQuestionController(req as AuthRequest, res)
 );
 
