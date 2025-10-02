@@ -30,7 +30,7 @@ export const getQuestionsByCourse = async (
   if (params.sortBy) searchParams.append("sortBy", params.sortBy);
 
   const queryString = searchParams.toString();
-  const url = `/qa/courses/${courseId}/questions${
+  const url = `/api/qa/courses/${courseId}/questions${
     queryString ? `?${queryString}` : ""
   }`;
 
@@ -41,7 +41,7 @@ export const getQuestionsByCourse = async (
 export const getQuestionById = async (
   questionId: string
 ): Promise<QuestionDetailsResponse> => {
-  const response = await api.get(`/qa/questions/${questionId}`);
+  const response = await api.get(`/api/qa/questions/${questionId}`);
   return response.data;
 };
 
@@ -50,7 +50,7 @@ export const createQuestion = async (
   questionData: CreateQuestionData
 ): Promise<CreateQuestionResponse> => {
   const response = await api.post(
-    `/qa/courses/${courseId}/questions`,
+    `/api/qa/courses/${courseId}/questions`,
     questionData
   );
   return response.data;
@@ -60,14 +60,14 @@ export const updateQuestion = async (
   questionId: string,
   updateData: UpdateQuestionData
 ): Promise<CreateQuestionResponse> => {
-  const response = await api.put(`/qa/questions/${questionId}`, updateData);
+  const response = await api.put(`/api/qa/questions/${questionId}`, updateData);
   return response.data;
 };
 
 export const deleteQuestion = async (
   questionId: string
 ): Promise<{ success: boolean; data: { message: string } }> => {
-  const response = await api.delete(`/qa/questions/${questionId}`);
+  const response = await api.delete(`/api/qa/questions/${questionId}`);
   return response.data;
 };
 
@@ -75,7 +75,10 @@ export const voteOnQuestion = async (
   questionId: string,
   voteData: VoteData
 ): Promise<VoteResponse> => {
-  const response = await api.post(`/qa/questions/${questionId}/vote`, voteData);
+  const response = await api.post(
+    `/api/qa/questions/${questionId}/vote`,
+    voteData
+  );
   return response.data;
 };
 
@@ -85,7 +88,7 @@ export const createAnswer = async (
   answerData: CreateAnswerData
 ): Promise<CreateAnswerResponse> => {
   const response = await api.post(
-    `/qa/questions/${questionId}/answers`,
+    `/api/qa/questions/${questionId}/answers`,
     answerData
   );
   return response.data;
@@ -95,14 +98,14 @@ export const updateAnswer = async (
   answerId: string,
   updateData: UpdateAnswerData
 ): Promise<CreateAnswerResponse> => {
-  const response = await api.put(`/qa/answers/${answerId}`, updateData);
+  const response = await api.put(`/api/qa/answers/${answerId}`, updateData);
   return response.data;
 };
 
 export const deleteAnswer = async (
   answerId: string
 ): Promise<{ success: boolean; data: { message: string } }> => {
-  const response = await api.delete(`/qa/answers/${answerId}`);
+  const response = await api.delete(`/api/qa/answers/${answerId}`);
   return response.data;
 };
 
@@ -110,7 +113,7 @@ export const voteOnAnswer = async (
   answerId: string,
   voteData: VoteData
 ): Promise<VoteResponse> => {
-  const response = await api.post(`/qa/answers/${answerId}/vote`, voteData);
+  const response = await api.post(`/api/qa/answers/${answerId}/vote`, voteData);
   return response.data;
 };
 
@@ -119,7 +122,7 @@ export const acceptAnswer = async (
   answerId: string
 ): Promise<AcceptAnswerResponse> => {
   const response = await api.post(
-    `/qa/questions/${questionId}/answers/${answerId}/accept`
+    `/api/qa/questions/${questionId}/answers/${answerId}/accept`
   );
   return response.data;
 };

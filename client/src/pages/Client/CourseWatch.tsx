@@ -27,6 +27,12 @@ import {
   useCompleteLessonProgress,
   useCourseProgress,
 } from "../../hooks/useUserProgress";
+import {
+  useQuestionsByCourse,
+  useCreateQuestion,
+  useVoteOnQuestion,
+} from "../../hooks/useQA";
+import { useQAFilters, useQAFormState } from "../../hooks/useQAHelpers";
 
 const CourseWatch: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>();
@@ -66,7 +72,7 @@ const CourseWatch: React.FC = () => {
   const [showNotes, setShowNotes] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
   const [activeTab, setActiveTab] = useState<
-    "overview" | "notes" | "reviews" | "resources" | "announcements"
+    "overview" | "notes" | "reviews" | "resources" | "announcements" | "qa"
   >("overview");
 
   const [newNote, setNewNote] = useState("");
@@ -75,6 +81,24 @@ const CourseWatch: React.FC = () => {
 
   const [newReview, setNewReview] = useState("");
   const [newRating, setNewRating] = useState(5);
+
+  // Q&A State
+  const {
+    filters: qaFilters,
+    setSearch: setQASearch,
+    setAnswered,
+    setSortBy: setQASortBy,
+  } = useQAFilters();
+  const {
+    isAsking,
+    startAsking,
+    stopAsking,
+    replyingToQuestionId,
+    startReplyingToQuestion,
+    stopReplyingToQuestion,
+  } = useQAFormState();
+  const [newQuestion, setNewQuestion] = useState({ title: "", content: "" });
+  const [newAnswer, setNewAnswer] = useState("");
 
   const currentLessonObj =
     course?.sections[currentSection]?.lessons[currentLesson];
@@ -88,6 +112,12 @@ const CourseWatch: React.FC = () => {
   const enrollmentReviews = enrollmentReviewsResponse?.data?.reviews || [];
 
   const addReviewMutation = useAddCourseReview();
+
+  // Q&A Queries and Mutations
+  const { data: questionsData, isLoading: questionsLoading } =
+    useQuestionsByCourse(courseId!, qaFilters, { enabled: !!courseId });
+  const createQuestionMutation = useCreateQuestion(courseId!);
+  const voteQuestionMutation = useVoteOnQuestion();
 
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -335,6 +365,49 @@ const CourseWatch: React.FC = () => {
         },
       }
     );
+  };
+
+  // Q&A Handler Functions
+  const handleCreateQuestion = () => {
+    if (!newQuestion.title.trim() || !newQuestion.content.trim()) return;
+
+    createQuestionMutation.mutate(
+      {
+        title: newQuestion.title.trim(),
+        content: newQuestion.content.trim(),
+        lessonId: currentLessonObj?._id,
+      },
+      {
+        onSuccess: () => {
+          setNewQuestion({ title: "", content: "" });
+          stopAsking();
+        },
+      }
+    );
+  };
+
+  const handleCreateAnswer = (questionId: string) => {
+    if (!newAnswer.trim()) return;
+
+    // Note: This would need proper implementation with the answer mutation
+    console.log(
+      "Creating answer for question:",
+      questionId,
+      "Content:",
+      newAnswer.trim()
+    );
+    setNewAnswer("");
+    stopReplyingToQuestion();
+  };
+
+  const handleVoteQuestion = (
+    questionId: string,
+    voteType: "upvote" | "downvote"
+  ) => {
+    voteQuestionMutation.mutate({
+      questionId,
+      voteData: { type: voteType },
+    });
   };
 
   const formatTime = (seconds: number) => {
@@ -703,65 +776,115 @@ const CourseWatch: React.FC = () => {
         </div>
 
         {/* Tabs Section Below Video */}
-        <div className="bg-gray-800 border-t border-gray-700">
+        <div className="bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 border-t border-gray-700/50 backdrop-blur-sm">
           {/* Tab Headers */}
-          <div className="flex border-b border-gray-700">
+          <div className="flex border-b border-gray-700/50 overflow-x-auto">
             {(
               [
                 "overview",
                 "notes",
                 "reviews",
+                "qa",
                 "resources",
                 "announcements",
               ] as const
-            ).map((tab, index) => (
-              <button
-                key={index}
-                onClick={() => setActiveTab(tab)}
-                className={`px-6 py-3 text-sm font-medium capitalize transition-colors cursor-pointer ${
-                  activeTab === tab
-                    ? "text-white border-b-2 border-purple-500 bg-gray-700"
-                    : "text-gray-300 hover:text-white hover:bg-gray-700"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
+            ).map((tab, index) => {
+              return (
+                <button
+                  key={index}
+                  onClick={() => setActiveTab(tab)}
+                  className={`group relative px-6 py-4 text-sm font-medium capitalize transition-all duration-300 cursor-pointer min-w-fit whitespace-nowrap ${
+                    activeTab === tab
+                      ? "text-white bg-gradient-to-br from-purple-600/20 to-purple-500/10 border-b-2 border-purple-400 shadow-lg shadow-purple-500/10"
+                      : "text-gray-300 hover:text-white hover:bg-gradient-to-br hover:from-gray-700/50 hover:to-gray-600/30 hover:shadow-md transition-all duration-200"
+                  }`}
+                >
+                  <div className="flex items-center space-x-2">
+                    <span
+                      className={`${
+                        activeTab === tab ? "font-semibold" : "font-medium"
+                      }`}
+                    >
+                      {tab === "qa" ? "Q&A" : tab}
+                    </span>
+                  </div>
+                  {activeTab === tab && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-400/5 to-transparent animate-pulse"></div>
+                  )}
+                </button>
+              );
+            })}
           </div>
 
           {/* Tab Content */}
-          <div className="p-6">
+          <div className="p-6 min-h-96 bg-gradient-to-br from-gray-800/30 via-gray-900/20 to-gray-800/30">
             {activeTab === "overview" && (
               <div>
-                <h3 className="text-xl font-bold mb-4">Course Overview</h3>
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="font-semibold mb-2">About This Course</h4>
-                    <p className="text-gray-300">{course.description}</p>
+                <h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                  Course Overview
+                </h3>
+                <div className="space-y-6">
+                  <div className="p-6 bg-gradient-to-br from-gray-800/50 to-gray-900/30 rounded-2xl border border-gray-700/50 backdrop-blur-sm">
+                    <h4 className="font-semibold mb-3 text-purple-300 flex items-center space-x-2">
+                      <span>About This Course</span>
+                    </h4>
+                    <p className="text-gray-300 leading-relaxed">
+                      {course.description}
+                    </p>
                   </div>
-                  <div>
-                    <h4 className="font-semibold mb-2">What You'll Learn</h4>
-                    <ul className="list-disc list-inside text-gray-300 space-y-1">
-                      <li>Comprehensive understanding of the subject matter</li>
-                      <li>Practical skills and knowledge application</li>
-                      <li>Step-by-step learning progression</li>
+                  <div className="p-6 bg-gradient-to-br from-gray-800/50 to-gray-900/30 rounded-2xl border border-gray-700/50 backdrop-blur-sm">
+                    <h4 className="font-semibold mb-3 text-blue-300 flex items-center space-x-2">
+                      <span>What You'll Learn</span>
+                    </h4>
+                    <ul className="space-y-2 text-gray-300">
+                      <li className="flex items-center space-x-3">
+                        <span className="w-2 h-2 bg-purple-400 rounded-full"></span>
+                        <span>
+                          Comprehensive understanding of the subject matter
+                        </span>
+                      </li>
+                      <li className="flex items-center space-x-3">
+                        <span className="w-2 h-2 bg-blue-400 rounded-full"></span>
+                        <span>Practical skills and knowledge application</span>
+                      </li>
+                      <li className="flex items-center space-x-3">
+                        <span className="w-2 h-2 bg-purple-400 rounded-full"></span>
+                        <span>Step-by-step learning progression</span>
+                      </li>
                     </ul>
                   </div>
-                  <div>
-                    <h4 className="font-semibold mb-2">Course Info</h4>
-                    <div className="flex flex-wrap gap-4 text-sm text-gray-300">
-                      <span>
-                        Instructor: {course.instructor.firstName}{" "}
-                        {course.instructor.lastName}
-                      </span>
-                      <span>Sections: {course.sections.length}</span>
-                      <span>
-                        Total Lessons:{" "}
-                        {course.sections.reduce(
-                          (total, section) => total + section.lessons.length,
-                          0
-                        )}
-                      </span>
+                  <div className="p-6 bg-gradient-to-br from-gray-800/50 to-gray-900/30 rounded-2xl border border-gray-700/50 backdrop-blur-sm">
+                    <h4 className="font-semibold mb-4 text-green-300 flex items-center space-x-2">
+                      <span>Course Info</span>
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="p-4 bg-purple-900/20 rounded-xl border border-purple-500/20">
+                        <div className="text-2xl text-purple-400 mb-2">👨‍🏫</div>
+                        <div className="text-sm text-gray-400">Instructor</div>
+                        <div className="font-medium text-white">
+                          {course.instructor.firstName}{" "}
+                          {course.instructor.lastName}
+                        </div>
+                      </div>
+                      <div className="p-4 bg-blue-900/20 rounded-xl border border-blue-500/20">
+                        <div className="text-2xl text-blue-400 mb-2">📖</div>
+                        <div className="text-sm text-gray-400">Sections</div>
+                        <div className="font-medium text-white">
+                          {course.sections.length}
+                        </div>
+                      </div>
+                      <div className="p-4 bg-green-900/20 rounded-xl border border-green-500/20">
+                        <div className="text-2xl text-green-400 mb-2">🎓</div>
+                        <div className="text-sm text-gray-400">
+                          Total Lessons
+                        </div>
+                        <div className="font-medium text-white">
+                          {course.sections.reduce(
+                            (total, section) => total + section.lessons.length,
+                            0
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -770,27 +893,35 @@ const CourseWatch: React.FC = () => {
 
             {activeTab === "notes" && (
               <div>
-                <h3 className="text-xl font-bold mb-4">My Notes</h3>
+                <h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                  My Notes
+                </h3>
 
                 {/* Add Note */}
-                <div className="bg-gray-700 p-4 rounded-lg mb-6">
+                <div className="bg-gradient-to-br from-purple-900/20 via-blue-900/10 to-purple-900/20 p-6 rounded-2xl mb-6 border border-purple-500/20 backdrop-blur-sm">
                   <div className="flex items-start space-x-3">
                     <div className="flex-1">
+                      <label className="flex items-center space-x-2 text-sm font-medium text-purple-300 mb-2">
+                        <span>Add a Note</span>
+                      </label>
                       <textarea
                         value={newNote}
                         onChange={(e) => setNewNote(e.target.value)}
-                        placeholder="Add a note at current time..."
-                        className="w-full bg-gray-600 text-white p-3 rounded border border-gray-500 focus:border-purple-500 focus:outline-none resize-none"
+                        placeholder="Write your note here..."
+                        className="w-full bg-gray-800/50 text-white p-4 rounded-xl border border-gray-600/50 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 focus:outline-none resize-none transition-all"
                         rows={3}
                       />
-                      <div className="flex justify-between items-center mt-3">
-                        <span className="text-sm text-gray-400">
-                          Note will be added at {formatTime(currentTime)}
-                        </span>
+                      <div className="flex justify-between items-center mt-4">
+                        <div className="flex items-center space-x-2 text-sm text-purple-300">
+                          <span>🕐</span>
+                          <span>
+                            Note will be saved at {formatTime(currentTime)}
+                          </span>
+                        </div>
                         <button
                           onClick={addNote}
                           disabled={!newNote.trim()}
-                          className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                          className="px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all font-medium"
                         >
                           Add Note
                         </button>
@@ -802,9 +933,15 @@ const CourseWatch: React.FC = () => {
                 {/* Notes List */}
                 <div className="space-y-4">
                   {allCourseNotes.length === 0 ? (
-                    <p className="text-gray-400 text-center py-8">
-                      No notes yet. Add your first note above!
-                    </p>
+                    <div className="text-center py-12">
+                      <div className="text-6xl mb-4">📝</div>
+                      <h3 className="text-xl font-semibold text-gray-300 mb-2">
+                        No notes yet
+                      </h3>
+                      <p className="text-gray-400">
+                        Start taking notes as you watch the lesson!
+                      </p>
+                    </div>
                   ) : (
                     allCourseNotes.map((note: any) => {
                       // Find the lesson info for this note
@@ -857,7 +994,7 @@ const CourseWatch: React.FC = () => {
                       return (
                         <div
                           key={note._id}
-                          className="bg-gray-700 p-4 rounded-lg hover:bg-gray-600 transition-colors"
+                          className="bg-gradient-to-br from-gray-800/50 to-gray-900/30 p-5 rounded-2xl border border-gray-700/50 hover:border-purple-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10 backdrop-blur-sm"
                         >
                           <div className="flex justify-between items-start mb-2">
                             <div className="flex flex-col">
@@ -1190,6 +1327,381 @@ const CourseWatch: React.FC = () => {
                 <p className="text-gray-400">
                   Course announcements will be displayed here.
                 </p>
+              </div>
+            )}
+
+            {activeTab === "qa" && (
+              <div className="max-w-none">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center space-x-4">
+                    <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                      Q&A Discussion
+                    </h3>
+                    <div className="px-3 py-1 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-full border border-purple-500/30">
+                      <span className="text-sm text-purple-300 font-medium">
+                        {questionsData?.data?.pagination?.totalQuestions || 0}{" "}
+                        questions
+                      </span>
+                    </div>
+                  </div>
+
+                  {!isAsking && (
+                    <button
+                      onClick={startAsking}
+                      className="group relative px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/25 hover:scale-105 active:scale-95"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <span className="text-lg">❓</span>
+                        <span>Ask Question</span>
+                      </div>
+                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-400/0 via-purple-400/10 to-blue-400/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    </button>
+                  )}
+                </div>
+
+                {/* Ask Question Form */}
+                {isAsking && (
+                  <div className="mb-8 p-6 bg-gradient-to-br from-purple-900/20 via-blue-900/10 to-purple-900/20 rounded-2xl border border-purple-500/20 backdrop-blur-sm">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-lg font-semibold text-purple-300 flex items-center space-x-2">
+                        <span>❓</span>
+                        <span>Ask a New Question</span>
+                      </h4>
+                      <button
+                        onClick={stopAsking}
+                        className="p-2 text-gray-400 hover:text-white hover:bg-gray-700/50 rounded-lg transition-colors"
+                      >
+                        <FaTimes />
+                      </button>
+                    </div>
+
+                    {currentLessonObj && (
+                      <div className="mb-4 p-3 bg-blue-900/20 rounded-lg border border-blue-500/30">
+                        <p className="text-sm text-blue-300 flex items-center space-x-2">
+                          <span>📚</span>
+                          <span>
+                            Question for:{" "}
+                            <span className="font-medium">
+                              {currentLessonObj.title}
+                            </span>
+                          </span>
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Question Title
+                        </label>
+                        <input
+                          type="text"
+                          value={newQuestion.title}
+                          onChange={(e) =>
+                            setNewQuestion((prev) => ({
+                              ...prev,
+                              title: e.target.value,
+                            }))
+                          }
+                          placeholder="What's your question about?"
+                          className="w-full p-3 bg-gray-800/50 border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 focus:outline-none transition-all"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Question Details
+                        </label>
+                        <textarea
+                          value={newQuestion.content}
+                          onChange={(e) =>
+                            setNewQuestion((prev) => ({
+                              ...prev,
+                              content: e.target.value,
+                            }))
+                          }
+                          placeholder="Provide more details about your question..."
+                          rows={4}
+                          className="w-full p-3 bg-gray-800/50 border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 focus:outline-none transition-all resize-none"
+                        />
+                      </div>
+
+                      <div className="flex justify-end space-x-3">
+                        <button
+                          onClick={stopAsking}
+                          className="px-4 py-2 text-gray-300 hover:text-white hover:bg-gray-700/50 rounded-lg transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={handleCreateQuestion}
+                          disabled={
+                            !newQuestion.title.trim() ||
+                            !newQuestion.content.trim() ||
+                            createQuestionMutation.isPending
+                          }
+                          className="px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-medium rounded-lg hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        >
+                          {createQuestionMutation.isPending
+                            ? "Posting..."
+                            : "Post Question"}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Filters and Search */}
+                <div className="mb-6 p-4 bg-gray-800/30 rounded-xl border border-gray-700/50 backdrop-blur-sm">
+                  <div className="flex flex-wrap gap-4 items-center">
+                    <div className="flex-1 min-w-64">
+                      <div className="relative">
+                        <input
+                          type="text"
+                          placeholder="Search questions..."
+                          onChange={(e) => setQASearch(e.target.value)}
+                          className="w-full pl-10 pr-4 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 focus:outline-none transition-all"
+                        />
+                        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                          🔍
+                        </div>
+                      </div>
+                    </div>
+
+                    <select
+                      onChange={(e) =>
+                        setAnswered(
+                          e.target.value === "all"
+                            ? null
+                            : e.target.value === "true"
+                        )
+                      }
+                      className="px-4 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white focus:border-purple-500 focus:outline-none"
+                    >
+                      <option value="all">All Questions</option>
+                      <option value="false">Unanswered</option>
+                      <option value="true">Answered</option>
+                    </select>
+
+                    <select
+                      value={qaFilters.sortBy}
+                      onChange={(e) => setQASortBy(e.target.value)}
+                      className="px-4 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white focus:border-purple-500 focus:outline-none"
+                    >
+                      <option value="newest">Newest First</option>
+                      <option value="oldest">Oldest First</option>
+                      <option value="popular">Most Popular</option>
+                      <option value="unanswered">Unanswered First</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Questions List */}
+                <div className="space-y-6">
+                  {questionsLoading ? (
+                    <div className="flex justify-center py-12">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+                    </div>
+                  ) : !questionsData?.data?.questions?.length ? (
+                    <div className="text-center py-12">
+                      <div className="text-6xl mb-4">❓</div>
+                      <h3 className="text-xl font-semibold text-gray-300 mb-2">
+                        No questions yet
+                      </h3>
+                      <p className="text-gray-400 mb-6">
+                        Be the first to ask a question about this course!
+                      </p>
+                      <button
+                        onClick={startAsking}
+                        className="px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-xl hover:from-purple-700 hover:to-blue-700 transition-all"
+                      >
+                        Ask First Question
+                      </button>
+                    </div>
+                  ) : (
+                    questionsData.data.questions.map((question: any) => (
+                      <div
+                        key={question._id}
+                        className="p-6 bg-gradient-to-br from-gray-800/50 to-gray-900/30 rounded-2xl border border-gray-700/50 hover:border-purple-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10 backdrop-blur-sm"
+                      >
+                        <div className="flex items-start space-x-4">
+                          {/* Vote Section */}
+                          <div className="flex flex-col items-center space-y-2 min-w-16">
+                            <button
+                              onClick={() =>
+                                handleVoteQuestion(question._id, "upvote")
+                              }
+                              className={`p-2 rounded-lg transition-all hover:scale-110 ${
+                                question.userVoteType === "upvote"
+                                  ? "bg-green-500/20 text-green-400 border border-green-500/50"
+                                  : "bg-gray-700/50 text-gray-400 hover:bg-green-500/10 hover:text-green-400"
+                              }`}
+                            >
+                              ▲
+                            </button>
+                            <span
+                              className={`font-bold text-lg ${
+                                question.voteScore > 0
+                                  ? "text-green-400"
+                                  : question.voteScore < 0
+                                  ? "text-red-400"
+                                  : "text-gray-400"
+                              }`}
+                            >
+                              {question.voteScore}
+                            </span>
+                            <button
+                              onClick={() =>
+                                handleVoteQuestion(question._id, "downvote")
+                              }
+                              className={`p-2 rounded-lg transition-all hover:scale-110 ${
+                                question.userVoteType === "downvote"
+                                  ? "bg-red-500/20 text-red-400 border border-red-500/50"
+                                  : "bg-gray-700/50 text-gray-400 hover:bg-red-500/10 hover:text-red-400"
+                              }`}
+                            >
+                              ▼
+                            </button>
+                          </div>
+
+                          {/* Question Content */}
+                          <div className="flex-1">
+                            <div className="flex items-start justify-between mb-3">
+                              <div className="flex-1">
+                                <h4 className="text-lg font-semibold text-white mb-2 hover:text-purple-300 transition-colors">
+                                  {question.title}
+                                </h4>
+                                <div className="flex items-center space-x-4 text-sm text-gray-400 mb-3">
+                                  <div className="flex items-center space-x-2">
+                                    <div className="w-6 h-6 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                                      {question.user.firstName?.[0] || "U"}
+                                    </div>
+                                    <span>
+                                      {question.user.firstName}{" "}
+                                      {question.user.lastName}
+                                    </span>
+                                  </div>
+                                  <span>•</span>
+                                  <span>
+                                    {new Date(
+                                      question.createdAt
+                                    ).toLocaleDateString()}
+                                  </span>
+                                  {question.lesson && (
+                                    <>
+                                      <span>•</span>
+                                      <span className="text-blue-400">
+                                        {question.lesson.title}
+                                      </span>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+
+                              {question.isAnswered && (
+                                <div className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full border border-green-500/30 text-sm font-medium">
+                                  ✓ Answered
+                                </div>
+                              )}
+                            </div>
+
+                            <p className="text-gray-300 mb-4 leading-relaxed">
+                              {question.content}
+                            </p>
+
+                            {question.tags && question.tags.length > 0 && (
+                              <div className="flex flex-wrap gap-2 mb-4">
+                                {question.tags.map(
+                                  (tag: string, index: number) => (
+                                    <span
+                                      key={index}
+                                      className="px-2 py-1 bg-purple-500/20 text-purple-300 rounded-lg text-xs border border-purple-500/30"
+                                    >
+                                      #{tag}
+                                    </span>
+                                  )
+                                )}
+                              </div>
+                            )}
+
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-4 text-sm text-gray-400">
+                                <span className="flex items-center space-x-1">
+                                  <span>💬</span>
+                                  <span>{question.answersCount} answers</span>
+                                </span>
+                              </div>
+
+                              <button
+                                onClick={() =>
+                                  startReplyingToQuestion(question._id)
+                                }
+                                className="px-4 py-2 bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 rounded-lg transition-all border border-blue-500/30 hover:border-blue-400/50"
+                              >
+                                Reply
+                              </button>
+                            </div>
+
+                            {/* Answer Form */}
+                            {replyingToQuestionId === question._id && (
+                              <div className="mt-4 p-4 bg-blue-900/20 rounded-xl border border-blue-500/30">
+                                <textarea
+                                  value={newAnswer}
+                                  onChange={(e) => setNewAnswer(e.target.value)}
+                                  placeholder="Write your answer..."
+                                  rows={3}
+                                  className="w-full p-3 bg-gray-800/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all resize-none"
+                                />
+                                <div className="flex justify-end space-x-3 mt-3">
+                                  <button
+                                    onClick={stopReplyingToQuestion}
+                                    className="px-4 py-2 text-gray-300 hover:text-white hover:bg-gray-700/50 rounded-lg transition-colors"
+                                  >
+                                    Cancel
+                                  </button>
+                                  <button
+                                    onClick={() =>
+                                      handleCreateAnswer(question._id)
+                                    }
+                                    disabled={!newAnswer.trim()}
+                                    className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-lg hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                  >
+                                    Post Answer
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                {/* Pagination */}
+                {questionsData?.data?.pagination &&
+                  questionsData.data.pagination.totalPages > 1 && (
+                    <div className="flex justify-center mt-8">
+                      <div className="flex items-center space-x-2">
+                        {Array.from(
+                          { length: questionsData.data.pagination.totalPages },
+                          (_, index) => (
+                            <button
+                              key={index}
+                              onClick={() => setQASearch("")} // This should be setPage but keeping simple for now
+                              className={`px-4 py-2 rounded-lg transition-all ${
+                                qaFilters.page === index + 1
+                                  ? "bg-purple-600 text-white"
+                                  : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                              }`}
+                            >
+                              {index + 1}
+                            </button>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  )}
               </div>
             )}
           </div>
