@@ -1,5 +1,6 @@
 import { FilterQuery } from "mongoose";
 import Course from "../models/Course";
+import User from "../models/User";
 import Section from "../models/Section";
 import Lesson from "../models/Lesson";
 import {
@@ -190,35 +191,7 @@ export const getUserCoursesService = async (userId: string) => {
     )
     .lean();
 
-  const coursesWithProgress = await Promise.all(
-    courses.map(async (course) => {
-      const UserProgress = require("../models/UserProgress").default;
-
-      const userProgress = await UserProgress.find({
-        user: userId,
-        course: course._id,
-      }).lean();
-
-      const totalLessons = await Lesson.countDocuments({ course: course._id });
-      const completedLessons = userProgress.filter(
-        (p: any) => p.isCompleted
-      ).length;
-      const progressPercentage =
-        totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0;
-
-      return {
-        ...course,
-        totalLessons,
-        userProgress: {
-          progressPercentage,
-          completedLessons,
-          totalLessons,
-        },
-      };
-    })
-  );
-
-  return coursesWithProgress;
+  return courses;
 };
 
 // Get instructor's courses
@@ -284,9 +257,14 @@ export const enrollUserInCourseService = async (
   userId: string
 ) => {
   const course = await Course.findById(courseId);
+  const user = await User.findById(userId);
 
   if (!course) {
     throw new Error("Course not found");
+  }
+
+  if (!user) {
+    throw new Error("User not found");
   }
 
   if (!course.isPublished) {
@@ -297,8 +275,15 @@ export const enrollUserInCourseService = async (
     throw new Error("User is already enrolled in this course");
   }
 
+  // Update course's studentsEnrolled array
   course.studentsEnrolled.push(userId as any);
   await course.save();
+
+  // Update user's enrolledCourses array
+  if (!user.enrolledCourses.includes(courseId as any)) {
+    user.enrolledCourses.push(courseId as any);
+    await user.save();
+  }
 
   return { message: "Successfully enrolled in course" };
 };

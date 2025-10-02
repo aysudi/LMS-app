@@ -41,21 +41,13 @@ const InstructorEarnings = () => {
     );
   }
 
-  console.log("Earnings Data:", earningsData);
-
   const earnings = earningsData?.data || {
-    totalEarnings: 0,
-    monthlyEarnings: 0,
-    pendingPayouts: 0,
-    completedPayouts: 0,
-    earningsThisMonth: 0,
-    earningsLastMonth: 0,
-    growthRate: 0,
-    topPerformingCourse: {
-      courseId: "",
-      title: "",
-      earnings: 0,
-    },
+    totalGross: 0,
+    totalPlatformFees: 0,
+    totalInstructorShare: 0,
+    totalPending: 0,
+    totalPaid: 0,
+    count: 0,
   };
 
   const courseEarnings = courseEarningsData?.data || [];
@@ -119,6 +111,23 @@ const InstructorEarnings = () => {
           </div>
         </motion.div>
 
+        {/* Platform Fee Summary */}
+        {earnings.totalGross > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl border border-gray-200 p-4 mb-6"
+          >
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-600">Platform Fee (30%):</span>
+              <span className="font-medium text-gray-900">
+                {formatCurrency(earnings.totalPlatformFees)}
+              </span>
+            </div>
+          </motion.div>
+        )}
+
         {/* Earnings Summary */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -129,7 +138,7 @@ const InstructorEarnings = () => {
           <EarningsCard
             icon={FaDollarSign}
             title="Total Earnings"
-            value={formatCurrency(earnings.totalEarnings)}
+            value={formatCurrency(earnings.totalInstructorShare)}
             change={15.2}
             changeType="increase"
             color="bg-gradient-to-r from-green-500 to-emerald-600"
@@ -137,25 +146,25 @@ const InstructorEarnings = () => {
 
           <EarningsCard
             icon={FaPiggyBank}
-            title="Current Balance"
-            value={formatCurrency(earnings.earningsThisMonth)}
-            subtitle="Available for payout"
+            title="Gross Revenue"
+            value={formatCurrency(earnings.totalGross)}
+            subtitle="Before platform fees"
             color="bg-gradient-to-r from-blue-500 to-cyan-600"
           />
 
           <EarningsCard
             icon={FaClock}
             title="Pending Earnings"
-            value={formatCurrency(earnings.pendingPayouts)}
+            value={formatCurrency(earnings.totalPending)}
             subtitle="Processing period"
             color="bg-gradient-to-r from-yellow-500 to-orange-600"
           />
 
           <EarningsCard
             icon={FaChartBar}
-            title="Total Payouts"
-            value={formatCurrency(earnings.completedPayouts)}
-            subtitle="Lifetime payouts"
+            title="Paid Earnings"
+            value={formatCurrency(earnings.totalPaid)}
+            subtitle="Completed payouts"
             color="bg-gradient-to-r from-purple-500 to-indigo-600"
           />
         </motion.div>
@@ -187,7 +196,8 @@ const InstructorEarnings = () => {
                   .toISOString()
                   .slice(0, 7),
                 amount: Math.round(
-                  (earnings.monthlyEarnings || 0) * (0.8 + Math.random() * 0.4)
+                  (earnings.totalInstructorShare / 6 || 0) *
+                    (0.8 + Math.random() * 0.4)
                 ),
               })).map((data: any, index: number) => (
                 <div
@@ -211,7 +221,7 @@ const InstructorEarnings = () => {
                                   .toISOString()
                                   .slice(0, 7),
                                 amount: Math.round(
-                                  (earnings.monthlyEarnings || 0) *
+                                  (earnings.totalInstructorShare / 6 || 0) *
                                     (0.8 + Math.random() * 0.4)
                                 ),
                               })).map((d: any) => d.amount)
@@ -272,25 +282,26 @@ const InstructorEarnings = () => {
                       </div>
                       <div>
                         <h3 className="font-medium text-gray-900 truncate max-w-48">
-                          {course.title || `Course ${index + 1}`}
+                          {course.course?.title || `Course ${index + 1}`}
                         </h3>
                         <div className="flex items-center space-x-4 text-sm text-gray-600">
                           <span className="flex items-center space-x-1">
                             <FaUsers className="text-xs" />
-                            <span>{course.totalStudents || 0} students</span>
+                            <span>
+                              {course.student?.firstName}{" "}
+                              {course.student?.lastName}
+                            </span>
                           </span>
-                          <span>{course.totalSales || 0} sales</span>
+                          <span>{course.payoutStatus}</span>
                         </div>
                       </div>
                     </div>
                     <div className="text-right">
                       <p className="font-semibold text-gray-900">
-                        {formatCurrency(course.totalEarnings || 0)}
+                        {formatCurrency(course.instructorShare || 0)}
                       </p>
                       <p className="text-sm text-gray-500">
-                        {course.averageRating
-                          ? `${course.averageRating}★`
-                          : "No rating"}
+                        Gross: {formatCurrency(course.grossAmount || 0)}
                       </p>
                     </div>
                   </div>
@@ -310,7 +321,7 @@ const InstructorEarnings = () => {
               Recent Payouts
             </h2>
 
-            {earnings.completedPayouts === 0 ? (
+            {earnings.totalPaid === 0 ? (
               <div className="text-center py-12">
                 <FaCreditCard className="text-4xl text-gray-300 mx-auto mb-3" />
                 <p className="text-gray-500">No payouts yet</p>
@@ -324,8 +335,8 @@ const InstructorEarnings = () => {
                   // Create mock recent payouts for demo
                   Array.from({ length: 3 }, (_, i) => ({
                     amount: Math.round(
-                      (earnings.completedPayouts || 0) *
-                        (0.2 + Math.random() * 0.3)
+                      (earnings.totalPaid / 3 || 0) *
+                        (0.8 + Math.random() * 0.4)
                     ),
                     date: new Date(
                       Date.now() - i * 30 * 24 * 60 * 60 * 1000

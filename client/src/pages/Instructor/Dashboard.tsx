@@ -547,13 +547,15 @@ const InstructorDashboard = () => {
                         {course.title}
                       </h3>
                       <div className="flex items-center justify-between text-sm text-gray-600">
-                        <span>{course.enrollmentsCount} students</span>
-                        <span>{formatCurrency(course.revenue)} revenue</span>
+                        <span>{course.studentsEnrolled.length} students</span>
+                        <span>
+                          {formatCurrency(course.originalPrice)} revenue
+                        </span>
                       </div>
                       <div className="flex items-center space-x-1 mt-2">
                         <FaStar className="text-yellow-400 text-sm" />
                         <span className="text-sm text-gray-600">
-                          {course.averageRating?.toFixed(1) || "No ratings"}
+                          {course.rating?.toFixed(1) || "No ratings"}
                         </span>
                       </div>
                     </div>
