@@ -23,6 +23,7 @@ import enrollmentRouter from "./routes/enrollmentRoutes.js";
 import userProgressRouter from "./routes/userProgressRoutes.js";
 import instructorRouter from "./routes/instructorRoutes.js";
 import adminRouter from "./routes/adminRoutes.js";
+import qaRouter from "./routes/qaRoutes.js";
 
 const app = express();
 
@@ -76,6 +77,7 @@ app.use("/api/enrollments", enrollmentRouter);
 app.use("/api/user-progress", userProgressRouter);
 app.use("/api/instructor", instructorRouter);
 app.use("/api/admin", adminRouter);
+app.use("/api/qa", qaRouter);
 
 // 404 handler
 app.use(notFoundHandler);
