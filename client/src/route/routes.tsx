@@ -165,10 +165,10 @@ const ROUTES = [
       </ProtectedRoute>
     ),
     children: [
-      {
-        index: true,
-        element: <InstructorDashboard />,
-      },
+      // {
+      //   index: true,
+      //   element: <InstructorDashboard />,
+      // },
       {
         path: "dashboard",
         element: <InstructorDashboard />,

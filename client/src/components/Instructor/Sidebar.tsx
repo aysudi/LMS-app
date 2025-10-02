@@ -52,7 +52,7 @@ const Sidebar = ({ sidebarOpen, user, messageStats }: Props) => {
       label: "Messages",
       icon: FaEnvelope,
       path: "/instructor/messages",
-      badge: messageStats?.data?.byStatus?.unread || 0,
+      // badge: messageStats?.data?.byStatus?.unread || 0,
     },
     {
       id: "earnings",
