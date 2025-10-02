@@ -8,9 +8,9 @@ import {
   resetPassword,
   logout,
 } from "../services/auth.service";
-import type { RegisterRequest, LoginRequest } from "../services/auth.service";
 import { useInvalidateUsers } from "./useUserQueries";
 import { setAuthToken, removeAuthToken } from "../utils/auth-storage";
+import type { LoginRequest, RegisterRequest } from "../types/auth.type";
 
 export const useRegister = () => {
   return useMutation({
@@ -35,10 +35,8 @@ export const useLogin = () => {
       if (data.data?.token) {
         setAuthToken(data.data.token);
 
-        // Wait a bit for the token to be set properly
         await new Promise((resolve) => setTimeout(resolve, 100));
 
-        // Invalidate user queries to refetch with new token
         invalidateCurrentUser();
 
         // Don't use window.location.href as it causes page reload

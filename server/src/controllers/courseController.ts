@@ -138,6 +138,7 @@ export const deleteCourse = async (req: AuthRequest, res: Response) => {
 export const getUserCourses = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user!.userId;
+    // console.log("Fetching courses for user:", userId);
     const courses = await getUserCoursesService(userId);
 
     res.status(200).json({

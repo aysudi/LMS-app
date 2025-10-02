@@ -18,7 +18,6 @@ export const useAddToCartModal = (courses: Course[]) => {
   const getRecommendedCourses = (baseCourse: Course): Course[] => {
     if (!baseCourse) return [];
 
-    // Get courses from the same category, excluding the added course
     const sameCategoryCourses = courses.filter(
       (course) =>
         course.id !== baseCourse.id &&
@@ -26,14 +25,12 @@ export const useAddToCartModal = (courses: Course[]) => {
         !course.isFree
     );
 
-    // If we have enough courses in the same category, return 3
     if (sameCategoryCourses.length >= 3) {
       return sameCategoryCourses
         .sort((a, b) => (b.rating || 0) - (a.rating || 0)) // Sort by rating
         .slice(0, 3);
     }
 
-    // If not enough in same category, get similar level courses
     const similarLevelCourses = courses.filter(
       (course) =>
         course.id !== baseCourse.id &&
@@ -42,7 +39,6 @@ export const useAddToCartModal = (courses: Course[]) => {
         !sameCategoryCourses.some((c) => c.id === course.id)
     );
 
-    // Combine and return up to 3 courses
     const combined = [...sameCategoryCourses, ...similarLevelCourses];
     return combined
       .sort((a, b) => (b.rating || 0) - (a.rating || 0))

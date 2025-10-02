@@ -322,6 +322,13 @@ export const completeOrder = async (orderId: string, paymentDetails: any) => {
       lastPurchaseAt: new Date(),
     });
 
+    // Update each course's studentsEnrolled array
+    for (const courseId of courseIds) {
+      await Course.findByIdAndUpdate(courseId, {
+        $addToSet: { studentsEnrolled: order.user }, // $addToSet prevents duplicates
+      });
+    }
+
     return order;
   } catch (error) {
     console.error("Complete order error:", error);
@@ -415,6 +422,13 @@ export const confirmPayment = async (req: AuthRequest, res: Response) => {
       $inc: { totalSpent: order.total },
       lastPurchaseAt: new Date(),
     });
+
+    // Update each course's studentsEnrolled array
+    for (const courseId of courseIds) {
+      await Course.findByIdAndUpdate(courseId, {
+        $addToSet: { studentsEnrolled: order.user }, // $addToSet prevents duplicates
+      });
+    }
 
     res.json({
       success: true,

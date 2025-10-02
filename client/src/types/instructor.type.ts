@@ -42,9 +42,9 @@ export interface InstructorCourseWithStats {
   image: string;
   isPublished: boolean;
   createdAt: string;
-  enrollmentsCount: number;
-  revenue: number;
-  averageRating: number;
+  studentsEnrolled: string[];
+  originalPrice: number;
+  rating: number;
   totalLessons: number;
   totalDuration: number;
   category: string;
@@ -198,20 +198,14 @@ export interface MessageStatsResponse {
   message?: string;
 }
 
-// Earnings Types
+// Earnings Types - Based on actual server response
 export interface InstructorEarnings {
-  totalEarnings: number;
-  monthlyEarnings: number;
-  pendingPayouts: number;
-  completedPayouts: number;
-  earningsThisMonth: number;
-  earningsLastMonth: number;
-  growthRate: number;
-  topPerformingCourse: {
-    courseId: string;
-    title: string;
-    earnings: number;
-  };
+  totalGross: number;
+  totalPlatformFees: number;
+  totalInstructorShare: number;
+  totalPending: number;
+  totalPaid: number;
+  count: number;
 }
 
 export interface InstructorEarningsResponse {
@@ -222,6 +216,7 @@ export interface InstructorEarningsResponse {
 
 export interface CourseEarning {
   _id: string;
+  instructor: string;
   course: {
     _id: string;
     title: string;
@@ -229,11 +224,22 @@ export interface CourseEarning {
   order: {
     _id: string;
     orderNumber: string;
+    total: number;
+    createdAt: string;
+  };
+  student: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
   };
   grossAmount: number;
   platformFee: number;
   instructorShare: number;
+  currency: string;
   payoutStatus: "pending" | "processing" | "completed" | "failed";
+  month: number;
+  year: number;
   createdAt: string;
   paidAt?: string;
 }

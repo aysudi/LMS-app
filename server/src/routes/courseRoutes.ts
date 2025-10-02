@@ -21,7 +21,7 @@ courseRouter.get("/:id", (req, res) => getCourseById(req, res));
 
 courseRouter.use(authenticateToken);
 
-courseRouter.get("/user/enrolled", (req, res) =>
+courseRouter.get("/user/enrolled", authenticateToken, (req, res) =>
   getUserCourses(req as any, res)
 );
 
