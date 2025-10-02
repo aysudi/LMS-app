@@ -163,7 +163,8 @@ export const getQuestionById = async (questionId: string, userId?: string) => {
     // Add userVoteType and isAccepted to answers
     answers.forEach((answer: any) => {
       answer.userVoteType = answer.getUserVoteType(userId);
-      answer.isAccepted = question.acceptedAnswer?.toString() === answer._id.toString();
+      answer.isAccepted =
+        question.acceptedAnswer?.toString() === answer._id.toString();
     });
   }
 
@@ -235,9 +236,7 @@ export const voteOnQuestion = async (
   }
 
   // Remove any existing vote
-  question.upvotes = question.upvotes.filter(
-    (id) => id.toString() !== userId
-  );
+  question.upvotes = question.upvotes.filter((id) => id.toString() !== userId);
   question.downvotes = question.downvotes.filter(
     (id) => id.toString() !== userId
   );
