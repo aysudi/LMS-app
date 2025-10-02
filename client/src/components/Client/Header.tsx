@@ -343,7 +343,7 @@ const Header: React.FC = () => {
           ? [
               {
                 name: "Instructor",
-                path: "/instructor",
+                path: "/instructor/dashboard",
                 icon: FaChalkboardTeacher,
               },
             ]
