@@ -13,6 +13,11 @@ import {
   getUserCourses,
   updateCourse,
 } from "../controllers/courseController";
+import {
+  courseUploadMiddleware,
+  courseUploadErrorHandler,
+  processCourseUploads,
+} from "../middlewares/course-upload.middleware.js";
 
 const courseRouter = Router();
 
@@ -30,11 +35,21 @@ courseRouter.get(
   authorizeRoles(UserRole.INSTRUCTOR),
   (req, res) => getInstructorCourses(req as any, res)
 );
-courseRouter.post("/", authorizeRoles(UserRole.INSTRUCTOR), (req, res) =>
-  createCourse(req as any, res)
+courseRouter.post(
+  "/",
+  authorizeRoles(UserRole.INSTRUCTOR),
+  courseUploadMiddleware,
+  courseUploadErrorHandler,
+  processCourseUploads,
+  (req: any, res: any) => createCourse(req, res)
 );
-courseRouter.put("/:id", authorizeRoles(UserRole.INSTRUCTOR), (req, res) =>
-  updateCourse(req as any, res)
+courseRouter.put(
+  "/:id",
+  authorizeRoles(UserRole.INSTRUCTOR),
+  courseUploadMiddleware,
+  courseUploadErrorHandler,
+  processCourseUploads,
+  (req: any, res: any) => updateCourse(req, res)
 );
 courseRouter.delete("/:id", authorizeRoles(UserRole.INSTRUCTOR), (req, res) =>
   deleteCourse(req as any, res)
