@@ -1,6 +1,12 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { FaDollarSign, FaGlobe, FaCertificate, FaToggleOn, FaToggleOff } from 'react-icons/fa';
+import React from "react";
+import { motion } from "framer-motion";
+import {
+  FaDollarSign,
+  FaGlobe,
+  FaCertificate,
+  FaToggleOn,
+  FaToggleOff,
+} from "react-icons/fa";
 
 interface PricingSettingsStepProps {
   formData: {
@@ -47,7 +53,8 @@ const PricingSettingsStep: React.FC<PricingSettingsStepProps> = ({
             Pricing & Settings
           </h2>
           <p className="text-gray-600">
-            Set your course pricing, language, and additional settings to help students find and enroll in your course.
+            Set your course pricing, language, and additional settings to help
+            students find and enroll in your course.
           </p>
         </div>
 
@@ -60,28 +67,41 @@ const PricingSettingsStep: React.FC<PricingSettingsStepProps> = ({
               </div>
               <div>
                 <h3 className="font-semibold text-gray-900">Course Pricing</h3>
-                <p className="text-sm text-gray-600">Choose between free or paid course</p>
+                <p className="text-sm text-gray-600">
+                  Choose between free or paid course
+                </p>
               </div>
             </div>
 
             {/* Free/Paid Toggle */}
             <div className="mb-6">
               <div className="flex items-center space-x-4">
-                <span className="text-sm font-medium text-gray-700">Course Type:</span>
+                <span className="text-sm font-medium text-gray-700">
+                  Course Type:
+                </span>
                 <button
                   type="button"
-                  onClick={() => setFormData((prev: any) => ({ ...prev, isFree: !prev.isFree }))}
+                  onClick={() =>
+                    setFormData((prev: any) => ({
+                      ...prev,
+                      isFree: !prev.isFree,
+                    }))
+                  }
                   className="flex items-center space-x-2 focus:outline-none"
                 >
                   {formData.isFree ? (
                     <>
                       <FaToggleOn className="text-2xl text-green-500" />
-                      <span className="text-green-600 font-medium">Free Course</span>
+                      <span className="text-green-600 font-medium">
+                        Free Course
+                      </span>
                     </>
                   ) : (
                     <>
                       <FaToggleOff className="text-2xl text-gray-400" />
-                      <span className="text-gray-600 font-medium">Paid Course</span>
+                      <span className="text-gray-600 font-medium">
+                        Paid Course
+                      </span>
                     </>
                   )}
                 </button>
@@ -92,7 +112,10 @@ const PricingSettingsStep: React.FC<PricingSettingsStepProps> = ({
             {!formData.isFree && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label htmlFor="originalPrice" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor="originalPrice"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
                     Original Price ($) *
                   </label>
                   <div className="relative">
@@ -102,28 +125,39 @@ const PricingSettingsStep: React.FC<PricingSettingsStepProps> = ({
                     <input
                       type="number"
                       id="originalPrice"
-                      value={formData.originalPrice || ''}
-                      onChange={(e) => setFormData((prev: any) => ({ 
-                        ...prev, 
-                        originalPrice: parseFloat(e.target.value) || 0 
-                      }))}
+                      value={formData.originalPrice || ""}
+                      onChange={(e) =>
+                        setFormData((prev: any) => ({
+                          ...prev,
+                          originalPrice: parseFloat(e.target.value) || 0,
+                        }))
+                      }
                       placeholder="99.99"
                       min="0"
                       step="0.01"
                       className={`w-full pl-8 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 ${
-                        errors.originalPrice ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                        errors.originalPrice
+                          ? "border-red-300 bg-red-50"
+                          : "border-gray-300"
                       }`}
                     />
                   </div>
                   {errors.originalPrice && (
-                    <p className="text-sm text-red-600 mt-2">{errors.originalPrice}</p>
+                    <p className="text-sm text-red-600 mt-2">
+                      {errors.originalPrice}
+                    </p>
                   )}
                 </div>
 
                 <div>
-                  <label htmlFor="discountPrice" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor="discountPrice"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
                     Discount Price ($)
-                    <span className="text-gray-500 text-xs ml-1">(Optional)</span>
+                    <span className="text-gray-500 text-xs ml-1">
+                      (Optional)
+                    </span>
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -132,25 +166,36 @@ const PricingSettingsStep: React.FC<PricingSettingsStepProps> = ({
                     <input
                       type="number"
                       id="discountPrice"
-                      value={formData.discountPrice || ''}
-                      onChange={(e) => setFormData((prev: any) => ({ 
-                        ...prev, 
-                        discountPrice: parseFloat(e.target.value) || 0 
-                      }))}
+                      value={formData.discountPrice || ""}
+                      onChange={(e) =>
+                        setFormData((prev: any) => ({
+                          ...prev,
+                          discountPrice: parseFloat(e.target.value) || 0,
+                        }))
+                      }
                       placeholder="79.99"
                       min="0"
                       step="0.01"
                       className={`w-full pl-8 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 ${
-                        errors.discountPrice ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                        errors.discountPrice
+                          ? "border-red-300 bg-red-50"
+                          : "border-gray-300"
                       }`}
                     />
                   </div>
                   {errors.discountPrice && (
-                    <p className="text-sm text-red-600 mt-2">{errors.discountPrice}</p>
+                    <p className="text-sm text-red-600 mt-2">
+                      {errors.discountPrice}
+                    </p>
                   )}
                   {formData.discountPrice > 0 && formData.originalPrice > 0 && (
                     <p className="text-sm text-green-600 mt-2">
-                      {Math.round(((formData.originalPrice - formData.discountPrice) / formData.originalPrice) * 100)}% discount
+                      {Math.round(
+                        ((formData.originalPrice - formData.discountPrice) /
+                          formData.originalPrice) *
+                          100
+                      )}
+                      % discount
                     </p>
                   )}
                 </div>
@@ -160,7 +205,9 @@ const PricingSettingsStep: React.FC<PricingSettingsStepProps> = ({
             {formData.isFree && (
               <div className="bg-green-100 border border-green-200 rounded-lg p-4">
                 <p className="text-green-800 text-sm">
-                  <strong>Free Course Benefits:</strong> Reach more students, build your reputation, and gather reviews. You can always convert to paid later.
+                  <strong>Free Course Benefits:</strong> Reach more students,
+                  build your reputation, and gather reviews. You can always
+                  convert to paid later.
                 </p>
               </div>
             )}
@@ -174,13 +221,20 @@ const PricingSettingsStep: React.FC<PricingSettingsStepProps> = ({
               </div>
               <div>
                 <h3 className="font-semibold text-gray-900">Course Language</h3>
-                <p className="text-sm text-gray-600">Select the primary language for your course</p>
+                <p className="text-sm text-gray-600">
+                  Select the primary language for your course
+                </p>
               </div>
             </div>
 
             <select
               value={formData.language}
-              onChange={(e) => setFormData((prev: any) => ({ ...prev, language: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev: any) => ({
+                  ...prev,
+                  language: e.target.value,
+                }))
+              }
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
             >
               {LANGUAGES.map((language) => (
@@ -198,8 +252,12 @@ const PricingSettingsStep: React.FC<PricingSettingsStepProps> = ({
                 <FaCertificate className="text-purple-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900">Certificate of Completion</h3>
-                <p className="text-sm text-gray-600">Offer a certificate when students complete your course</p>
+                <h3 className="font-semibold text-gray-900">
+                  Certificate of Completion
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Offer a certificate when students complete your course
+                </p>
               </div>
             </div>
 
@@ -214,10 +272,12 @@ const PricingSettingsStep: React.FC<PricingSettingsStepProps> = ({
               </div>
               <button
                 type="button"
-                onClick={() => setFormData((prev: any) => ({ 
-                  ...prev, 
-                  certificateProvided: !prev.certificateProvided 
-                }))}
+                onClick={() =>
+                  setFormData((prev: any) => ({
+                    ...prev,
+                    certificateProvided: !prev.certificateProvided,
+                  }))
+                }
                 className="focus:outline-none"
               >
                 {formData.certificateProvided ? (
@@ -231,7 +291,9 @@ const PricingSettingsStep: React.FC<PricingSettingsStepProps> = ({
             {formData.certificateProvided && (
               <div className="mt-4 bg-purple-100 border border-purple-200 rounded-lg p-4">
                 <p className="text-purple-800 text-sm">
-                  <strong>Certificate Features:</strong> Personalized with student name, course title, completion date, and your instructor signature.
+                  <strong>Certificate Features:</strong> Personalized with
+                  student name, course title, completion date, and your
+                  instructor signature.
                 </p>
               </div>
             )}
@@ -239,12 +301,21 @@ const PricingSettingsStep: React.FC<PricingSettingsStepProps> = ({
 
           {/* Pricing Tips */}
           <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
-            <h4 className="font-semibold text-yellow-800 mb-3">💡 Pricing Tips</h4>
+            <h4 className="font-semibold text-yellow-800 mb-3">
+              💡 Pricing Tips
+            </h4>
             <ul className="text-sm text-yellow-700 space-y-2">
               <li>• Research similar courses to set competitive pricing</li>
-              <li>• Consider starting with a lower price to attract initial students</li>
-              <li>• Free courses can help build your reputation and student base</li>
-              <li>• Discount pricing creates urgency and can boost enrollments</li>
+              <li>
+                • Consider starting with a lower price to attract initial
+                students
+              </li>
+              <li>
+                • Free courses can help build your reputation and student base
+              </li>
+              <li>
+                • Discount pricing creates urgency and can boost enrollments
+              </li>
               <li>• You can adjust pricing anytime after publishing</li>
             </ul>
           </div>

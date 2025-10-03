@@ -2,11 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { UseMutationOptions } from "@tanstack/react-query";
 import { courseQueryKeys } from "./useCourseQueries";
 import { api } from "../services/api";
-import type {
-  Course,
-  CourseResponse,
-  CreateCourseData,
-} from "../types/course.type";
+import type { Course, CourseResponse } from "../types/course.type";
 
 // Course enrollment mutation
 interface EnrollCourseResponse {

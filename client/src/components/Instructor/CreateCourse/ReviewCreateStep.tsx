@@ -1,19 +1,18 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { 
-  FaEye, 
-  FaBook, 
-  FaUsers, 
-  FaDollarSign, 
-  FaGlobe, 
+import React from "react";
+import { motion } from "framer-motion";
+import {
+  FaEye,
+  FaBook,
+  FaUsers,
+  FaDollarSign,
+  FaGlobe,
   FaCertificate,
   FaTag,
   FaList,
   FaCheckCircle,
   FaImage,
-  FaVideo,
-  FaEdit
-} from 'react-icons/fa';
+  FaEdit,
+} from "react-icons/fa";
 
 interface ReviewCreateStepProps {
   formData: {
@@ -43,15 +42,19 @@ const ReviewCreateStep: React.FC<ReviewCreateStepProps> = ({
   isSubmitting,
 }) => {
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
     }).format(price);
   };
 
   const getSavingsPercentage = () => {
     if (formData.discountPrice > 0 && formData.originalPrice > 0) {
-      return Math.round(((formData.originalPrice - formData.discountPrice) / formData.originalPrice) * 100);
+      return Math.round(
+        ((formData.originalPrice - formData.discountPrice) /
+          formData.originalPrice) *
+          100
+      );
     }
     return 0;
   };
@@ -63,10 +66,16 @@ const ReviewCreateStep: React.FC<ReviewCreateStepProps> = ({
       color: "blue",
       items: [
         { label: "Course Title", value: formData.title },
-        { label: "Short Description", value: formData.shortDescription || "Not provided" },
+        {
+          label: "Short Description",
+          value: formData.shortDescription || "Not provided",
+        },
         { label: "Category", value: formData.category },
-        { label: "Subcategory", value: formData.subcategory || "Not specified" },
-      ]
+        {
+          label: "Subcategory",
+          value: formData.subcategory || "Not specified",
+        },
+      ],
     },
     {
       title: "Course Details",
@@ -74,37 +83,67 @@ const ReviewCreateStep: React.FC<ReviewCreateStepProps> = ({
       color: "green",
       items: [
         { label: "Course Level", value: formData.level },
-        { label: "Learning Objectives", value: `${formData.learningObjectives.filter(obj => obj.trim()).length} objectives` },
-        { label: "Requirements", value: `${formData.requirements.filter(req => req.trim()).length} requirements` },
-        { label: "Target Audience", value: `${formData.targetAudience.filter(aud => aud.trim()).length} audience groups` },
-      ]
+        {
+          label: "Learning Objectives",
+          value: `${
+            formData.learningObjectives.filter((obj) => obj.trim()).length
+          } objectives`,
+        },
+        {
+          label: "Requirements",
+          value: `${
+            formData.requirements.filter((req) => req.trim()).length
+          } requirements`,
+        },
+        {
+          label: "Target Audience",
+          value: `${
+            formData.targetAudience.filter((aud) => aud.trim()).length
+          } audience groups`,
+        },
+      ],
     },
     {
       title: "Pricing & Settings",
       icon: FaDollarSign,
       color: "purple",
       items: [
-        { 
-          label: "Pricing", 
-          value: formData.isFree ? "Free Course" : (
-            formData.discountPrice > 0 
-              ? `${formatPrice(formData.discountPrice)} (${getSavingsPercentage()}% off from ${formatPrice(formData.originalPrice)})`
-              : formatPrice(formData.originalPrice)
-          )
+        {
+          label: "Pricing",
+          value: formData.isFree
+            ? "Free Course"
+            : formData.discountPrice > 0
+            ? `${formatPrice(
+                formData.discountPrice
+              )} (${getSavingsPercentage()}% off from ${formatPrice(
+                formData.originalPrice
+              )})`
+            : formatPrice(formData.originalPrice),
         },
         { label: "Language", value: formData.language },
-        { label: "Certificate", value: formData.certificateProvided ? "Provided" : "Not provided" },
-      ]
+        {
+          label: "Certificate",
+          value: formData.certificateProvided ? "Provided" : "Not provided",
+        },
+      ],
     },
     {
       title: "Media Content",
       icon: FaImage,
       color: "indigo",
       items: [
-        { label: "Course Image", value: formData.image ? "✅ Uploaded" : "❌ Not uploaded" },
-        { label: "Promotional Video", value: formData.videoPromo ? "✅ Uploaded" : "📷 Optional - Not uploaded" },
-      ]
-    }
+        {
+          label: "Course Image",
+          value: formData.image ? "✅ Uploaded" : "❌ Not uploaded",
+        },
+        {
+          label: "Promotional Video",
+          value: formData.videoPromo
+            ? "✅ Uploaded"
+            : "📷 Optional - Not uploaded",
+        },
+      ],
+    },
   ];
 
   return (
@@ -122,7 +161,8 @@ const ReviewCreateStep: React.FC<ReviewCreateStepProps> = ({
             Review & Create
           </h2>
           <p className="text-gray-600">
-            Review all the details before creating your course. You can edit any section by going back to previous steps.
+            Review all the details before creating your course. You can edit any
+            section by going back to previous steps.
           </p>
         </div>
 
@@ -133,9 +173,9 @@ const ReviewCreateStep: React.FC<ReviewCreateStepProps> = ({
             <div className="flex-shrink-0">
               <div className="w-32 h-20 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
                 {formData.image ? (
-                  <img 
-                    src={URL.createObjectURL(formData.image)} 
-                    alt="Course preview" 
+                  <img
+                    src={URL.createObjectURL(formData.image)}
+                    alt="Course preview"
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -150,7 +190,8 @@ const ReviewCreateStep: React.FC<ReviewCreateStepProps> = ({
                 {formData.title || "Course Title"}
               </h3>
               <p className="text-gray-600 mb-3 line-clamp-2">
-                {formData.shortDescription || formData.description.slice(0, 100) + "..."}
+                {formData.shortDescription ||
+                  formData.description.slice(0, 100) + "..."}
               </p>
               <div className="flex items-center space-x-4 text-sm">
                 <span className="flex items-center space-x-1 text-gray-600">
@@ -212,13 +253,22 @@ const ReviewCreateStep: React.FC<ReviewCreateStepProps> = ({
             };
 
             return (
-              <div key={section.title} className="bg-white rounded-xl border border-gray-200 p-6">
+              <div
+                key={section.title}
+                className="bg-white rounded-xl border border-gray-200 p-6"
+              >
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-3">
-                    <div className={`p-2 rounded-lg ${colorClasses[section.color as keyof typeof colorClasses]}`}>
+                    <div
+                      className={`p-2 rounded-lg ${
+                        colorClasses[section.color as keyof typeof colorClasses]
+                      }`}
+                    >
                       <Icon />
                     </div>
-                    <h3 className="font-semibold text-gray-900">{section.title}</h3>
+                    <h3 className="font-semibold text-gray-900">
+                      {section.title}
+                    </h3>
                   </div>
                   <button
                     type="button"
@@ -230,9 +280,16 @@ const ReviewCreateStep: React.FC<ReviewCreateStepProps> = ({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {section.items.map((item, index) => (
-                    <div key={index} className="flex justify-between items-start">
-                      <span className="text-sm text-gray-600 font-medium">{item.label}:</span>
-                      <span className="text-sm text-gray-900 text-right ml-4">{item.value}</span>
+                    <div
+                      key={index}
+                      className="flex justify-between items-start"
+                    >
+                      <span className="text-sm text-gray-600 font-medium">
+                        {item.label}:
+                      </span>
+                      <span className="text-sm text-gray-900 text-right ml-4">
+                        {item.value}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -265,10 +322,14 @@ const ReviewCreateStep: React.FC<ReviewCreateStepProps> = ({
 
         {/* Course Description */}
         <div className="mt-6 bg-white rounded-xl border border-gray-200 p-6">
-          <h3 className="font-semibold text-gray-900 mb-4">Full Course Description</h3>
+          <h3 className="font-semibold text-gray-900 mb-4">
+            Full Course Description
+          </h3>
           <div className="prose prose-sm max-w-none text-gray-700">
-            {formData.description.split('\n').map((paragraph, index) => (
-              <p key={index} className="mb-2">{paragraph}</p>
+            {formData.description.split("\n").map((paragraph, index) => (
+              <p key={index} className="mb-2">
+                {paragraph}
+              </p>
             ))}
           </div>
         </div>
@@ -277,14 +338,21 @@ const ReviewCreateStep: React.FC<ReviewCreateStepProps> = ({
         <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Learning Objectives */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h4 className="font-semibold text-gray-900 mb-4">What You'll Learn</h4>
+            <h4 className="font-semibold text-gray-900 mb-4">
+              What You'll Learn
+            </h4>
             <ul className="space-y-2">
-              {formData.learningObjectives.filter(obj => obj.trim()).map((objective, index) => (
-                <li key={index} className="flex items-start space-x-2 text-sm text-gray-700">
-                  <FaCheckCircle className="text-green-500 mt-0.5 flex-shrink-0" />
-                  <span>{objective}</span>
-                </li>
-              ))}
+              {formData.learningObjectives
+                .filter((obj) => obj.trim())
+                .map((objective, index) => (
+                  <li
+                    key={index}
+                    className="flex items-start space-x-2 text-sm text-gray-700"
+                  >
+                    <FaCheckCircle className="text-green-500 mt-0.5 flex-shrink-0" />
+                    <span>{objective}</span>
+                  </li>
+                ))}
             </ul>
           </div>
 
@@ -292,25 +360,37 @@ const ReviewCreateStep: React.FC<ReviewCreateStepProps> = ({
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <h4 className="font-semibold text-gray-900 mb-4">Requirements</h4>
             <ul className="space-y-2">
-              {formData.requirements.filter(req => req.trim()).map((requirement, index) => (
-                <li key={index} className="flex items-start space-x-2 text-sm text-gray-700">
-                  <span className="w-1.5 h-1.5 bg-gray-400 rounded-full mt-2 flex-shrink-0" />
-                  <span>{requirement}</span>
-                </li>
-              ))}
+              {formData.requirements
+                .filter((req) => req.trim())
+                .map((requirement, index) => (
+                  <li
+                    key={index}
+                    className="flex items-start space-x-2 text-sm text-gray-700"
+                  >
+                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full mt-2 flex-shrink-0" />
+                    <span>{requirement}</span>
+                  </li>
+                ))}
             </ul>
           </div>
 
           {/* Target Audience */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h4 className="font-semibold text-gray-900 mb-4">Who This Course Is For</h4>
+            <h4 className="font-semibold text-gray-900 mb-4">
+              Who This Course Is For
+            </h4>
             <ul className="space-y-2">
-              {formData.targetAudience.filter(aud => aud.trim()).map((audience, index) => (
-                <li key={index} className="flex items-start space-x-2 text-sm text-gray-700">
-                  <FaUsers className="text-blue-500 mt-0.5 flex-shrink-0 text-xs" />
-                  <span>{audience}</span>
-                </li>
-              ))}
+              {formData.targetAudience
+                .filter((aud) => aud.trim())
+                .map((audience, index) => (
+                  <li
+                    key={index}
+                    className="flex items-start space-x-2 text-sm text-gray-700"
+                  >
+                    <FaUsers className="text-blue-500 mt-0.5 flex-shrink-0 text-xs" />
+                    <span>{audience}</span>
+                  </li>
+                ))}
             </ul>
           </div>
         </div>
@@ -320,10 +400,13 @@ const ReviewCreateStep: React.FC<ReviewCreateStepProps> = ({
           <div className="flex items-start space-x-3">
             <FaCheckCircle className="text-green-500 text-xl mt-1" />
             <div>
-              <h4 className="font-semibold text-gray-900 mb-2">Ready to Create Your Course?</h4>
+              <h4 className="font-semibold text-gray-900 mb-2">
+                Ready to Create Your Course?
+              </h4>
               <p className="text-gray-700 mb-4">
-                Once you create your course, you'll be able to add sections and lessons to build your curriculum. 
-                You can always edit course details later from your instructor dashboard.
+                Once you create your course, you'll be able to add sections and
+                lessons to build your curriculum. You can always edit course
+                details later from your instructor dashboard.
               </p>
               <div className="flex items-center space-x-4 text-sm text-gray-600">
                 <span className="flex items-center space-x-1">
@@ -344,7 +427,9 @@ const ReviewCreateStep: React.FC<ReviewCreateStepProps> = ({
           <div className="mt-6 bg-blue-50 border border-blue-200 rounded-xl p-6">
             <div className="flex items-center justify-center space-x-3">
               <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-              <span className="text-blue-700 font-medium">Creating your course...</span>
+              <span className="text-blue-700 font-medium">
+                Creating your course...
+              </span>
             </div>
           </div>
         )}
