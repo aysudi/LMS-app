@@ -1,6 +1,12 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { FaPlus, FaMinus, FaLightbulb, FaClipboardList, FaUsers } from 'react-icons/fa';
+import React from "react";
+import { motion } from "framer-motion";
+import {
+  FaPlus,
+  FaMinus,
+  FaLightbulb,
+  FaClipboardList,
+  FaUsers,
+} from "react-icons/fa";
 
 interface CourseDetailsStepProps {
   formData: {
@@ -9,9 +15,18 @@ interface CourseDetailsStepProps {
     targetAudience: string[];
     level: "Beginner" | "Intermediate" | "Advanced";
   };
-  onArrayFieldAdd: (field: 'learningObjectives' | 'requirements' | 'targetAudience') => void;
-  onArrayFieldRemove: (field: 'learningObjectives' | 'requirements' | 'targetAudience', index: number) => void;
-  onArrayFieldChange: (field: 'learningObjectives' | 'requirements' | 'targetAudience', index: number, value: string) => void;
+  onArrayFieldAdd: (
+    field: "learningObjectives" | "requirements" | "targetAudience"
+  ) => void;
+  onArrayFieldRemove: (
+    field: "learningObjectives" | "requirements" | "targetAudience",
+    index: number
+  ) => void;
+  onArrayFieldChange: (
+    field: "learningObjectives" | "requirements" | "targetAudience",
+    index: number,
+    value: string
+  ) => void;
   setFormData: React.Dispatch<React.SetStateAction<any>>;
   errors: Record<string, string>;
 }
@@ -25,14 +40,14 @@ const CourseDetailsStep: React.FC<CourseDetailsStepProps> = ({
   errors,
 }) => {
   const renderArrayField = (
-    field: 'learningObjectives' | 'requirements' | 'targetAudience',
+    field: "learningObjectives" | "requirements" | "targetAudience",
     title: string,
     placeholder: string,
     icon: React.ComponentType<any>,
     description: string
   ) => {
     const Icon = icon;
-    
+
     return (
       <div className="bg-gray-50 rounded-xl p-6">
         <div className="flex items-center space-x-3 mb-4">
@@ -52,7 +67,9 @@ const CourseDetailsStep: React.FC<CourseDetailsStepProps> = ({
                 <input
                   type="text"
                   value={item}
-                  onChange={(e) => onArrayFieldChange(field, index, e.target.value)}
+                  onChange={(e) =>
+                    onArrayFieldChange(field, index, e.target.value)
+                  }
                   placeholder={`${placeholder} ${index + 1}`}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
                 />
@@ -107,7 +124,8 @@ const CourseDetailsStep: React.FC<CourseDetailsStepProps> = ({
             Course Details
           </h2>
           <p className="text-gray-600">
-            Define what students will learn, what they need to know beforehand, and who this course is for.
+            Define what students will learn, what they need to know beforehand,
+            and who this course is for.
           </p>
         </div>
 
@@ -118,67 +136,77 @@ const CourseDetailsStep: React.FC<CourseDetailsStepProps> = ({
               Course Level *
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {(['Beginner', 'Intermediate', 'Advanced'] as const).map((level) => (
-                <div key={level} className="relative">
-                  <input
-                    type="radio"
-                    id={level}
-                    name="level"
-                    value={level}
-                    checked={formData.level === level}
-                    onChange={(e) => setFormData((prev: any) => ({ ...prev, level: e.target.value as any }))}
-                    className="sr-only peer"
-                  />
-                  <label
-                    htmlFor={level}
-                    className="flex flex-col items-center justify-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer transition-all duration-200 peer-checked:border-indigo-500 peer-checked:bg-indigo-50 hover:border-indigo-300"
-                  >
-                    <div className={`w-8 h-8 rounded-full mb-2 flex items-center justify-center ${
-                      formData.level === level
-                        ? 'bg-indigo-500 text-white'
-                        : 'bg-gray-200 text-gray-500'
-                    }`}>
-                      {level === 'Beginner' && '1'}
-                      {level === 'Intermediate' && '2'}
-                      {level === 'Advanced' && '3'}
-                    </div>
-                    <span className="font-medium text-gray-900">{level}</span>
-                    <span className="text-sm text-gray-500 text-center mt-1">
-                      {level === 'Beginner' && 'No prior experience required'}
-                      {level === 'Intermediate' && 'Some experience helpful'}
-                      {level === 'Advanced' && 'Extensive experience required'}
-                    </span>
-                  </label>
-                </div>
-              ))}
+              {(["Beginner", "Intermediate", "Advanced"] as const).map(
+                (level) => (
+                  <div key={level} className="relative">
+                    <input
+                      type="radio"
+                      id={level}
+                      name="level"
+                      value={level}
+                      checked={formData.level === level}
+                      onChange={(e) =>
+                        setFormData((prev: any) => ({
+                          ...prev,
+                          level: e.target.value as any,
+                        }))
+                      }
+                      className="sr-only peer"
+                    />
+                    <label
+                      htmlFor={level}
+                      className="flex flex-col items-center justify-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer transition-all duration-200 peer-checked:border-indigo-500 peer-checked:bg-indigo-50 hover:border-indigo-300"
+                    >
+                      <div
+                        className={`w-8 h-8 rounded-full mb-2 flex items-center justify-center ${
+                          formData.level === level
+                            ? "bg-indigo-500 text-white"
+                            : "bg-gray-200 text-gray-500"
+                        }`}
+                      >
+                        {level === "Beginner" && "1"}
+                        {level === "Intermediate" && "2"}
+                        {level === "Advanced" && "3"}
+                      </div>
+                      <span className="font-medium text-gray-900">{level}</span>
+                      <span className="text-sm text-gray-500 text-center mt-1">
+                        {level === "Beginner" && "No prior experience required"}
+                        {level === "Intermediate" && "Some experience helpful"}
+                        {level === "Advanced" &&
+                          "Extensive experience required"}
+                      </span>
+                    </label>
+                  </div>
+                )
+              )}
             </div>
           </div>
 
           {/* Learning Objectives */}
           {renderArrayField(
-            'learningObjectives',
-            'Learning Objectives',
-            'What will students learn?',
+            "learningObjectives",
+            "Learning Objectives",
+            "What will students learn?",
             FaLightbulb,
-            'List the key skills and knowledge students will gain'
+            "List the key skills and knowledge students will gain"
           )}
 
           {/* Requirements */}
           {renderArrayField(
-            'requirements',
-            'Requirements',
-            'What do students need to know?',
+            "requirements",
+            "Requirements",
+            "What do students need to know?",
             FaClipboardList,
-            'List any prerequisites or requirements for taking this course'
+            "List any prerequisites or requirements for taking this course"
           )}
 
           {/* Target Audience */}
           {renderArrayField(
-            'targetAudience',
-            'Target Audience',
-            'Who is this course for?',
+            "targetAudience",
+            "Target Audience",
+            "Who is this course for?",
             FaUsers,
-            'Describe who would benefit most from this course'
+            "Describe who would benefit most from this course"
           )}
         </div>
       </div>
