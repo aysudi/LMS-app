@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { UseMutationOptions } from "@tanstack/react-query";
 import { courseQueryKeys } from "./useCourseQueries";
 import { api } from "../services/api";
-import type { Course, CourseResponse } from "../types/course.type";
+import type { Course, CourseResponse, CreateCourseData } from "../types/course.type";
 
 // Course enrollment mutation
 interface EnrollCourseResponse {
@@ -62,6 +62,17 @@ interface BookmarkCourseResponse {
 }
 
 // API Functions
+
+// Create course with file upload support
+const createCourseWithFiles = async (formData: FormData): Promise<CourseResponse> => {
+  const response = await api.post('/api/courses', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data;
+};
+
 const enrollInCourse = async (
   courseId: string
 ): Promise<EnrollCourseResponse> => {
@@ -387,4 +398,27 @@ export const useToggleBookmark = () => {
     error: bookmarkMutation.error || unbookmarkMutation.error,
     isSuccess: bookmarkMutation.isSuccess || unbookmarkMutation.isSuccess,
   };
+};
+
+// Create course mutation
+export const useCreateCourse = (
+  options?: UseMutationOptions<CourseResponse, Error, FormData>
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: createCourseWithFiles,
+    onSuccess: () => {
+      // Invalidate instructor courses to include the new course
+      queryClient.invalidateQueries({
+        queryKey: courseQueryKeys.instructorCourses(),
+      });
+      
+      // Invalidate all course lists
+      queryClient.invalidateQueries({ 
+        queryKey: courseQueryKeys.lists() 
+      });
+    },
+    ...options,
+  });
 };

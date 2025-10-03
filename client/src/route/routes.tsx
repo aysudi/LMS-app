@@ -29,6 +29,8 @@ import InstructorStudents from "../pages/Instructor/Students";
 import InstructorAnalytics from "../pages/Instructor/Analytics";
 import InstructorMessages from "../pages/Instructor/Messages";
 import InstructorEarnings from "../pages/Instructor/Earnings";
+import CreateCourse from "../pages/Instructor/CreateCourse";
+// import CreateCourse from "../pages/Instructor/CreateCourse";
 
 const ROUTES = [
   //client routes
@@ -165,10 +167,6 @@ const ROUTES = [
       </ProtectedRoute>
     ),
     children: [
-      // {
-      //   index: true,
-      //   element: <InstructorDashboard />,
-      // },
       {
         path: "dashboard",
         element: <InstructorDashboard />,
@@ -176,6 +174,10 @@ const ROUTES = [
       {
         path: "courses",
         element: <InstructorCourses />,
+      },
+      {
+        path: "courses/create",
+        element: <CreateCourse />,
       },
       {
         path: "students",
