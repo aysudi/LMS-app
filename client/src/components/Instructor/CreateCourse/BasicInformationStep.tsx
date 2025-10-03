@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react';
-import { motion } from 'framer-motion';
-import { FaPlus, FaTimes, FaHashtag } from 'react-icons/fa';
+import React, { useState, useRef } from "react";
+import { motion } from "framer-motion";
+import { FaPlus, FaTimes, FaHashtag } from "react-icons/fa";
 
 interface BasicInformationStepProps {
   formData: {
@@ -19,7 +19,7 @@ interface BasicInformationStepProps {
 
 const CATEGORIES = [
   "Development",
-  "Business", 
+  "Business",
   "Design",
   "Marketing",
   "Photography",
@@ -31,16 +31,85 @@ const CATEGORIES = [
 ];
 
 const SUBCATEGORIES: Record<string, string[]> = {
-  Development: ["Web Development", "Mobile Development", "Data Science", "Machine Learning", "Software Engineering", "Game Development"],
-  Business: ["Entrepreneurship", "Management", "Finance", "Marketing Strategy", "Sales", "Operations"],
-  Design: ["Graphic Design", "UX/UI Design", "Web Design", "Interior Design", "Fashion Design", "3D Design"],
-  Marketing: ["Digital Marketing", "Social Media", "Content Marketing", "SEO", "Email Marketing", "Advertising"],
-  Photography: ["Portrait Photography", "Landscape Photography", "Wedding Photography", "Street Photography", "Commercial Photography"],
-  Music: ["Music Production", "Singing", "Guitar", "Piano", "Music Theory", "Audio Engineering"],
-  "Health & Fitness": ["Yoga", "Fitness Training", "Nutrition", "Mental Health", "Meditation", "Sports"],
-  "Teaching & Academics": ["Language Learning", "Math", "Science", "History", "Literature", "Test Prep"],
-  "Personal Development": ["Leadership", "Productivity", "Communication", "Time Management", "Motivation", "Life Coaching"],
-  Technology: ["Cloud Computing", "Cybersecurity", "DevOps", "AI/ML", "Blockchain", "IoT"],
+  Development: [
+    "Web Development",
+    "Mobile Development",
+    "Data Science",
+    "Machine Learning",
+    "Software Engineering",
+    "Game Development",
+  ],
+  Business: [
+    "Entrepreneurship",
+    "Management",
+    "Finance",
+    "Marketing Strategy",
+    "Sales",
+    "Operations",
+  ],
+  Design: [
+    "Graphic Design",
+    "UX/UI Design",
+    "Web Design",
+    "Interior Design",
+    "Fashion Design",
+    "3D Design",
+  ],
+  Marketing: [
+    "Digital Marketing",
+    "Social Media",
+    "Content Marketing",
+    "SEO",
+    "Email Marketing",
+    "Advertising",
+  ],
+  Photography: [
+    "Portrait Photography",
+    "Landscape Photography",
+    "Wedding Photography",
+    "Street Photography",
+    "Commercial Photography",
+  ],
+  Music: [
+    "Music Production",
+    "Singing",
+    "Guitar",
+    "Piano",
+    "Music Theory",
+    "Audio Engineering",
+  ],
+  "Health & Fitness": [
+    "Yoga",
+    "Fitness Training",
+    "Nutrition",
+    "Mental Health",
+    "Meditation",
+    "Sports",
+  ],
+  "Teaching & Academics": [
+    "Language Learning",
+    "Math",
+    "Science",
+    "History",
+    "Literature",
+    "Test Prep",
+  ],
+  "Personal Development": [
+    "Leadership",
+    "Productivity",
+    "Communication",
+    "Time Management",
+    "Motivation",
+    "Life Coaching",
+  ],
+  Technology: [
+    "Cloud Computing",
+    "Cybersecurity",
+    "DevOps",
+    "AI/ML",
+    "Blockchain",
+    "IoT",
+  ],
 };
 
 const BasicInformationStep: React.FC<BasicInformationStepProps> = ({
@@ -50,13 +119,13 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({
   onTagAdd,
   onTagRemove,
 }) => {
-  const [newTag, setNewTag] = useState('');
+  const [newTag, setNewTag] = useState("");
   const tagInputRef = useRef<HTMLInputElement>(null);
 
   const handleAddTag = () => {
     if (newTag.trim()) {
       onTagAdd(newTag);
-      setNewTag('');
+      setNewTag("");
       if (tagInputRef.current) {
         tagInputRef.current.focus();
       }
@@ -64,7 +133,7 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({
   };
 
   const handleTagKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       handleAddTag();
     }
@@ -85,24 +154,30 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({
             Basic Information
           </h2>
           <p className="text-gray-600">
-            Let's start with the fundamental details of your course. This information will help students understand what your course is about.
+            Let's start with the fundamental details of your course. This
+            information will help students understand what your course is about.
           </p>
         </div>
 
         <div className="space-y-8">
           {/* Course Title */}
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="title"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Course Title *
             </label>
             <input
               type="text"
               id="title"
               value={formData.title}
-              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev: any) => ({ ...prev, title: e.target.value }))
+              }
               placeholder="Enter an engaging course title"
               className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 ${
-                errors.title ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                errors.title ? "border-red-300 bg-red-50" : "border-gray-300"
               }`}
               maxLength={100}
             />
@@ -118,14 +193,22 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({
 
           {/* Short Description */}
           <div>
-            <label htmlFor="shortDescription" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="shortDescription"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Short Description
             </label>
             <input
               type="text"
               id="shortDescription"
               value={formData.shortDescription}
-              onChange={(e) => setFormData(prev => ({ ...prev, shortDescription: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev: any) => ({
+                  ...prev,
+                  shortDescription: e.target.value,
+                }))
+              }
               placeholder="A brief, compelling description of your course"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
               maxLength={150}
@@ -137,17 +220,27 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({
 
           {/* Full Description */}
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="description"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Course Description *
             </label>
             <textarea
               id="description"
               value={formData.description}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev: any) => ({
+                  ...prev,
+                  description: e.target.value,
+                }))
+              }
               placeholder="Provide a detailed description of your course. What will students learn? How will it benefit them?"
               rows={6}
               className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 resize-none ${
-                errors.description ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                errors.description
+                  ? "border-red-300 bg-red-50"
+                  : "border-gray-300"
               }`}
             />
             {errors.description && (
@@ -158,19 +251,26 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({
           {/* Category & Subcategory */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="category"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Category *
               </label>
               <select
                 id="category"
                 value={formData.category}
-                onChange={(e) => setFormData(prev => ({ 
-                  ...prev, 
-                  category: e.target.value,
-                  subcategory: '' // Reset subcategory when category changes
-                }))}
+                onChange={(e) =>
+                  setFormData((prev: any) => ({
+                    ...prev,
+                    category: e.target.value,
+                    subcategory: "", // Reset subcategory when category changes
+                  }))
+                }
                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 ${
-                  errors.category ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  errors.category
+                    ? "border-red-300 bg-red-50"
+                    : "border-gray-300"
                 }`}
               >
                 <option value="">Select a category</option>
@@ -186,22 +286,31 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({
             </div>
 
             <div>
-              <label htmlFor="subcategory" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="subcategory"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Subcategory
               </label>
               <select
                 id="subcategory"
                 value={formData.subcategory}
-                onChange={(e) => setFormData(prev => ({ ...prev, subcategory: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev: any) => ({
+                    ...prev,
+                    subcategory: e.target.value,
+                  }))
+                }
                 disabled={!formData.category}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
               >
                 <option value="">Select a subcategory</option>
-                {formData.category && SUBCATEGORIES[formData.category]?.map((subcategory) => (
-                  <option key={subcategory} value={subcategory}>
-                    {subcategory}
-                  </option>
-                ))}
+                {formData.category &&
+                  SUBCATEGORIES[formData.category]?.map((subcategory) => (
+                    <option key={subcategory} value={subcategory}>
+                      {subcategory}
+                    </option>
+                  ))}
               </select>
             </div>
           </div>
@@ -212,9 +321,10 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({
               Tags
             </label>
             <p className="text-sm text-gray-500 mb-4">
-              Add tags to help students find your course. You can add up to 10 tags.
+              Add tags to help students find your course. You can add up to 10
+              tags.
             </p>
-            
+
             {/* Tag Input */}
             <div className="flex items-center space-x-3 mb-4">
               <div className="relative flex-1">
