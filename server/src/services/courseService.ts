@@ -11,7 +11,10 @@ import {
 } from "../types/course.types";
 import UserNote from "../models/UserNote";
 import UserProgress from "../models/UserProgress";
-import { deleteFromCloudinary, extractPublicIdFromUrl } from "../middlewares/course-upload.middleware.js";
+import {
+  deleteFromCloudinary,
+  extractPublicIdFromUrl,
+} from "../middlewares/course-upload.middleware.js";
 
 export const getAllCoursesService = async (query: CourseQuery = {}) => {
   const {
@@ -123,14 +126,14 @@ export const createCourseService = async (
 ) => {
   // Handle uploaded files
   const coursePayload = { ...courseData, instructor: instructorId };
-  
+
   if (courseData.uploadedFiles?.image) {
     coursePayload.image = {
       url: courseData.uploadedFiles.image.url,
       publicId: courseData.uploadedFiles.image.publicId,
     };
   }
-  
+
   if (courseData.uploadedFiles?.videoPromo) {
     coursePayload.videoPromo = {
       url: courseData.uploadedFiles.videoPromo.url,
@@ -166,20 +169,20 @@ export const updateCourseService = async (
     if (course.image?.publicId) {
       await deleteFromCloudinary(course.image.publicId, "image");
     }
-    
+
     updateData.image = {
       url: updateData.uploadedFiles.image.url,
       publicId: updateData.uploadedFiles.image.publicId,
     };
   }
-  
+
   // Handle video promo updates
   if (updateData.uploadedFiles?.videoPromo) {
     // Delete old video if exists
     if (course.videoPromo?.publicId) {
       await deleteFromCloudinary(course.videoPromo.publicId, "video");
     }
-    
+
     updateData.videoPromo = {
       url: updateData.uploadedFiles.videoPromo.url,
       publicId: updateData.uploadedFiles.videoPromo.publicId,
@@ -213,15 +216,17 @@ export const deleteCourseService = async (id: string, instructorId: string) => {
 
   // Delete course media from Cloudinary
   const deletionPromises = [];
-  
+
   if (course.image?.publicId) {
     deletionPromises.push(deleteFromCloudinary(course.image.publicId, "image"));
   }
-  
+
   if (course.videoPromo?.publicId) {
-    deletionPromises.push(deleteFromCloudinary(course.videoPromo.publicId, "video"));
+    deletionPromises.push(
+      deleteFromCloudinary(course.videoPromo.publicId, "video")
+    );
   }
-  
+
   // Wait for all Cloudinary deletions to complete
   await Promise.allSettled(deletionPromises);
 
