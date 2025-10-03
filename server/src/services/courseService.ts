@@ -11,6 +11,7 @@ import {
 } from "../types/course.types";
 import UserNote from "../models/UserNote";
 import UserProgress from "../models/UserProgress";
+import { deleteFromCloudinary, extractPublicIdFromUrl } from "../middlewares/course-upload.middleware.js";
 
 export const getAllCoursesService = async (query: CourseQuery = {}) => {
   const {
@@ -120,11 +121,27 @@ export const createCourseService = async (
   courseData: CreateCourseData,
   instructorId: string
 ) => {
-  const course = new Course({
-    ...courseData,
-    instructor: instructorId,
-  });
+  // Handle uploaded files
+  const coursePayload = { ...courseData, instructor: instructorId };
+  
+  if (courseData.uploadedFiles?.image) {
+    coursePayload.image = {
+      url: courseData.uploadedFiles.image.url,
+      publicId: courseData.uploadedFiles.image.publicId,
+    };
+  }
+  
+  if (courseData.uploadedFiles?.videoPromo) {
+    coursePayload.videoPromo = {
+      url: courseData.uploadedFiles.videoPromo.url,
+      publicId: courseData.uploadedFiles.videoPromo.publicId,
+    };
+  }
 
+  // Remove uploadedFiles from payload before saving to database
+  delete coursePayload.uploadedFiles;
+
+  const course = new Course(coursePayload);
   await course.save();
   return course.populate("instructor", "firstName lastName email avatar");
 };
@@ -142,6 +159,35 @@ export const updateCourseService = async (
   if (!course) {
     throw new Error("Course not found or you are not authorized to update it");
   }
+
+  // Handle image updates
+  if (updateData.uploadedFiles?.image) {
+    // Delete old image if exists
+    if (course.image?.publicId) {
+      await deleteFromCloudinary(course.image.publicId, "image");
+    }
+    
+    updateData.image = {
+      url: updateData.uploadedFiles.image.url,
+      publicId: updateData.uploadedFiles.image.publicId,
+    };
+  }
+  
+  // Handle video promo updates
+  if (updateData.uploadedFiles?.videoPromo) {
+    // Delete old video if exists
+    if (course.videoPromo?.publicId) {
+      await deleteFromCloudinary(course.videoPromo.publicId, "video");
+    }
+    
+    updateData.videoPromo = {
+      url: updateData.uploadedFiles.videoPromo.url,
+      publicId: updateData.uploadedFiles.videoPromo.publicId,
+    };
+  }
+
+  // Remove uploadedFiles from updateData before saving
+  delete updateData.uploadedFiles;
 
   Object.assign(course, updateData);
 
@@ -165,13 +211,27 @@ export const deleteCourseService = async (id: string, instructorId: string) => {
     throw new Error("Course not found or you are not authorized to delete it");
   }
 
-  await Lesson.deleteMany({ course: id });
+  // Delete course media from Cloudinary
+  const deletionPromises = [];
+  
+  if (course.image?.publicId) {
+    deletionPromises.push(deleteFromCloudinary(course.image.publicId, "image"));
+  }
+  
+  if (course.videoPromo?.publicId) {
+    deletionPromises.push(deleteFromCloudinary(course.videoPromo.publicId, "video"));
+  }
+  
+  // Wait for all Cloudinary deletions to complete
+  await Promise.allSettled(deletionPromises);
 
-  await Section.deleteMany({ course: id });
-
-  await UserNote.deleteMany({ course: id });
-
-  await UserProgress.deleteMany({ course: id });
+  // Delete related data from database
+  await Promise.all([
+    Lesson.deleteMany({ course: id }),
+    Section.deleteMany({ course: id }),
+    UserNote.deleteMany({ course: id }),
+    UserProgress.deleteMany({ course: id }),
+  ]);
 
   await Course.deleteOne({ _id: id });
 

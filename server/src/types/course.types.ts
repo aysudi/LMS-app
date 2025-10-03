@@ -1,5 +1,10 @@
 import mongoose from "mongoose";
 
+export interface ICourseMedia {
+  url: string;
+  publicId: string;
+}
+
 export interface ICourse extends Document {
   title: string;
   description: string;
@@ -13,8 +18,8 @@ export interface ICourse extends Document {
   rating: number;
   ratingsCount: number;
   studentsEnrolled: mongoose.Types.ObjectId[];
-  image: string;
-  videoPromo?: string;
+  image: ICourseMedia;
+  videoPromo?: ICourseMedia;
   tags: string[];
   level: "Beginner" | "Intermediate" | "Advanced";
   language: string;
@@ -68,8 +73,8 @@ export interface CreateCourseData {
   originalPrice: number;
   discountPrice?: number;
   isFree?: boolean;
-  image?: string;
-  videoPromo?: string;
+  image?: ICourseMedia;
+  videoPromo?: ICourseMedia;
   tags?: string[];
   level: "Beginner" | "Intermediate" | "Advanced";
   language?: string;
@@ -77,6 +82,10 @@ export interface CreateCourseData {
   requirements?: string[];
   targetAudience?: string[];
   certificateProvided?: boolean;
+  uploadedFiles?: {
+    image?: { url: string; publicId: string };
+    videoPromo?: { url: string; publicId: string };
+  };
 }
 
 export interface UpdateCourseData extends Partial<CreateCourseData> {
