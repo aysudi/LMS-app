@@ -505,7 +505,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
 
         {course.image ? (
           <img
-            src={course.image}
+            src={course.image.url}
             alt={course.title}
             className="w-full h-full object-cover"
           />
@@ -603,19 +603,19 @@ const CourseCard: React.FC<CourseCardProps> = ({
         <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
           <div className="flex items-center space-x-1 text-gray-600">
             <FaUsers className="text-xs" />
-            <span>{course.enrollmentsCount || 0} students</span>
+            <span>{course.studentsEnrolled.length || 0} students</span>
           </div>
           <div className="flex items-center space-x-1 text-gray-600">
             <FaStar className="text-xs text-yellow-400" />
-            <span>{course.averageRating?.toFixed(1) || "No ratings"}</span>
+            <span>{course.rating?.toFixed(1) || "No ratings"}</span>
           </div>
           <div className="flex items-center space-x-1 text-gray-600">
             <FaDollarSign className="text-xs" />
-            <span>{formatCurrency(course.revenue || 0)}</span>
+            <span>{formatCurrency(course.originalPrice || 0)}</span>
           </div>
           <div className="flex items-center space-x-1 text-gray-600">
             <FaClock className="text-xs" />
-            <span>{course.duration || 0}h</span>
+            <span>{course.totalDuration || 0}h</span>
           </div>
         </div>
 

@@ -10,6 +10,7 @@ import {
   FaBullseye,
   FaImage,
   FaSave,
+  FaList,
 } from "react-icons/fa";
 import { toast } from "react-hot-toast";
 import { useCreateCourse } from "../../hooks/useCourseMutations";
@@ -18,6 +19,8 @@ import CourseDetailsStep from "../../components/Instructor/CreateCourse/CourseDe
 import PricingSettingsStep from "../../components/Instructor/CreateCourse/PricingSettingsStep";
 import MediaContentStep from "../../components/Instructor/CreateCourse/MediaContentStep";
 import ReviewCreateStep from "../../components/Instructor/CreateCourse/ReviewCreateStep";
+import CurriculumStep from "../../components/Instructor/CreateCourse/CurriculumStep";
+import type { CourseFormData } from "../../types/course.type";
 
 // Course creation steps
 const CREATION_STEPS = [
@@ -47,38 +50,17 @@ const CREATION_STEPS = [
   },
   {
     id: 5,
+    title: "Curriculum",
+    description: "Add sections and lessons to your course",
+    icon: FaList,
+  },
+  {
+    id: 6,
     title: "Review & Create",
     description: "Review your course details and create",
     icon: FaCheck,
   },
 ];
-
-interface CourseFormData {
-  // Basic Information
-  title: string;
-  description: string;
-  shortDescription: string;
-  category: string;
-  subcategory: string;
-  tags: string[];
-
-  // Course Details
-  learningObjectives: string[];
-  requirements: string[];
-  targetAudience: string[];
-  level: "Beginner" | "Intermediate" | "Advanced";
-
-  // Pricing & Settings
-  originalPrice: number;
-  discountPrice: number;
-  isFree: boolean;
-  language: string;
-  certificateProvided: boolean;
-
-  // Media
-  image: File | null;
-  videoPromo: File | null;
-}
 
 const CreateCourse = () => {
   const navigate = useNavigate();
@@ -103,9 +85,9 @@ const CreateCourse = () => {
     category: "",
     subcategory: "",
     tags: [],
-    learningObjectives: [""],
-    requirements: [""],
-    targetAudience: [""],
+    learningObjectives: [],
+    requirements: [],
+    targetAudience: [],
     level: "Beginner",
     originalPrice: 0,
     discountPrice: 0,
@@ -114,6 +96,7 @@ const CreateCourse = () => {
     certificateProvided: false,
     image: null,
     videoPromo: null,
+    sections: [],
   });
 
   // Validation functions
@@ -168,10 +151,7 @@ const CreateCourse = () => {
       "learningObjectives" | "requirements" | "targetAudience"
     >
   ) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: [...prev[field], ""],
-    }));
+    setFormData((prev) => ({ ...prev, [field]: [...prev[field], ""] }));
   };
 
   const handleArrayFieldRemove = (
@@ -207,9 +187,10 @@ const CreateCourse = () => {
       !formData.tags.includes(tag.trim()) &&
       formData.tags.length < 10
     ) {
+      const tags = [...formData.tags, tag.trim()];
       setFormData((prev) => ({
         ...prev,
-        tags: [...prev.tags, tag.trim()],
+        tags: [...tags],
       }));
     }
   };
@@ -226,20 +207,18 @@ const CreateCourse = () => {
 
     const formDataToSend = new FormData();
 
-    // Add text fields
     Object.entries(formData).forEach(([key, value]) => {
       if (key === "image" || key === "videoPromo") {
         if (value) formDataToSend.append(key, value as File);
       } else if (Array.isArray(value)) {
-        formDataToSend.append(
-          key,
-          JSON.stringify(value.filter((item: any) => item.trim()))
-        );
+        const processed = value.map((v) => String(v).trim()).filter(Boolean);
+        processed.forEach((v) => formDataToSend.append(key, v));
       } else {
         formDataToSend.append(key, String(value));
       }
     });
 
+    formDataToSend.append("isPublished", "true");
     createCourseMutation.mutate(formDataToSend);
   };
 
@@ -271,7 +250,24 @@ const CreateCourse = () => {
 
           {/* Save Draft Button */}
           <button
-            onClick={() => toast.success("Draft saved!")}
+            onClick={() => {
+              const formDataToSend = new FormData();
+              Object.entries(formData).forEach(([key, value]) => {
+                if (key === "image" || key === "videoPromo") {
+                  if (value) formDataToSend.append(key, value as File);
+                } else if (Array.isArray(value)) {
+                  // Simply filter empty strings and trim values
+                  const processed = value
+                    .map((v) => String(v).trim())
+                    .filter(Boolean);
+                  formDataToSend.append(key, JSON.stringify(processed));
+                } else {
+                  formDataToSend.append(key, String(value));
+                }
+              });
+              formDataToSend.append("isPublished", "false");
+              createCourseMutation.mutate(formDataToSend);
+            }}
             className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200 flex items-center space-x-2"
           >
             <FaSave className="text-sm" />
@@ -381,8 +377,17 @@ const CreateCourse = () => {
               />
             )}
 
-            {/* Step 5: Review & Create */}
+            {/* Step 5: Curriculum */}
             {currentStep === 5 && (
+              <CurriculumStep
+                formData={formData}
+                setFormData={setFormData}
+                errors={errors}
+              />
+            )}
+
+            {/* Step 6: Review & Create */}
+            {currentStep === 6 && (
               <ReviewCreateStep
                 formData={formData}
                 isSubmitting={createCourseMutation.isPending}
