@@ -147,3 +147,53 @@ export interface CourseListResponse {
   success: boolean;
   data: Course[];
 }
+
+export interface CourseFormData {
+  title: string;
+  description: string;
+  shortDescription: string;
+  category: string;
+  subcategory: string;
+  tags: string[];
+
+  learningObjectives: string[];
+  requirements: string[];
+  targetAudience: string[];
+  level: "Beginner" | "Intermediate" | "Advanced";
+
+  originalPrice: number;
+  discountPrice: number;
+  isFree: boolean;
+  language: string;
+  certificateProvided: boolean;
+
+  image: File | null;
+  videoPromo: File | null;
+
+  sections: {
+    title: string;
+    description?: string;
+    order: number;
+    course: string;
+    lessons: {
+      title: string;
+      description?: string;
+      videoUrl: string;
+      duration: number;
+      order: number;
+      isPreview: boolean;
+      course: string;
+      section: string;
+      resources: {
+        name: string;
+        url: string;
+        type: "pdf" | "zip" | "doc" | "other";
+      }[];
+      quiz: {
+        question: string;
+        options: string[];
+        correctAnswer: number;
+      }[];
+    }[];
+  }[];
+}
