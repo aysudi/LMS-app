@@ -30,7 +30,7 @@ sectionRouter.post(
   sectionUploadMiddleware,
   sectionUploadErrorHandler,
   processSectionUploads,
-  (req, res) => addSection(req as any, res)
+  (req: any, res: any) => addSection(req, res)
 );
 
 sectionRouter.get("/course/:courseId", (req, res) =>
@@ -50,7 +50,7 @@ sectionRouter.put(
   sectionUploadMiddleware,
   sectionUploadErrorHandler,
   processSectionUploads,
-  (req, res) => updateSection(req as any, res)
+  (req: any, res: any) => updateSection(req, res)
 );
 
 sectionRouter.delete(
