@@ -65,7 +65,11 @@ export interface Lesson {
   _id: string;
   title: string;
   description?: string;
-  videoUrl: File;
+  video: {
+    url: string;
+    publicId: string;
+    file?: File;
+  };
   duration: number; // in seconds
   order: number;
   isPreview: boolean;
@@ -74,7 +78,9 @@ export interface Lesson {
   resources: {
     name: string;
     url: string;
+    publicId: string;
     type: "pdf" | "zip" | "doc" | "other";
+    file?: File;
   }[];
   quiz: {
     question: string;
@@ -91,6 +97,11 @@ export interface Section {
   description?: string;
   order: number;
   course: string;
+  thumbnail?: {
+    url: string;
+    publicId: string;
+    file?: File;
+  };
   lessons: Lesson[];
   lessonCount: number;
   createdAt: string;
