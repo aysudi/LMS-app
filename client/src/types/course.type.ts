@@ -20,8 +20,16 @@ export interface Course {
   ratingsCount: number;
   studentsEnrolled: string[];
   enrollmentCount: number;
-  image: string;
-  videoPromo?: string;
+  image: {
+    url: string;
+    publicId: string;
+    file?: File;
+  };
+  videoPromo?: {
+    url: string;
+    publicId: string;
+    file?: File;
+  };
   tags: string[];
   level: "Beginner" | "Intermediate" | "Advanced";
   language: string;
@@ -111,8 +119,8 @@ export interface CreateCourseData {
   originalPrice: number;
   discountPrice?: number;
   isFree?: boolean;
-  image?: string;
-  videoPromo?: string;
+  image?: string | MediaFile;
+  videoPromo?: string | MediaFile;
   tags?: string[];
   level: "Beginner" | "Intermediate" | "Advanced";
   language?: string;
@@ -122,8 +130,14 @@ export interface CreateCourseData {
   certificateProvided?: boolean;
 }
 
+export interface MediaFile {
+  file: File;
+}
+
 export interface UpdateCourseData extends Partial<CreateCourseData> {
   isPublished?: boolean;
+  image?: string | MediaFile;
+  videoPromo?: string | MediaFile;
 }
 
 export interface CoursesResponse {
@@ -166,24 +180,24 @@ export interface CourseFormData {
   isFree: boolean;
   language: string;
   certificateProvided: boolean;
-
   image: File | null;
   videoPromo: File | null;
-
   sections: {
+    id?: string;
     title: string;
     description?: string;
     order: number;
-    course: string;
+    course?: string;
     lessons: {
+      id?: string;
       title: string;
       description?: string;
-      videoUrl: string;
+      videoUrl?: string;
       duration: number;
       order: number;
       isPreview: boolean;
-      course: string;
-      section: string;
+      course?: string;
+      section?: string;
       resources: {
         name: string;
         url: string;

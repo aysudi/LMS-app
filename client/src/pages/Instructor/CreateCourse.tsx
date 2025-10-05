@@ -19,7 +19,6 @@ import CourseDetailsStep from "../../components/Instructor/CreateCourse/CourseDe
 import PricingSettingsStep from "../../components/Instructor/CreateCourse/PricingSettingsStep";
 import MediaContentStep from "../../components/Instructor/CreateCourse/MediaContentStep";
 import ReviewCreateStep from "../../components/Instructor/CreateCourse/ReviewCreateStep";
-import CurriculumStep from "../../components/Instructor/CreateCourse/CurriculumStep";
 import type { CourseFormData } from "../../types/course.type";
 
 // Course creation steps
@@ -50,12 +49,6 @@ const CREATION_STEPS = [
   },
   {
     id: 5,
-    title: "Curriculum",
-    description: "Add sections and lessons to your course",
-    icon: FaList,
-  },
-  {
-    id: 6,
     title: "Review & Create",
     description: "Review your course details and create",
     icon: FaCheck,
@@ -96,7 +89,7 @@ const CreateCourse = () => {
     certificateProvided: false,
     image: null,
     videoPromo: null,
-    sections: [],
+    sections: [] as CourseFormData["sections"],
   });
 
   // Validation functions
@@ -207,14 +200,51 @@ const CreateCourse = () => {
 
     const formDataToSend = new FormData();
 
-    Object.entries(formData).forEach(([key, value]) => {
-      if (key === "image" || key === "videoPromo") {
-        if (value) formDataToSend.append(key, value as File);
-      } else if (Array.isArray(value)) {
-        const processed = value.map((v) => String(v).trim()).filter(Boolean);
-        processed.forEach((v) => formDataToSend.append(key, v));
-      } else {
-        formDataToSend.append(key, String(value));
+    // Handle files
+    if (formData.image instanceof File) {
+      formDataToSend.append("image", formData.image);
+    }
+    if (formData.videoPromo instanceof File) {
+      formDataToSend.append("videoPromo", formData.videoPromo);
+    }
+
+    // Handle arrays with JSON stringification
+    ["tags", "learningObjectives", "requirements", "targetAudience"].forEach(
+      (key) => {
+        if (formData[key as keyof CourseFormData]) {
+          const value = formData[key as keyof CourseFormData];
+          if (Array.isArray(value)) {
+            const processed = value.filter(Boolean).map(String);
+            formDataToSend.append(key, JSON.stringify(processed));
+          }
+        }
+      }
+    );
+
+    // Handle sections array
+    if (formData.sections.length > 0) {
+      formDataToSend.append("sections", JSON.stringify(formData.sections));
+    }
+
+    // Handle other fields
+    const simpleFields = [
+      "title",
+      "description",
+      "shortDescription",
+      "category",
+      "subcategory",
+      "level",
+      "originalPrice",
+      "discountPrice",
+      "language",
+      "certificateProvided",
+      "isFree",
+    ];
+
+    simpleFields.forEach((field) => {
+      const value = formData[field as keyof CourseFormData];
+      if (value !== undefined && value !== null) {
+        formDataToSend.append(field, String(value));
       }
     });
 
@@ -377,17 +407,8 @@ const CreateCourse = () => {
               />
             )}
 
-            {/* Step 5: Curriculum */}
-            {currentStep === 5 && (
-              <CurriculumStep
-                formData={formData}
-                setFormData={setFormData}
-                errors={errors}
-              />
-            )}
-
             {/* Step 6: Review & Create */}
-            {currentStep === 6 && (
+            {currentStep === 5 && (
               <ReviewCreateStep
                 formData={formData}
                 isSubmitting={createCourseMutation.isPending}
@@ -413,7 +434,7 @@ const CreateCourse = () => {
             {currentStep < CREATION_STEPS.length ? (
               <button
                 onClick={handleNext}
-                className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200 flex items-center space-x-2"
+                className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200 flex items-center space-x-2 cursor-pointer"
               >
                 <span>Next</span>
                 <FaArrowRight className="text-sm" />
@@ -422,7 +443,7 @@ const CreateCourse = () => {
               <button
                 onClick={handleSubmit}
                 disabled={createCourseMutation.isPending}
-                className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 {createCourseMutation.isPending ? (
                   <>

@@ -38,9 +38,19 @@ export const getInstructorCourses = async (): Promise<CourseListResponse> => {
 
 // Create new course (instructor only)
 export const createCourse = async (
-  courseData: CreateCourseData
+  courseData: CreateCourseData | FormData
 ): Promise<CourseResponse> => {
-  const response = await api.post("/api/courses", courseData);
+  let config = {};
+  
+  if (courseData instanceof FormData) {
+    config = {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    };
+  }
+
+  const response = await api.post("/api/courses", courseData, config);
   return response.data;
 };
 
@@ -49,6 +59,30 @@ export const updateCourse = async (
   courseId: string,
   updateData: UpdateCourseData
 ): Promise<CourseResponse> => {
+  // If there are files to upload, use FormData
+  if (updateData.image instanceof File || updateData.videoPromo instanceof File) {
+    const formData = new FormData();
+    Object.entries(updateData).forEach(([key, value]) => {
+      if (value === undefined) return;
+
+      if (key === "image" && value instanceof File) {
+        formData.append("image", value);
+      } else if (key === "videoPromo" && value instanceof File) {
+        formData.append("videoPromo", value);
+      } else {
+        formData.append(key, JSON.stringify(value));
+      }
+    });
+
+    const response = await api.put(`/api/courses/${courseId}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  }
+
+  // Regular JSON update if no files
   const response = await api.put(`/api/courses/${courseId}`, updateData);
   return response.data;
 };

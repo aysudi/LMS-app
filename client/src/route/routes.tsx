@@ -30,6 +30,7 @@ import InstructorAnalytics from "../pages/Instructor/Analytics";
 import InstructorMessages from "../pages/Instructor/Messages";
 import InstructorEarnings from "../pages/Instructor/Earnings";
 import CreateCourse from "../pages/Instructor/CreateCourse";
+import EditCourse from "../pages/Instructor/EditCourse";
 // import CreateCourse from "../pages/Instructor/CreateCourse";
 
 const ROUTES = [
@@ -178,6 +179,10 @@ const ROUTES = [
       {
         path: "courses/create",
         element: <CreateCourse />,
+      },
+      {
+        path: "courses/:courseId/edit",
+        element: <EditCourse />,
       },
       {
         path: "students",

@@ -291,10 +291,7 @@ export const useCreateCourse = (
   return useMutation({
     mutationFn: createCourse,
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: courseQueryKeys.lists() });
-      queryClient.invalidateQueries({
-        queryKey: courseQueryKeys.instructorCourses(),
-      });
+      queryClient.invalidateQueries({ queryKey: courseQueryKeys.all });
 
       queryClient.setQueryData(courseQueryKeys.detail(data.data.id), data);
     },
