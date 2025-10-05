@@ -53,6 +53,8 @@ export const getSectionById = async (sectionId: string): Promise<ISection> => {
   return section;
 };
 
+import { deleteFromCloudinary } from "../middlewares/course-upload.middleware";
+
 export const createSection = async (
   sectionData: CreateSectionData,
   instructorId: string
@@ -74,13 +76,22 @@ export const createSection = async (
     order = lastSection ? lastSection.order + 1 : 1;
   }
 
-  const section = new Section({
+  // Handle thumbnail upload
+  const sectionPayload = {
     title: sectionData.title,
     description: sectionData.description,
     order,
     course: sectionData.course,
-  });
+  };
 
+  if (sectionData.uploadedFiles?.thumbnail) {
+    sectionPayload.thumbnail = {
+      url: sectionData.uploadedFiles.thumbnail.url,
+      publicId: sectionData.uploadedFiles.thumbnail.publicId,
+    };
+  }
+
+  const section = new Section(sectionPayload);
   await section.save();
   return section.populate("course", "title instructor");
 };
@@ -100,7 +111,25 @@ export const updateSection = async (
     throw new Error("You are not authorized to update this section");
   }
 
-  Object.assign(section, updateData);
+  // Handle thumbnail update
+  const updatePayload = { ...updateData };
+
+  if (updatePayload.uploadedFiles?.thumbnail) {
+    // Delete old thumbnail if exists
+    if (section.thumbnail?.publicId) {
+      await deleteFromCloudinary(section.thumbnail.publicId, "image");
+    }
+
+    updatePayload.thumbnail = {
+      url: updatePayload.uploadedFiles.thumbnail.url,
+      publicId: updatePayload.uploadedFiles.thumbnail.publicId,
+    };
+  }
+
+  // Remove uploadedFiles from payload before saving
+  delete updatePayload.uploadedFiles;
+
+  Object.assign(section, updatePayload);
   await section.save();
 
   return section;
@@ -118,6 +147,11 @@ export const deleteSection = async (
 
   if ((section.course as any).instructor.toString() !== instructorId) {
     throw new Error("You are not authorized to delete this section");
+  }
+
+  // Delete thumbnail from Cloudinary if exists
+  if (section.thumbnail?.publicId) {
+    await deleteFromCloudinary(section.thumbnail.publicId, "image");
   }
 
   const lessonIds = await Lesson.find({ section: sectionId }).distinct("_id");

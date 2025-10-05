@@ -6,6 +6,10 @@ export interface ISection extends Document {
   description?: string;
   order: number;
   course: mongoose.Types.ObjectId;
+  thumbnail?: {
+    url: string;
+    publicId: string;
+  };
   createdAt: Date;
   updatedAt: Date;
   // Virtual fields
@@ -18,12 +22,32 @@ export interface CreateSectionData {
   description?: string;
   order?: number;
   course: string;
+  thumbnail?: {
+    url: string;
+    publicId: string;
+  };
+  uploadedFiles?: {
+    thumbnail?: {
+      url: string;
+      publicId: string;
+    };
+  };
 }
 
 export interface UpdateSectionData {
   title?: string;
   description?: string;
   order?: number;
+  thumbnail?: {
+    url: string;
+    publicId: string;
+  };
+  uploadedFiles?: {
+    thumbnail?: {
+      url: string;
+      publicId: string;
+    };
+  };
 }
 
 export interface SectionWithLessonCount extends ISection {

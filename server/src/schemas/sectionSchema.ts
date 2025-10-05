@@ -21,6 +21,10 @@ const sectionSchema = new mongoose.Schema(
       ref: "Course",
       required: true,
     },
+    thumbnail: {
+      url: String,
+      publicId: String,
+    },
   },
   {
     timestamps: true,
