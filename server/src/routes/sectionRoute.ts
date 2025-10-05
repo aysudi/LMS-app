@@ -13,6 +13,11 @@ import {
   authorizeRoles,
 } from "../middlewares/auth.middleware";
 import { UserRole } from "../types/user.types";
+import {
+  sectionUploadMiddleware,
+  sectionUploadErrorHandler,
+  processSectionUploads,
+} from "../middlewares/section-upload.middleware";
 
 const sectionRouter = Router();
 
@@ -22,6 +27,9 @@ sectionRouter.post(
   "/",
   authenticateToken,
   authorizeRoles(UserRole.INSTRUCTOR),
+  sectionUploadMiddleware,
+  sectionUploadErrorHandler,
+  processSectionUploads,
   (req, res) => addSection(req as any, res)
 );
 
@@ -39,6 +47,9 @@ sectionRouter.put(
   "/:sectionId",
   authenticateToken,
   authorizeRoles(UserRole.INSTRUCTOR),
+  sectionUploadMiddleware,
+  sectionUploadErrorHandler,
+  processSectionUploads,
   (req, res) => updateSection(req as any, res)
 );
 

@@ -3,7 +3,10 @@ import mongoose, { Document } from "mongoose";
 export interface ILesson extends Document {
   title: string;
   description?: string;
-  videoUrl: string;
+  video: {
+    url: string;
+    publicId: string;
+  };
   duration: number; // in seconds
   order: number;
   isPreview: boolean;
@@ -12,6 +15,7 @@ export interface ILesson extends Document {
   resources: {
     name: string;
     url: string;
+    publicId: string;
     type: "pdf" | "zip" | "doc" | "other";
   }[];
   quiz: {
@@ -26,13 +30,17 @@ export interface ILesson extends Document {
 export interface CreateLessonData {
   title: string;
   description?: string;
-  videoUrl: string;
   duration: number;
   order?: number;
   isPreview?: boolean;
+  video?: {
+    url: string;
+    publicId: string;
+  };
   resources?: {
     name: string;
     url: string;
+    publicId: string;
     type?: "pdf" | "zip" | "doc" | "other";
   }[];
   quiz?: {
@@ -40,18 +48,33 @@ export interface CreateLessonData {
     options: string[];
     correctAnswer: number;
   }[];
+  uploadedFiles?: {
+    video?: {
+      url: string;
+      publicId: string;
+    };
+    resources?: Array<{
+      url: string;
+      publicId: string;
+      name: string;
+    }>;
+  };
 }
 
 export interface UpdateLessonData {
   title?: string;
   description?: string;
-  videoUrl?: string;
+  video?: {
+    url: string;
+    publicId: string;
+  };
   duration?: number;
   order?: number;
   isPreview?: boolean;
   resources?: {
     name: string;
     url: string;
+    publicId: string;
     type?: "pdf" | "zip" | "doc" | "other";
   }[];
   quiz?: {
@@ -59,6 +82,17 @@ export interface UpdateLessonData {
     options: string[];
     correctAnswer: number;
   }[];
+  uploadedFiles?: {
+    video?: {
+      url: string;
+      publicId: string;
+    };
+    resources?: Array<{
+      url: string;
+      publicId: string;
+      name: string;
+    }>;
+  };
 }
 
 export interface LessonQuery {

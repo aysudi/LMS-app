@@ -12,8 +12,9 @@ const lessonSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-    videoUrl: {
-      type: String,
+    video: {
+      url: String,
+      publicId: String,
       required: true,
     },
     duration: {
@@ -46,6 +47,10 @@ const lessonSchema = new mongoose.Schema(
           required: true,
         },
         url: {
+          type: String,
+          required: true,
+        },
+        publicId: {
           type: String,
           required: true,
         },

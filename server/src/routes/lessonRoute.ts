@@ -14,6 +14,11 @@ import {
   authorizeRoles,
 } from "../middlewares/auth.middleware";
 import { UserRole } from "../types/user.types";
+import {
+  lessonUploadMiddleware,
+  lessonUploadErrorHandler,
+  processLessonUploads,
+} from "../middlewares/lesson-upload.middleware";
 
 const lessonRouter = Router();
 
@@ -31,14 +36,20 @@ lessonRouter.post(
   "/",
   authenticateToken,
   authorizeRoles(UserRole.INSTRUCTOR),
-  (req, res) => addLesson(req as any, res)
+  lessonUploadMiddleware,
+  lessonUploadErrorHandler,
+  processLessonUploads,
+  (req: any, res: any) => addLesson(req, res)
 );
 
 lessonRouter.put(
   "/:courseId/lesson/:lessonId",
   authenticateToken,
   authorizeRoles(UserRole.INSTRUCTOR),
-  (req, res) => updateLesson(req as any, res)
+  lessonUploadMiddleware,
+  lessonUploadErrorHandler,
+  processLessonUploads,
+  (req: any, res: any) => updateLesson(req, res)
 );
 
 lessonRouter.delete(
