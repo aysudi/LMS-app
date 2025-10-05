@@ -33,9 +33,27 @@ export const createSection = async (
   courseId: string,
   sectionData: Partial<Section>
 ): Promise<SectionResponse> => {
+  const formData = new FormData();
+
+  // Append basic section data
+  formData.append("title", sectionData.title || "");
+  if (sectionData.description)
+    formData.append("description", sectionData.description);
+  if (sectionData.order) formData.append("order", sectionData.order.toString());
+
+  // Append thumbnail if present
+  if (sectionData.thumbnail?.file) {
+    formData.append("thumbnail", sectionData.thumbnail.file);
+  }
+
   const response = await api.post(
     `/api/courses/${courseId}/sections`,
-    sectionData
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
   );
   return response.data;
 };
@@ -46,9 +64,27 @@ export const updateSection = async (
   sectionId: string,
   updateData: Partial<Section>
 ): Promise<SectionResponse> => {
+  const formData = new FormData();
+
+  // Append basic section data
+  if (updateData.title) formData.append("title", updateData.title);
+  if (updateData.description)
+    formData.append("description", updateData.description);
+  if (updateData.order) formData.append("order", updateData.order.toString());
+
+  // Append thumbnail if present
+  if (updateData.thumbnail?.file) {
+    formData.append("thumbnail", updateData.thumbnail.file);
+  }
+
   const response = await api.put(
     `/api/courses/${courseId}/sections/${sectionId}`,
-    updateData
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
   );
   return response.data;
 };

@@ -49,17 +49,19 @@ export const createLesson = async (
   const formData = new FormData();
 
   // Handle video file if present
-  if (lessonData.videoUrl instanceof File) {
-    formData.append("videoUrl", lessonData.videoUrl);
-    delete lessonData.videoUrl;
+  if (lessonData.video?.file instanceof File) {
+    formData.append("video", lessonData.video.file);
+    delete lessonData.video.file;
   }
 
   // Handle resource files if present
   if (lessonData.resources?.length) {
-    lessonData.resources.forEach((file: any) => {
-      formData.append("resources", file);
+    lessonData.resources.forEach((resource: any) => {
+      if (resource.file instanceof File) {
+        formData.append("resources", resource.file);
+        delete resource.file;
+      }
     });
-    delete lessonData.resources;
   }
 
   // Add remaining lesson data
@@ -89,19 +91,21 @@ export const updateLesson = async (
   let config = {};
 
   // If there are files to upload, use FormData
-  if (updateData.videoUrl || updateData.resources?.length) {
+  if (updateData.video?.file || updateData.resources?.some((r) => r.file)) {
     const formData = new FormData();
 
-    if (updateData.videoUrl instanceof File) {
-      formData.append("videoUrl", updateData.videoUrl);
-      delete updateData.videoUrl;
+    if (updateData.video?.file instanceof File) {
+      formData.append("video", updateData.video.file);
+      delete updateData.video.file;
     }
 
     if (updateData.resources?.length) {
-      updateData.resources.forEach((file: any) => {
-        formData.append("resources", file);
+      updateData.resources.forEach((resource: any) => {
+        if (resource.file instanceof File) {
+          formData.append("resources", resource.file);
+          delete resource.file;
+        }
       });
-      delete updateData.resources;
     }
 
     formData.append("data", JSON.stringify(updateData));
