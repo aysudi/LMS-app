@@ -77,11 +77,12 @@ export const createSection = async (
   }
 
   // Handle thumbnail upload
-  const sectionPayload = {
+  const sectionPayload: Partial<ISection> = {
     title: sectionData.title,
     description: sectionData.description,
     order,
-    course: sectionData.course,
+    course: new mongoose.Types.ObjectId(sectionData.course),
+    thumbnail: undefined,
   };
 
   if (sectionData.uploadedFiles?.thumbnail) {
@@ -147,11 +148,6 @@ export const deleteSection = async (
 
   if ((section.course as any).instructor.toString() !== instructorId) {
     throw new Error("You are not authorized to delete this section");
-  }
-
-  // Delete thumbnail from Cloudinary if exists
-  if (section.thumbnail?.publicId) {
-    await deleteFromCloudinary(section.thumbnail.publicId, "image");
   }
 
   const lessonIds = await Lesson.find({ section: sectionId }).distinct("_id");
