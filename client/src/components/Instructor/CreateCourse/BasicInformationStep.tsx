@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { FaPlus, FaTimes, FaHashtag } from "react-icons/fa";
+import RichTextEditor from "../../UI/RichTextEditor";
 
 interface BasicInformationStepProps {
   formData: {
@@ -226,22 +227,15 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({
             >
               Course Description *
             </label>
-            <textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) =>
+            <RichTextEditor
+              content={formData.description}
+              onChange={(content) =>
                 setFormData((prev: any) => ({
                   ...prev,
-                  description: e.target.value,
+                  description: content,
                 }))
               }
               placeholder="Provide a detailed description of your course. What will students learn? How will it benefit them?"
-              rows={6}
-              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 resize-none ${
-                errors.description
-                  ? "border-red-300 bg-red-50"
-                  : "border-gray-300"
-              }`}
             />
             {errors.description && (
               <p className="text-sm text-red-600 mt-2">{errors.description}</p>

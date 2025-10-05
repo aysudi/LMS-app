@@ -410,15 +410,28 @@ export const useCreateCourse = (
 
   return useMutation({
     mutationFn: createCourseWithFiles,
-    onSuccess: () => {
-      // Invalidate instructor courses to include the new course
+    onSuccess: (data) => {
+      // Immediately update the instructor courses cache with the new course
+      queryClient.setQueryData(
+        courseQueryKeys.instructorCourses(),
+        (oldData: { success: boolean; data: Course[] } | undefined) => {
+          if (!oldData) return { success: true, data: [data.data] };
+          return {
+            ...oldData,
+            data: [...oldData.data, data.data],
+          };
+        }
+      );
+
+      // Then invalidate the queries to refetch fresh data
       queryClient.invalidateQueries({
         queryKey: courseQueryKeys.instructorCourses(),
+        exact: true,
       });
 
-      // Invalidate all course lists
       queryClient.invalidateQueries({
         queryKey: courseQueryKeys.lists(),
+        exact: true,
       });
     },
     ...options,
