@@ -315,14 +315,12 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
         toast.error("Title is required");
         return;
       }
-      //   console.log("formData in handleSave", formData);
 
       const currentSections = Array.isArray(course.sections)
         ? course.sections
         : [];
 
       if (editModal?.type === "section") {
-        // console.log("editModal", editModal);
         const updatedSections = currentSections.map((section) =>
           section.id === (editModal.data as Section).id
             ? {
@@ -333,10 +331,8 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
               }
             : section
         );
-        // console.log("updateSections", updatedSections);
         onUpdate({ sections: updatedSections });
 
-        // const timestamp = Date.now();
         const newSection: Section = {
           title: formData.title.trim(),
           description: formData.description?.trim() || "",
@@ -344,12 +340,9 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
           course: course.id || "",
           lessons: [],
           lessonCount: 0,
-          //   createdAt: new Date().toISOString(),
           //   updatedAt: new Date().toISOString(),
         };
-        console.log("newSection", newSection);
         onUpdate({ sections: [...currentSections, newSection] });
-        console.log("sections after update", [...currentSections, newSection]);
         setExpandedSections((prev) => [...prev, newSection.id]);
       } else if (editModal?.type === "lesson" && editModal.sectionId) {
         const currentSections = [

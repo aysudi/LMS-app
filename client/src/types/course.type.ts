@@ -65,7 +65,7 @@ export interface Lesson {
   _id: string;
   title: string;
   description?: string;
-  videoUrl: string;
+  videoUrl: File;
   duration: number; // in seconds
   order: number;
   isPreview: boolean;
