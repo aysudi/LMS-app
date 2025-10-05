@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { useCurriculumOperations } from "../../../hooks/useCurriculumMutations";
 import {
   FaGripVertical,
   FaPlus,
@@ -252,7 +253,7 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
     }
   };
 
-  const handleAddSection = () => {
+  const openAddSectionModal = () => {
     setEditModal({ type: "section" });
   };
 
@@ -304,7 +305,11 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
     }
   };
 
-  const handleSave = (formData: {
+  const { handleAddSection, handleUpdateSection } = useCurriculumOperations(
+    course.id
+  );
+
+  const handleSave = async (formData: {
     title: string;
     description?: string;
     duration?: number;
@@ -316,38 +321,30 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
         return;
       }
 
-      const currentSections = Array.isArray(course.sections)
-        ? course.sections
-        : [];
-
       if (editModal?.type === "section") {
-        const updatedSections = currentSections.map((section) =>
-          section.id === (editModal.data as Section).id
-            ? {
-                ...section,
-                title: formData.title.trim(),
-                description:
-                  formData.description?.trim() || section.description,
-              }
-            : section
-        );
-        onUpdate({ sections: updatedSections });
-
-        const newSection: Section = {
+        const sectionData = {
           title: formData.title.trim(),
-          description: formData.description?.trim() || "",
-          order: currentSections.length + 1,
-          course: course.id || "",
-          lessons: [],
-          lessonCount: 0,
-          //   updatedAt: new Date().toISOString(),
+          description: formData.description?.trim(),
+          order: editModal.data
+            ? (editModal.data as Section).order
+            : (course.sections?.length || 0) + 1,
+          course: course.id,
         };
-        onUpdate({ sections: [...currentSections, newSection] });
-        setExpandedSections((prev) => [...prev, newSection.id]);
+
+        if (editModal.data) {
+          // Update existing section
+          await handleUpdateSection(
+            (editModal.data as Section).id,
+            sectionData
+          );
+        } else {
+          // Create new section
+          //   console.log("sectionData", sectionData);
+          await handleAddSection(sectionData);
+          //   setExpandedSections((prev) => [...prev, sectionData.id]);
+        }
       } else if (editModal?.type === "lesson" && editModal.sectionId) {
-        const currentSections = [
-          ...(Array.isArray(course.sections) ? course.sections : []),
-        ];
+        const currentSections = [...(course.sections || [])];
         const sectionIndex = currentSections.findIndex(
           (section: Section) => section.id === editModal.sectionId
         );
@@ -357,23 +354,23 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
           return;
         }
 
-        const updatedSections = [...currentSections];
-        const section = { ...updatedSections[sectionIndex] };
+        const section = currentSections[sectionIndex];
 
         if (editModal.data && "_id" in editModal.data) {
           // Edit existing lesson
-          section.lessons = section.lessons.map((lesson: Lesson) =>
-            lesson.id === (editModal.data as Lesson).id
-              ? {
-                  ...lesson,
-                  title: formData.title.trim(),
-                  description:
-                    formData.description?.trim() || lesson.description,
-                  duration: formData.duration || lesson.duration,
-                  isPreview: formData.isPreview || false,
-                }
-              : lesson
-          );
+          const updatedLesson = {
+            ...(editModal.data as Lesson),
+            title: formData.title.trim(),
+            description: formData.description?.trim(),
+            duration: formData.duration || 0,
+            isPreview: formData.isPreview || false,
+          };
+          await handleUpdateSection(section.id, {
+            ...section,
+            lessons: section.lessons.map((l) =>
+              l.id === updatedLesson.id ? updatedLesson : l
+            ),
+          });
         } else {
           // Add new lesson
           const timestamp = Date.now();
@@ -382,24 +379,23 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
             _id: `lesson_${timestamp}`,
             title: formData.title.trim(),
             description: formData.description?.trim() || "",
-            videoUrl: "",
+            video: { url: "", publicId: "" },
             duration: formData.duration || 0,
-            order: Array.isArray(section.lessons) ? section.lessons.length : 0,
+            order: section.lessons?.length || 0,
             isPreview: formData.isPreview || false,
-            course: course.id || "",
+            course: course.id,
             section: editModal.sectionId,
             resources: [],
             quiz: [],
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           };
-          section.lessons = Array.isArray(section.lessons)
-            ? [...section.lessons, newLesson]
-            : [newLesson];
-        }
 
-        updatedSections[sectionIndex] = section;
-        onUpdate({ sections: updatedSections });
+          await handleUpdateSection(section.id, {
+            ...section,
+            lessons: [...(section.lessons || []), newLesson],
+          });
+        }
       }
 
       setEditModal(null);
@@ -419,7 +415,7 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
           Course Curriculum
         </h2>
         <button
-          onClick={handleAddSection}
+          onClick={openAddSectionModal}
           className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
           <FaPlus className="mr-2" />
@@ -437,7 +433,7 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
               {(Array.isArray(course.sections) ? course.sections : []).map(
                 (section: Section, sectionIndex: number) => (
                   <Draggable
-                    key={section.id}
+                    key={sectionIndex}
                     draggableId={String(section.id)}
                     index={sectionIndex}
                   >

@@ -16,7 +16,7 @@ interface SectionListResponse {
 export const getSectionsByCourse = async (
   courseId: string
 ): Promise<SectionListResponse> => {
-  const response = await api.get(`/api/courses/${courseId}/sections`);
+  const response = await api.get(`/api/sections/course/${courseId}`);
   return response.data;
 };
 
@@ -33,28 +33,27 @@ export const createSection = async (
   courseId: string,
   sectionData: Partial<Section>
 ): Promise<SectionResponse> => {
-  const formData = new FormData();
+  const formData =
+    sectionData instanceof FormData ? sectionData : new FormData();
 
-  // Append basic section data
-  formData.append("title", sectionData.title || "");
-  if (sectionData.description)
-    formData.append("description", sectionData.description);
-  if (sectionData.order) formData.append("order", sectionData.order.toString());
-
-  // Append thumbnail if present
-  if (sectionData.thumbnail?.file) {
-    formData.append("thumbnail", sectionData.thumbnail.file);
+  if (!(sectionData instanceof FormData)) {
+    // Append basic section data only if not already a FormData
+    formData.append("title", sectionData.title || "");
+    formData.append("course", courseId);
+    if (sectionData.description)
+      formData.append("description", sectionData.description);
+    if (sectionData.order)
+      formData.append("order", sectionData.order.toString());
+    if (sectionData.thumbnail?.file) {
+      formData.append("thumbnail", sectionData.thumbnail.file);
+    }
   }
 
-  const response = await api.post(
-    `/api/courses/${courseId}/sections`,
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
-  );
+  const response = await api.post(`/api/sections`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
   return response.data;
 };
 
@@ -62,30 +61,28 @@ export const createSection = async (
 export const updateSection = async (
   courseId: string,
   sectionId: string,
-  updateData: Partial<Section>
+  updateData: Partial<Section> | FormData
 ): Promise<SectionResponse> => {
-  const formData = new FormData();
+  const formData = updateData instanceof FormData ? updateData : new FormData();
 
-  // Append basic section data
-  if (updateData.title) formData.append("title", updateData.title);
-  if (updateData.description)
-    formData.append("description", updateData.description);
-  if (updateData.order) formData.append("order", updateData.order.toString());
-
-  // Append thumbnail if present
-  if (updateData.thumbnail?.file) {
-    formData.append("thumbnail", updateData.thumbnail.file);
+  if (!(updateData instanceof FormData)) {
+    // Append basic section data only if not already a FormData
+    if (updateData.title) formData.append("title", updateData.title);
+    if (updateData.description)
+      formData.append("description", updateData.description);
+    if (updateData.order !== undefined)
+      formData.append("order", updateData.order.toString());
+    formData.append("course", courseId);
+    if (updateData.thumbnail?.file) {
+      formData.append("thumbnail", updateData.thumbnail.file);
+    }
   }
 
-  const response = await api.put(
-    `/api/courses/${courseId}/sections/${sectionId}`,
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
-  );
+  const response = await api.put(`/api/sections/${sectionId}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
   return response.data;
 };
 
@@ -95,7 +92,7 @@ export const deleteSection = async (
   sectionId: string
 ): Promise<{ success: boolean; message: string }> => {
   const response = await api.delete(
-    `/api/courses/${courseId}/sections/${sectionId}`
+    `/api/sections/${sectionId}?courseId=${courseId}`
   );
   return response.data;
 };
