@@ -31,7 +31,7 @@ import InstructorMessages from "../pages/Instructor/Messages";
 import InstructorEarnings from "../pages/Instructor/Earnings";
 import CreateCourse from "../pages/Instructor/CreateCourse";
 import EditCourse from "../pages/Instructor/EditCourse";
-// import CreateCourse from "../pages/Instructor/CreateCourse";
+import LessonEditor from "../pages/Instructor/LessonEditor";
 
 const ROUTES = [
   //client routes
@@ -183,6 +183,10 @@ const ROUTES = [
       {
         path: "courses/:courseId/edit",
         element: <EditCourse />,
+      },
+      {
+        path: "courses/:courseId/lessons/editor",
+        element: <LessonEditor />,
       },
       {
         path: "students",

@@ -10,12 +10,14 @@ import ErrorState from "../../components/UI/ErrorState";
 import BasicInfoPanel from "../../components/Instructor/EditCourse/BasicInfoPanel";
 import CurriculumPanel from "../../components/Instructor/EditCourse/CurriculumPanel";
 import MediaPanel from "../../components/Instructor/EditCourse/MediaPanel";
+import AnnouncementsPanel from "../../components/Instructor/EditCourse/AnnouncementsPanel";
 import SettingsPanel from "../../components/Instructor/EditCourse/SettingsPanel";
 
 const TABS = [
   { id: "basic-info", label: "Basic Information", icon: "📝" },
   { id: "curriculum", label: "Curriculum", icon: "📚" },
   { id: "media", label: "Media", icon: "🎬" },
+  { id: "announcements", label: "Announcements", icon: "📢" },
   { id: "settings", label: "Settings", icon: "⚙️" },
 ] as const;
 
@@ -172,6 +174,12 @@ const EditCourse = () => {
           )}
           {activeTab === "media" && (
             <MediaPanel course={courseData.data} onUpdate={handlePanelUpdate} />
+          )}
+          {activeTab === "announcements" && (
+            <AnnouncementsPanel
+              course={courseData.data}
+              onUpdate={handlePanelUpdate}
+            />
           )}
           {activeTab === "settings" && (
             <SettingsPanel
