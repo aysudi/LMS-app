@@ -57,7 +57,6 @@ const Checkout = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  // Redirect if no items selected
   useEffect(() => {
     if (selectedCourses.length === 0) {
       navigate("/cart");

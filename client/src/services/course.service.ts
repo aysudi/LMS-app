@@ -59,7 +59,6 @@ export const updateCourse = async (
   courseId: string,
   updateData: UpdateCourseData
 ): Promise<CourseResponse> => {
-  // Check if there are files to upload (either direct File objects or embedded in media objects)
   const hasImageFile =
     updateData.image instanceof File ||
     (typeof updateData.image === "object" &&
@@ -89,17 +88,14 @@ export const updateCourse = async (
           formData.append("videoPromo", value.file);
         }
       } else if (Array.isArray(value)) {
-        // Handle arrays (like tags, learningObjectives, etc.)
         value.forEach((item, index) => {
           formData.append(`${key}[${index}]`, item);
         });
       } else if (typeof value === "object") {
-        // Skip file objects and media objects that have files
         if (!(value instanceof File) && !value.file) {
           formData.append(key, JSON.stringify(value));
         }
       } else {
-        // Handle primitive values
         formData.append(key, String(value));
       }
     });
