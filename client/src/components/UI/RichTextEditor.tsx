@@ -5,6 +5,7 @@ import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import CodeBlock from "@tiptap/extension-code-block";
 import Color from "@tiptap/extension-color";
+
 import {
   FaBold,
   FaItalic,
@@ -58,39 +59,52 @@ const RichTextEditor = ({
         heading: {
           levels: [1, 2, 3],
         },
+        bulletList: {
+          keepMarks: true,
+          keepAttributes: false,
+        },
+        orderedList: {
+          keepMarks: true,
+          keepAttributes: false,
+        },
       }),
       Placeholder.configure({
         placeholder,
         showOnlyWhenEditable: true,
+        emptyEditorClass: "is-editor-empty",
       }),
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: "text-indigo-600 hover:text-indigo-800 underline",
+          class:
+            "text-indigo-600 hover:text-indigo-800 underline cursor-pointer",
         },
       }),
       Image.configure({
         HTMLAttributes: {
-          class: "max-w-full h-auto rounded-lg",
+          class: "max-w-full h-auto rounded-lg shadow-sm",
         },
       }),
       CodeBlock.configure({
         HTMLAttributes: {
-          class: "bg-gray-100 rounded-lg p-4 font-mono text-sm",
+          class: "bg-gray-100 rounded-lg p-4 font-mono text-sm border",
         },
       }),
       Color,
     ],
     content,
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
+      const html = editor.getHTML();
+      onChange(html);
     },
     editorProps: {
       attributes: {
         class:
-          "prose prose-indigo max-w-none min-h-[200px] focus:outline-none p-4",
+          "prose prose-indigo prose-sm max-w-none min-h-[200px] focus:outline-none p-4 text-gray-900",
+        spellcheck: "false",
       },
     },
+    immediatelyRender: false,
   });
 
   if (!editor) {

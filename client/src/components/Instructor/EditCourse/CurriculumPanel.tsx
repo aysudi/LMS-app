@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { useCurriculumOperations } from "../../../hooks/useCurriculumMutations";
+import SectionEditorModal from "./SectionEditorModal";
 import {
   FaGripVertical,
   FaPlus,
@@ -257,8 +259,18 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
     setEditModal({ type: "section" });
   };
 
+  const navigate = useNavigate();
+
   const handleAddLesson = (sectionId: string) => {
-    setEditModal({ type: "lesson", sectionId });
+    navigate(
+      `/instructor/courses/${course.id}/lessons/editor?sectionId=${sectionId}`
+    );
+  };
+
+  const handleEditLesson = (sectionId: string, lessonId: string) => {
+    navigate(
+      `/instructor/courses/${course.id}/lessons/editor?sectionId=${sectionId}&lessonId=${lessonId}`
+    );
   };
 
   const handleShowDeleteConfirmation = (
@@ -575,11 +587,10 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
                                                   <div className="flex items-center space-x-2">
                                                     <button
                                                       onClick={() =>
-                                                        setEditModal({
-                                                          type: "lesson",
-                                                          data: lesson,
-                                                          sectionId: section.id,
-                                                        })
+                                                        handleEditLesson(
+                                                          section.id,
+                                                          lesson.id
+                                                        )
                                                       }
                                                       className="p-2 text-gray-400 hover:text-gray-500"
                                                     >
