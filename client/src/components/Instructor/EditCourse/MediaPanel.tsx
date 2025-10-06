@@ -20,15 +20,14 @@ const MediaPanel = ({ course, onUpdate }: MediaPanelProps) => {
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Here you would typically upload the file to your storage service and get the URL
-      // For now, we'll just store the file object and preview URL
       const previewUrl = URL.createObjectURL(file);
       setPreviewImage(previewUrl);
+      // Update the UI with preview
       onUpdate({
         image: {
           url: previewUrl,
-          publicId: "", // Will be set by the server
-          file, // Keep the file reference for actual upload
+          publicId: course.image?.publicId || "",
+          file,
         },
       });
     }
@@ -39,11 +38,12 @@ const MediaPanel = ({ course, onUpdate }: MediaPanelProps) => {
     if (file) {
       const previewUrl = URL.createObjectURL(file);
       setPreviewVideo(previewUrl);
+      // Update the UI with preview
       onUpdate({
         videoPromo: {
           url: previewUrl,
-          publicId: "", // Will be set by the server
-          file, // Keep the file reference for actual upload
+          publicId: course.videoPromo?.publicId || "",
+          file,
         },
       });
     }

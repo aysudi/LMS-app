@@ -5,6 +5,10 @@ import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import CodeBlock from "@tiptap/extension-code-block";
 import Color from "@tiptap/extension-color";
+import ListItem from "@tiptap/extension-list-item";
+import BulletList from "@tiptap/extension-bullet-list";
+import OrderedList from "@tiptap/extension-ordered-list";
+import Blockquote from "@tiptap/extension-blockquote";
 
 import {
   FaBold,
@@ -59,13 +63,30 @@ const RichTextEditor = ({
         heading: {
           levels: [1, 2, 3],
         },
-        bulletList: {
-          keepMarks: true,
-          keepAttributes: false,
+        bulletList: false,
+        orderedList: false,
+        listItem: false,
+        blockquote: false,
+      }),
+      BulletList.configure({
+        HTMLAttributes: {
+          class: "prose-ul",
         },
-        orderedList: {
-          keepMarks: true,
-          keepAttributes: false,
+      }),
+      OrderedList.configure({
+        HTMLAttributes: {
+          class: "prose-ol",
+        },
+      }),
+      ListItem.configure({
+        HTMLAttributes: {
+          class: "prose-li",
+        },
+      }),
+      Blockquote.configure({
+        HTMLAttributes: {
+          class:
+            "prose-blockquote border-l-4 border-gray-300 pl-4 italic text-gray-600 my-4",
         },
       }),
       Placeholder.configure({
@@ -100,7 +121,7 @@ const RichTextEditor = ({
     editorProps: {
       attributes: {
         class:
-          "prose prose-indigo prose-sm max-w-none min-h-[200px] focus:outline-none p-4 text-gray-900",
+          "prose prose-indigo prose-sm max-w-none min-h-[200px] focus:outline-none p-4 text-gray-900 prose-ul:list-disc prose-ol:list-decimal prose-li:ml-4",
         spellcheck: "false",
       },
     },
@@ -129,6 +150,49 @@ const RichTextEditor = ({
 
   return (
     <div className="rich-text-editor border border-gray-300 rounded-lg overflow-hidden">
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+          .rich-text-editor .ProseMirror {
+            outline: none;
+          }
+          .rich-text-editor .ProseMirror ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+            margin: 1rem 0;
+          }
+          .rich-text-editor .ProseMirror ol {
+            list-style-type: decimal;
+            padding-left: 1.5rem;
+            margin: 1rem 0;
+          }
+          .rich-text-editor .ProseMirror li {
+            margin: 0.25rem 0;
+          }
+          .rich-text-editor .ProseMirror blockquote {
+            border-left: 4px solid #d1d5db;
+            padding-left: 1rem;
+            font-style: italic;
+            color: #6b7280;
+            margin: 1rem 0;
+          }
+          .rich-text-editor .ProseMirror a {
+            color: #4f46e5;
+            text-decoration: underline;
+          }
+          .rich-text-editor .ProseMirror a:hover {
+            color: #3730a3;
+          }
+          .rich-text-editor .ProseMirror .is-editor-empty:first-child::before {
+            color: #9ca3af;
+            content: attr(data-placeholder);
+            float: left;
+            height: 0;
+            pointer-events: none;
+          }
+        `,
+        }}
+      />
       <div className="bg-gray-50 border-b border-gray-300 p-2 flex items-center space-x-2 flex-wrap">
         <div className="flex items-center space-x-1">
           <ToolbarButton

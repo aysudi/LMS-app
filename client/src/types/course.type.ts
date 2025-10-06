@@ -145,10 +145,25 @@ export interface MediaFile {
   file: File;
 }
 
-export interface UpdateCourseData extends Partial<CreateCourseData> {
+export interface UpdateCourseData {
+  title?: string;
+  description?: string;
+  shortDescription?: string;
+  category?: string;
+  subcategory?: string;
+  originalPrice?: number;
+  discountPrice?: number;
+  isFree?: boolean;
+  image?: string | MediaFile | File;
+  videoPromo?: string | MediaFile | File;
+  tags?: string[];
+  level?: "Beginner" | "Intermediate" | "Advanced";
+  language?: string;
+  learningObjectives?: string[];
+  requirements?: string[];
+  targetAudience?: string[];
+  certificateProvided?: boolean;
   isPublished?: boolean;
-  image?: string | MediaFile;
-  videoPromo?: string | MediaFile;
 }
 
 export interface CoursesResponse {

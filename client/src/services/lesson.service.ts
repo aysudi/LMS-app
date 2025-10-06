@@ -73,11 +73,7 @@ export const createLesson = async (
     },
   };
 
-  const response = await api.post(
-    `/api/courses/${courseId}/sections/${sectionId}/lessons`,
-    formData,
-    config
-  );
+  const response = await api.post(`/api/lessons`, formData, config);
   return response.data;
 };
 
@@ -117,7 +113,7 @@ export const updateLesson = async (
     };
 
     const response = await api.put(
-      `/api/courses/${courseId}/sections/${sectionId}/lessons/${lessonId}`,
+      `/api/lessons/${courseId}/lesson/${lessonId}`,
       formData,
       config
     );

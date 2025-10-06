@@ -17,147 +17,11 @@ import {
 import { toast } from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Section, Lesson, Course } from "../../../types/course.type";
-import { FormInput, FormTextArea } from "../../UI/FormControls";
 
 interface CurriculumPanelProps {
   course: Course;
   onUpdate: (changes: Partial<Course>) => void;
 }
-
-interface EditModalProps {
-  type: "section" | "lesson";
-  data?: Section | Lesson;
-  sectionId?: string;
-  onSave: (data: {
-    title: string;
-    description?: string;
-    duration?: number;
-    isPreview?: boolean;
-  }) => void;
-  onClose: () => void;
-}
-
-const EditModal = ({ type, data, onSave, onClose }: EditModalProps) => {
-  const [formData, setFormData] = useState({
-    title: data?.title || "",
-    description: data?.description || "",
-    ...(type === "lesson" && {
-      duration: (data as Lesson)?.duration || 0,
-      isPreview: (data as Lesson)?.isPreview || false,
-    }),
-  });
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
-        <h2 className="text-xl font-semibold mb-4">
-          {type === "section" ? "Edit Section" : "Edit Lesson"}
-        </h2>
-        {type === "section" && (
-          <div className="space-y-4">
-            <FormInput
-              value={formData.title}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  title: e.target.value,
-                }))
-              }
-              label="Title"
-              placeholder="Enter section title"
-            />
-            <FormTextArea
-              value={formData.description}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  description: e.target.value,
-                }))
-              }
-              label="Description"
-              placeholder="Describe what students will learn in this section"
-              rows={3}
-            />
-          </div>
-        )}
-        {type === "lesson" && (
-          <div className="space-y-4">
-            <FormInput
-              value={formData.title}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  title: e.target.value,
-                }))
-              }
-              label="Title"
-              placeholder="Enter lesson title"
-            />
-            <FormTextArea
-              value={formData.description}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  description: e.target.value,
-                }))
-              }
-              label="Description"
-              placeholder="Describe what students will learn in this lesson"
-              rows={3}
-            />
-            <FormInput
-              type="number"
-              value={formData.duration ? Math.floor(formData.duration / 60) : 0}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  duration: parseInt(e.target.value) * 60,
-                }))
-              }
-              min="0"
-              label="Duration (minutes)"
-              helperText="Estimated time to complete this lesson"
-            />
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="isPreview"
-                checked={formData.isPreview || false}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    isPreview: e.target.checked,
-                  }))
-                }
-                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded transition duration-150 ease-in-out"
-              />
-              <label htmlFor="isPreview" className="text-sm text-gray-900">
-                Preview Lesson (Free)
-              </label>
-            </div>
-          </div>
-        )}
-        <div className="mt-6 flex justify-end space-x-3">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={() => {
-              if (!formData.title) return;
-              onSave(formData);
-            }}
-            className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            Save
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
@@ -620,7 +484,7 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
                                       <div className="p-4 flex justify-center">
                                         <button
                                           onClick={() =>
-                                            handleAddLesson(section.id)
+                                            handleAddLesson(section._id)
                                           }
                                           className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                                         >
@@ -647,10 +511,9 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
       </DragDropContext>
 
       {editModal && (
-        <EditModal
-          type={editModal.type}
-          data={editModal.data}
-          sectionId={editModal.sectionId}
+        <SectionEditorModal
+          isOpen={!!editModal}
+          section={editModal.data as Section}
           onSave={handleSave}
           onClose={() => setEditModal(null)}
         />

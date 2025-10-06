@@ -55,11 +55,13 @@ const LessonEditor = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   // Get current section
+  //   console.log("courseData", courseData);
   const currentSection = courseData?.data.sections.find(
-    (s: Section) => s.id === sectionId
+    (s: Section) => s._id === sectionId
   );
+  //   console.log("currentSection", currentSection);
   const currentLesson = currentSection?.lessons.find(
-    (l: Lesson) => l.id === lessonId
+    (l: Lesson) => l._id === lessonId
   );
 
   useEffect(() => {
@@ -221,7 +223,34 @@ const LessonEditor = () => {
       // Add quiz data
       formData.append("quiz", JSON.stringify(quiz));
 
-      // TODO: Call API to save lesson
+      // Call API to save lesson
+      const lessonDataForAPI = {
+        title,
+        description,
+        duration: duration * 60, // Convert to seconds
+        isPreview,
+        video: videoFile,
+        course: courseId,
+        section: sectionId,
+        resources: resources.map((r) => ({ ...r, file: r.file })),
+        quiz,
+      };
+      console.log("videoFile", videoFile);
+
+      if (lessonId) {
+        // Update existing lesson - use the lesson service
+        const { updateLesson } = await import("../../services/lesson.service");
+        await updateLesson(
+          courseId!,
+          sectionId!,
+          lessonId,
+          lessonDataForAPI as any
+        );
+      } else {
+        // Create new lesson - use the lesson service
+        const { createLesson } = await import("../../services/lesson.service");
+        await createLesson(courseId!, sectionId!, lessonDataForAPI as any);
+      }
 
       toast.success(
         lessonId

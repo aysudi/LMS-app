@@ -59,18 +59,44 @@ export const updateCourse = async (
   courseId: string,
   updateData: UpdateCourseData
 ): Promise<CourseResponse> => {
-  // If there are files to upload, use FormData
-  if (updateData.image instanceof File || updateData.videoPromo instanceof File) {
+  // Check if there are files to upload (either direct File objects or embedded in media objects)
+  const hasImageFile = updateData.image instanceof File || 
+    (typeof updateData.image === 'object' && updateData.image?.file instanceof File);
+  const hasVideoFile = updateData.videoPromo instanceof File || 
+    (typeof updateData.videoPromo === 'object' && updateData.videoPromo?.file instanceof File);
+  const hasFiles = hasImageFile || hasVideoFile;
+  
+  if (hasFiles) {
     const formData = new FormData();
+    
     Object.entries(updateData).forEach(([key, value]) => {
-      if (value === undefined) return;
+      if (value === undefined || value === null) return;
 
-      if (key === "image" && value instanceof File) {
-        formData.append("image", value);
-      } else if (key === "videoPromo" && value instanceof File) {
-        formData.append("videoPromo", value);
+      if (key === "image") {
+        if (value instanceof File) {
+          formData.append("image", value);
+        } else if (typeof value === 'object' && value.file instanceof File) {
+          formData.append("image", value.file);
+        }
+      } else if (key === "videoPromo") {
+        if (value instanceof File) {
+          formData.append("videoPromo", value);
+        } else if (typeof value === 'object' && value.file instanceof File) {
+          formData.append("videoPromo", value.file);
+        }
+      } else if (Array.isArray(value)) {
+        // Handle arrays (like tags, learningObjectives, etc.)
+        value.forEach((item, index) => {
+          formData.append(`${key}[${index}]`, item);
+        });
+      } else if (typeof value === 'object') {
+        // Skip file objects and media objects that have files
+        if (!(value instanceof File) && !value.file) {
+          formData.append(key, JSON.stringify(value));
+        }
       } else {
-        formData.append(key, JSON.stringify(value));
+        // Handle primitive values
+        formData.append(key, String(value));
       }
     });
 
