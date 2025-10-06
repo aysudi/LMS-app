@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { useCurriculumOperations } from "../../../hooks/useCurriculumMutations";
+import { useDeleteSection } from "../../../hooks/useSectionMutations";
+import { useDeleteLesson } from "../../../hooks/useLessonMutations";
 import SectionEditorModal from "./SectionEditorModal";
 import {
   FaGripVertical,
@@ -14,9 +16,11 @@ import {
   FaFile,
   FaQuestionCircle,
 } from "react-icons/fa";
-import { toast } from "react-hot-toast";
+// import { toast } from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Section, Lesson, Course } from "../../../types/course.type";
+import { enqueueSnackbar } from "notistack";
+// import { toast } from "react-toastify";
 
 interface CurriculumPanelProps {
   course: Course;
@@ -37,12 +41,19 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
     lessonId?: string;
   } | null>(null);
 
+  // Add deletion mutations
+  const deleteSectionMutation = useDeleteSection(course.id);
+  const deleteLessonMutation = useDeleteLesson(course.id, "");
+
   const toggleSection = (sectionId: string) => {
-    setExpandedSections((prev) =>
-      prev.includes(sectionId)
-        ? prev.filter((id) => id !== sectionId)
-        : [...prev, sectionId]
-    );
+    setExpandedSections((prev) => {
+      const isExpanded = prev.includes(sectionId);
+      if (isExpanded) {
+        return prev.filter((id) => id !== sectionId);
+      } else {
+        return [...prev, sectionId];
+      }
+    });
   };
 
   const handleDragEnd = (result: any) => {
@@ -145,17 +156,16 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
     setDeleteConfirmation({ type, sectionId, lessonId });
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (!deleteConfirmation) return;
-
     try {
       if (deleteConfirmation.type === "section") {
-        const updatedSections = course.sections.filter(
-          (section) => section.id !== deleteConfirmation.sectionId
-        );
-        onUpdate({ sections: updatedSections });
-        toast.success("🗑️ Section deleted successfully", {
-          duration: 3000,
+        // Call API to delete section
+        await deleteSectionMutation.mutateAsync(deleteConfirmation.sectionId);
+
+        enqueueSnackbar("🗑️ Section deleted successfully", {
+          // variant: "success",
+          autoHideDuration: 3000,
           style: {
             background: "#10B981",
             color: "#ffffff",
@@ -169,20 +179,10 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
         deleteConfirmation.type === "lesson" &&
         deleteConfirmation.lessonId
       ) {
-        const updatedSections = course.sections.map((section) => {
-          if (section.id === deleteConfirmation.sectionId) {
-            return {
-              ...section,
-              lessons: section.lessons.filter(
-                (lesson) => lesson.id !== deleteConfirmation.lessonId
-              ),
-            };
-          }
-          return section;
-        });
-        onUpdate({ sections: updatedSections });
-        toast.success("🗑️ Lesson deleted successfully", {
-          duration: 3000,
+        await deleteLessonMutation.mutateAsync(deleteConfirmation.lessonId);
+
+        enqueueSnackbar("🗑️ Lesson deleted successfully", {
+          autoHideDuration: 3000,
           style: {
             background: "#10B981",
             color: "#ffffff",
@@ -195,7 +195,9 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
       }
     } catch (error) {
       console.error("Error deleting:", error);
-      toast.error(`Failed to delete ${deleteConfirmation.type}`);
+      enqueueSnackbar(`Failed to delete ${deleteConfirmation.type}`, {
+        variant: "error",
+      });
     } finally {
       setDeleteConfirmation(null);
     }
@@ -213,7 +215,10 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
   }) => {
     try {
       if (!formData.title.trim()) {
-        toast.error("Title is required");
+        // toast.error("Title is required");
+        enqueueSnackbar("Title is required", {
+          variant: "error",
+        });
         return;
       }
 
@@ -235,7 +240,6 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
           );
         } else {
           // Create new section
-          //   console.log("sectionData", sectionData);
           await handleAddSection(sectionData);
           //   setExpandedSections((prev) => [...prev, sectionData.id]);
         }
@@ -246,7 +250,9 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
         );
 
         if (sectionIndex === -1) {
-          toast.error("Section not found");
+          enqueueSnackbar("Section not found", {
+            variant: "error",
+          });
           return;
         }
 
@@ -298,12 +304,13 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
       const isUpdate = editModal?.data;
       const isSection = editModal?.type === "section";
 
-      toast.success(
+      enqueueSnackbar(
         isUpdate
           ? `✨ ${isSection ? "Section" : "Lesson"} updated successfully!`
           : `🎉 ${isSection ? "Section" : "Lesson"} created successfully!`,
         {
-          duration: 4000,
+          variant: "success",
+          autoHideDuration: 4000,
           style: {
             background: "#10B981",
             color: "#ffffff",
@@ -312,16 +319,13 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
             padding: "16px 24px",
             fontSize: "14px",
           },
-          iconTheme: {
-            primary: "#ffffff",
-            secondary: "#10B981",
-          },
         }
       );
     } catch (error) {
       console.error("Error in handleSave:", error);
-      toast.error("❌ Something went wrong. Please try again.", {
-        duration: 6000,
+      enqueueSnackbar("❌ Something went wrong. Please try again.", {
+        variant: "error",
+        autoHideDuration: 6000,
         style: {
           background: "#EF4444",
           color: "#ffffff",
@@ -329,10 +333,6 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
           borderRadius: "12px",
           padding: "16px 24px",
           fontSize: "14px",
-        },
-        iconTheme: {
-          primary: "#ffffff",
-          secondary: "#EF4444",
         },
       });
     }
@@ -346,7 +346,7 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
         </h2>
         <button
           onClick={openAddSectionModal}
-          className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer"
         >
           <FaPlus className="mr-2" />
           Add Section
@@ -381,13 +381,17 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
                                 <FaGripVertical className="text-gray-400 mr-3" />
                               </span>
                               <button
-                                onClick={() => toggleSection(section.id)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  section._id && toggleSection(section._id);
+                                }}
                                 className="flex items-center text-left flex-1"
                               >
-                                {expandedSections.includes(section.id) ? (
-                                  <FaChevronDown className="text-gray-500 mr-2" />
+                                {section._id &&
+                                expandedSections.includes(section._id) ? (
+                                  <FaChevronDown className="text-gray-500 mr-2 cursor-pointer" />
                                 ) : (
-                                  <FaChevronRight className="text-gray-500 mr-2" />
+                                  <FaChevronRight className="text-gray-500 mr-2 cursor-pointer" />
                                 )}
                                 <div>
                                   <h3 className="font-medium text-gray-900">
@@ -407,7 +411,7 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
                                     data: section,
                                   })
                                 }
-                                className="p-2 text-gray-400 hover:text-gray-500"
+                                className="p-2 text-gray-400 hover:text-gray-500 cursor-pointer"
                               >
                                 <FaEdit />
                               </button>
@@ -415,10 +419,10 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
                                 onClick={() =>
                                   handleShowDeleteConfirmation(
                                     "section",
-                                    section.id
+                                    section._id
                                   )
                                 }
-                                className="p-2 text-gray-400 hover:text-red-500"
+                                className="p-2 text-gray-400 hover:text-red-500 cursor-pointer"
                               >
                                 <FaTrash />
                               </button>
@@ -427,130 +431,135 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
 
                           {/* Lessons */}
                           <AnimatePresence>
-                            {expandedSections.includes(section.id) && (
-                              <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: "auto", opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                transition={{ duration: 0.2 }}
-                              >
-                                <Droppable
-                                  droppableId={`section-${section.id}`}
-                                  type="lesson"
+                            {section._id &&
+                              expandedSections.includes(section._id) && (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: "auto", opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  transition={{ duration: 0.2 }}
                                 >
-                                  {(providedLessons) => (
-                                    <div
-                                      ref={providedLessons.innerRef}
-                                      {...providedLessons.droppableProps}
-                                      className="border-t"
-                                    >
-                                      {section.lessons?.map(
-                                        (lesson: any, lessonIndex: number) => (
-                                          <Draggable
-                                            key={lesson.id}
-                                            draggableId={String(lesson.id)}
-                                            index={lessonIndex}
-                                          >
-                                            {(providedLesson) => (
-                                              <div
-                                                ref={providedLesson.innerRef}
-                                                {...providedLesson.draggableProps}
-                                                className="border-b last:border-b-0"
-                                              >
-                                                <div className="p-4 flex items-center bg-white">
-                                                  <span
-                                                    {...providedLesson.dragHandleProps}
-                                                  >
-                                                    <FaGripVertical className="text-gray-400 mr-3" />
-                                                  </span>
-                                                  <div className="flex-1">
-                                                    <div className="flex items-center">
-                                                      <FaVideo className="text-gray-400 mr-2" />
-                                                      <h4 className="font-medium text-gray-900">
-                                                        {lesson.title}
-                                                      </h4>
-                                                      {lesson.isPreview && (
-                                                        <span className="ml-2 px-2 py-1 text-xs font-medium text-green-800 bg-green-100 rounded-full">
-                                                          Preview
-                                                        </span>
-                                                      )}
-                                                    </div>
-                                                    <div className="mt-1 flex items-center text-sm text-gray-500">
-                                                      <span className="flex items-center">
-                                                        {Math.floor(
-                                                          lesson.duration / 60
-                                                        )}{" "}
-                                                        min
-                                                      </span>
-                                                      {lesson.resources
-                                                        ?.length > 0 && (
-                                                        <span className="flex items-center ml-4">
-                                                          <FaFile className="mr-1" />
-                                                          {
-                                                            lesson.resources
-                                                              .length
-                                                          }{" "}
-                                                          resources
-                                                        </span>
-                                                      )}
-                                                      {lesson.quiz?.length >
-                                                        0 && (
-                                                        <span className="flex items-center ml-4">
-                                                          <FaQuestionCircle className="mr-1" />
-                                                          Quiz
-                                                        </span>
-                                                      )}
-                                                    </div>
-                                                  </div>
-                                                  <div className="flex items-center space-x-2">
-                                                    <button
-                                                      onClick={() =>
-                                                        handleEditLesson(
-                                                          section.id,
-                                                          lesson.id
-                                                        )
-                                                      }
-                                                      className="p-2 text-gray-400 hover:text-gray-500"
+                                  <Droppable
+                                    droppableId={`section-${section.id}`}
+                                    type="lesson"
+                                  >
+                                    {(providedLessons) => (
+                                      <div
+                                        ref={providedLessons.innerRef}
+                                        {...providedLessons.droppableProps}
+                                        className="border-t"
+                                      >
+                                        {section.lessons?.map(
+                                          (
+                                            lesson: any,
+                                            lessonIndex: number
+                                          ) => (
+                                            <Draggable
+                                              key={lessonIndex}
+                                              draggableId={String(lesson.id)}
+                                              index={lessonIndex}
+                                            >
+                                              {(providedLesson) => (
+                                                <div
+                                                  ref={providedLesson.innerRef}
+                                                  {...providedLesson.draggableProps}
+                                                  className="border-b last:border-b-0"
+                                                >
+                                                  <div className="p-4 flex items-center bg-white">
+                                                    <span
+                                                      {...providedLesson.dragHandleProps}
                                                     >
-                                                      <FaEdit />
-                                                    </button>
-                                                    <button
-                                                      onClick={() =>
-                                                        handleShowDeleteConfirmation(
-                                                          "lesson",
-                                                          section.id,
-                                                          lesson.id
-                                                        )
-                                                      }
-                                                      className="p-2 text-gray-400 hover:text-red-500"
-                                                    >
-                                                      <FaTrash />
-                                                    </button>
+                                                      <FaGripVertical className="text-gray-400 mr-3" />
+                                                    </span>
+                                                    <div className="flex-1">
+                                                      <div className="flex items-center">
+                                                        <FaVideo className="text-gray-400 mr-2" />
+                                                        <h4 className="font-medium text-gray-900">
+                                                          {lesson.title}
+                                                        </h4>
+                                                        {lesson.isPreview && (
+                                                          <span className="ml-2 px-2 py-1 text-xs font-medium text-green-800 bg-green-100 rounded-full">
+                                                            Preview
+                                                          </span>
+                                                        )}
+                                                      </div>
+                                                      <div className="mt-1 flex items-center text-sm text-gray-500">
+                                                        <span className="flex items-center">
+                                                          {Math.floor(
+                                                            lesson.duration / 60
+                                                          )}{" "}
+                                                          min
+                                                        </span>
+                                                        {lesson.resources
+                                                          ?.length > 0 && (
+                                                          <span className="flex items-center ml-4">
+                                                            <FaFile className="mr-1" />
+                                                            {
+                                                              lesson.resources
+                                                                .length
+                                                            }{" "}
+                                                            resources
+                                                          </span>
+                                                        )}
+                                                        {lesson.quiz?.length >
+                                                          0 && (
+                                                          <span className="flex items-center ml-4">
+                                                            <FaQuestionCircle className="mr-1" />
+                                                            Quiz
+                                                          </span>
+                                                        )}
+                                                      </div>
+                                                    </div>
+                                                    <div className="flex items-center space-x-2">
+                                                      <button
+                                                        onClick={() =>
+                                                          handleEditLesson(
+                                                            section.id,
+                                                            lesson.id
+                                                          )
+                                                        }
+                                                        className="p-2 text-gray-400 hover:text-gray-500 cursor-pointer"
+                                                      >
+                                                        <FaEdit />
+                                                      </button>
+                                                      <button
+                                                        onClick={() => {
+                                                          handleShowDeleteConfirmation(
+                                                            "lesson",
+                                                            section._id,
+                                                            lesson._id
+                                                          );
+                                                        }}
+                                                        className="p-2 text-gray-400 hover:text-red-500 cursor-pointer"
+                                                      >
+                                                        <FaTrash />
+                                                      </button>
+                                                    </div>
                                                   </div>
                                                 </div>
-                                              </div>
-                                            )}
-                                          </Draggable>
-                                          /* Previously had a bad `//` comment here */
-                                        )
-                                      )}
-                                      {providedLessons.placeholder}
-                                      <div className="p-4 flex justify-center">
-                                        <button
-                                          onClick={() =>
-                                            handleAddLesson(section._id)
-                                          }
-                                          className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                                        >
-                                          <FaPlus className="mr-2" />
-                                          Add Lesson
-                                        </button>
+                                              )}
+                                            </Draggable>
+                                            /* Previously had a bad `//` comment here */
+                                          )
+                                        )}
+                                        {providedLessons.placeholder}
+                                        <div className="p-4 flex justify-center">
+                                          <button
+                                            onClick={() =>
+                                              section._id &&
+                                              handleAddLesson(section._id)
+                                            }
+                                            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer"
+                                          >
+                                            <FaPlus className="mr-2" />
+                                            Add Lesson
+                                          </button>
+                                        </div>
                                       </div>
-                                    </div>
-                                  )}
-                                </Droppable>
-                              </motion.div>
-                            )}
+                                    )}
+                                  </Droppable>
+                                </motion.div>
+                              )}
                           </AnimatePresence>
                         </div>
                       </div>
@@ -574,7 +583,7 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
       )}
 
       {deleteConfirmation && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/65 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
             <h3 className="text-lg font-medium text-gray-900 mb-4">
               Delete{" "}
@@ -587,13 +596,13 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
             <div className="flex justify-end space-x-3">
               <button
                 onClick={() => setDeleteConfirmation(null)}
-                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmDelete}
-                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 cursor-pointer"
               >
                 Delete
               </button>

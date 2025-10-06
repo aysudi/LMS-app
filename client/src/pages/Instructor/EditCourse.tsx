@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaArrowLeft, FaSave } from "react-icons/fa";
 import { toast } from "react-hot-toast";
@@ -24,13 +24,15 @@ const TABS = [
 const EditCourse = () => {
   const { courseId } = useParams();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] =
-    useState<(typeof TABS)[number]["id"]>("basic-info");
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState<(typeof TABS)[number]["id"]>(
+    (searchParams.get("tab") as (typeof TABS)[number]["id"]) || "basic-info"
+  );
   const [unsavedChanges, setUnsavedChanges] = useState(false);
   const [formChanges, setFormChanges] = useState<Partial<Course>>({});
 
   // Fetch course data
-  const { data: courseData, isLoading, error } = useCourse(courseId!);
+  const { data: courseData, isLoading, error, refetch } = useCourse(courseId!);
 
   // Update course mutation
   const updateCourseMutation = useUpdateCourse({
@@ -43,6 +45,15 @@ const EditCourse = () => {
       console.error("Error updating course:", error);
     },
   });
+
+  // Check for curriculum refresh flag
+  useEffect(() => {
+    const shouldRefresh = localStorage.getItem("refreshCurriculum");
+    if (shouldRefresh) {
+      localStorage.removeItem("refreshCurriculum");
+      refetch();
+    }
+  }, [refetch]);
 
   // Handle unsaved changes
   useEffect(() => {

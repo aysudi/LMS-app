@@ -416,7 +416,7 @@ const CartItem: React.FC<CartItemProps> = ({
           <div className="flex-shrink-0">
             <img
               src={
-                course.image ||
+                course.image.url ||
                 "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&h=200&fit=crop"
               }
               alt={course.title}
