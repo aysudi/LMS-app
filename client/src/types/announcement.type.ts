@@ -24,7 +24,8 @@ export interface CreateAnnouncementData {
   isPublished?: boolean;
 }
 
-export interface UpdateAnnouncementData extends Partial<CreateAnnouncementData> {
+export interface UpdateAnnouncementData
+  extends Partial<CreateAnnouncementData> {
   id: string;
 }
 
