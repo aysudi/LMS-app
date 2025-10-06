@@ -43,37 +43,48 @@ export const getLessonById = async (
 export const createLesson = async (
   courseId: string,
   sectionId: string,
-  lessonData: Lesson
+  lessonData: any
 ): Promise<LessonResponse> => {
-  let config = {};
   const formData = new FormData();
 
-  // Handle video file if present
-  if (lessonData.video?.file instanceof File) {
-    formData.append("video", lessonData.video.file);
-    delete lessonData.video.file;
+  // Add lesson basic data
+  formData.append("title", lessonData.title);
+  formData.append("description", lessonData.description);
+  formData.append("duration", lessonData.duration.toString());
+  formData.append("isPreview", lessonData.isPreview.toString());
+  formData.append("course", courseId);
+  formData.append("section", sectionId);
+
+  // Add video file if present
+  if (lessonData.video instanceof File) {
+    formData.append("video", lessonData.video);
   }
 
-  // Handle resource files if present
+  // Add resource files if present
   if (lessonData.resources?.length) {
-    lessonData.resources.forEach((resource: any) => {
+    lessonData.resources.forEach((resource: any, index: number) => {
       if (resource.file instanceof File) {
         formData.append("resources", resource.file);
-        delete resource.file;
+        formData.append(`resourceNames[${index}]`, resource.name);
+        formData.append(`resourceTypes[${index}]`, resource.type);
       }
     });
   }
 
-  // Add remaining lesson data
-  formData.append("data", JSON.stringify(lessonData));
+  // Add quiz data if present - only add if there are actual questions
+  if (
+    lessonData.quiz &&
+    Array.isArray(lessonData.quiz) &&
+    lessonData.quiz.length > 0
+  ) {
+    formData.append("quiz", JSON.stringify(lessonData.quiz));
+  }
 
-  config = {
+  const response = await api.post(`/api/lessons`, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
-  };
-
-  const response = await api.post(`/api/lessons`, formData, config);
+  });
   return response.data;
 };
 

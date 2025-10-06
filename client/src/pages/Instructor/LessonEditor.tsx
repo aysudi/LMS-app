@@ -55,13 +55,11 @@ const LessonEditor = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   // Get current section
-  //   console.log("courseData", courseData);
   const currentSection = courseData?.data.sections.find(
-    (s: Section) => s._id === sectionId
+    (s: Section) => s.id === sectionId
   );
-  //   console.log("currentSection", currentSection);
   const currentLesson = currentSection?.lessons.find(
-    (l: Lesson) => l._id === lessonId
+    (l: Lesson) => l.id === lessonId
   );
 
   useEffect(() => {
@@ -111,6 +109,26 @@ const LessonEditor = () => {
     }
 
     setVideoFile(file);
+
+    // Show success toast for video upload
+    toast.success(
+      `📹 Video "${file.name}" uploaded successfully!`,
+      {
+        duration: 3000,
+        style: {
+          background: "#8B5CF6",
+          color: "#ffffff",
+          fontWeight: "500",
+          borderRadius: "12px",
+          padding: "16px 24px",
+          fontSize: "14px",
+        },
+        iconTheme: {
+          primary: "#ffffff",
+          secondary: "#8B5CF6",
+        },
+      }
+    );
 
     // Create preview URL
     const videoElement = document.createElement("video");
@@ -196,46 +214,16 @@ const LessonEditor = () => {
 
     setIsLoading(true);
     try {
-      const formData = new FormData();
-
-      // Add lesson data
-      formData.append("title", title);
-      formData.append("description", description);
-      formData.append("duration", (duration * 60).toString()); // Convert to seconds
-      formData.append("isPreview", isPreview.toString());
-      formData.append("course", courseId!);
-      formData.append("section", sectionId!);
-
-      // Add video if new file
-      if (videoFile) {
-        formData.append("video", videoFile);
-      }
-
-      // Add resources
-      resources.forEach((resource, index) => {
-        if (resource.file) {
-          formData.append(`resources`, resource.file);
-          formData.append(`resourceNames[${index}]`, resource.name);
-          formData.append(`resourceTypes[${index}]`, resource.type);
-        }
-      });
-
-      // Add quiz data
-      formData.append("quiz", JSON.stringify(quiz));
-
-      // Call API to save lesson
+      // Prepare lesson data for API
       const lessonDataForAPI = {
         title,
         description,
         duration: duration * 60, // Convert to seconds
         isPreview,
-        video: videoFile,
-        course: courseId,
-        section: sectionId,
-        resources: resources.map((r) => ({ ...r, file: r.file })),
-        quiz,
+        video: videoFile, // Pass the File directly
+        resources: resources.filter((r) => r.file), // Only include resources with files
+        quiz: quiz.filter((q) => q.question.trim() !== ""), // Only include questions with content
       };
-      console.log("videoFile", videoFile);
 
       if (lessonId) {
         // Update existing lesson - use the lesson service
@@ -252,15 +240,52 @@ const LessonEditor = () => {
         await createLesson(courseId!, sectionId!, lessonDataForAPI as any);
       }
 
+      // Success toast with custom styling
       toast.success(
         lessonId
-          ? "Lesson updated successfully!"
-          : "Lesson created successfully!"
+          ? "✨ Lesson updated successfully!"
+          : "🎉 Lesson created successfully!",
+        {
+          duration: 4000,
+          style: {
+            background: "#10B981",
+            color: "#ffffff",
+            fontWeight: "500",
+            borderRadius: "12px",
+            padding: "16px 24px",
+            fontSize: "14px",
+          },
+          iconTheme: {
+            primary: "#ffffff",
+            secondary: "#10B981",
+          },
+        }
       );
-      navigate(`/instructor/courses/${courseId}/edit?tab=curriculum`);
+      
+      // Navigate after a short delay to show the toast
+      setTimeout(() => {
+        navigate(`/instructor/courses/${courseId}/edit?tab=curriculum`);
+      }, 1000);
     } catch (error) {
       console.error("Error saving lesson:", error);
-      toast.error("Failed to save lesson. Please try again.");
+      toast.error(
+        (error as any)?.response?.data?.message || "❌ Failed to save lesson. Please try again.",
+        {
+          duration: 6000,
+          style: {
+            background: "#EF4444",
+            color: "#ffffff",
+            fontWeight: "500",
+            borderRadius: "12px",
+            padding: "16px 24px",
+            fontSize: "14px",
+          },
+          iconTheme: {
+            primary: "#ffffff",
+            secondary: "#EF4444",
+          },
+        }
+      );
     } finally {
       setIsLoading(false);
     }

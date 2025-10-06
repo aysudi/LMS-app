@@ -1,4 +1,5 @@
 import { useEditor, EditorContent } from "@tiptap/react";
+import { useState } from "react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import Link from "@tiptap/extension-link";
@@ -19,6 +20,9 @@ import {
   FaQuoteRight,
   FaLink,
   FaUnlink,
+  FaTimes,
+  FaCheck,
+  FaExternalLinkAlt,
 } from "react-icons/fa";
 
 interface RichTextEditorProps {
@@ -32,6 +36,14 @@ interface ToolbarButtonProps {
   isActive: boolean;
   icon: React.ReactNode;
   tooltip: string;
+}
+
+interface LinkModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (url: string) => void;
+  selectedText: string;
+  currentUrl?: string;
 }
 
 const ToolbarButton: React.FC<ToolbarButtonProps> = ({
@@ -52,11 +64,96 @@ const ToolbarButton: React.FC<ToolbarButtonProps> = ({
   </button>
 );
 
+const LinkModal: React.FC<LinkModalProps> = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  selectedText,
+  currentUrl,
+}) => {
+  const [url, setUrl] = useState(currentUrl || "");
+
+  if (!isOpen) return null;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (url.trim()) {
+      onSubmit(url.trim());
+    }
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+            <FaExternalLinkAlt className="mr-2 text-indigo-600" />
+            Add Link
+          </h3>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <FaTimes />
+          </button>
+        </div>
+
+        <div className="mb-4">
+          <p className="text-sm text-gray-600 mb-2">Selected text:</p>
+          <div className="p-3 bg-gray-50 rounded-lg border">
+            <p className="text-sm font-medium text-gray-900">
+              "{selectedText}"
+            </p>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              URL
+            </label>
+            <input
+              type="url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="https://example.com"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+              autoFocus
+            />
+          </div>
+
+          <div className="flex space-x-3">
+            <button
+              type="submit"
+              disabled={!url.trim()}
+              className="flex-1 bg-indigo-600 text-white py-3 px-4 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center font-medium"
+            >
+              <FaCheck className="mr-2" />
+              Add Link
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 const RichTextEditor = ({
   content,
   onChange,
   placeholder = "Start writing...",
 }: RichTextEditorProps) => {
+  const [showLinkModal, setShowLinkModal] = useState(false);
+  const [selectedText, setSelectedText] = useState("");
+  const [currentLinkUrl, setCurrentLinkUrl] = useState("");
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -96,9 +193,14 @@ const RichTextEditor = ({
       }),
       Link.configure({
         openOnClick: false,
+        linkOnPaste: true,
+        autolink: true,
+        protocols: ["http", "https", "ftp", "mailto"],
         HTMLAttributes: {
           class:
             "text-indigo-600 hover:text-indigo-800 underline cursor-pointer",
+          target: "_blank",
+          rel: "noopener noreferrer",
         },
       }),
       Image.configure({
@@ -133,19 +235,63 @@ const RichTextEditor = ({
   }
 
   const addLink = () => {
-    const previousUrl = editor.getAttributes("link").href;
-    const url = window.prompt("URL", previousUrl);
+    const { from, to } = editor.state.selection;
+    const text = editor.state.doc.textBetween(from, to);
 
-    if (url === null) {
+    if (text === "") {
+      // Show a better error message
+      const errorDiv = document.createElement("div");
+      errorDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #FEF2F2;
+        border: 1px solid #FCA5A5;
+        color: #DC2626;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        z-index: 1000;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      `;
+      errorDiv.textContent = "Please select some text first to add a link";
+      document.body.appendChild(errorDiv);
+
+      setTimeout(() => {
+        document.body.removeChild(errorDiv);
+      }, 3000);
       return;
     }
 
-    if (url === "") {
+    const previousUrl = editor.getAttributes("link").href;
+    setSelectedText(text);
+    setCurrentLinkUrl(previousUrl || "");
+    setShowLinkModal(true);
+  };
+
+  const handleLinkSubmit = (url: string) => {
+    if (!url) {
       editor.chain().focus().extendMarkRange("link").unsetLink().run();
       return;
     }
 
-    editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
+    // Validate URL format
+    let validUrl = url;
+    if (!url.match(/^https?:\/\//)) {
+      validUrl = `https://${url}`;
+    }
+
+    editor
+      .chain()
+      .focus()
+      .extendMarkRange("link")
+      .setLink({ href: validUrl, target: "_blank" })
+      .run();
+  };
+
+  const removeLink = () => {
+    editor.chain().focus().unsetLink().run();
   };
 
   return (
@@ -170,18 +316,21 @@ const RichTextEditor = ({
             margin: 0.25rem 0;
           }
           .rich-text-editor .ProseMirror blockquote {
-            border-left: 4px solid #d1d5db;
-            padding-left: 1rem;
-            font-style: italic;
-            color: #6b7280;
-            margin: 1rem 0;
+            border-left: 4px solid #d1d5db !important;
+            padding-left: 1rem !important;
+            font-style: italic !important;
+            color: #6b7280 !important;
+            margin: 1rem 0 !important;
+            background-color: #f9fafb !important;
+            padding: 1rem !important;
+            border-radius: 0.375rem !important;
           }
           .rich-text-editor .ProseMirror a {
-            color: #4f46e5;
-            text-decoration: underline;
+            color: #4f46e5 !important;
+            text-decoration: underline !important;
           }
           .rich-text-editor .ProseMirror a:hover {
-            color: #3730a3;
+            color: #3730a3 !important;
           }
           .rich-text-editor .ProseMirror .is-editor-empty:first-child::before {
             color: #9ca3af;
@@ -282,7 +431,7 @@ const RichTextEditor = ({
             tooltip="Add Link"
           />
           <ToolbarButton
-            onClick={() => editor.chain().focus().unsetLink().run()}
+            onClick={removeLink}
             isActive={false}
             icon={<FaUnlink />}
             tooltip="Remove Link"
@@ -291,6 +440,14 @@ const RichTextEditor = ({
       </div>
 
       <EditorContent editor={editor} />
+
+      <LinkModal
+        isOpen={showLinkModal}
+        onClose={() => setShowLinkModal(false)}
+        onSubmit={handleLinkSubmit}
+        selectedText={selectedText}
+        currentUrl={currentLinkUrl}
+      />
     </div>
   );
 };
