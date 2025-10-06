@@ -154,20 +154,17 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
           (section) => section.id !== deleteConfirmation.sectionId
         );
         onUpdate({ sections: updatedSections });
-        toast.success(
-          "🗑️ Section deleted successfully",
-          {
-            duration: 3000,
-            style: {
-              background: "#10B981",
-              color: "#ffffff",
-              fontWeight: "500",
-              borderRadius: "12px",
-              padding: "16px 24px",
-              fontSize: "14px",
-            },
-          }
-        );
+        toast.success("🗑️ Section deleted successfully", {
+          duration: 3000,
+          style: {
+            background: "#10B981",
+            color: "#ffffff",
+            fontWeight: "500",
+            borderRadius: "12px",
+            padding: "16px 24px",
+            fontSize: "14px",
+          },
+        });
       } else if (
         deleteConfirmation.type === "lesson" &&
         deleteConfirmation.lessonId
@@ -184,20 +181,17 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
           return section;
         });
         onUpdate({ sections: updatedSections });
-        toast.success(
-          "🗑️ Lesson deleted successfully",
-          {
-            duration: 3000,
-            style: {
-              background: "#10B981",
-              color: "#ffffff",
-              fontWeight: "500",
-              borderRadius: "12px",
-              padding: "16px 24px",
-              fontSize: "14px",
-            },
-          }
-        );
+        toast.success("🗑️ Lesson deleted successfully", {
+          duration: 3000,
+          style: {
+            background: "#10B981",
+            color: "#ffffff",
+            fontWeight: "500",
+            borderRadius: "12px",
+            padding: "16px 24px",
+            fontSize: "14px",
+          },
+        });
       }
     } catch (error) {
       console.error("Error deleting:", error);
@@ -303,11 +297,11 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
       setEditModal(null);
       const isUpdate = editModal?.data;
       const isSection = editModal?.type === "section";
-      
+
       toast.success(
-        isUpdate 
-          ? `✨ ${isSection ? 'Section' : 'Lesson'} updated successfully!`
-          : `🎉 ${isSection ? 'Section' : 'Lesson'} created successfully!`,
+        isUpdate
+          ? `✨ ${isSection ? "Section" : "Lesson"} updated successfully!`
+          : `🎉 ${isSection ? "Section" : "Lesson"} created successfully!`,
         {
           duration: 4000,
           style: {
@@ -326,24 +320,21 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
       );
     } catch (error) {
       console.error("Error in handleSave:", error);
-      toast.error(
-        "❌ Something went wrong. Please try again.",
-        {
-          duration: 6000,
-          style: {
-            background: "#EF4444",
-            color: "#ffffff",
-            fontWeight: "500",
-            borderRadius: "12px",
-            padding: "16px 24px",
-            fontSize: "14px",
-          },
-          iconTheme: {
-            primary: "#ffffff",
-            secondary: "#EF4444",
-          },
-        }
-      );
+      toast.error("❌ Something went wrong. Please try again.", {
+        duration: 6000,
+        style: {
+          background: "#EF4444",
+          color: "#ffffff",
+          fontWeight: "500",
+          borderRadius: "12px",
+          padding: "16px 24px",
+          fontSize: "14px",
+        },
+        iconTheme: {
+          primary: "#ffffff",
+          secondary: "#EF4444",
+        },
+      });
     }
   };
 
@@ -547,7 +538,7 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
                                       <div className="p-4 flex justify-center">
                                         <button
                                           onClick={() =>
-                                            handleAddLesson(section.id)
+                                            handleAddLesson(section._id)
                                           }
                                           className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                                         >
