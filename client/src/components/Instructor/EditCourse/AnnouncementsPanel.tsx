@@ -36,27 +36,46 @@ interface AnnouncementsPanelProps {
 interface AnnouncementModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (announcement: Omit<Announcement, "id" | "publishedAt" | "readBy">) => void;
+  onSave: (
+    announcement: Omit<Announcement, "id" | "publishedAt" | "readBy">
+  ) => void;
   announcement?: Announcement;
 }
 
 const priorityConfig = {
   low: { color: "text-gray-600", bg: "bg-gray-100", icon: FaInfo },
   medium: { color: "text-blue-600", bg: "bg-blue-100", icon: FaInfo },
-  high: { color: "text-orange-600", bg: "bg-orange-100", icon: FaExclamationTriangle },
-  urgent: { color: "text-red-600", bg: "bg-red-100", icon: FaExclamationTriangle },
+  high: {
+    color: "text-orange-600",
+    bg: "bg-orange-100",
+    icon: FaExclamationTriangle,
+  },
+  urgent: {
+    color: "text-red-600",
+    bg: "bg-red-100",
+    icon: FaExclamationTriangle,
+  },
 };
 
-const AnnouncementModal = ({ isOpen, onClose, onSave, announcement }: AnnouncementModalProps) => {
+const AnnouncementModal = ({
+  isOpen,
+  onClose,
+  onSave,
+  announcement,
+}: AnnouncementModalProps) => {
   const [title, setTitle] = useState(announcement?.title || "");
   const [content, setContent] = useState(announcement?.content || "");
   const [priority, setPriority] = useState(announcement?.priority || "medium");
-  const [targetAudience, setTargetAudience] = useState(announcement?.targetAudience || "enrolled");
-  const [isPublished, setIsPublished] = useState(announcement?.isPublished ?? true);
+  const [targetAudience, setTargetAudience] = useState(
+    announcement?.targetAudience || "enrolled"
+  );
+  const [isPublished, setIsPublished] = useState(
+    announcement?.isPublished ?? true
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!title.trim() || !content.trim()) {
       toast.error("Title and content are required");
       return;
@@ -77,8 +96,11 @@ const AnnouncementModal = ({ isOpen, onClose, onSave, announcement }: Announceme
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      
+      <div
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={onClose}
+      />
+
       <div className="flex min-h-screen items-center justify-center p-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
@@ -119,7 +141,11 @@ const AnnouncementModal = ({ isOpen, onClose, onSave, announcement }: Announceme
                 </label>
                 <select
                   value={priority}
-                  onChange={(e) => setPriority(e.target.value as "low" | "medium" | "high" | "urgent")}
+                  onChange={(e) =>
+                    setPriority(
+                      e.target.value as "low" | "medium" | "high" | "urgent"
+                    )
+                  }
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 >
                   <option value="low">Low Priority</option>
@@ -135,7 +161,11 @@ const AnnouncementModal = ({ isOpen, onClose, onSave, announcement }: Announceme
                 </label>
                 <select
                   value={targetAudience}
-                  onChange={(e) => setTargetAudience(e.target.value as "all" | "enrolled" | "completed")}
+                  onChange={(e) =>
+                    setTargetAudience(
+                      e.target.value as "all" | "enrolled" | "completed"
+                    )
+                  }
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 >
                   <option value="all">All Students</option>
@@ -199,7 +229,8 @@ const AnnouncementsPanel = ({}: AnnouncementsPanelProps) => {
     {
       id: "1",
       title: "Welcome to the Course!",
-      content: "<p>Welcome to this amazing course. We're excited to have you here!</p>",
+      content:
+        "<p>Welcome to this amazing course. We're excited to have you here!</p>",
       priority: "medium",
       targetAudience: "enrolled",
       isPublished: true,
@@ -209,7 +240,9 @@ const AnnouncementsPanel = ({}: AnnouncementsPanelProps) => {
   ]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | undefined>();
+  const [editingAnnouncement, setEditingAnnouncement] = useState<
+    Announcement | undefined
+  >();
 
   const handleCreateAnnouncement = () => {
     setEditingAnnouncement(undefined);
@@ -221,14 +254,16 @@ const AnnouncementsPanel = ({}: AnnouncementsPanelProps) => {
     setIsModalOpen(true);
   };
 
-  const handleSaveAnnouncement = (announcementData: Omit<Announcement, "id" | "publishedAt" | "readBy">) => {
+  const handleSaveAnnouncement = (
+    announcementData: Omit<Announcement, "id" | "publishedAt" | "readBy">
+  ) => {
     if (editingAnnouncement) {
       // Update existing
-      setAnnouncements(announcements.map(a => 
-        a.id === editingAnnouncement.id 
-          ? { ...a, ...announcementData }
-          : a
-      ));
+      setAnnouncements(
+        announcements.map((a) =>
+          a.id === editingAnnouncement.id ? { ...a, ...announcementData } : a
+        )
+      );
       toast.success("Announcement updated successfully!");
     } else {
       // Create new
@@ -244,14 +279,16 @@ const AnnouncementsPanel = ({}: AnnouncementsPanelProps) => {
   };
 
   const handleDeleteAnnouncement = (id: string) => {
-    setAnnouncements(announcements.filter(a => a.id !== id));
+    setAnnouncements(announcements.filter((a) => a.id !== id));
     toast.success("Announcement deleted successfully!");
   };
 
   const toggleAnnouncementStatus = (id: string) => {
-    setAnnouncements(announcements.map(a => 
-      a.id === id ? { ...a, isPublished: !a.isPublished } : a
-    ));
+    setAnnouncements(
+      announcements.map((a) =>
+        a.id === id ? { ...a, isPublished: !a.isPublished } : a
+      )
+    );
   };
 
   return (
@@ -278,7 +315,7 @@ const AnnouncementsPanel = ({}: AnnouncementsPanelProps) => {
       <div className="space-y-4">
         {announcements.map((announcement) => {
           const PriorityIcon = priorityConfig[announcement.priority].icon;
-          
+
           return (
             <motion.div
               key={announcement.id}
@@ -289,9 +326,15 @@ const AnnouncementsPanel = ({}: AnnouncementsPanelProps) => {
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center space-x-3 mb-3">
-                    <h3 className="font-semibold text-gray-900">{announcement.title}</h3>
-                    
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${priorityConfig[announcement.priority].bg} ${priorityConfig[announcement.priority].color}`}>
+                    <h3 className="font-semibold text-gray-900">
+                      {announcement.title}
+                    </h3>
+
+                    <span
+                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                        priorityConfig[announcement.priority].bg
+                      } ${priorityConfig[announcement.priority].color}`}
+                    >
                       <PriorityIcon className="mr-1 h-3 w-3" />
                       {announcement.priority}
                     </span>
@@ -308,7 +351,7 @@ const AnnouncementsPanel = ({}: AnnouncementsPanelProps) => {
                     )}
                   </div>
 
-                  <div 
+                  <div
                     className="text-gray-600 text-sm mb-3 prose prose-sm max-w-none"
                     dangerouslySetInnerHTML={{ __html: announcement.content }}
                   />
@@ -320,13 +363,14 @@ const AnnouncementsPanel = ({}: AnnouncementsPanelProps) => {
                     </div>
                     <div className="flex items-center">
                       <FaUsers className="mr-1" />
-                      {announcement.targetAudience === "all" ? "All students" : 
-                       announcement.targetAudience === "enrolled" ? "Enrolled students" : "Completed students"}
+                      {announcement.targetAudience === "all"
+                        ? "All students"
+                        : announcement.targetAudience === "enrolled"
+                        ? "Enrolled students"
+                        : "Completed students"}
                     </div>
                     {announcement.readBy.length > 0 && (
-                      <div>
-                        {announcement.readBy.length} read
-                      </div>
+                      <div>{announcement.readBy.length} read</div>
                     )}
                   </div>
                 </div>
@@ -343,14 +387,14 @@ const AnnouncementsPanel = ({}: AnnouncementsPanelProps) => {
                   >
                     {announcement.isPublished ? <FaEye /> : <FaEyeSlash />}
                   </button>
-                  
+
                   <button
                     onClick={() => handleEditAnnouncement(announcement)}
                     className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
                   >
                     <FaEdit />
                   </button>
-                  
+
                   <button
                     onClick={() => handleDeleteAnnouncement(announcement.id)}
                     className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
@@ -366,9 +410,12 @@ const AnnouncementsPanel = ({}: AnnouncementsPanelProps) => {
         {announcements.length === 0 && (
           <div className="text-center py-12">
             <FaBullhorn className="mx-auto h-16 w-16 text-gray-300 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No announcements yet</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No announcements yet
+            </h3>
             <p className="text-gray-500 mb-6">
-              Create your first announcement to keep students informed about important updates.
+              Create your first announcement to keep students informed about
+              important updates.
             </p>
             <button
               onClick={handleCreateAnnouncement}
