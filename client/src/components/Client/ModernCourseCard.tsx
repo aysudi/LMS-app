@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FaStar, FaUsers } from "react-icons/fa";
 import type { Course } from "../../types/course.type";
 import { useCardHover } from "../../hooks/useCardHover";
+import { getImageUrl } from "../../utils/mediaHelpers";
 import HoverPanel from "../Common/HoverPanel";
 import CourseFeatures from "../Common/CourseFeatures";
 import ActionButtons from "../Common/ActionButtons";
@@ -65,7 +66,7 @@ const ModernCourseCard: React.FC<ModernCourseCardProps> = ({
         <div className="relative h-48 overflow-hidden">
           <img
             src={
-              course.image ||
+              getImageUrl(course.image) ||
               "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&h=300&fit=crop"
             }
             alt={course.title}

@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { FaStar, FaHeart, FaShoppingCart } from "react-icons/fa";
 import type { Course } from "../../types/course.type";
 import { useCardHover } from "../../hooks/useCardHover";
+import { getImageUrl } from "../../utils/mediaHelpers";
 import HoverPanel from "../Common/HoverPanel";
 import CourseFeatures from "../Common/CourseFeatures";
 import FreeCourseActionButtons from "../Common/FreeCourseActionButtons";
@@ -52,7 +53,7 @@ const FreeCourseCard: React.FC<FreeCourseCardProps> = ({
         <div className="relative">
           <img
             src={
-              course.image ||
+              getImageUrl(course.image) ||
               "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&h=200&fit=crop"
             }
             alt={course.title}

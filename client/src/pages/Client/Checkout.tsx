@@ -19,6 +19,7 @@ import {
 import { stripePromise, stripeConfig } from "../../utils/stripe";
 import StripePaymentForm from "../../components/Common/StripePaymentForm";
 import type { CreateOrderRequest } from "../../services/payment.service";
+import { getImageUrl } from "../../utils/mediaHelpers";
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -409,7 +410,7 @@ const Checkout = () => {
                   {selectedCourses.map((course) => (
                     <div key={course.id} className="flex items-start space-x-3">
                       <img
-                        src={course.image}
+                        src={getImageUrl(course.image)}
                         alt={course.title}
                         className="w-16 h-12 object-cover rounded"
                       />

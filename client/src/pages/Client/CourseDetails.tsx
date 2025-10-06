@@ -28,6 +28,7 @@ import {
 } from "react-icons/fa";
 import { useSnackbar } from "notistack";
 import { useCourse } from "../../hooks/useCourseQueries";
+import { getImageUrl, getVideoUrl } from "../../utils/mediaHelpers";
 import { useToggleWishlist, useIsInWishlist } from "../../hooks/useWishlist";
 import { useAuthContext } from "../../context/AuthContext";
 import { useAddToCart, useIsInCart } from "../../hooks/useCart";
@@ -69,7 +70,7 @@ const CoursePreviewCard: React.FC<{
       <div className="relative aspect-video bg-gray-100">
         {course.image ? (
           <img
-            src={course.image}
+            src={getImageUrl(course.image)}
             alt={course.title}
             className="w-full h-full object-cover"
           />
@@ -735,7 +736,7 @@ const CourseDetails = () => {
       <AnimatePresence>
         {isVideoModalOpen && course.videoPromo && (
           <VideoModal
-            videoUrl={course.videoPromo}
+            videoUrl={getVideoUrl(course.videoPromo)}
             onClose={() => setIsVideoModalOpen(false)}
           />
         )}
