@@ -84,7 +84,7 @@ const LinkModal: React.FC<LinkModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/70 bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900 flex items-center">
@@ -93,7 +93,7 @@ const LinkModal: React.FC<LinkModalProps> = ({
           </h3>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
           >
             <FaTimes />
           </button>
@@ -127,7 +127,7 @@ const LinkModal: React.FC<LinkModalProps> = ({
             <button
               type="submit"
               disabled={!url.trim()}
-              className="flex-1 bg-indigo-600 text-white py-3 px-4 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center font-medium"
+              className="flex-1 bg-indigo-600 text-white py-3 px-4 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center font-medium cursor-pointer"
             >
               <FaCheck className="mr-2" />
               Add Link
@@ -135,7 +135,7 @@ const LinkModal: React.FC<LinkModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              className="px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
             >
               Cancel
             </button>

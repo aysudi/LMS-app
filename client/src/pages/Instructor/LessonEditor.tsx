@@ -111,24 +111,21 @@ const LessonEditor = () => {
     setVideoFile(file);
 
     // Show success toast for video upload
-    toast.success(
-      `📹 Video "${file.name}" uploaded successfully!`,
-      {
-        duration: 3000,
-        style: {
-          background: "#8B5CF6",
-          color: "#ffffff",
-          fontWeight: "500",
-          borderRadius: "12px",
-          padding: "16px 24px",
-          fontSize: "14px",
-        },
-        iconTheme: {
-          primary: "#ffffff",
-          secondary: "#8B5CF6",
-        },
-      }
-    );
+    toast.success(`📹 Video "${file.name}" uploaded successfully!`, {
+      duration: 3000,
+      style: {
+        background: "#8B5CF6",
+        color: "#ffffff",
+        fontWeight: "500",
+        borderRadius: "12px",
+        padding: "16px 24px",
+        fontSize: "14px",
+      },
+      iconTheme: {
+        primary: "#ffffff",
+        secondary: "#8B5CF6",
+      },
+    });
 
     // Create preview URL
     const videoElement = document.createElement("video");
@@ -261,7 +258,7 @@ const LessonEditor = () => {
           },
         }
       );
-      
+
       // Navigate after a short delay to show the toast
       setTimeout(() => {
         navigate(`/instructor/courses/${courseId}/edit?tab=curriculum`);
@@ -269,7 +266,8 @@ const LessonEditor = () => {
     } catch (error) {
       console.error("Error saving lesson:", error);
       toast.error(
-        (error as any)?.response?.data?.message || "❌ Failed to save lesson. Please try again.",
+        (error as any)?.response?.data?.message ||
+          "❌ Failed to save lesson. Please try again.",
         {
           duration: 6000,
           style: {
@@ -432,7 +430,7 @@ const LessonEditor = () => {
                       type="file"
                       accept="video/*"
                       onChange={handleVideoChange}
-                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 "
                     />
                   </div>
                 </div>
@@ -453,7 +451,7 @@ const LessonEditor = () => {
                 </h2>
                 <button
                   onClick={addResource}
-                  className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
+                  className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium cursor-pointer"
                 >
                   <FaPlus className="mr-2" />
                   Add Resource
@@ -501,7 +499,7 @@ const LessonEditor = () => {
                     />
                     <button
                       onClick={() => removeResource(resource.id)}
-                      className="text-red-600 hover:text-red-700 p-2"
+                      className="text-red-600 hover:text-red-700 p-2 cursor-pointer"
                     >
                       <FaTrash />
                     </button>
@@ -531,7 +529,7 @@ const LessonEditor = () => {
                 </h2>
                 <button
                   onClick={addQuizQuestion}
-                  className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
+                  className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium cursor-pointer"
                 >
                   <FaPlus className="mr-2" />
                   Add Question
@@ -550,7 +548,7 @@ const LessonEditor = () => {
                       </h3>
                       <button
                         onClick={() => removeQuizQuestion(question.id)}
-                        className="text-red-600 hover:text-red-700 p-1"
+                        className="text-red-600 hover:text-red-700 p-1 cursor-pointer"
                       >
                         <FaTrash />
                       </button>
