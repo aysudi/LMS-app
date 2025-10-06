@@ -22,7 +22,6 @@ const MediaPanel = ({ course, onUpdate }: MediaPanelProps) => {
     if (file) {
       const previewUrl = URL.createObjectURL(file);
       setPreviewImage(previewUrl);
-      // Update the UI with preview
       onUpdate({
         image: {
           url: previewUrl,
@@ -38,7 +37,6 @@ const MediaPanel = ({ course, onUpdate }: MediaPanelProps) => {
     if (file) {
       const previewUrl = URL.createObjectURL(file);
       setPreviewVideo(previewUrl);
-      // Update the UI with preview
       onUpdate({
         videoPromo: {
           url: previewUrl,
