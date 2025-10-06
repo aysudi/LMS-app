@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { toast } from "react-hot-toast";
+// import { toast } from "react-hot-toast";
 import {
   FaArrowLeft,
   FaSave,
@@ -17,6 +17,7 @@ import {
 import type { Lesson, Section } from "../../types/course.type";
 import RichTextEditor from "../../components/UI/RichTextEditor";
 import { useCourse } from "../../hooks/useCourseQueries";
+import { enqueueSnackbar } from "notistack";
 
 interface QuizQuestion {
   id: string;
@@ -41,7 +42,11 @@ const LessonEditor = () => {
   const lessonId = searchParams.get("lessonId");
 
   // Fetch course data
-  const { data: courseData, isLoading: courseLoading } = useCourse(courseId!);
+  const {
+    data: courseData,
+    isLoading: courseLoading,
+    refetch: refetchCourse,
+  } = useCourse(courseId!);
 
   // Form state
   const [title, setTitle] = useState("");
@@ -54,65 +59,93 @@ const LessonEditor = () => {
   const [quiz, setQuiz] = useState<QuizQuestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Get current section
+  // Get current section for display
   const currentSection = courseData?.data.sections.find(
     (s: Section) => s.id === sectionId
   );
-  const currentLesson = currentSection?.lessons.find(
-    (l: Lesson) => l.id === lessonId
-  );
 
   useEffect(() => {
-    if (currentLesson && lessonId) {
-      // Editing existing lesson
-      setTitle(currentLesson.title);
-      setDescription(currentLesson.description || "");
-      setVideoPreview(currentLesson.video?.url || "");
-      setDuration(Math.floor(currentLesson.duration / 60)); // Convert to minutes
-      setIsPreview(currentLesson.isPreview);
-
-      // Set resources
-      setResources(
-        currentLesson.resources?.map((r, index) => ({
-          id: `resource-${index}`,
-          name: r.name,
-          url: r.url,
-          type: r.type,
-        })) || []
+    if (courseData && lessonId) {
+      const section = courseData?.data.sections.find(
+        (s: Section) => s.id === sectionId
       );
+      const lesson = section?.lessons.find((l: Lesson) => l.id === lessonId);
 
-      // Set quiz
-      setQuiz(
-        currentLesson.quiz?.map((q, index) => ({
-          id: `question-${index}`,
-          question: q.question,
-          options: [...q.options],
-          correctAnswer: q.correctAnswer,
-        })) || []
-      );
+      if (lesson) {
+        // Editing existing lesson - populate all fields
+        setTitle(lesson.title || "");
+        setDescription(lesson.description || "");
+
+        // Handle video
+        if (lesson.video?.url) {
+          setVideoPreview(lesson.video.url);
+        }
+
+        setDuration(lesson.duration ? Math.floor(lesson.duration / 60) : 0);
+        setIsPreview(lesson.isPreview || false);
+
+        // Set resources
+        if (lesson.resources && Array.isArray(lesson.resources)) {
+          setResources(
+            lesson.resources.map((r, index) => ({
+              id: `resource-${index}`,
+              name: r.name || "",
+              url: r.url || "",
+              type: r.type || "pdf",
+            }))
+          );
+        }
+
+        // Set quiz
+        if (lesson.quiz && Array.isArray(lesson.quiz)) {
+          setQuiz(
+            lesson.quiz.map((q, index) => ({
+              id: `question-${index}`,
+              question: q.question || "",
+              options: Array.isArray(q.options)
+                ? [...q.options]
+                : ["", "", "", ""],
+              correctAnswer: q.correctAnswer || 0,
+            }))
+          );
+        }
+      }
+    } else if (!lessonId) {
+      // Creating new lesson - reset all fields
+      setTitle("");
+      setDescription("");
+      setVideoFile(null);
+      setVideoPreview("");
+      setDuration(0);
+      setIsPreview(false);
+      setResources([]);
+      setQuiz([]);
     }
-  }, [currentLesson, lessonId]);
+  }, [courseData, lessonId, sectionId]);
 
   const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     if (!file.type.startsWith("video/")) {
-      toast.error("Please select a video file");
+      enqueueSnackbar("Please select a video file", { variant: "error" });
       return;
     }
 
     if (file.size > 500 * 1024 * 1024) {
       // 500MB
-      toast.error("Video size should be less than 500MB");
+      enqueueSnackbar("Video size should be less than 500MB", {
+        variant: "error",
+      });
       return;
     }
 
     setVideoFile(file);
 
     // Show success toast for video upload
-    toast.success(`📹 Video "${file.name}" uploaded successfully!`, {
-      duration: 3000,
+    enqueueSnackbar(`📹 Video "${file.name}" uploaded successfully!`, {
+      variant: "success",
+      autoHideDuration: 3000,
       style: {
         background: "#8B5CF6",
         color: "#ffffff",
@@ -120,10 +153,6 @@ const LessonEditor = () => {
         borderRadius: "12px",
         padding: "16px 24px",
         fontSize: "14px",
-      },
-      iconTheme: {
-        primary: "#ffffff",
-        secondary: "#8B5CF6",
       },
     });
 
@@ -160,7 +189,9 @@ const LessonEditor = () => {
   const handleResourceFileChange = (id: string, file: File) => {
     if (file.size > 50 * 1024 * 1024) {
       // 50MB
-      toast.error("File size should be less than 50MB");
+      enqueueSnackbar("File size should be less than 50MB", {
+        variant: "error",
+      });
       return;
     }
 
@@ -200,18 +231,32 @@ const LessonEditor = () => {
 
   const handleSave = async () => {
     if (!title.trim()) {
-      toast.error("Lesson title is required");
+      enqueueSnackbar("Lesson title is required", { variant: "error" });
       return;
     }
 
     if (!videoFile && !videoPreview) {
-      toast.error("Please upload a video for this lesson");
+      enqueueSnackbar("Please upload a video for this lesson", {
+        variant: "error",
+      });
       return;
     }
 
     setIsLoading(true);
     try {
-      // Prepare lesson data for API
+      // Prepare lesson data for API with proper quiz validation
+      const validQuiz = quiz.filter(
+        (q) =>
+          q.question &&
+          q.question.trim() &&
+          Array.isArray(q.options) &&
+          q.options.length >= 2 &&
+          q.options.every((opt: string) => opt && opt.trim()) &&
+          typeof q.correctAnswer === "number" &&
+          q.correctAnswer >= 0 &&
+          q.correctAnswer < q.options.length
+      );
+
       const lessonDataForAPI = {
         title,
         description,
@@ -219,7 +264,7 @@ const LessonEditor = () => {
         isPreview,
         video: videoFile, // Pass the File directly
         resources: resources.filter((r) => r.file), // Only include resources with files
-        quiz: quiz.filter((q) => q.question.trim() !== ""), // Only include questions with content
+        quiz: validQuiz, // Only include valid quiz questions
       };
 
       if (lessonId) {
@@ -237,13 +282,17 @@ const LessonEditor = () => {
         await createLesson(courseId!, sectionId!, lessonDataForAPI as any);
       }
 
+      // Refresh course data to show new lesson
+      await refetchCourse();
+
       // Success toast with custom styling
-      toast.success(
+      enqueueSnackbar(
         lessonId
           ? "✨ Lesson updated successfully!"
           : "🎉 Lesson created successfully!",
         {
-          duration: 4000,
+          variant: "success",
+          autoHideDuration: 4000,
           style: {
             background: "#10B981",
             color: "#ffffff",
@@ -252,24 +301,22 @@ const LessonEditor = () => {
             padding: "16px 24px",
             fontSize: "14px",
           },
-          iconTheme: {
-            primary: "#ffffff",
-            secondary: "#10B981",
-          },
         }
       );
 
-      // Navigate after a short delay to show the toast
+      localStorage.setItem("refreshCurriculum", "true");
+
       setTimeout(() => {
         navigate(`/instructor/courses/${courseId}/edit?tab=curriculum`);
-      }, 1000);
+      }, 1500);
     } catch (error) {
       console.error("Error saving lesson:", error);
-      toast.error(
+      enqueueSnackbar(
         (error as any)?.response?.data?.message ||
           "❌ Failed to save lesson. Please try again.",
         {
-          duration: 6000,
+          variant: "error",
+          autoHideDuration: 6000,
           style: {
             background: "#EF4444",
             color: "#ffffff",
@@ -277,10 +324,6 @@ const LessonEditor = () => {
             borderRadius: "12px",
             padding: "16px 24px",
             fontSize: "14px",
-          },
-          iconTheme: {
-            primary: "#ffffff",
-            secondary: "#EF4444",
           },
         }
       );

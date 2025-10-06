@@ -71,13 +71,28 @@ export const createLesson = async (
     });
   }
 
-  // Add quiz data if present - only add if there are actual questions
+  // Add quiz data if present - only add if there are actual questions with valid structure
   if (
     lessonData.quiz &&
     Array.isArray(lessonData.quiz) &&
     lessonData.quiz.length > 0
   ) {
-    formData.append("quiz", JSON.stringify(lessonData.quiz));
+    // Filter out incomplete quiz questions
+    const validQuiz = lessonData.quiz.filter(
+      (q: any) =>
+        q.question &&
+        q.question.trim() &&
+        Array.isArray(q.options) &&
+        q.options.length >= 2 &&
+        q.options.every((opt: string) => opt && opt.trim()) &&
+        typeof q.correctAnswer === "number" &&
+        q.correctAnswer >= 0 &&
+        q.correctAnswer < q.options.length
+    );
+
+    if (validQuiz.length > 0) {
+      formData.append("quiz", JSON.stringify(validQuiz));
+    }
   }
 
   const response = await api.post(`/api/lessons`, formData, {
@@ -91,7 +106,7 @@ export const createLesson = async (
 // Update lesson
 export const updateLesson = async (
   courseId: string,
-  sectionId: string,
+  _sectionId: string,
   lessonId: string,
   updateData: Partial<Lesson>
 ): Promise<LessonResponse> => {
@@ -133,7 +148,7 @@ export const updateLesson = async (
 
   // Regular JSON update if no files
   const response = await api.put(
-    `/api/courses/${courseId}/sections/${sectionId}/lessons/${lessonId}`,
+    `/api/lessons/${courseId}/lesson/${lessonId}`,
     updateData
   );
   return response.data;
@@ -142,11 +157,11 @@ export const updateLesson = async (
 // Delete lesson
 export const deleteLesson = async (
   courseId: string,
-  sectionId: string,
+  _sectionId: string,
   lessonId: string
 ): Promise<{ success: boolean; message: string }> => {
   const response = await api.delete(
-    `/api/courses/${courseId}/sections/${sectionId}/lessons/${lessonId}`
+    `/api/lessons/${courseId}/lesson/${lessonId}`
   );
   return response.data;
 };
