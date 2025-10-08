@@ -208,7 +208,7 @@ const CreateCourse = () => {
       formDataToSend.append("videoPromo", formData.videoPromo);
     }
 
-    // Handle arrays with JSON stringification
+    // Handle arrays - filter out empty values and send as JSON
     ["tags", "learningObjectives", "requirements", "targetAudience"].forEach(
       (key) => {
         if (formData[key as keyof CourseFormData]) {
@@ -282,19 +282,61 @@ const CreateCourse = () => {
           <button
             onClick={() => {
               const formDataToSend = new FormData();
-              Object.entries(formData).forEach(([key, value]) => {
-                if (key === "image" || key === "videoPromo") {
-                  if (value) formDataToSend.append(key, value as File);
-                } else if (Array.isArray(value)) {
-                  // Simply filter empty strings and trim values
-                  const processed = value
-                    .map((v) => String(v).trim())
-                    .filter(Boolean);
-                  formDataToSend.append(key, JSON.stringify(processed));
-                } else {
-                  formDataToSend.append(key, String(value));
+
+              // Handle files
+              if (formData.image instanceof File) {
+                formDataToSend.append("image", formData.image);
+              }
+              if (formData.videoPromo instanceof File) {
+                formDataToSend.append("videoPromo", formData.videoPromo);
+              }
+
+              // Handle arrays
+              [
+                "tags",
+                "learningObjectives",
+                "requirements",
+                "targetAudience",
+              ].forEach((key) => {
+                if (formData[key as keyof CourseFormData]) {
+                  const value = formData[key as keyof CourseFormData];
+                  if (Array.isArray(value)) {
+                    const processed = value.filter(Boolean).map(String);
+                    formDataToSend.append(key, JSON.stringify(processed));
+                  }
                 }
               });
+
+              // Handle sections array
+              if (formData.sections.length > 0) {
+                formDataToSend.append(
+                  "sections",
+                  JSON.stringify(formData.sections)
+                );
+              }
+
+              // Handle other fields
+              const simpleFields = [
+                "title",
+                "description",
+                "shortDescription",
+                "category",
+                "subcategory",
+                "level",
+                "originalPrice",
+                "discountPrice",
+                "language",
+                "certificateProvided",
+                "isFree",
+              ];
+
+              simpleFields.forEach((field) => {
+                const value = formData[field as keyof CourseFormData];
+                if (value !== undefined && value !== null) {
+                  formDataToSend.append(field, String(value));
+                }
+              });
+
               formDataToSend.append("isPublished", "false");
               createCourseMutation.mutate(formDataToSend);
             }}

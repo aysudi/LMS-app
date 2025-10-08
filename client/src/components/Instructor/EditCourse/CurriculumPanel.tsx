@@ -229,7 +229,7 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
 
         if (editModal.data) {
           await handleUpdateSection(
-            (editModal.data as Section).id,
+            (editModal.data as Section)._id,
             sectionData
           );
         } else {

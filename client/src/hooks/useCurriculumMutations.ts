@@ -19,23 +19,6 @@ export const useCurriculumOperations = (courseId: string) => {
     sectionData: Partial<Section> & { title: string }
   ) => {
     try {
-      // Create FormData for file upload
-      const formData = new FormData();
-
-      // Add section data
-      formData.append("title", sectionData.title);
-      if (sectionData.description) {
-        formData.append("description", sectionData.description);
-      }
-      if (sectionData.order) {
-        formData.append("order", sectionData.order.toString());
-      }
-
-      // Add thumbnail if present
-      if (sectionData.thumbnail?.file) {
-        formData.append("thumbnail", sectionData.thumbnail.file);
-      }
-
       await createSection(sectionData);
 
       // Invalidate course queries to reflect new section
@@ -53,25 +36,6 @@ export const useCurriculumOperations = (courseId: string) => {
     updateData: Partial<Section>
   ) => {
     try {
-      // Create FormData for file upload
-      const formData = new FormData();
-
-      // Add section data
-      if (updateData.title) {
-        formData.append("title", updateData.title);
-      }
-      if (updateData.description) {
-        formData.append("description", updateData.description);
-      }
-      if (updateData.order !== undefined) {
-        formData.append("order", updateData.order.toString());
-      }
-
-      // Add thumbnail if present
-      if (updateData.thumbnail?.file) {
-        formData.append("thumbnail", updateData.thumbnail.file);
-      }
-
       await updateSection({ sectionId, updateData });
 
       // Invalidate course queries to reflect updated section

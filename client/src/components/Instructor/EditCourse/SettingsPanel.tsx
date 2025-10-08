@@ -32,6 +32,7 @@ const SettingsPanel = ({ course, onUpdate }: SettingsPanelProps) => {
     language: course.language,
     level: course.level,
     certificateProvided: course.certificateProvided,
+    isPublished: course.isPublished,
   });
 
   const handleChange = (field: string, value: any) => {
@@ -253,6 +254,55 @@ const SettingsPanel = ({ course, onUpdate }: SettingsPanelProps) => {
                       <p className="text-sm text-purple-700 font-medium">
                         ✓ Certificate enabled - Students will receive a
                         completion certificate
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Publication Status */}
+          <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl p-6 border border-indigo-100">
+            <h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+              <div className="p-2 bg-indigo-100 rounded-lg mr-3">
+                <FaGlobe className="text-indigo-600" />
+              </div>
+              Publication Status
+            </h3>
+            <div className="bg-white rounded-lg p-6 border border-indigo-200">
+              <div className="flex items-start space-x-4">
+                <input
+                  type="checkbox"
+                  id="isPublished"
+                  checked={formData.isPublished}
+                  onChange={(e) =>
+                    handleChange("isPublished", e.target.checked)
+                  }
+                  className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded mt-1"
+                />
+                <div className="flex-1">
+                  <label
+                    htmlFor="isPublished"
+                    className="block text-base font-medium text-gray-900 mb-2"
+                  >
+                    Publish this course
+                  </label>
+                  <p className="text-sm text-gray-600 leading-relaxed mb-3">
+                    When published, your course will be visible to students and
+                    available for enrollment. Unpublished courses remain in
+                    draft mode and are only visible to you.
+                  </p>
+                  {formData.isPublished ? (
+                    <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                      <p className="text-sm text-green-700 font-medium">
+                        ✓ Course is published and available to students
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
+                      <p className="text-sm text-amber-700 font-medium">
+                        ⚠ Course is in draft mode - not visible to students
                       </p>
                     </div>
                   )}

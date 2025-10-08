@@ -36,6 +36,9 @@ interface FormState {
   category: string;
   subcategory: string;
   tags: string[];
+  learningObjectives: string[];
+  requirements: string[];
+  targetAudience: string[];
 }
 
 const BasicInfoPanel = ({ course, onUpdate }: BasicInfoPanelProps) => {
@@ -47,6 +50,9 @@ const BasicInfoPanel = ({ course, onUpdate }: BasicInfoPanelProps) => {
     category: course.category || "",
     subcategory: course.subcategory || "",
     tags: [...(course.tags || [])],
+    learningObjectives: [...(course.learningObjectives || [])],
+    requirements: [...(course.requirements || [])],
+    targetAudience: [...(course.targetAudience || [])],
   });
 
   const handleInputChange = (field: keyof FormState, value: string) => {
@@ -396,6 +402,186 @@ const BasicInfoPanel = ({ course, onUpdate }: BasicInfoPanelProps) => {
               Maximum number of tags reached (10/10)
             </p>
           )}
+        </div>
+        {/* Learning Objectives */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Learning Objectives
+          </label>
+          <p className="text-sm text-gray-500 mb-3">
+            What will students learn in this course? (Add at least 4 objectives)
+          </p>
+          <div className="space-y-2">
+            {formData.learningObjectives.map((objective, index) => (
+              <div key={index} className="flex space-x-2">
+                <input
+                  type="text"
+                  value={objective}
+                  onChange={(e) => {
+                    const newObjectives = [...formData.learningObjectives];
+                    newObjectives[index] = e.target.value;
+                    setFormData((prev) => ({
+                      ...prev,
+                      learningObjectives: newObjectives,
+                    }));
+                    onUpdate({ learningObjectives: newObjectives });
+                  }}
+                  placeholder={`Learning objective ${index + 1}`}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newObjectives = formData.learningObjectives.filter(
+                      (_, i) => i !== index
+                    );
+                    setFormData((prev) => ({
+                      ...prev,
+                      learningObjectives: newObjectives,
+                    }));
+                    onUpdate({ learningObjectives: newObjectives });
+                  }}
+                  className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                >
+                  <FaTimes />
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => {
+                const newObjectives = [...formData.learningObjectives, ""];
+                setFormData((prev) => ({
+                  ...prev,
+                  learningObjectives: newObjectives,
+                }));
+                onUpdate({ learningObjectives: newObjectives });
+              }}
+              className="w-full px-4 py-2 border-2 border-dashed border-gray-300 text-gray-600 rounded-lg hover:border-indigo-500 hover:text-indigo-600 transition-all duration-200"
+            >
+              + Add Learning Objective
+            </button>
+          </div>
+        </div>
+        {/* Requirements */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Requirements
+          </label>
+          <p className="text-sm text-gray-500 mb-3">
+            What do students need to know or have before taking this course?
+          </p>
+          <div className="space-y-2">
+            {formData.requirements.map((requirement, index) => (
+              <div key={index} className="flex space-x-2">
+                <input
+                  type="text"
+                  value={requirement}
+                  onChange={(e) => {
+                    const newRequirements = [...formData.requirements];
+                    newRequirements[index] = e.target.value;
+                    setFormData((prev) => ({
+                      ...prev,
+                      requirements: newRequirements,
+                    }));
+                    onUpdate({ requirements: newRequirements });
+                  }}
+                  placeholder={`Requirement ${index + 1}`}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newRequirements = formData.requirements.filter(
+                      (_, i) => i !== index
+                    );
+                    setFormData((prev) => ({
+                      ...prev,
+                      requirements: newRequirements,
+                    }));
+                    onUpdate({ requirements: newRequirements });
+                  }}
+                  className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                >
+                  <FaTimes />
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => {
+                const newRequirements = [...formData.requirements, ""];
+                setFormData((prev) => ({
+                  ...prev,
+                  requirements: newRequirements,
+                }));
+                onUpdate({ requirements: newRequirements });
+              }}
+              className="w-full px-4 py-2 border-2 border-dashed border-gray-300 text-gray-600 rounded-lg hover:border-indigo-500 hover:text-indigo-600 transition-all duration-200"
+            >
+              + Add Requirement
+            </button>
+          </div>
+        </div>
+        {/* Target Audience */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Target Audience
+          </label>
+          <p className="text-sm text-gray-500 mb-3">
+            Who is this course for? Define your ideal student.
+          </p>
+          <div className="space-y-2">
+            {formData.targetAudience.map((audience, index) => (
+              <div key={index} className="flex space-x-2">
+                <input
+                  type="text"
+                  value={audience}
+                  onChange={(e) => {
+                    const newAudience = [...formData.targetAudience];
+                    newAudience[index] = e.target.value;
+                    setFormData((prev) => ({
+                      ...prev,
+                      targetAudience: newAudience,
+                    }));
+                    onUpdate({ targetAudience: newAudience });
+                  }}
+                  placeholder={`Target audience ${index + 1}`}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newAudience = formData.targetAudience.filter(
+                      (_, i) => i !== index
+                    );
+                    setFormData((prev) => ({
+                      ...prev,
+                      targetAudience: newAudience,
+                    }));
+                    onUpdate({ targetAudience: newAudience });
+                  }}
+                  className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                >
+                  <FaTimes />
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => {
+                const newAudience = [...formData.targetAudience, ""];
+                setFormData((prev) => ({
+                  ...prev,
+                  targetAudience: newAudience,
+                }));
+                onUpdate({ targetAudience: newAudience });
+              }}
+              className="w-full px-4 py-2 border-2 border-dashed border-gray-300 text-gray-600 rounded-lg hover:border-indigo-500 hover:text-indigo-600 transition-all duration-200"
+            >
+              + Add Target Audience
+            </button>
+          </div>
         </div>
       </div>
     </div>
