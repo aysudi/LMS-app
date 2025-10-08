@@ -19,6 +19,7 @@ import {
   lessonUploadErrorHandler,
   processLessonUploads,
 } from "../middlewares/lesson-upload.middleware";
+import { processLessonData } from "../middlewares/lesson-data.middleware";
 
 const lessonRouter = Router();
 
@@ -39,6 +40,7 @@ lessonRouter.post(
   lessonUploadMiddleware,
   lessonUploadErrorHandler,
   processLessonUploads,
+  processLessonData,
   (req: any, res: any) => addLesson(req, res)
 );
 
@@ -49,6 +51,7 @@ lessonRouter.put(
   lessonUploadMiddleware,
   lessonUploadErrorHandler,
   processLessonUploads,
+  processLessonData,
   (req: any, res: any) => updateLesson(req, res)
 );
 

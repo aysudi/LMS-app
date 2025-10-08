@@ -238,7 +238,9 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
       } else if (editModal?.type === "lesson" && editModal.sectionId) {
         const currentSections = [...(course.sections || [])];
         const sectionIndex = currentSections.findIndex(
-          (section: Section) => section.id === editModal.sectionId
+          (section: Section) =>
+            section._id === editModal.sectionId ||
+            section.id === editModal.sectionId
         );
 
         if (sectionIndex === -1) {
@@ -258,10 +260,12 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
             duration: formData.duration || 0,
             isPreview: formData.isPreview || false,
           };
-          await handleUpdateSection(section.id, {
+          await handleUpdateSection(section._id || section.id, {
             ...section,
             lessons: section.lessons.map((l) =>
-              l.id === updatedLesson.id ? updatedLesson : l
+              l._id === updatedLesson._id || l.id === updatedLesson.id
+                ? updatedLesson
+                : l
             ),
           });
         } else {
@@ -284,7 +288,7 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
             updatedAt: new Date().toISOString(),
           };
 
-          await handleUpdateSection(section.id, {
+          await handleUpdateSection(section._id || section.id, {
             ...section,
             lessons: [...(section.lessons || []), newLesson],
           });

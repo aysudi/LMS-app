@@ -38,8 +38,8 @@ export const useCurriculumOperations = (courseId: string) => {
     try {
       await updateSection({ sectionId, updateData });
 
-      // Invalidate course queries to reflect updated section
-      queryClient.invalidateQueries({
+      // Force complete cache refresh to ensure UI updates immediately
+      await queryClient.refetchQueries({
         queryKey: courseQueryKeys.detail(courseId),
       });
     } catch (error) {

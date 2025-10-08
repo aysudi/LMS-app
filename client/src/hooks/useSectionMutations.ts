@@ -75,7 +75,9 @@ export const useUpdateSection = (
             data: {
               ...oldData.data,
               sections: oldData.data.sections.map((section: Section) =>
-                section.id === sectionId ? data.data : section
+                section._id === sectionId || section.id === sectionId
+                  ? data.data
+                  : section
               ),
             },
           };
