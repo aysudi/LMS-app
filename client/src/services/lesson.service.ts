@@ -48,10 +48,10 @@ export const createLesson = async (
   const formData = new FormData();
 
   // Add lesson basic data
-  formData.append("title", lessonData.title);
-  formData.append("description", lessonData.description);
-  formData.append("duration", lessonData.duration.toString());
-  formData.append("isPreview", lessonData.isPreview.toString());
+  formData.append("title", lessonData.title || "");
+  formData.append("description", lessonData.description || "");
+  formData.append("duration", (lessonData.duration || 0).toString());
+  formData.append("isPreview", (lessonData.isPreview || false).toString());
   formData.append("course", courseId);
   formData.append("section", sectionId);
 
@@ -112,44 +112,41 @@ export const updateLesson = async (
 ): Promise<LessonResponse> => {
   let config = {};
 
-  // If there are files to upload, use FormData
-  if (updateData.video?.file || updateData.resources?.some((r) => r.file)) {
-    const formData = new FormData();
+  // Always use FormData for lesson updates to ensure consistent processing
+  const formData = new FormData();
 
-    if (updateData.video?.file instanceof File) {
-      formData.append("video", updateData.video.file);
-      delete updateData.video.file;
-    }
-
-    if (updateData.resources?.length) {
-      updateData.resources.forEach((resource: any) => {
-        if (resource.file instanceof File) {
-          formData.append("resources", resource.file);
-          delete resource.file;
-        }
-      });
-    }
-
-    formData.append("data", JSON.stringify(updateData));
-
-    config = {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    };
-
-    const response = await api.put(
-      `/api/lessons/${courseId}/lesson/${lessonId}`,
-      formData,
-      config
-    );
-    return response.data;
+  // Handle video file if present
+  if (updateData.video?.file instanceof File) {
+    formData.append("video", updateData.video.file);
+    // Remove the file from updateData before JSON stringifying
+    const videoData = { ...updateData.video };
+    delete videoData.file;
+    updateData.video = videoData;
   }
 
-  // Regular JSON update if no files
+  // Handle resource files if present
+  if (updateData.resources?.length) {
+    updateData.resources.forEach((resource: any) => {
+      if (resource.file instanceof File) {
+        formData.append("resources", resource.file);
+        delete resource.file;
+      }
+    });
+  }
+
+  // Always append the data as JSON for consistent server-side processing
+  formData.append("data", JSON.stringify(updateData));
+
+  config = {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  };
+
   const response = await api.put(
     `/api/lessons/${courseId}/lesson/${lessonId}`,
-    updateData
+    formData,
+    config
   );
   return response.data;
 };
