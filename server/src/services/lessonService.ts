@@ -57,6 +57,16 @@ export const createLessonService = async (
   // Handle uploaded files
   const lessonPayload = { ...lessonData };
 
+  // Parse quiz data if it's a JSON string
+  if (lessonData.quiz && typeof lessonData.quiz === "string") {
+    try {
+      lessonPayload.quiz = JSON.parse(lessonData.quiz);
+    } catch (error) {
+      console.error("Error parsing quiz data:", error);
+      lessonPayload.quiz = [];
+    }
+  }
+
   if (lessonData.uploadedFiles?.video) {
     lessonPayload.video = {
       url: lessonData.uploadedFiles.video.url,
@@ -144,6 +154,16 @@ export const updateLessonService = async (
 
   // Handle file updates
   const updatePayload = { ...lessonData };
+
+  // Parse quiz data if it's a JSON string
+  if (updatePayload.quiz && typeof updatePayload.quiz === "string") {
+    try {
+      updatePayload.quiz = JSON.parse(updatePayload.quiz);
+    } catch (error) {
+      console.error("Error parsing quiz data:", error);
+      updatePayload.quiz = [];
+    }
+  }
 
   // Handle video update
   if (updatePayload.uploadedFiles?.video) {

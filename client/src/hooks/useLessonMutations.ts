@@ -92,6 +92,11 @@ export const useDeleteLesson = (
       queryClient.invalidateQueries({
         queryKey: ["lessons", sectionId],
       });
+
+      // Also invalidate all sections for this course
+      queryClient.invalidateQueries({
+        queryKey: ["sections", courseId],
+      });
     },
     ...options,
   });

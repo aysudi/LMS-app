@@ -105,23 +105,11 @@ export const useDeleteSection = (
   return useMutation({
     mutationFn: (sectionId) =>
       sectionService.deleteSection(courseId, sectionId),
-    onSuccess: (_, sectionId) => {
-      // Update course details to remove deleted section
-      queryClient.setQueryData(
-        courseQueryKeys.detail(courseId),
-        (oldData: any) => {
-          if (!oldData) return oldData;
-          return {
-            ...oldData,
-            data: {
-              ...oldData.data,
-              sections: oldData.data.sections.filter(
-                (section: Section) => section.id !== sectionId
-              ),
-            },
-          };
-        }
-      );
+    onSuccess: () => {
+      // Invalidate course details to force refetch
+      queryClient.invalidateQueries({
+        queryKey: courseQueryKeys.detail(courseId),
+      });
 
       // Invalidate sections query
       queryClient.invalidateQueries({

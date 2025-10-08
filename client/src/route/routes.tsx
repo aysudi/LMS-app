@@ -32,6 +32,7 @@ import InstructorEarnings from "../pages/Instructor/Earnings";
 import CreateCourse from "../pages/Instructor/CreateCourse";
 import EditCourse from "../pages/Instructor/EditCourse";
 import LessonEditor from "../pages/Instructor/LessonEditor";
+import LessonEditPage from "../pages/Instructor/LessonEditPage";
 
 const ROUTES = [
   //client routes
@@ -185,8 +186,12 @@ const ROUTES = [
         element: <EditCourse />,
       },
       {
-        path: "courses/:courseId/lessons/editor",
+        path: "courses/:courseId/lessons/create",
         element: <LessonEditor />,
+      },
+      {
+        path: "courses/:courseId/lessons/:lessonId/edit",
+        element: <LessonEditPage />,
       },
       {
         path: "students",

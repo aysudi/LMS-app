@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaArrowLeft, FaSave } from "react-icons/fa";
-import { toast } from "react-hot-toast";
 import type { Course } from "../../types/course.type";
 import { useCourse, useUpdateCourse } from "../../hooks/useCourseQueries";
 import LoadingSpinner from "../../components/UI/LoadingSpinner";
@@ -12,6 +11,7 @@ import CurriculumPanel from "../../components/Instructor/EditCourse/CurriculumPa
 import MediaPanel from "../../components/Instructor/EditCourse/MediaPanel";
 import AnnouncementsPanel from "../../components/Instructor/EditCourse/AnnouncementsPanel";
 import SettingsPanel from "../../components/Instructor/EditCourse/SettingsPanel";
+import { enqueueSnackbar } from "notistack";
 
 const TABS = [
   { id: "basic-info", label: "Basic Information", icon: "📝" },
@@ -37,11 +37,13 @@ const EditCourse = () => {
   // Update course mutation
   const updateCourseMutation = useUpdateCourse({
     onSuccess: () => {
-      toast.success("Course updated successfully!");
+      enqueueSnackbar("Course updated successfully!", { variant: "success" });
       setUnsavedChanges(false);
     },
     onError: (error) => {
-      toast.error("Failed to update course. Please try again.");
+      enqueueSnackbar("Failed to update course. Please try again.", {
+        variant: "error",
+      });
       console.error("Error updating course:", error);
     },
   });
