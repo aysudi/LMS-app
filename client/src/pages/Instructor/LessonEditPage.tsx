@@ -153,8 +153,9 @@ const LessonEditPage = () => {
     );
   };
 
-  const removeResource = (id: string) => {
-    setResources(resources.filter((r) => r.id !== id));
+  const removeResource = async (id: string) => {
+    const filteredResources = resources.filter((r) => r.id != id);
+    setResources(filteredResources);
   };
 
   const handleResourceFileChange = (id: string, file: File) => {
@@ -221,26 +222,23 @@ const LessonEditPage = () => {
           q.correctAnswer >= 0 &&
           q.correctAnswer < q.options.length
       );
-
       const updateData: any = {
         title,
-        description,
+        description: description,
         duration: duration * 60, // Convert to seconds
         isPreview,
         quiz: validQuiz,
+        resources,
       };
 
-      // Add video if changed
       if (videoFile) {
         updateData.video = { file: videoFile };
       }
 
-      // Add resources if any have new files
       const newResources = resources.filter((r) => r.file);
       if (newResources.length > 0) {
         updateData.resources = newResources;
       }
-
       await updateLessonMutation.mutateAsync({
         lessonId: lessonId!,
         updateData,
@@ -479,75 +477,115 @@ const LessonEditPage = () => {
                 </button>
               </div>
 
-              <div className="space-y-4">
-                {resources.map((resource) => (
-                  <div
-                    key={resource.id}
-                    className="flex items-center space-x-4 p-4 border border-gray-200 rounded-xl"
-                  >
-                    <div className="flex-1">
-                      {resource.url ? (
-                        <div className="space-y-2">
-                          <div className="text-sm text-gray-600">
-                            Current: {resource.name}
-                          </div>
-                          <input
-                            type="file"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file)
-                                handleResourceFileChange(resource.id, file);
-                            }}
-                            className="w-full text-sm"
-                            accept=".pdf,.doc,.docx,.zip,.txt"
-                          />
-                          <div className="text-xs text-gray-500">
-                            Leave empty to keep current file
-                          </div>
-                        </div>
-                      ) : (
-                        <input
-                          type="file"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file)
-                              handleResourceFileChange(resource.id, file);
-                          }}
-                          className="w-full text-sm"
-                          accept=".pdf,.doc,.docx,.zip,.txt"
-                        />
-                      )}
-                    </div>
-                    <select
-                      value={resource.type}
-                      onChange={(e) =>
-                        updateResource(resource.id, {
-                          type: e.target.value as any,
-                        })
-                      }
-                      className="px-3 py-2 border border-gray-200 rounded-lg text-sm"
+              {resources.length > 0 ? (
+                <div className="grid gap-4">
+                  {resources.map((resource, index) => (
+                    <div
+                      key={resource.id}
+                      className="p-4 bg-gray-50 rounded-xl border border-gray-200"
                     >
-                      <option value="pdf">PDF</option>
-                      <option value="zip">ZIP</option>
-                      <option value="doc">Document</option>
-                      <option value="other">Other</option>
-                    </select>
-                    <button
-                      onClick={() => removeResource(resource.id)}
-                      className="text-red-600 hover:text-red-700 p-2"
-                    >
-                      <FaTrash />
-                    </button>
-                  </div>
-                ))}
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="font-medium text-gray-900">
+                          Resource {index + 1}
+                        </h3>
+                        <button
+                          onClick={() => removeResource(resource.id)}
+                          className="text-red-500 hover:text-red-700 transition-colors"
+                        >
+                          <FaTrash className="text-sm" />
+                        </button>
+                      </div>
 
-                {resources.length === 0 && (
-                  <div className="text-center py-8 text-gray-500">
-                    <FaFileUpload className="mx-auto h-12 w-12 text-gray-300 mb-2" />
-                    <p>No additional resources</p>
-                  </div>
-                )}
-              </div>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            File
+                          </label>
+                          {resource.url ? (
+                            <div className="space-y-2">
+                              <div className="text-sm text-gray-600 p-2 bg-white rounded border">
+                                Current: {resource.name}
+                              </div>
+                              <input
+                                type="file"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file)
+                                    handleResourceFileChange(resource.id, file);
+                                }}
+                                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                                accept=".pdf,.doc,.docx,.zip,.txt"
+                              />
+                              <div className="text-xs text-gray-500">
+                                Leave empty to keep current file
+                              </div>
+                            </div>
+                          ) : (
+                            <input
+                              type="file"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file)
+                                  handleResourceFileChange(resource.id, file);
+                              }}
+                              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                              accept=".pdf,.doc,.docx,.zip,.txt"
+                            />
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Type
+                          </label>
+                          <select
+                            value={resource.type}
+                            onChange={(e) =>
+                              updateResource(resource.id, {
+                                type: e.target.value as any,
+                              })
+                            }
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          >
+                            <option value="pdf">PDF Document</option>
+                            <option value="zip">ZIP Archive</option>
+                            <option value="doc">Document</option>
+                            <option value="other">Other</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Name (Optional)
+                          </label>
+                          <input
+                            type="text"
+                            value={resource.name}
+                            onChange={(e) =>
+                              updateResource(resource.id, {
+                                name: e.target.value,
+                              })
+                            }
+                            placeholder="Custom name for this resource"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12 text-gray-500">
+                  <FaFileUpload className="mx-auto h-16 w-16 text-gray-300 mb-4" />
+                  <h3 className="text-lg font-medium text-gray-400 mb-2">
+                    No Resources Added
+                  </h3>
+                  <p className="text-gray-400">
+                    Add supplementary materials like PDFs, documents, or other
+                    files to enhance your lesson.
+                  </p>
+                </div>
+              )}
             </motion.div>
 
             {/* Quiz Section */}

@@ -76,13 +76,18 @@ export const useUpdateSection = (
               ...oldData.data,
               sections: oldData.data.sections.map((section: Section) =>
                 section._id === sectionId || section.id === sectionId
-                  ? data.data
+                  ? { ...section, ...data.data }
                   : section
               ),
             },
           };
         }
       );
+
+      // Force immediate invalidation and refetch
+      queryClient.invalidateQueries({
+        queryKey: courseQueryKeys.detail(courseId),
+      });
 
       // Invalidate sections query
       queryClient.invalidateQueries({
