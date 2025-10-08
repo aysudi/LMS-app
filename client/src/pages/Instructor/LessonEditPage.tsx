@@ -41,13 +41,8 @@ const LessonEditPage = () => {
   const sectionId = searchParams.get("sectionId");
   const { lessonId } = useParams();
 
-  console.log("lessonId:", lessonId);
-  console.log("sectionId:", sectionId);
-  console.log("courseId:", courseId);
-
   const { data: courseData, isLoading: courseLoading } = useCourse(courseId!);
 
-  // Mutation hook for updating
   const updateLessonMutation = useUpdateLesson(courseId!, sectionId!);
 
   const [title, setTitle] = useState("");
@@ -67,7 +62,6 @@ const LessonEditPage = () => {
     (l: Lesson) => l._id === lessonId
   );
 
-  // Load existing lesson data
   useEffect(() => {
     if (currentLesson) {
       setTitle(currentLesson.title || "");
@@ -248,7 +242,7 @@ const LessonEditPage = () => {
       }
 
       await updateLessonMutation.mutateAsync({
-        lessonId,
+        lessonId: lessonId!,
         updateData,
       });
 
