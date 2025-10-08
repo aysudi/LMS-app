@@ -13,11 +13,11 @@ import {
   FaEyeSlash,
   FaSpinner,
 } from "react-icons/fa";
-import type { Section } from "../../types/course.type";
+import type { Lesson, Section } from "../../types/course.type";
 import RichTextEditor from "../../components/UI/RichTextEditor";
 import { useCourse } from "../../hooks/useCourseQueries";
 import { enqueueSnackbar } from "notistack";
-import { useCreateLesson } from "../../hooks/useLessonMutations";
+import { useUpdateLesson } from "../../hooks/useLessonMutations";
 
 interface QuizQuestion {
   id: string;
@@ -34,16 +34,21 @@ interface LessonResource {
   type: "pdf" | "zip" | "doc" | "other";
 }
 
-const LessonEditor = () => {
+const LessonEditPage = () => {
   const navigate = useNavigate();
   const { courseId } = useParams();
   const [searchParams] = useSearchParams();
   const sectionId = searchParams.get("sectionId");
+  const { lessonId } = useParams();
+
+  console.log("lessonId:", lessonId);
+  console.log("sectionId:", sectionId);
+  console.log("courseId:", courseId);
 
   const { data: courseData, isLoading: courseLoading } = useCourse(courseId!);
 
-  // Mutation hook for creation only
-  const createLessonMutation = useCreateLesson(courseId!, sectionId!);
+  // Mutation hook for updating
+  const updateLessonMutation = useUpdateLesson(courseId!, sectionId!);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -53,23 +58,57 @@ const LessonEditor = () => {
   const [isPreview, setIsPreview] = useState(false);
   const [resources, setResources] = useState<LessonResource[]>([]);
   const [quiz, setQuiz] = useState<QuizQuestion[]>([]);
-  const isLoading = createLessonMutation.isPending;
 
   const currentSection = courseData?.data.sections.find(
     (s: Section) => s._id === sectionId
   );
 
-  // Initialize empty form - this is create-only
+  const currentLesson = currentSection?.lessons.find(
+    (l: Lesson) => l._id === lessonId
+  );
+
+  // Load existing lesson data
   useEffect(() => {
-    setTitle("");
-    setDescription("");
-    setVideoFile(null);
-    setVideoPreview("");
-    setDuration(0);
-    setIsPreview(false);
-    setResources([]);
-    setQuiz([]);
-  }, []);
+    if (currentLesson) {
+      setTitle(currentLesson.title || "");
+      setDescription(currentLesson.description || "");
+
+      if (currentLesson.video?.url) {
+        setVideoPreview(currentLesson.video.url);
+      }
+
+      setDuration(
+        currentLesson.duration ? Math.floor(currentLesson.duration / 60) : 0
+      );
+      setIsPreview(currentLesson.isPreview || false);
+
+      if (currentLesson.resources && Array.isArray(currentLesson.resources)) {
+        setResources(
+          currentLesson.resources.map((r: any, index: number) => ({
+            id: `resource-${index}`,
+            name: r.name || "",
+            url: r.url || "",
+            type: r.type || "pdf",
+          }))
+        );
+      }
+
+      if (currentLesson.quiz && Array.isArray(currentLesson.quiz)) {
+        setQuiz(
+          currentLesson.quiz.map((q: any, index: number) => ({
+            id: `question-${index}`,
+            question: q.question || "",
+            options: Array.isArray(q.options)
+              ? [...q.options]
+              : ["", "", "", ""],
+            correctAnswer: q.correctAnswer || 0,
+          }))
+        );
+      }
+    }
+  }, [currentLesson]);
+
+  const isLoading = updateLessonMutation.isPending;
 
   const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -92,16 +131,9 @@ const LessonEditor = () => {
     enqueueSnackbar(`📹 Video "${file.name}" uploaded successfully!`, {
       variant: "success",
       autoHideDuration: 3000,
-      style: {
-        background: "#8B5CF6",
-        color: "#ffffff",
-        fontWeight: "500",
-        borderRadius: "12px",
-        padding: "16px 24px",
-        fontSize: "14px",
-      },
     });
 
+    // Auto-detect duration
     const videoElement = document.createElement("video");
     videoElement.preload = "metadata";
     videoElement.onloadedmetadata = () => {
@@ -133,13 +165,11 @@ const LessonEditor = () => {
 
   const handleResourceFileChange = (id: string, file: File) => {
     if (file.size > 50 * 1024 * 1024) {
-      // 50MB
       enqueueSnackbar("File size should be less than 50MB", {
         variant: "error",
       });
       return;
     }
-
     updateResource(id, { file, name: file.name });
   };
 
@@ -180,10 +210,8 @@ const LessonEditor = () => {
       return;
     }
 
-    if (!videoFile && !videoPreview) {
-      enqueueSnackbar("Please upload a video for this lesson", {
-        variant: "error",
-      });
+    if (!lessonId) {
+      enqueueSnackbar("Lesson ID is missing", { variant: "error" });
       return;
     }
 
@@ -200,49 +228,47 @@ const LessonEditor = () => {
           q.correctAnswer < q.options.length
       );
 
-      const lessonDataForAPI = {
+      const updateData: any = {
         title,
         description,
         duration: duration * 60, // Convert to seconds
         isPreview,
-        video: videoFile, // Pass the File directly
-        resources: resources.filter((r) => r.file),
         quiz: validQuiz,
       };
 
-      await createLessonMutation.mutateAsync(lessonDataForAPI as any);
+      // Add video if changed
+      if (videoFile) {
+        updateData.video = { file: videoFile };
+      }
 
-      // Course data will be automatically updated via query invalidation
+      // Add resources if any have new files
+      const newResources = resources.filter((r) => r.file);
+      if (newResources.length > 0) {
+        updateData.resources = newResources;
+      }
 
-      enqueueSnackbar("🎉 Lesson created successfully!", {
+      await updateLessonMutation.mutateAsync({
+        lessonId,
+        updateData,
+      });
+
+      enqueueSnackbar("✨ Lesson updated successfully!", {
         variant: "success",
         autoHideDuration: 4000,
-        style: {
-          background: "#10B981",
-          color: "#ffffff",
-          fontWeight: "500",
-          borderRadius: "12px",
-          padding: "16px 24px",
-          fontSize: "14px",
-        },
       });
-      navigate(`/instructor/courses/${courseId}/edit?tab=curriculum`);
+
+      // Navigate back after short delay
+      setTimeout(() => {
+        navigate(`/instructor/courses/${courseId}/edit?tab=curriculum`);
+      }, 1000);
     } catch (error) {
-      console.error("Error creating lesson:", error);
+      console.error("Error updating lesson:", error);
       enqueueSnackbar(
         (error as any)?.response?.data?.message ||
-          "❌ Failed to create lesson. Please try again.",
+          "❌ Failed to update lesson. Please try again.",
         {
           variant: "error",
           autoHideDuration: 6000,
-          style: {
-            background: "#EF4444",
-            color: "#ffffff",
-            fontWeight: "500",
-            borderRadius: "12px",
-            padding: "16px 24px",
-            fontSize: "14px",
-          },
         }
       );
     }
@@ -252,6 +278,29 @@ const LessonEditor = () => {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <FaSpinner className="animate-spin text-4xl text-indigo-600" />
+      </div>
+    );
+  }
+
+  if (!currentLesson) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Lesson Not Found
+          </h2>
+          <p className="text-gray-600">
+            The lesson you're trying to edit doesn't exist.
+          </p>
+          <button
+            onClick={() =>
+              navigate(`/instructor/courses/${courseId}/edit?tab=curriculum`)
+            }
+            className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+          >
+            Back to Curriculum
+          </button>
+        </div>
       </div>
     );
   }
@@ -275,7 +324,7 @@ const LessonEditor = () => {
               </button>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">
-                  Create New Lesson
+                  Edit Lesson
                 </h1>
                 <p className="text-sm text-gray-500">
                   {currentSection?.title} • {courseData?.data.title}
@@ -293,7 +342,7 @@ const LessonEditor = () => {
               ) : (
                 <FaSave className="mr-2" />
               )}
-              Create Lesson
+              Update Lesson
             </button>
           </div>
         </div>
@@ -365,17 +414,36 @@ const LessonEditor = () => {
                       <span className="text-sm text-gray-600">
                         Duration: {duration} minutes
                       </span>
+                      {!videoFile && (
+                        <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                          Current Video
+                        </span>
+                      )}
                     </div>
-                    <button
-                      onClick={() => {
-                        setVideoFile(null);
-                        setVideoPreview("");
-                        setDuration(0);
-                      }}
-                      className="text-red-600 hover:text-red-700 text-sm font-medium"
-                    >
-                      Remove Video
-                    </button>
+                    <div className="space-x-2">
+                      <label className="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 text-sm">
+                        Change Video
+                        <input
+                          type="file"
+                          accept="video/*"
+                          onChange={handleVideoChange}
+                          className="hidden"
+                        />
+                      </label>
+                      <button
+                        onClick={() => {
+                          setVideoFile(null);
+                          if (currentLesson?.video?.url) {
+                            setVideoPreview(currentLesson.video.url);
+                          } else {
+                            setVideoPreview("");
+                          }
+                        }}
+                        className="text-red-600 hover:text-red-700 px-4 py-2 text-sm"
+                      >
+                        Reset
+                      </button>
+                    </div>
                   </div>
                 </div>
               ) : (
@@ -383,7 +451,7 @@ const LessonEditor = () => {
                   <FaVideo className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                   <div className="space-y-2">
                     <p className="text-sm text-gray-600">
-                      Upload your lesson video
+                      Upload replacement video
                     </p>
                     <input
                       type="file"
@@ -410,7 +478,7 @@ const LessonEditor = () => {
                 </h2>
                 <button
                   onClick={addResource}
-                  className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium cursor-pointer"
+                  className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
                 >
                   <FaPlus className="mr-2" />
                   Add Resource
@@ -424,15 +492,37 @@ const LessonEditor = () => {
                     className="flex items-center space-x-4 p-4 border border-gray-200 rounded-xl"
                   >
                     <div className="flex-1">
-                      <input
-                        type="text"
-                        value={resource.name}
-                        onChange={(e) =>
-                          updateResource(resource.id, { name: e.target.value })
-                        }
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
-                        placeholder="Resource name..."
-                      />
+                      {resource.url ? (
+                        <div className="space-y-2">
+                          <div className="text-sm text-gray-600">
+                            Current: {resource.name}
+                          </div>
+                          <input
+                            type="file"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file)
+                                handleResourceFileChange(resource.id, file);
+                            }}
+                            className="w-full text-sm"
+                            accept=".pdf,.doc,.docx,.zip,.txt"
+                          />
+                          <div className="text-xs text-gray-500">
+                            Leave empty to keep current file
+                          </div>
+                        </div>
+                      ) : (
+                        <input
+                          type="file"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file)
+                              handleResourceFileChange(resource.id, file);
+                          }}
+                          className="w-full text-sm"
+                          accept=".pdf,.doc,.docx,.zip,.txt"
+                        />
+                      )}
                     </div>
                     <select
                       value={resource.type}
@@ -448,17 +538,9 @@ const LessonEditor = () => {
                       <option value="doc">Document</option>
                       <option value="other">Other</option>
                     </select>
-                    <input
-                      type="file"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleResourceFileChange(resource.id, file);
-                      }}
-                      className="text-sm"
-                    />
                     <button
                       onClick={() => removeResource(resource.id)}
-                      className="text-red-600 hover:text-red-700 p-2 cursor-pointer"
+                      className="text-red-600 hover:text-red-700 p-2"
                     >
                       <FaTrash />
                     </button>
@@ -468,7 +550,7 @@ const LessonEditor = () => {
                 {resources.length === 0 && (
                   <div className="text-center py-8 text-gray-500">
                     <FaFileUpload className="mx-auto h-12 w-12 text-gray-300 mb-2" />
-                    <p>No resources added yet</p>
+                    <p>No additional resources</p>
                   </div>
                 )}
               </div>
@@ -488,7 +570,7 @@ const LessonEditor = () => {
                 </h2>
                 <button
                   onClick={addQuizQuestion}
-                  className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium cursor-pointer"
+                  className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
                 >
                   <FaPlus className="mr-2" />
                   Add Question
@@ -507,7 +589,7 @@ const LessonEditor = () => {
                       </h3>
                       <button
                         onClick={() => removeQuizQuestion(question.id)}
-                        className="text-red-600 hover:text-red-700 p-1 cursor-pointer"
+                        className="text-red-600 hover:text-red-700 p-1"
                       >
                         <FaTrash />
                       </button>
@@ -642,4 +724,4 @@ const LessonEditor = () => {
   );
 };
 
-export default LessonEditor;
+export default LessonEditPage;

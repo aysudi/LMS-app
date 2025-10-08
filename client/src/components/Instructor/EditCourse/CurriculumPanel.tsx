@@ -16,11 +16,9 @@ import {
   FaFile,
   FaQuestionCircle,
 } from "react-icons/fa";
-// import { toast } from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Section, Lesson, Course } from "../../../types/course.type";
 import { enqueueSnackbar } from "notistack";
-// import { toast } from "react-toastify";
 
 interface CurriculumPanelProps {
   course: Course;
@@ -138,13 +136,13 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
 
   const handleAddLesson = (sectionId: string) => {
     navigate(
-      `/instructor/courses/${course.id}/lessons/editor?sectionId=${sectionId}`
+      `/instructor/courses/${course.id}/lessons/create?sectionId=${sectionId}`
     );
   };
 
   const handleEditLesson = (sectionId: string, lessonId: string) => {
     navigate(
-      `/instructor/courses/${course.id}/lessons/editor?sectionId=${sectionId}&lessonId=${lessonId}`
+      `/instructor/courses/${course.id}/lessons/${lessonId}/edit?sectionId=${sectionId}`
     );
   };
 
@@ -160,11 +158,9 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
     if (!deleteConfirmation) return;
     try {
       if (deleteConfirmation.type === "section") {
-        // Call API to delete section
         await deleteSectionMutation.mutateAsync(deleteConfirmation.sectionId);
 
         enqueueSnackbar("🗑️ Section deleted successfully", {
-          // variant: "success",
           autoHideDuration: 3000,
           style: {
             background: "#10B981",
@@ -215,7 +211,6 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
   }) => {
     try {
       if (!formData.title.trim()) {
-        // toast.error("Title is required");
         enqueueSnackbar("Title is required", {
           variant: "error",
         });
@@ -233,15 +228,12 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
         };
 
         if (editModal.data) {
-          // Update existing section
           await handleUpdateSection(
             (editModal.data as Section).id,
             sectionData
           );
         } else {
-          // Create new section
           await handleAddSection(sectionData);
-          //   setExpandedSections((prev) => [...prev, sectionData.id]);
         }
       } else if (editModal?.type === "lesson" && editModal.sectionId) {
         const currentSections = [...(course.sections || [])];
@@ -259,7 +251,6 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
         const section = currentSections[sectionIndex];
 
         if (editModal.data && "_id" in editModal.data) {
-          // Edit existing lesson
           const updatedLesson = {
             ...(editModal.data as Lesson),
             title: formData.title.trim(),
@@ -514,8 +505,8 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
                                                       <button
                                                         onClick={() =>
                                                           handleEditLesson(
-                                                            section.id,
-                                                            lesson.id
+                                                            section._id,
+                                                            lesson._id
                                                           )
                                                         }
                                                         className="p-2 text-gray-400 hover:text-gray-500 cursor-pointer"
