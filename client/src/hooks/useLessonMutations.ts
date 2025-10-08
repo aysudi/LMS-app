@@ -52,8 +52,34 @@ export const useUpdateLesson = (
   return useMutation({
     mutationFn: ({ lessonId, updateData }) =>
       lessonService.updateLesson(courseId, sectionId, lessonId, updateData),
-    onSuccess: () => {
-      // Invalidate course details to reflect lesson changes
+    onSuccess: (data, { lessonId }) => {
+      // Update course details to reflect lesson changes immediately
+      queryClient.setQueryData(
+        courseQueryKeys.detail(courseId),
+        (oldData: any) => {
+          if (!oldData) return oldData;
+          return {
+            ...oldData,
+            data: {
+              ...oldData.data,
+              sections: oldData.data.sections.map((section: any) =>
+                section._id === sectionId
+                  ? {
+                      ...section,
+                      lessons: section.lessons.map((lesson: any) =>
+                        lesson._id === lessonId || lesson.id === lessonId
+                          ? { ...lesson, ...data.data }
+                          : lesson
+                      ),
+                    }
+                  : section
+              ),
+            },
+          };
+        }
+      );
+
+      // Force invalidation for immediate UI updates
       queryClient.invalidateQueries({
         queryKey: courseQueryKeys.detail(courseId),
       });
