@@ -152,10 +152,8 @@ export const updateLessonService = async (
     throw new Error("Lesson not found");
   }
 
-  // Handle file updates
   const updatePayload = { ...lessonData };
 
-  // Parse quiz data if it's a JSON string
   if (updatePayload.quiz && typeof updatePayload.quiz === "string") {
     try {
       updatePayload.quiz = JSON.parse(updatePayload.quiz);
@@ -165,9 +163,7 @@ export const updateLessonService = async (
     }
   }
 
-  // Handle video update
   if (updatePayload.uploadedFiles?.video) {
-    // Delete old video if exists
     if (lesson.video?.publicId) {
       await deleteFromCloudinary(lesson.video.publicId, "video");
     }
@@ -178,18 +174,16 @@ export const updateLessonService = async (
     };
   }
 
-  // Handle resources update
-  if (updatePayload.uploadedFiles?.resources) {
-    // Delete old resources if they're being replaced
-    if (lesson.resources?.length) {
-      await Promise.all(
-        lesson.resources.map((resource) =>
-          deleteFromCloudinary(resource.publicId, "raw")
-        )
-      );
-    }
+  let finalResources: any[] = [];
+  const payload = updatePayload as any; // Cast to any to handle dynamic properties
 
-    updatePayload.resources = updatePayload.uploadedFiles.resources.map(
+  if (payload.existingResources && Array.isArray(payload.existingResources)) {
+    finalResources = [...payload.existingResources];
+    console.log("Keeping existing resources:", finalResources.length);
+  }
+
+  if (updatePayload.uploadedFiles?.resources) {
+    const newUploadedResources = updatePayload.uploadedFiles.resources.map(
       (resource) => ({
         name: resource.name,
         url: resource.url,
@@ -197,17 +191,46 @@ export const updateLessonService = async (
         type: (resource.name.split(".").pop()?.toLowerCase() as any) || "other",
       })
     );
+    finalResources = [...finalResources, ...newUploadedResources];
+    console.log("Added new uploaded resources:", newUploadedResources.length);
   }
 
-  // Remove uploadedFiles from payload before saving
-  delete updatePayload.uploadedFiles;
+  if (lesson.resources?.length) {
+    const resourcesToDelete = lesson.resources.filter(
+      (oldResource) =>
+        !finalResources.some(
+          (newResource) => newResource.url === oldResource.url
+        )
+    );
 
-  // Update lesson
+    if (resourcesToDelete.length > 0) {
+      console.log(
+        "Deleting old resources from Cloudinary:",
+        resourcesToDelete.length
+      );
+      await Promise.all(
+        resourcesToDelete.map((resource) =>
+          deleteFromCloudinary(resource.publicId, "raw")
+        )
+      );
+    }
+  }
+
+  // Update lesson with final resources
+  updatePayload.resources = finalResources;
+
+  delete updatePayload.uploadedFiles;
+  delete payload.existingResources;
+
+  console.log("Final updatePayload:", updatePayload);
+
   Object.assign(lesson, updatePayload);
   await lesson.save();
 
   course.lastUpdated = new Date();
   await course.save();
+
+  console.log("lesson updated:", lesson);
 
   return lesson;
 };

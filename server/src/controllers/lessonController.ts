@@ -62,6 +62,13 @@ export const updateLesson = async (req: AuthRequest, res: Response) => {
     const instructorId = req.user!.userId;
     const lessonData = req.body;
 
+    console.log("Update lesson request received:");
+    console.log("- CourseId:", courseId);
+    console.log("- LessonId:", lessonId);
+    console.log("- InstructorId:", instructorId);
+    console.log("- Lesson data:", JSON.stringify(lessonData, null, 2));
+    console.log("- Files received:", req.files);
+
     const lesson = await updateLessonService(
       courseId,
       lessonId,
@@ -75,6 +82,7 @@ export const updateLesson = async (req: AuthRequest, res: Response) => {
       data: formatMongoData(lesson),
     });
   } catch (error: any) {
+    console.error("Error updating lesson:", error);
     res.status(400).json({
       success: false,
       message: error.message,

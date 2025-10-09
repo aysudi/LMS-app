@@ -1,5 +1,5 @@
 import { useEditor, EditorContent } from "@tiptap/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import Link from "@tiptap/extension-link";
@@ -230,6 +230,12 @@ const RichTextEditor = ({
     immediatelyRender: false,
   });
 
+  useEffect(() => {
+    if (editor && content !== editor.getHTML()) {
+      editor.commands.setContent(content);
+    }
+  }, [editor, content]);
+
   if (!editor) {
     return null;
   }
@@ -239,7 +245,6 @@ const RichTextEditor = ({
     const text = editor.state.doc.textBetween(from, to);
 
     if (text === "") {
-      // Show a better error message
       const errorDiv = document.createElement("div");
       errorDiv.style.cssText = `
         position: fixed;
@@ -276,7 +281,6 @@ const RichTextEditor = ({
       return;
     }
 
-    // Validate URL format
     let validUrl = url;
     if (!url.match(/^https?:\/\//)) {
       validUrl = `https://${url}`;

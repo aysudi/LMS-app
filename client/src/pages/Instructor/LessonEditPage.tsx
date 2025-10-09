@@ -127,7 +127,6 @@ const LessonEditPage = () => {
       autoHideDuration: 3000,
     });
 
-    // Auto-detect duration
     const videoElement = document.createElement("video");
     videoElement.preload = "metadata";
     videoElement.onloadedmetadata = () => {
@@ -142,15 +141,19 @@ const LessonEditPage = () => {
     const newResource: LessonResource = {
       id: `resource-${Date.now()}`,
       name: "",
-      type: "pdf",
+      type: "other", // Default to 'other' to avoid confusion
     };
     setResources([...resources, newResource]);
+    console.log("Added new resource:", newResource);
   };
 
   const updateResource = (id: string, updates: Partial<LessonResource>) => {
-    setResources(
-      resources.map((r) => (r.id === id ? { ...r, ...updates } : r))
+    console.log("Updating resource:", id, "with updates:", updates);
+    const updatedResources = resources.map((r) =>
+      r.id === id ? { ...r, ...updates } : r
     );
+    setResources(updatedResources);
+    console.log("All resources after update:", updatedResources);
   };
 
   const removeResource = async (id: string) => {
@@ -159,13 +162,28 @@ const LessonEditPage = () => {
   };
 
   const handleResourceFileChange = (id: string, file: File) => {
+    console.log(
+      "File selected:",
+      file.name,
+      "Type:",
+      file.type,
+      "Size:",
+      file.size
+    );
+
     if (file.size > 50 * 1024 * 1024) {
       enqueueSnackbar("File size should be less than 50MB", {
         variant: "error",
       });
       return;
     }
+
     updateResource(id, { file, name: file.name });
+    console.log("Updated resource with file:", {
+      id,
+      fileName: file.name,
+      fileType: file.type,
+    });
   };
 
   const addQuizQuestion = () => {
@@ -223,22 +241,57 @@ const LessonEditPage = () => {
           q.correctAnswer < q.options.length
       );
       const updateData: any = {
-        title,
+        title: title.trim(),
         description: description,
         duration: duration * 60, // Convert to seconds
         isPreview,
         quiz: validQuiz,
-        resources,
       };
+
+      console.log("Description value:", JSON.stringify(description));
 
       if (videoFile) {
         updateData.video = { file: videoFile };
       }
 
-      const newResources = resources.filter((r) => r.file);
+      // Separate existing and new resources
+      const existingResources = resources.filter((r) => r.url && !r.file); // Resources that already exist in DB
+      const newResources = resources.filter((r) => r.file && !r.url); // New resources to upload
+
+      // Include existing resources that should be kept (this tells server which ones to preserve)
+      updateData.existingResources = existingResources.map((r) => ({
+        name: r.name,
+        type: r.type,
+        url: r.url,
+      }));
+
+      // Include new resources for upload
       if (newResources.length > 0) {
-        updateData.resources = newResources;
+        updateData.resources = newResources.map((r) => ({
+          name: r.name || r.file?.name || "Untitled Resource",
+          type: r.type,
+          file: r.file,
+        }));
       }
+
+      console.log("Update data being sent:");
+      console.log("- Basic data:", {
+        title: updateData.title,
+        description: updateData.description,
+      });
+      console.log(
+        "- Existing resources to keep:",
+        updateData.existingResources
+      );
+      console.log(
+        "- New resources to upload:",
+        updateData.resources?.map((r: any) => ({
+          name: r.name,
+          type: r.type,
+          hasFile: !!r.file,
+        }))
+      );
+
       await updateLessonMutation.mutateAsync({
         lessonId: lessonId!,
         updateData,
@@ -249,7 +302,6 @@ const LessonEditPage = () => {
         autoHideDuration: 4000,
       });
 
-      // Navigate back after short delay
       setTimeout(() => {
         navigate(`/instructor/courses/${courseId}/edit?tab=curriculum`);
       }, 1000);
@@ -514,7 +566,7 @@ const LessonEditPage = () => {
                                     handleResourceFileChange(resource.id, file);
                                 }}
                                 className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
-                                accept=".pdf,.doc,.docx,.zip,.txt"
+                                accept=".pdf,.doc,.docx,.zip,.txt,.ppt,.pptx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.mp3,.mp4,.avi,.mov,.rar,.7z"
                               />
                               <div className="text-xs text-gray-500">
                                 Leave empty to keep current file
@@ -529,7 +581,7 @@ const LessonEditPage = () => {
                                   handleResourceFileChange(resource.id, file);
                               }}
                               className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
-                              accept=".pdf,.doc,.docx,.zip,.txt"
+                              accept=".pdf,.doc,.docx,.zip,.txt,.ppt,.pptx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.mp3,.mp4,.avi,.mov,.rar,.7z"
                             />
                           )}
                         </div>
