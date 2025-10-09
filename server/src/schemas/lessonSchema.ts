@@ -55,7 +55,17 @@ const lessonSchema = new mongoose.Schema(
         },
         type: {
           type: String,
-          enum: ["pdf", "zip", "doc", "other"],
+          enum: [
+            "pdf",
+            "doc",
+            "ppt",
+            "xls",
+            "zip",
+            "image",
+            "audio",
+            "video",
+            "other",
+          ],
           default: "other",
         },
       },

@@ -20,18 +20,45 @@ const lessonUpload = multer({
         cb(new Error("Only video files are allowed for lesson content!"));
       }
     } else if (file.fieldname === "resources") {
-      // Allow various resource file types (PDF, documents, etc.)
+      // Allow various resource file types (PDF, documents, images, audio, video, archives, etc.)
       const allowedMimeTypes = [
+        // Documents
         "application/pdf",
         "application/msword",
+        "application/docx",
+        "application/xlsx",
+        "application/pptx",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         "application/vnd.ms-excel",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         "application/vnd.ms-powerpoint",
         "application/vnd.openxmlformats-officedocument.presentationml.presentation",
         "text/plain",
+        "text/csv",
+        // Archives
         "application/zip",
         "application/x-zip-compressed",
+        "application/x-rar-compressed",
+        "application/x-7z-compressed",
+        // Images
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+        "image/gif",
+        "image/webp",
+        "image/svg+xml",
+        // Audio
+        "audio/mpeg",
+        "audio/mp3",
+        "audio/wav",
+        "audio/ogg",
+        "audio/aac",
+        // Video (for resource files, different from lesson video)
+        "video/mp4",
+        "video/avi",
+        "video/mov",
+        "video/wmv",
+        "video/mkv",
       ];
 
       if (allowedMimeTypes.includes(file.mimetype)) {
@@ -94,24 +121,49 @@ export const uploadResourceToCloudinary = async (
   mimeType: string
 ): Promise<{ url: string; publicId: string }> => {
   return new Promise((resolve, reject) => {
+    // Determine the appropriate resource type based on MIME type
+    let resourceType: "image" | "video" | "auto" | "raw" = "raw";
+    let transformation: any = {};
+
+    if (mimeType.startsWith("image/")) {
+      resourceType = "image";
+      transformation = {
+        quality: "auto:good",
+        format: "auto",
+      };
+    } else if (mimeType.startsWith("video/")) {
+      resourceType = "video";
+      transformation = {
+        quality: "auto:good",
+        format: "auto",
+      };
+    } else {
+      resourceType = "raw";
+    }
+
+    const uploadOptions: any = {
+      folder: "skillify/lessons/resources",
+      public_id: filename,
+      resource_type: resourceType,
+    };
+
+    // Add transformation only for images and videos
+    if (Object.keys(transformation).length > 0) {
+      uploadOptions.transformation = transformation;
+    }
+
     cloudinary.uploader
-      .upload_stream(
-        {
-          folder: "skillify/lessons/resources",
-          public_id: filename,
-          resource_type: "raw",
-        },
-        (error, result) => {
-          if (error) {
-            reject(error);
-          } else {
-            resolve({
-              url: result?.secure_url || "",
-              publicId: result?.public_id || "",
-            });
-          }
+      .upload_stream(uploadOptions, (error, result) => {
+        if (error) {
+          console.error("Cloudinary upload error:", error);
+          reject(error);
+        } else {
+          resolve({
+            url: result?.secure_url || "",
+            publicId: result?.public_id || "",
+          });
         }
-      )
+      })
       .end(buffer);
   });
 };
@@ -168,12 +220,26 @@ export const processLessonUploads = async (
 ) => {
   try {
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+    console.log(
+      "Processing lesson uploads - files received:",
+      Object.keys(files || {})
+    );
+    console.log(
+      "Files details:",
+      files?.resources?.map((f) => ({
+        name: f.originalname,
+        size: f.size,
+        type: f.mimetype,
+      }))
+    );
+
     const uploadedFiles: {
       video?: { url: string; publicId: string };
       resources?: Array<{ url: string; publicId: string; name: string }>;
     } = {};
 
     if (files?.video?.[0]) {
+      console.log("Processing video upload...");
       const videoFile = files.video[0];
       const timestamp = Date.now();
       const filename = `lesson-video-${timestamp}`;
@@ -183,11 +249,18 @@ export const processLessonUploads = async (
         filename
       );
       uploadedFiles.video = result;
+      console.log("Video uploaded successfully:", result);
     }
 
     if (files?.resources) {
+      console.log("Processing resource uploads...");
       uploadedFiles.resources = await Promise.all(
-        files.resources.map(async (file) => {
+        files.resources.map(async (file, index) => {
+          console.log(
+            `Uploading resource ${index + 1}: ${file.originalname} (${
+              file.mimetype
+            })`
+          );
           const timestamp = Date.now();
           const filename = `lesson-resource-${timestamp}-${file.originalname}`;
 
@@ -196,6 +269,7 @@ export const processLessonUploads = async (
             filename,
             file.mimetype
           );
+          console.log(`Resource ${index + 1} uploaded successfully:`, result);
           return {
             ...result,
             name: file.originalname,
@@ -204,11 +278,14 @@ export const processLessonUploads = async (
       );
     }
 
+    console.log("All uploads completed. uploadedFiles:", uploadedFiles);
+
     // Add uploaded file info to request body
     req.body.uploadedFiles = uploadedFiles;
 
     next();
   } catch (error: any) {
+    console.error("Error in processLessonUploads:", error);
     return res.status(500).json({
       success: false,
       message: "Error uploading files to Cloudinary",
