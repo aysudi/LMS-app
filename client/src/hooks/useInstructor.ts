@@ -208,7 +208,6 @@ export const useReplyToMessage = (
   return useMutation({
     mutationFn: ({ messageId, data }) => replyToMessage(messageId, data),
     onSuccess: () => {
-      // Invalidate messages and stats
       queryClient.invalidateQueries({
         queryKey: instructorQueryKeys.messages(),
       });
@@ -541,7 +540,6 @@ export const useDeleteLesson = (
   });
 };
 
-// Lesson Notes Hooks
 export const useLessonNotes = (
   courseId: string,
   sectionId: string,
@@ -591,7 +589,6 @@ export const useAddNoteToLesson = (
   });
 };
 
-// Course Management Mutations
 export const useDeleteCourse = (
   options?: UseMutationOptions<
     { success: boolean; message: string },
@@ -604,7 +601,6 @@ export const useDeleteCourse = (
   return useMutation({
     mutationFn: (courseId: string) => deleteCourse(courseId),
     onSuccess: () => {
-      // Invalidate all course-related queries
       queryClient.invalidateQueries({
         queryKey: instructorQueryKeys.coursesWithStats({}),
       });
@@ -628,7 +624,6 @@ export const useToggleCourseStatus = (
   return useMutation({
     mutationFn: (courseId: string) => toggleCourseStatus(courseId),
     onSuccess: () => {
-      // Invalidate course queries to refresh the data
       queryClient.invalidateQueries({
         queryKey: instructorQueryKeys.coursesWithStats({}),
       });
@@ -664,7 +659,6 @@ export const useInfiniteInstructorMessages = (
   });
 };
 
-// Prefetch hooks for performance optimization
 export const usePrefetchInstructor = () => {
   const queryClient = useQueryClient();
 
@@ -708,7 +702,6 @@ export const usePrefetchInstructor = () => {
   };
 };
 
-// Invalidation hooks
 export const useInvalidateInstructor = () => {
   const queryClient = useQueryClient();
 

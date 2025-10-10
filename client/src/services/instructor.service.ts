@@ -232,7 +232,6 @@ export const getLessonById = async (
   return response.data;
 };
 
-// Lesson Notes (for instructors to manage student notes)
 export const addNoteToLesson = async (
   courseId: string,
   sectionId: string,
@@ -260,7 +259,6 @@ export const getUserNotesForLesson = async (
   return response.data;
 };
 
-// Course Management Operations
 export const deleteCourse = async (
   courseId: string
 ): Promise<{ success: boolean; message: string }> => {
