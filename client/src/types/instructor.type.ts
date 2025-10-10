@@ -70,6 +70,13 @@ export interface InstructorCoursesQuery {
   page?: number;
   limit?: number;
   status?: "all" | "published" | "draft";
+  search?: string;
+  category?: string;
+  level?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  sortBy?: "rating" | "originalPrice" | "createdAt" | "studentsCount" | "title";
+  sortOrder?: "asc" | "desc";
 }
 
 // Course Students Types

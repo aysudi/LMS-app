@@ -601,8 +601,9 @@ export const useDeleteCourse = (
   return useMutation({
     mutationFn: (courseId: string) => deleteCourse(courseId),
     onSuccess: () => {
+      // Invalidate all instructor course-related queries
       queryClient.invalidateQueries({
-        queryKey: instructorQueryKeys.coursesWithStats({}),
+        queryKey: instructorQueryKeys.courses(),
       });
       queryClient.invalidateQueries({
         queryKey: instructorQueryKeys.overview(),
@@ -624,8 +625,9 @@ export const useToggleCourseStatus = (
   return useMutation({
     mutationFn: (courseId: string) => toggleCourseStatus(courseId),
     onSuccess: () => {
+      // Invalidate all instructor course-related queries
       queryClient.invalidateQueries({
-        queryKey: instructorQueryKeys.coursesWithStats({}),
+        queryKey: instructorQueryKeys.courses(),
       });
       queryClient.invalidateQueries({
         queryKey: instructorQueryKeys.overview(),

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
@@ -36,7 +36,7 @@ type SortOption =
   | "oldest"
   | "title"
   | "students"
-  | "revenue"
+  | "price"
   | "rating";
 type CourseStatus = "draft" | "published" | "archived";
 
@@ -50,6 +50,7 @@ const InstructorCourses = () => {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [showFilters, setShowFilters] = useState(false);
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
@@ -59,6 +60,16 @@ const InstructorCourses = () => {
     priceRange: "all",
   });
   const [page, setPage] = useState(1);
+
+  // Debounce search term
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setPage(1);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   const {
     data: coursesData,
@@ -71,6 +82,26 @@ const InstructorCourses = () => {
       filters.status !== "all" && filters.status !== "archived"
         ? filters.status
         : "all",
+    search: debouncedSearchTerm || undefined,
+    category: filters.category || undefined,
+    minPrice: filters.priceRange === "free" ? 0 : undefined,
+    maxPrice:
+      filters.priceRange === "free"
+        ? 0
+        : filters.priceRange === "paid"
+        ? undefined
+        : undefined,
+    sortBy:
+      sortBy === "newest"
+        ? "createdAt"
+        : sortBy === "oldest"
+        ? "createdAt"
+        : sortBy === "students"
+        ? "studentsCount"
+        : sortBy === "price"
+        ? "originalPrice"
+        : sortBy,
+    sortOrder: sortBy === "oldest" ? "asc" : "desc",
   });
 
   const { formatCurrency } = useInstructorAnalytics();
@@ -335,7 +366,7 @@ const InstructorCourses = () => {
                   <option value="oldest">Oldest First</option>
                   <option value="title">Title A-Z</option>
                   <option value="students">Most Students</option>
-                  <option value="revenue">Highest Revenue</option>
+                  <option value="price">Highest Price</option>
                   <option value="rating">Highest Rated</option>
                 </select>
                 <FaSort className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
@@ -454,7 +485,7 @@ const InstructorCourses = () => {
               <button
                 onClick={handleDeleteSelectedCourses}
                 disabled={deleteMutation.isPending}
-                className="px-3 py-1 text-sm text-red-600 hover:text-red-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-1 text-sm text-red-600 hover:text-red-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 {deleteMutation.isPending ? "Deleting..." : "Delete Selected"}
               </button>
@@ -627,7 +658,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
           type="checkbox"
           checked={isSelected}
           onChange={onSelect}
-          className="absolute top-3 left-3 z-10 rounded"
+          className="absolute top-3 left-3 z-10 rounded-xl w-5 h-5 bg-white border-2 border-gray-300 text-indigo-500 cursor-pointer"
         />
 
         {course.image ? (
@@ -673,26 +704,6 @@ const CourseCard: React.FC<CourseCardProps> = ({
                   exit={{ opacity: 0, scale: 0.95, y: 10 }}
                   className="absolute right-0 bottom-full mb-2 w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20"
                 >
-                  <button
-                    onClick={() => {
-                      navigate(`/instructor/courses/${course._id}/preview`);
-                      setShowMenu(false);
-                    }}
-                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
-                  >
-                    <FaEye className="text-xs" />
-                    <span>View</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      onEdit();
-                      setShowMenu(false);
-                    }}
-                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
-                  >
-                    <FaEdit className="text-xs" />
-                    <span>Edit</span>
-                  </button>
                   <button
                     onClick={() => {
                       onToggleStatus();
