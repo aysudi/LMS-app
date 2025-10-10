@@ -54,7 +54,6 @@ const InstructorCourses = () => {
   });
   const [page, setPage] = useState(1);
 
-  // Fetch courses
   const {
     data: coursesData,
     isLoading,
@@ -68,7 +67,6 @@ const InstructorCourses = () => {
         : "all",
   });
 
-  // Helper hooks
   const { formatCurrency } = useInstructorAnalytics();
 
   const courses = coursesData?.data?.courses || [];
