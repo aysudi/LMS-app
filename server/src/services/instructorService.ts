@@ -8,7 +8,6 @@ import mongoose from "mongoose";
 
 // Get instructor dashboard overview
 export const getInstructorOverviewService = async (instructorId: string) => {
-  // Get instructor's courses
   const courses = await Course.find({
     instructor: instructorId,
     isPublished: true,
@@ -21,7 +20,6 @@ export const getInstructorOverviewService = async (instructorId: string) => {
     status: "active",
   });
 
-  // Get total revenue
   const earnings = await InstructorEarnings.aggregate([
     { $match: { instructor: new mongoose.Types.ObjectId(instructorId) } },
     { $group: { _id: null, total: { $sum: "$instructorShare" } } },
@@ -29,7 +27,6 @@ export const getInstructorOverviewService = async (instructorId: string) => {
 
   const totalRevenue = earnings[0]?.total || 0;
 
-  // Get monthly revenue
   const currentDate = new Date();
   const currentMonth = currentDate.getMonth() + 1;
   const currentYear = currentDate.getFullYear();
@@ -150,44 +147,38 @@ export const getInstructorCoursesWithStatsService = async (
     minPrice,
     maxPrice,
     sortBy = "createdAt",
-    sortOrder = "desc"
+    sortOrder = "desc",
   } = queryParams;
 
   const skip = (page - 1) * limit;
 
   let filter: any = { instructor: instructorId };
-  
-  // Status filter
+
   if (status === "published") filter.isPublished = true;
   if (status === "draft") filter.isPublished = false;
 
-  // Search filter
   if (search) {
     filter.$or = [
       { title: { $regex: search, $options: "i" } },
       { description: { $regex: search, $options: "i" } },
-      { tags: { $in: [new RegExp(search, "i")] } }
+      { tags: { $in: [new RegExp(search, "i")] } },
     ];
   }
 
-  // Category filter
   if (category) {
     filter.category = { $regex: category, $options: "i" };
   }
 
-  // Level filter
   if (level) {
     filter.level = level;
   }
 
-  // Price range filter
   if (minPrice !== undefined || maxPrice !== undefined) {
     filter.originalPrice = {};
     if (minPrice !== undefined) filter.originalPrice.$gte = minPrice;
     if (maxPrice !== undefined) filter.originalPrice.$lte = maxPrice;
   }
 
-  // Sort configuration
   let sort: any = {};
   switch (sortBy) {
     case "title":
@@ -214,7 +205,6 @@ export const getInstructorCoursesWithStatsService = async (
 
   const totalCourses = await Course.countDocuments(filter);
 
-  // Get detailed stats for each course
   const coursesWithStats = await Promise.all(
     courses.map(async (course) => {
       const enrollmentsCount = await Enrollment.countDocuments({
@@ -292,7 +282,6 @@ export const getCourseStudentsService = async (
 
   const totalStudents = await Enrollment.countDocuments({ course: courseId });
 
-  // Get additional stats for each student
   const studentsWithStats = await Promise.all(
     enrollments.map(async (enrollment) => {
       const progress = await UserProgress.find({
