@@ -3,10 +3,8 @@ import multer from "multer";
 import cloudinary from "../configs/cloudinary.config.js";
 import { Buffer } from "buffer";
 
-// Configure multer to store files in memory
 const storage = multer.memoryStorage();
 
-// Create multer instance for lesson uploads
 const lessonUpload = multer({
   storage: storage,
   limits: {
@@ -20,9 +18,7 @@ const lessonUpload = multer({
         cb(new Error("Only video files are allowed for lesson content!"));
       }
     } else if (file.fieldname === "resources") {
-      // Allow various resource file types (PDF, documents, images, audio, video, archives, etc.)
       const allowedMimeTypes = [
-        // Documents
         "application/pdf",
         "application/msword",
         "application/docx",
@@ -35,6 +31,9 @@ const lessonUpload = multer({
         "application/vnd.openxmlformats-officedocument.presentationml.presentation",
         "text/plain",
         "text/csv",
+        "text/docx",
+        "text/xlsv",
+        "text/pptx",
         // Archives
         "application/zip",
         "application/x-zip-compressed",
@@ -62,7 +61,6 @@ const lessonUpload = multer({
       ];
 
       if (allowedMimeTypes.includes(file.mimetype)) {
-        // Limit resource file size to 50MB
         if (file.size > 50 * 1024 * 1024) {
           cb(new Error("Resource file too large. Maximum size is 50MB."));
           return;
@@ -77,7 +75,6 @@ const lessonUpload = multer({
   },
 });
 
-// Function to upload video to Cloudinary
 export const uploadLessonVideoToCloudinary = async (
   buffer: Buffer,
   filename: string
@@ -114,14 +111,12 @@ export const uploadLessonVideoToCloudinary = async (
   });
 };
 
-// Function to upload resource file to Cloudinary
 export const uploadResourceToCloudinary = async (
   buffer: Buffer,
   filename: string,
   mimeType: string
 ): Promise<{ url: string; publicId: string }> => {
   return new Promise((resolve, reject) => {
-    // Determine the appropriate resource type based on MIME type
     let resourceType: "image" | "video" | "auto" | "raw" = "raw";
     let transformation: any = {};
 
@@ -147,7 +142,6 @@ export const uploadResourceToCloudinary = async (
       resource_type: resourceType,
     };
 
-    // Add transformation only for images and videos
     if (Object.keys(transformation).length > 0) {
       uploadOptions.transformation = transformation;
     }
@@ -168,13 +162,11 @@ export const uploadResourceToCloudinary = async (
   });
 };
 
-// Upload middleware for lesson files (video and resources)
 export const lessonUploadMiddleware = lessonUpload.fields([
   { name: "video", maxCount: 1 },
   { name: "resources", maxCount: 5 }, // Allow up to 5 resource files
 ]);
 
-// Upload error handler middleware
 export const lessonUploadErrorHandler = (
   err: any,
   req: Request,
@@ -212,7 +204,6 @@ export const lessonUploadErrorHandler = (
   next();
 };
 
-// Process uploaded lesson files
 export const processLessonUploads = async (
   req: Request,
   res: Response,
@@ -220,18 +211,6 @@ export const processLessonUploads = async (
 ) => {
   try {
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-    console.log(
-      "Processing lesson uploads - files received:",
-      Object.keys(files || {})
-    );
-    console.log(
-      "Files details:",
-      files?.resources?.map((f) => ({
-        name: f.originalname,
-        size: f.size,
-        type: f.mimetype,
-      }))
-    );
 
     const uploadedFiles: {
       video?: { url: string; publicId: string };
@@ -239,7 +218,6 @@ export const processLessonUploads = async (
     } = {};
 
     if (files?.video?.[0]) {
-      console.log("Processing video upload...");
       const videoFile = files.video[0];
       const timestamp = Date.now();
       const filename = `lesson-video-${timestamp}`;
@@ -249,18 +227,11 @@ export const processLessonUploads = async (
         filename
       );
       uploadedFiles.video = result;
-      console.log("Video uploaded successfully:", result);
     }
 
     if (files?.resources) {
-      console.log("Processing resource uploads...");
       uploadedFiles.resources = await Promise.all(
         files.resources.map(async (file, index) => {
-          console.log(
-            `Uploading resource ${index + 1}: ${file.originalname} (${
-              file.mimetype
-            })`
-          );
           const timestamp = Date.now();
           const filename = `lesson-resource-${timestamp}-${file.originalname}`;
 
@@ -269,7 +240,6 @@ export const processLessonUploads = async (
             filename,
             file.mimetype
           );
-          console.log(`Resource ${index + 1} uploaded successfully:`, result);
           return {
             ...result,
             name: file.originalname,
@@ -278,9 +248,6 @@ export const processLessonUploads = async (
       );
     }
 
-    console.log("All uploads completed. uploadedFiles:", uploadedFiles);
-
-    // Add uploaded file info to request body
     req.body.uploadedFiles = uploadedFiles;
 
     next();

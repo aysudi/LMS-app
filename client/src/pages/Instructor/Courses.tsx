@@ -75,6 +75,9 @@ const InstructorCourses = () => {
   const totalPages = coursesData?.data?.pagination?.totalPages || 1;
   const totalCourses = coursesData?.data?.pagination?.totalCourses || 0;
 
+  console.log("totalCourses", totalCourses);
+  console.log("courses", courses);
+
   const handleSearch = (term: string) => {
     setSearchTerm(term);
     setPage(1);

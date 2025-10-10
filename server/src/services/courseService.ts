@@ -80,14 +80,8 @@ export const getAllCoursesService = async (query: CourseQuery = {}) => {
   };
 };
 
-export const getCourseByIdService = async (
-  id: string,
-  includeUnpublished = false
-) => {
+export const getCourseByIdService = async (id: string) => {
   const filter: FilterQuery<ICourse> = { _id: id };
-  if (!includeUnpublished) {
-    filter.isPublished = true;
-  }
 
   const course = await Course.findOne(filter)
     .populate("instructor", "firstName lastName email avatar bio")

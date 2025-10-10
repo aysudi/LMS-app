@@ -144,16 +144,13 @@ const LessonEditPage = () => {
       type: "other", // Default to 'other' to avoid confusion
     };
     setResources([...resources, newResource]);
-    console.log("Added new resource:", newResource);
   };
 
   const updateResource = (id: string, updates: Partial<LessonResource>) => {
-    console.log("Updating resource:", id, "with updates:", updates);
     const updatedResources = resources.map((r) =>
       r.id === id ? { ...r, ...updates } : r
     );
     setResources(updatedResources);
-    console.log("All resources after update:", updatedResources);
   };
 
   const removeResource = async (id: string) => {
@@ -162,15 +159,6 @@ const LessonEditPage = () => {
   };
 
   const handleResourceFileChange = (id: string, file: File) => {
-    console.log(
-      "File selected:",
-      file.name,
-      "Type:",
-      file.type,
-      "Size:",
-      file.size
-    );
-
     if (file.size > 50 * 1024 * 1024) {
       enqueueSnackbar("File size should be less than 50MB", {
         variant: "error",
@@ -179,11 +167,6 @@ const LessonEditPage = () => {
     }
 
     updateResource(id, { file, name: file.name });
-    console.log("Updated resource with file:", {
-      id,
-      fileName: file.name,
-      fileType: file.type,
-    });
   };
 
   const addQuizQuestion = () => {
@@ -248,24 +231,19 @@ const LessonEditPage = () => {
         quiz: validQuiz,
       };
 
-      console.log("Description value:", JSON.stringify(description));
-
       if (videoFile) {
         updateData.video = { file: videoFile };
       }
 
-      // Separate existing and new resources
-      const existingResources = resources.filter((r) => r.url && !r.file); // Resources that already exist in DB
-      const newResources = resources.filter((r) => r.file && !r.url); // New resources to upload
+      const existingResources = resources.filter((r) => r.url && !r.file);
+      const newResources = resources.filter((r) => r.file && !r.url);
 
-      // Include existing resources that should be kept (this tells server which ones to preserve)
       updateData.existingResources = existingResources.map((r) => ({
         name: r.name,
         type: r.type,
         url: r.url,
       }));
 
-      // Include new resources for upload
       if (newResources.length > 0) {
         updateData.resources = newResources.map((r) => ({
           name: r.name || r.file?.name || "Untitled Resource",
@@ -274,30 +252,12 @@ const LessonEditPage = () => {
         }));
       }
 
-      console.log("Update data being sent:");
-      console.log("- Basic data:", {
-        title: updateData.title,
-        description: updateData.description,
-      });
-      console.log(
-        "- Existing resources to keep:",
-        updateData.existingResources
-      );
-      console.log(
-        "- New resources to upload:",
-        updateData.resources?.map((r: any) => ({
-          name: r.name,
-          type: r.type,
-          hasFile: !!r.file,
-        }))
-      );
-
       await updateLessonMutation.mutateAsync({
         lessonId: lessonId!,
         updateData,
       });
 
-      enqueueSnackbar("✨ Lesson updated successfully!", {
+      enqueueSnackbar("✨ Lesson updated successfully! what??", {
         variant: "success",
         autoHideDuration: 4000,
       });
