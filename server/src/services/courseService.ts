@@ -118,7 +118,6 @@ export const createCourseService = async (
   courseData: CreateCourseData,
   instructorId: string
 ) => {
-  // Handle uploaded files
   const coursePayload = { ...courseData, instructor: instructorId };
 
   if (courseData.uploadedFiles?.image) {
@@ -135,7 +134,6 @@ export const createCourseService = async (
     };
   }
 
-  // Remove uploadedFiles from payload before saving to database
   delete coursePayload.uploadedFiles;
 
   const course = new Course(coursePayload);
@@ -157,9 +155,7 @@ export const updateCourseService = async (
     throw new Error("Course not found or you are not authorized to update it");
   }
 
-  // Handle image updates
   if (updateData.uploadedFiles?.image) {
-    // Delete old image if exists
     if (course.image?.publicId) {
       await deleteFromCloudinary(course.image.publicId, "image");
     }
@@ -170,9 +166,7 @@ export const updateCourseService = async (
     };
   }
 
-  // Handle video promo updates
   if (updateData.uploadedFiles?.videoPromo) {
-    // Delete old video if exists
     if (course.videoPromo?.publicId) {
       await deleteFromCloudinary(course.videoPromo.publicId, "video");
     }
@@ -183,7 +177,6 @@ export const updateCourseService = async (
     };
   }
 
-  // Remove uploadedFiles from updateData before saving
   delete updateData.uploadedFiles;
 
   Object.assign(course, updateData);
@@ -208,7 +201,6 @@ export const deleteCourseService = async (id: string, instructorId: string) => {
     throw new Error("Course not found or you are not authorized to delete it");
   }
 
-  // Delete course media from Cloudinary
   const deletionPromises = [];
 
   if (course.image?.publicId) {
@@ -221,10 +213,8 @@ export const deleteCourseService = async (id: string, instructorId: string) => {
     );
   }
 
-  // Wait for all Cloudinary deletions to complete
   await Promise.allSettled(deletionPromises);
 
-  // Delete related data from database
   await Promise.all([
     Lesson.deleteMany({ course: id }),
     Section.deleteMany({ course: id }),
@@ -266,7 +256,6 @@ export const getCourseStatisticsService = async (
   courseId: string,
   instructorId: string
 ) => {
-  // Verify course ownership
   const course = await Course.findOne({
     _id: courseId,
     instructor: instructorId,
@@ -276,11 +265,9 @@ export const getCourseStatisticsService = async (
     throw new Error("Course not found or you are not authorized to view it");
   }
 
-  // Get course sections and lessons count
   const sectionsCount = await Section.countDocuments({ course: courseId });
   const lessonsCount = await Lesson.countDocuments({ course: courseId });
 
-  // Import UserProgress to get completion statistics
   const UserProgress = require("../models/UserProgress").default;
   const totalEnrollments = course.studentsEnrolled.length;
   const completedStudents = await UserProgress.distinct("user", {
@@ -324,10 +311,8 @@ export const toggleCourseStatusService = async (
     throw new Error("Course not found or you are not authorized to modify it");
   }
 
-  // Toggle the published status
   course.isPublished = !course.isPublished;
 
-  // Set publishedAt timestamp if publishing for the first time
   if (course.isPublished && !course.publishedAt) {
     course.publishedAt = new Date();
   }
@@ -362,11 +347,9 @@ export const enrollUserInCourseService = async (
     throw new Error("User is already enrolled in this course");
   }
 
-  // Update course's studentsEnrolled array
   course.studentsEnrolled.push(userId as any);
   await course.save();
 
-  // Update user's enrolledCourses array
   if (!user.enrolledCourses.includes(courseId as any)) {
     user.enrolledCourses.push(courseId as any);
     await user.save();
