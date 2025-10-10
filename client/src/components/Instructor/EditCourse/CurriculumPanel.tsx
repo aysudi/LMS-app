@@ -39,7 +39,6 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
     lessonId?: string;
   } | null>(null);
 
-  // Add deletion mutations
   const deleteSectionMutation = useDeleteSection(course.id);
   const deleteLessonMutation = useDeleteLesson(course.id, "");
 
@@ -97,7 +96,6 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
         order: result.destination.index,
       });
 
-      // Update order
       sourceSection.lessons = sourceSection.lessons.map((lesson, idx) => ({
         ...lesson,
         order: idx,
@@ -269,7 +267,6 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
             ),
           });
         } else {
-          // Add new lesson
           const timestamp = Date.now();
           const newLesson: Lesson = {
             id: `lesson_${timestamp}`,
@@ -534,7 +531,6 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
                                                 </div>
                                               )}
                                             </Draggable>
-                                            /* Previously had a bad `//` comment here */
                                           )
                                         )}
                                         {providedLessons.placeholder}

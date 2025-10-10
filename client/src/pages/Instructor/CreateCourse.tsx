@@ -21,7 +21,6 @@ import MediaContentStep from "../../components/Instructor/CreateCourse/MediaCont
 import ReviewCreateStep from "../../components/Instructor/CreateCourse/ReviewCreateStep";
 import type { CourseFormData } from "../../types/course.type";
 
-// Course creation steps
 const CREATION_STEPS = [
   {
     id: 1,
@@ -92,7 +91,6 @@ const CreateCourse = () => {
     sections: [] as CourseFormData["sections"],
   });
 
-  // Validation functions
   const validateStep = (step: number): boolean => {
     const newErrors: Record<string, string> = {};
 
@@ -200,7 +198,6 @@ const CreateCourse = () => {
 
     const formDataToSend = new FormData();
 
-    // Handle files
     if (formData.image instanceof File) {
       formDataToSend.append("image", formData.image);
     }
@@ -208,7 +205,6 @@ const CreateCourse = () => {
       formDataToSend.append("videoPromo", formData.videoPromo);
     }
 
-    // Handle arrays - filter out empty values and send as JSON
     ["tags", "learningObjectives", "requirements", "targetAudience"].forEach(
       (key) => {
         if (formData[key as keyof CourseFormData]) {
@@ -221,12 +217,10 @@ const CreateCourse = () => {
       }
     );
 
-    // Handle sections array
     if (formData.sections.length > 0) {
       formDataToSend.append("sections", JSON.stringify(formData.sections));
     }
 
-    // Handle other fields
     const simpleFields = [
       "title",
       "description",
@@ -283,7 +277,6 @@ const CreateCourse = () => {
             onClick={() => {
               const formDataToSend = new FormData();
 
-              // Handle files
               if (formData.image instanceof File) {
                 formDataToSend.append("image", formData.image);
               }
@@ -291,7 +284,6 @@ const CreateCourse = () => {
                 formDataToSend.append("videoPromo", formData.videoPromo);
               }
 
-              // Handle arrays
               [
                 "tags",
                 "learningObjectives",
@@ -307,7 +299,6 @@ const CreateCourse = () => {
                 }
               });
 
-              // Handle sections array
               if (formData.sections.length > 0) {
                 formDataToSend.append(
                   "sections",
@@ -315,7 +306,6 @@ const CreateCourse = () => {
                 );
               }
 
-              // Handle other fields
               const simpleFields = [
                 "title",
                 "description",

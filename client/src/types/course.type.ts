@@ -93,7 +93,7 @@ export interface Lesson {
 
 export interface Section {
   id: string;
-  _id?: string; // MongoDB _id field from server responses
+  _id?: string;
   title: string;
   description?: string;
   order: number;

@@ -141,7 +141,7 @@ const LessonEditPage = () => {
     const newResource: LessonResource = {
       id: `resource-${Date.now()}`,
       name: "",
-      type: "other", // Default to 'other' to avoid confusion
+      type: "other",
     };
     setResources([...resources, newResource]);
   };
