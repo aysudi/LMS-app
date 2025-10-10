@@ -175,11 +175,17 @@ export const updateLessonService = async (
   }
 
   let finalResources: any[] = [];
-  const payload = updatePayload as any; // Cast to any to handle dynamic properties
+  const payload = updatePayload as any;
 
   if (payload.existingResources && Array.isArray(payload.existingResources)) {
-    finalResources = [...payload.existingResources];
-    console.log("Keeping existing resources:", finalResources.length);
+    const existingResourcesFromDB =
+      lesson.resources?.filter((dbResource) =>
+        payload.existingResources.some(
+          (clientResource: any) => clientResource.url === dbResource.url
+        )
+      ) || [];
+
+    finalResources = [...existingResourcesFromDB];
   }
 
   if (updatePayload.uploadedFiles?.resources) {
@@ -188,11 +194,12 @@ export const updateLessonService = async (
         name: resource.name,
         url: resource.url,
         publicId: resource.publicId,
-        type: (resource.name.split(".").pop()?.toLowerCase() as any) || "other",
+        type: (resource.name.split(".").pop()?.toLowerCase() as any)
+          ? "pdf"
+          : "other",
       })
     );
     finalResources = [...finalResources, ...newUploadedResources];
-    console.log("Added new uploaded resources:", newUploadedResources.length);
   }
 
   if (lesson.resources?.length) {
@@ -204,10 +211,6 @@ export const updateLessonService = async (
     );
 
     if (resourcesToDelete.length > 0) {
-      console.log(
-        "Deleting old resources from Cloudinary:",
-        resourcesToDelete.length
-      );
       await Promise.all(
         resourcesToDelete.map((resource) =>
           deleteFromCloudinary(resource.publicId, "raw")
@@ -216,21 +219,16 @@ export const updateLessonService = async (
     }
   }
 
-  // Update lesson with final resources
   updatePayload.resources = finalResources;
 
   delete updatePayload.uploadedFiles;
   delete payload.existingResources;
-
-  console.log("Final updatePayload:", updatePayload);
 
   Object.assign(lesson, updatePayload);
   await lesson.save();
 
   course.lastUpdated = new Date();
   await course.save();
-
-  console.log("lesson updated:", lesson);
 
   return lesson;
 };
