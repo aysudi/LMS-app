@@ -20,7 +20,11 @@ import {
   FaClock,
   FaPlay,
 } from "react-icons/fa";
-import { useInstructorCoursesWithStats } from "../../hooks/useInstructor";
+import {
+  useInstructorCoursesWithStats,
+  useDeleteCourse,
+  useToggleCourseStatus,
+} from "../../hooks/useInstructor";
 import { useInstructorAnalytics } from "../../hooks/useInstructorHelpers";
 import Loading from "../../components/Common/Loading";
 
@@ -69,12 +73,29 @@ const InstructorCourses = () => {
 
   const { formatCurrency } = useInstructorAnalytics();
 
+  const deleteMutation = useDeleteCourse({
+    onSuccess: (data) => {
+      // Optional: Show success message
+      console.log(data.message);
+    },
+    onError: (error) => {
+      console.error("Failed to delete course:", error);
+    },
+  });
+
+  const toggleStatusMutation = useToggleCourseStatus({
+    onSuccess: (data) => {
+      // Optional: Show success message
+      console.log(data.message);
+    },
+    onError: (error) => {
+      console.error("Failed to toggle course status:", error);
+    },
+  });
+
   const courses = coursesData?.data?.courses || [];
   const totalPages = coursesData?.data?.pagination?.totalPages || 1;
   const totalCourses = coursesData?.data?.pagination?.totalCourses || 0;
-
-  console.log("totalCourses", totalCourses);
-  console.log("courses", courses);
 
   const handleSearch = (term: string) => {
     setSearchTerm(term);
@@ -94,8 +115,7 @@ const InstructorCourses = () => {
   const handleDeleteCourse = async (courseId: string) => {
     if (window.confirm("Are you sure you want to delete this course?")) {
       try {
-        console.log("Deleting course:", courseId);
-        // TODO: Implement delete course mutation
+        await deleteMutation.mutateAsync(courseId);
       } catch (error) {
         console.error("Failed to delete course:", error);
       }
@@ -104,8 +124,7 @@ const InstructorCourses = () => {
 
   const handleToggleStatus = async (courseId: string) => {
     try {
-      console.log("Toggling course status:", courseId);
-      // TODO: Implement toggle status mutation
+      await toggleStatusMutation.mutateAsync(courseId);
     } catch (error) {
       console.error("Failed to toggle course status:", error);
     }
@@ -117,6 +136,27 @@ const InstructorCourses = () => {
         ? prev.filter((id) => id !== courseId)
         : [...prev, courseId]
     );
+  };
+
+  const handleDeleteSelectedCourses = async () => {
+    if (selectedCourses.length === 0) return;
+
+    if (
+      window.confirm(
+        `Are you sure you want to delete ${selectedCourses.length} selected course(s)?`
+      )
+    ) {
+      try {
+        // Delete courses one by one
+        for (const courseId of selectedCourses) {
+          await deleteMutation.mutateAsync(courseId);
+        }
+        // Clear selection after successful deletion
+        setSelectedCourses([]);
+      } catch (error) {
+        console.error("Failed to delete selected courses:", error);
+      }
+    }
   };
 
   if (isLoading) {
@@ -341,8 +381,12 @@ const InstructorCourses = () => {
 
           {selectedCourses.length > 0 && (
             <div className="flex items-center space-x-2">
-              <button className="px-3 py-1 text-sm text-red-600 hover:text-red-700 font-medium">
-                Delete Selected
+              <button
+                onClick={handleDeleteSelectedCourses}
+                disabled={deleteMutation.isPending}
+                className="px-3 py-1 text-sm text-red-600 hover:text-red-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {deleteMutation.isPending ? "Deleting..." : "Delete Selected"}
               </button>
             </div>
           )}
@@ -652,6 +696,7 @@ const CourseListItem: React.FC<CourseCardProps> = ({
   delay = 0,
 }) => {
   const navigate = useNavigate();
+  console.log(course);
 
   return (
     <motion.div
@@ -676,7 +721,7 @@ const CourseListItem: React.FC<CourseCardProps> = ({
         <div className="w-20 h-20 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex-shrink-0 overflow-hidden">
           {course.image ? (
             <img
-              src={course.image}
+              src={course.image.url}
               alt={course.title}
               className="w-full h-full object-cover"
             />
@@ -697,36 +742,33 @@ const CourseListItem: React.FC<CourseCardProps> = ({
               <div className="flex items-center space-x-4 text-sm text-gray-600">
                 <span className="flex items-center space-x-1">
                   <FaUsers className="text-xs" />
-                  <span>{course.enrollmentsCount || 0} students</span>
+                  <span>{course.studentsEnrolled.length || 0} students</span>
                 </span>
                 <span className="flex items-center space-x-1">
                   <FaStar className="text-xs text-yellow-400" />
-                  <span>
-                    {course.averageRating?.toFixed(1) || "No ratings"}
-                  </span>
+                  <span>{course.rating?.toFixed(1) || "No ratings"}</span>
                 </span>
                 <span className="flex items-center space-x-1">
                   <FaDollarSign className="text-xs" />
-                  <span>{formatCurrency(course.revenue || 0)}</span>
+                  <span>{formatCurrency(course.originalPrice || 0)}</span>
                 </span>
               </div>
             </div>
-
-            {/* Status */}
-            <span
-              className={`px-3 py-1 rounded-full text-xs font-medium ${
-                course.isPublished
-                  ? "bg-green-100 text-green-800"
-                  : "bg-yellow-100 text-yellow-800"
-              }`}
-            >
-              {course.isPublished ? "Published" : "Draft"}
-            </span>
           </div>
         </div>
 
         {/* Actions */}
         <div className="flex items-center space-x-2">
+          {/* Status */}
+          <span
+            className={`px-3 py-1 rounded-full text-xs font-medium ${
+              course.isPublished
+                ? "bg-green-100 text-green-800"
+                : "bg-yellow-100 text-yellow-800"
+            }`}
+          >
+            {course.isPublished ? "Published" : "Draft"}
+          </span>
           <button
             onClick={() => navigate(`/instructor/courses/${course._id}`)}
             className="p-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors duration-200"
@@ -740,13 +782,6 @@ const CourseListItem: React.FC<CourseCardProps> = ({
             title="Edit Course"
           >
             <FaEdit />
-          </button>
-          <button
-            onClick={onToggleStatus}
-            className="p-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors duration-200"
-            title={course.isPublished ? "Unpublish" : "Publish"}
-          >
-            <FaPlay />
           </button>
           <button
             onClick={onDelete}

@@ -259,3 +259,18 @@ export const getUserNotesForLesson = async (
   );
   return response.data;
 };
+
+// Course Management Operations
+export const deleteCourse = async (
+  courseId: string
+): Promise<{ success: boolean; message: string }> => {
+  const response = await api.delete(`/api/courses/${courseId}`);
+  return response.data;
+};
+
+export const toggleCourseStatus = async (
+  courseId: string
+): Promise<{ success: boolean; message: string; data?: any }> => {
+  const response = await api.patch(`/api/courses/${courseId}/toggle-status`);
+  return response.data;
+};

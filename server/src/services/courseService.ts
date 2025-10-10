@@ -310,6 +310,34 @@ export const getCourseStatisticsService = async (
   };
 };
 
+// Toggle course publish status
+export const toggleCourseStatusService = async (
+  id: string,
+  instructorId: string
+) => {
+  const course = await Course.findOne({
+    _id: id,
+    instructor: instructorId,
+  });
+
+  if (!course) {
+    throw new Error("Course not found or you are not authorized to modify it");
+  }
+
+  // Toggle the published status
+  course.isPublished = !course.isPublished;
+
+  // Set publishedAt timestamp if publishing for the first time
+  if (course.isPublished && !course.publishedAt) {
+    course.publishedAt = new Date();
+  }
+
+  course.lastUpdated = new Date();
+  await course.save();
+
+  return course.populate("instructor", "firstName lastName email avatar");
+};
+
 // Enroll user in course
 export const enrollUserInCourseService = async (
   courseId: string,

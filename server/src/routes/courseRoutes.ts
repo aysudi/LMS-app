@@ -12,6 +12,7 @@ import {
   getInstructorCourses,
   getUserCourses,
   updateCourse,
+  toggleCourseStatus,
 } from "../controllers/courseController";
 import {
   courseUploadMiddleware,
@@ -53,6 +54,11 @@ courseRouter.put(
 );
 courseRouter.delete("/:id", authorizeRoles(UserRole.INSTRUCTOR), (req, res) =>
   deleteCourse(req as any, res)
+);
+courseRouter.patch(
+  "/:id/toggle-status",
+  authorizeRoles(UserRole.INSTRUCTOR),
+  (req, res) => toggleCourseStatus(req as any, res)
 );
 
 export default courseRouter;
