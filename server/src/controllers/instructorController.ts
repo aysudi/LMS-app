@@ -38,7 +38,18 @@ export const getInstructorOverview = async (req: AuthRequest, res: Response) => 
 export const getInstructorCoursesWithStats = async (req: AuthRequest, res: Response) => {
   try {
     const instructorId = req.user?.id;
-    const { page = 1, limit = 10, status = "all" } = req.query;
+    const { 
+      page = 1, 
+      limit = 10, 
+      status = "all",
+      search,
+      category,
+      level,
+      minPrice,
+      maxPrice,
+      sortBy = "createdAt",
+      sortOrder = "desc"
+    } = req.query;
     
     if (!instructorId) {
       return res.status(401).json({
@@ -47,12 +58,20 @@ export const getInstructorCoursesWithStats = async (req: AuthRequest, res: Respo
       });
     }
 
-    const data = await getInstructorCoursesWithStatsService(
-      instructorId,
-      Number(page),
-      Number(limit),
-      status as string
-    );
+    const queryParams = {
+      page: Number(page),
+      limit: Number(limit),
+      status: status as string,
+      search: search as string,
+      category: category as string,
+      level: level as string,
+      minPrice: minPrice ? Number(minPrice) : undefined,
+      maxPrice: maxPrice ? Number(maxPrice) : undefined,
+      sortBy: sortBy as string,
+      sortOrder: sortOrder as "asc" | "desc"
+    };
+
+    const data = await getInstructorCoursesWithStatsService(instructorId, queryParams);
 
     res.json({
       success: true,

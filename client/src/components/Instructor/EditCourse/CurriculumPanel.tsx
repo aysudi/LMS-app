@@ -226,10 +226,10 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
         };
 
         if (editModal.data) {
-          await handleUpdateSection(
-            (editModal.data as Section)._id,
-            sectionData
-          );
+          const section = editModal.data as Section;
+          if (section._id) {
+            await handleUpdateSection(section._id, sectionData);
+          }
         } else {
           await handleAddSection(sectionData);
         }
@@ -409,6 +409,7 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
                               </button>
                               <button
                                 onClick={() =>
+                                  section._id &&
                                   handleShowDeleteConfirmation(
                                     "section",
                                     section._id
@@ -505,6 +506,8 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
                                                     <div className="flex items-center space-x-2">
                                                       <button
                                                         onClick={() =>
+                                                          section._id &&
+                                                          lesson._id &&
                                                           handleEditLesson(
                                                             section._id,
                                                             lesson._id
@@ -516,11 +519,13 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
                                                       </button>
                                                       <button
                                                         onClick={() => {
-                                                          handleShowDeleteConfirmation(
-                                                            "lesson",
-                                                            section._id,
-                                                            lesson._id
-                                                          );
+                                                          section._id &&
+                                                            lesson._id &&
+                                                            handleShowDeleteConfirmation(
+                                                              "lesson",
+                                                              section._id,
+                                                              lesson._id
+                                                            );
                                                         }}
                                                         className="p-2 text-gray-400 hover:text-red-500 cursor-pointer"
                                                       >
