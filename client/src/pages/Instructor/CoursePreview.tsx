@@ -24,8 +24,12 @@ import Loading from "../../components/Common/Loading";
 const InstructorCoursePreview = () => {
   const { courseId } = useParams<{ courseId: string }>();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<"overview" | "curriculum" | "reviews">("overview");
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "curriculum" | "reviews"
+  >("overview");
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(
+    new Set()
+  );
 
   const { data: courseData, isLoading, error } = useCourse(courseId!);
 
@@ -45,7 +49,8 @@ const InstructorCoursePreview = () => {
             Course not found
           </h2>
           <p className="text-gray-600 mb-4">
-            The course you're looking for doesn't exist or you don't have access to it.
+            The course you're looking for doesn't exist or you don't have access
+            to it.
           </p>
           <button
             onClick={() => navigate("/instructor/courses")}
@@ -94,7 +99,9 @@ const InstructorCoursePreview = () => {
               </button>
               <div>
                 <div className="flex items-center space-x-2 mb-1">
-                  <h1 className="text-xl font-bold text-gray-900">{course.title}</h1>
+                  <h1 className="text-xl font-bold text-gray-900">
+                    {course.title}
+                  </h1>
                   <span
                     className={`px-2 py-1 rounded-full text-xs font-medium ${
                       course.isPublished
@@ -105,7 +112,9 @@ const InstructorCoursePreview = () => {
                     {course.isPublished ? "Published" : "Draft"}
                   </span>
                 </div>
-                <p className="text-sm text-gray-600">Preview how students will see your course</p>
+                <p className="text-sm text-gray-600">
+                  Preview how students will see your course
+                </p>
               </div>
             </div>
             <button
@@ -164,8 +173,16 @@ const InstructorCoursePreview = () => {
                 <nav className="flex space-x-8 px-6">
                   {[
                     { id: "overview", label: "Overview", count: null },
-                    { id: "curriculum", label: "Curriculum", count: course.sections?.length || 0 },
-                    { id: "reviews", label: "Reviews", count: course.reviews?.length || 0 },
+                    {
+                      id: "curriculum",
+                      label: "Curriculum",
+                      count: course.sections?.length || 0,
+                    },
+                    {
+                      id: "reviews",
+                      label: "Reviews",
+                      count: course.reviews?.length || 0,
+                    },
                   ].map((tab) => (
                     <button
                       key={tab.id}
@@ -193,128 +210,168 @@ const InstructorCoursePreview = () => {
                   <div className="space-y-6">
                     {/* Description */}
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-3">About this course</h3>
-                      <div 
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                        About this course
+                      </h3>
+                      <div
                         className="prose max-w-none text-gray-700"
                         dangerouslySetInnerHTML={{ __html: course.description }}
                       />
                     </div>
 
                     {/* Learning Objectives */}
-                    {course.learningObjectives && course.learningObjectives.length > 0 && (
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                          What you'll learn
-                        </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          {course.learningObjectives.map((objective: string, index: number) => (
-                            <div key={index} className="flex items-start space-x-3">
-                              <FaCheck className="text-green-500 mt-1 flex-shrink-0" />
-                              <span className="text-gray-700">{objective}</span>
-                            </div>
-                          ))}
+                    {course.learningObjectives &&
+                      course.learningObjectives.length > 0 && (
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                            What you'll learn
+                          </h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {course.learningObjectives.map(
+                              (objective: string, index: number) => (
+                                <div
+                                  key={index}
+                                  className="flex items-start space-x-3"
+                                >
+                                  <FaCheck className="text-green-500 mt-1 flex-shrink-0" />
+                                  <span className="text-gray-700">
+                                    {objective}
+                                  </span>
+                                </div>
+                              )
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
 
                     {/* Requirements */}
                     {course.requirements && course.requirements.length > 0 && (
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-3">Requirements</h3>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                          Requirements
+                        </h3>
                         <ul className="space-y-2">
-                          {course.requirements.map((requirement: string, index: number) => (
-                            <li key={index} className="flex items-start space-x-3">
-                              <span className="text-gray-400 mt-2 text-sm">•</span>
-                              <span className="text-gray-700">{requirement}</span>
-                            </li>
-                          ))}
+                          {course.requirements.map(
+                            (requirement: string, index: number) => (
+                              <li
+                                key={index}
+                                className="flex items-center space-x-2"
+                              >
+                                <span className="text-gray-400 text-sm">•</span>
+                                <span className="text-gray-700">
+                                  {requirement}
+                                </span>
+                              </li>
+                            )
+                          )}
                         </ul>
                       </div>
                     )}
 
                     {/* Target Audience */}
-                    {course.targetAudience && course.targetAudience.length > 0 && (
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                          Who this course is for
-                        </h3>
-                        <ul className="space-y-2">
-                          {course.targetAudience.map((audience: string, index: number) => (
-                            <li key={index} className="flex items-start space-x-3">
-                              <span className="text-gray-400 mt-2 text-sm">•</span>
-                              <span className="text-gray-700">{audience}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
+                    {course.targetAudience &&
+                      course.targetAudience.length > 0 && (
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                            Who this course is for
+                          </h3>
+                          <ul className="space-y-2">
+                            {course.targetAudience.map(
+                              (audience: string, index: number) => (
+                                <li
+                                  key={index}
+                                  className="flex items-center space-x-2"
+                                >
+                                  <span className="text-gray-400 text-sm">
+                                    •
+                                  </span>
+                                  <span className="text-gray-700">
+                                    {audience}
+                                  </span>
+                                </li>
+                              )
+                            )}
+                          </ul>
+                        </div>
+                      )}
                   </div>
                 )}
 
                 {activeTab === "curriculum" && (
                   <div className="space-y-4">
                     {course.sections && course.sections.length > 0 ? (
-                      course.sections.map((section: any, sectionIndex: number) => (
-                        <div
-                          key={section._id}
-                          className="border border-gray-200 rounded-lg overflow-hidden"
-                        >
-                          <button
-                            onClick={() => toggleSection(section._id)}
-                            className="w-full px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between hover:bg-gray-100 transition-colors"
+                      course.sections.map(
+                        (section: any, sectionIndex: number) => (
+                          <div
+                            key={section._id}
+                            className="border border-gray-200 rounded-lg overflow-hidden"
                           >
-                            <div className="flex items-center space-x-3">
-                              <span className="text-sm font-medium text-gray-900">
-                                Section {sectionIndex + 1}: {section.title}
-                              </span>
-                              <span className="text-xs text-gray-500">
-                                {section.lessons?.length || 0} lessons
-                              </span>
-                            </div>
-                            {expandedSections.has(section._id) ? (
-                              <FaChevronUp className="text-gray-400" />
-                            ) : (
-                              <FaChevronDown className="text-gray-400" />
-                            )}
-                          </button>
-                          {expandedSections.has(section._id) && (
-                            <div className="divide-y divide-gray-100">
-                              {section.lessons?.map((lesson: any, lessonIndex: number) => (
-                                <div key={lesson._id} className="px-4 py-3 flex items-center justify-between">
-                                  <div className="flex items-center space-x-3">
-                                    <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                                      {lesson.isPreview ? (
-                                        <FaPlayCircle className="text-indigo-600 text-sm" />
-                                      ) : (
-                                        <FaLock className="text-gray-400 text-sm" />
-                                      )}
-                                    </div>
-                                    <div>
-                                      <p className="text-sm font-medium text-gray-900">
-                                        {lessonIndex + 1}. {lesson.title}
-                                      </p>
-                                      {lesson.isPreview && (
-                                        <p className="text-xs text-indigo-600">Preview available</p>
-                                      )}
-                                    </div>
-                                  </div>
-                                  <span className="text-xs text-gray-500">
-                                    {formatDuration(lesson.duration || 0)}
-                                  </span>
-                                </div>
-                              )) || (
-                                <div className="px-4 py-8 text-center text-gray-500">
-                                  No lessons in this section yet
-                                </div>
+                            <button
+                              onClick={() => toggleSection(section._id)}
+                              className="w-full px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between hover:bg-gray-100 transition-colors"
+                            >
+                              <div className="flex items-center space-x-3">
+                                <span className="text-sm font-medium text-gray-900">
+                                  Section {sectionIndex + 1}: {section.title}
+                                </span>
+                                <span className="text-xs text-gray-500">
+                                  {section.lessons?.length || 0} lessons
+                                </span>
+                              </div>
+                              {expandedSections.has(section._id) ? (
+                                <FaChevronUp className="text-gray-400" />
+                              ) : (
+                                <FaChevronDown className="text-gray-400" />
                               )}
-                            </div>
-                          )}
-                        </div>
-                      ))
+                            </button>
+                            {expandedSections.has(section._id) && (
+                              <div className="divide-y divide-gray-100">
+                                {section.lessons?.map(
+                                  (lesson: any, lessonIndex: number) => (
+                                    <div
+                                      key={lesson._id}
+                                      className="px-4 py-3 flex items-center justify-between"
+                                    >
+                                      <div className="flex items-center space-x-3">
+                                        <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                                          {lesson.isPreview ? (
+                                            <FaPlayCircle className="text-indigo-600 text-sm" />
+                                          ) : (
+                                            <FaLock className="text-gray-400 text-sm" />
+                                          )}
+                                        </div>
+                                        <div>
+                                          <p className="text-sm font-medium text-gray-900">
+                                            {lessonIndex + 1}. {lesson.title}
+                                          </p>
+                                          {lesson.isPreview && (
+                                            <p className="text-xs text-indigo-600">
+                                              Preview available
+                                            </p>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <span className="text-xs text-gray-500">
+                                        {formatDuration(lesson.duration || 0)}
+                                      </span>
+                                    </div>
+                                  )
+                                ) || (
+                                  <div className="px-4 py-8 text-center text-gray-500">
+                                    No lessons in this section yet
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )
+                      )
                     ) : (
                       <div className="text-center py-8">
                         <FaBook className="text-4xl text-gray-300 mx-auto mb-4" />
-                        <p className="text-gray-500">No curriculum sections added yet</p>
+                        <p className="text-gray-500">
+                          No curriculum sections added yet
+                        </p>
                       </div>
                     )}
                   </div>
@@ -325,7 +382,10 @@ const InstructorCoursePreview = () => {
                     {course.reviews && course.reviews.length > 0 ? (
                       <div className="space-y-4">
                         {course.reviews.map((review: any) => (
-                          <div key={review._id} className="border-b border-gray-100 pb-4">
+                          <div
+                            key={review._id}
+                            className="border-b border-gray-100 pb-4"
+                          >
                             <div className="flex items-start space-x-3">
                               <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
                                 <span className="text-sm font-medium text-indigo-600">
@@ -335,14 +395,17 @@ const InstructorCoursePreview = () => {
                               <div className="flex-1">
                                 <div className="flex items-center space-x-2 mb-1">
                                   <span className="font-medium text-gray-900">
-                                    {review.user?.firstName} {review.user?.lastName}
+                                    {review.user?.firstName}{" "}
+                                    {review.user?.lastName}
                                   </span>
                                   <div className="flex items-center">
                                     {[...Array(5)].map((_, i) => (
                                       <FaStar
                                         key={i}
                                         className={`text-sm ${
-                                          i < review.rating ? "text-yellow-400" : "text-gray-300"
+                                          i < review.rating
+                                            ? "text-yellow-400"
+                                            : "text-gray-300"
                                         }`}
                                       />
                                     ))}
@@ -351,7 +414,9 @@ const InstructorCoursePreview = () => {
                                     {new Date(review.date).toLocaleDateString()}
                                   </span>
                                 </div>
-                                <p className="text-gray-700">{review.comment}</p>
+                                <p className="text-gray-700">
+                                  {review.comment}
+                                </p>
                               </div>
                             </div>
                           </div>
@@ -382,11 +447,6 @@ const InstructorCoursePreview = () => {
                 <div className="text-3xl font-bold text-gray-900">
                   {course.isFree ? "Free" : `$${course.originalPrice}`}
                 </div>
-                {course.discountPrice && course.discountPrice > 0 && course.discountPrice < course.originalPrice && (
-                  <div className="text-lg text-gray-500 line-through">
-                    ${course.originalPrice}
-                  </div>
-                )}
               </div>
 
               {/* Course Stats */}
@@ -396,21 +456,27 @@ const InstructorCoursePreview = () => {
                     <FaClock />
                     <span>Duration</span>
                   </span>
-                  <span className="font-medium">{formatDuration(course.totalDuration || 0)}</span>
+                  <span className="font-medium">
+                    {formatDuration(course.totalDuration || 0)}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-600 flex items-center space-x-2">
                     <FaBook />
                     <span>Lessons</span>
                   </span>
-                  <span className="font-medium">{course.totalLessons || 0}</span>
+                  <span className="font-medium">
+                    {course.totalLessons || 0}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-600 flex items-center space-x-2">
                     <FaUsers />
                     <span>Students</span>
                   </span>
-                  <span className="font-medium">{course.studentsEnrolled?.length || 0}</span>
+                  <span className="font-medium">
+                    {course.studentsEnrolled?.length || 0}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-600 flex items-center space-x-2">
@@ -441,7 +507,9 @@ const InstructorCoursePreview = () => {
 
               {/* Course Features */}
               <div className="border-t border-gray-200 pt-6">
-                <h4 className="font-semibold text-gray-900 mb-3">This course includes:</h4>
+                <h4 className="font-semibold text-gray-900 mb-3">
+                  This course includes:
+                </h4>
                 <ul className="space-y-2 text-sm text-gray-600">
                   <li className="flex items-center space-x-2">
                     <FaPlay className="text-indigo-500" />

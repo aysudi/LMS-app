@@ -84,7 +84,6 @@ const InstructorCourses = () => {
         type: "success",
         duration: 3000,
       });
-      // Clear selection after successful deletion
       setSelectedCourses((prev) => prev.filter((id) => !prev.includes(id)));
     },
     onError: (error) => {
@@ -221,11 +220,9 @@ const InstructorCourses = () => {
 
     if (result.isConfirmed) {
       try {
-        // Delete courses one by one
         for (const courseId of selectedCourses) {
           await deleteMutation.mutateAsync(courseId);
         }
-        // Clear selection after successful deletion
         setSelectedCourses([]);
       } catch (error) {
         console.error("Failed to delete selected courses:", error);
