@@ -31,6 +31,7 @@ import InstructorMessages from "../pages/Instructor/Messages";
 import InstructorEarnings from "../pages/Instructor/Earnings";
 import CreateCourse from "../pages/Instructor/CreateCourse";
 import EditCourse from "../pages/Instructor/EditCourse";
+import CoursePreview from "../pages/Instructor/CoursePreview";
 import LessonEditor from "../pages/Instructor/LessonEditor";
 import LessonEditPage from "../pages/Instructor/LessonEditPage";
 
@@ -184,6 +185,10 @@ const ROUTES = [
       {
         path: "courses/:courseId/edit",
         element: <EditCourse />,
+      },
+      {
+        path: "courses/:courseId/preview",
+        element: <CoursePreview />,
       },
       {
         path: "courses/:courseId/lessons/create",

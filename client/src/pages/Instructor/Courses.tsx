@@ -27,6 +27,8 @@ import {
 } from "../../hooks/useInstructor";
 import { useInstructorAnalytics } from "../../hooks/useInstructorHelpers";
 import Loading from "../../components/Common/Loading";
+import { useToast } from "../../components/UI/ToastProvider";
+import Swal from "sweetalert2";
 
 type ViewMode = "grid" | "list";
 type SortOption =
@@ -72,24 +74,46 @@ const InstructorCourses = () => {
   });
 
   const { formatCurrency } = useInstructorAnalytics();
+  const { showToast } = useToast();
 
   const deleteMutation = useDeleteCourse({
     onSuccess: (data) => {
-      // Optional: Show success message
-      console.log(data.message);
+      showToast({
+        title: "✅ Course Deleted",
+        message: data.message,
+        type: "success",
+        duration: 3000,
+      });
+      // Clear selection after successful deletion
+      setSelectedCourses((prev) => prev.filter((id) => !prev.includes(id)));
     },
     onError: (error) => {
-      console.error("Failed to delete course:", error);
+      showToast({
+        title: "❌ Delete Failed",
+        message: error.message || "Failed to delete course. Please try again.",
+        type: "error",
+        duration: 4000,
+      });
     },
   });
 
   const toggleStatusMutation = useToggleCourseStatus({
     onSuccess: (data) => {
-      // Optional: Show success message
-      console.log(data.message);
+      showToast({
+        title: "🎯 Status Updated",
+        message: data.message,
+        type: "success",
+        duration: 3000,
+      });
     },
     onError: (error) => {
-      console.error("Failed to toggle course status:", error);
+      showToast({
+        title: "❌ Status Update Failed",
+        message:
+          error.message || "Failed to update course status. Please try again.",
+        type: "error",
+        duration: 4000,
+      });
     },
   });
 
@@ -112,8 +136,25 @@ const InstructorCourses = () => {
     setPage(1);
   };
 
-  const handleDeleteCourse = async (courseId: string) => {
-    if (window.confirm("Are you sure you want to delete this course?")) {
+  const handleDeleteCourse = async (courseId: string, courseTitle?: string) => {
+    const result = await Swal.fire({
+      title: "Delete Course",
+      html: `Are you sure you want to delete <strong>"${
+        courseTitle || "this course"
+      }"</strong>?<br><br>This action cannot be undone and will remove all associated lessons, sections, and student progress.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#EF4444",
+      cancelButtonColor: "#6B7280",
+      confirmButtonText: "Yes, Delete",
+      cancelButtonText: "Cancel",
+      customClass: {
+        confirmButton: "hover:bg-red-600 transition-colors",
+        cancelButton: "hover:bg-gray-600 transition-colors",
+      },
+    });
+
+    if (result.isConfirmed) {
       try {
         await deleteMutation.mutateAsync(courseId);
       } catch (error) {
@@ -122,11 +163,33 @@ const InstructorCourses = () => {
     }
   };
 
-  const handleToggleStatus = async (courseId: string) => {
-    try {
-      await toggleStatusMutation.mutateAsync(courseId);
-    } catch (error) {
-      console.error("Failed to toggle course status:", error);
+  const handleToggleStatus = async (
+    courseId: string,
+    currentStatus?: boolean,
+    courseTitle?: string
+  ) => {
+    const action = currentStatus ? "unpublish" : "publish";
+    const result = await Swal.fire({
+      title: `${action.charAt(0).toUpperCase() + action.slice(1)} Course`,
+      html: `Are you sure you want to ${action} <strong>"${
+        courseTitle || "this course"
+      }"</strong>?`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: currentStatus ? "#F59E0B" : "#10B981",
+      cancelButtonColor: "#6B7280",
+      confirmButtonText: `Yes, ${
+        action.charAt(0).toUpperCase() + action.slice(1)
+      }`,
+      cancelButtonText: "Cancel",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await toggleStatusMutation.mutateAsync(courseId);
+      } catch (error) {
+        console.error("Failed to toggle course status:", error);
+      }
     }
   };
 
@@ -141,11 +204,22 @@ const InstructorCourses = () => {
   const handleDeleteSelectedCourses = async () => {
     if (selectedCourses.length === 0) return;
 
-    if (
-      window.confirm(
-        `Are you sure you want to delete ${selectedCourses.length} selected course(s)?`
-      )
-    ) {
+    const result = await Swal.fire({
+      title: "Delete Selected Courses",
+      html: `Are you sure you want to delete <strong>${selectedCourses.length} selected course(s)</strong>?<br><br>This action cannot be undone and will remove all associated lessons, sections, and student progress.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#EF4444",
+      cancelButtonColor: "#6B7280",
+      confirmButtonText: `Yes, Delete ${selectedCourses.length} Course(s)`,
+      cancelButtonText: "Cancel",
+      customClass: {
+        confirmButton: "hover:bg-red-600 transition-colors",
+        cancelButton: "hover:bg-gray-600 transition-colors",
+      },
+    });
+
+    if (result.isConfirmed) {
       try {
         // Delete courses one by one
         for (const courseId of selectedCourses) {
@@ -158,7 +232,6 @@ const InstructorCourses = () => {
       }
     }
   };
-
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -425,8 +498,14 @@ const InstructorCourses = () => {
                   onEdit={() =>
                     navigate(`/instructor/courses/${course._id}/edit`)
                   }
-                  onDelete={() => handleDeleteCourse(course._id)}
-                  onToggleStatus={() => handleToggleStatus(course._id)}
+                  onDelete={() => handleDeleteCourse(course._id, course.title)}
+                  onToggleStatus={() =>
+                    handleToggleStatus(
+                      course._id,
+                      course.isPublished,
+                      course.title
+                    )
+                  }
                   onSelect={() => handleSelectCourse(course._id)}
                   isSelected={selectedCourses.includes(course._id)}
                   formatCurrency={formatCurrency}
@@ -443,8 +522,14 @@ const InstructorCourses = () => {
                   onEdit={() =>
                     navigate(`/instructor/courses/${course._id}/edit`)
                   }
-                  onDelete={() => handleDeleteCourse(course._id)}
-                  onToggleStatus={() => handleToggleStatus(course._id)}
+                  onDelete={() => handleDeleteCourse(course._id, course.title)}
+                  onToggleStatus={() =>
+                    handleToggleStatus(
+                      course._id,
+                      course.isPublished,
+                      course.title
+                    )
+                  }
                   onSelect={() => handleSelectCourse(course._id)}
                   isSelected={selectedCourses.includes(course._id)}
                   formatCurrency={formatCurrency}
@@ -593,7 +678,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
                 >
                   <button
                     onClick={() => {
-                      navigate(`/instructor/courses/${course._id}`);
+                      navigate(`/instructor/courses/${course._id}/preview`);
                       setShowMenu(false);
                     }}
                     className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
@@ -673,7 +758,9 @@ const CourseCard: React.FC<CourseCardProps> = ({
             Edit
           </button>
           <button
-            onClick={() => navigate(`/instructor/courses/${course._id}`)}
+            onClick={() =>
+              navigate(`/instructor/courses/${course._id}/preview`)
+            }
             className="flex-1 px-3 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors duration-200"
           >
             View
@@ -770,7 +857,9 @@ const CourseListItem: React.FC<CourseCardProps> = ({
             {course.isPublished ? "Published" : "Draft"}
           </span>
           <button
-            onClick={() => navigate(`/instructor/courses/${course._id}`)}
+            onClick={() =>
+              navigate(`/instructor/courses/${course._id}/preview`)
+            }
             className="p-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors duration-200"
             title="View Course"
           >
@@ -782,6 +871,13 @@ const CourseListItem: React.FC<CourseCardProps> = ({
             title="Edit Course"
           >
             <FaEdit />
+          </button>
+          <button
+            onClick={onToggleStatus}
+            className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200"
+            title={course.isPublished ? "Unpublish Course" : "Publish Course"}
+          >
+            <FaPlay />
           </button>
           <button
             onClick={onDelete}

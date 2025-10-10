@@ -322,6 +322,9 @@ export const useUpdateCourse = (
       queryClient.invalidateQueries({
         queryKey: courseQueryKeys.instructorCourses(),
       });
+
+      // Also invalidate instructor courses with stats for immediate UI updates
+      queryClient.invalidateQueries({ queryKey: ["instructor"] });
     },
     ...options,
   });
