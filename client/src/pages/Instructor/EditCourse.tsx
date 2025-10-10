@@ -32,8 +32,6 @@ const EditCourse = () => {
   const [formChanges, setFormChanges] = useState<Partial<Course>>({});
 
   const { data: courseData, isLoading, error, refetch } = useCourse(courseId!);
-  console.log("course id", courseId);
-  console.log("courseData", courseData);
 
   const updateCourseMutation = useUpdateCourse({
     onSuccess: () => {
@@ -69,8 +67,6 @@ const EditCourse = () => {
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [unsavedChanges]);
-
-  console.log("error", error);
 
   if (isLoading) return <LoadingSpinner fullScreen />;
   if (error || !courseData)

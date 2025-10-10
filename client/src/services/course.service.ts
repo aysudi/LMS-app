@@ -193,3 +193,11 @@ export const getTrendingCourses = async (
   };
   return getCourses(params);
 };
+
+// Toggle course status (instructor only)
+export const toggleCourseStatus = async (
+  courseId: string
+): Promise<{ success: boolean; message: string; data?: any }> => {
+  const response = await api.patch(`/api/courses/${courseId}/toggle-status`);
+  return response.data;
+};

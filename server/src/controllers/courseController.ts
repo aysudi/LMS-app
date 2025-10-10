@@ -13,6 +13,7 @@ import {
   getInstructorCoursesService,
   getUserCoursesService,
   updateCourseService,
+  toggleCourseStatusService,
 } from "../services/courseService";
 import formatMongoData from "../utils/formatMongoData";
 
@@ -168,6 +169,27 @@ export const getInstructorCourses = async (req: AuthRequest, res: Response) => {
       success: false,
       message: "Error fetching instructor courses",
       error: error.message,
+    });
+  }
+};
+
+// Toggle course status (instructor only)
+export const toggleCourseStatus = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const instructorId = req.user!.userId;
+
+    const course = await toggleCourseStatusService(id, instructorId);
+
+    res.status(200).json({
+      success: true,
+      message: `Course ${course.isPublished ? 'published' : 'unpublished'} successfully`,
+      data: formatMongoData(course),
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
     });
   }
 };

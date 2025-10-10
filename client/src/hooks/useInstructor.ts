@@ -32,6 +32,8 @@ import {
   getLessonById,
   addNoteToLesson,
   getUserNotesForLesson,
+  deleteCourse,
+  toggleCourseStatus,
 } from "../services/instructor.service";
 import type {
   InstructorOverviewResponse,
@@ -583,6 +585,55 @@ export const useAddNoteToLesson = (
           variables.sectionId,
           variables.lessonId
         ),
+      });
+    },
+    ...options,
+  });
+};
+
+// Course Management Mutations
+export const useDeleteCourse = (
+  options?: UseMutationOptions<
+    { success: boolean; message: string },
+    Error,
+    string
+  >
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (courseId: string) => deleteCourse(courseId),
+    onSuccess: () => {
+      // Invalidate all course-related queries
+      queryClient.invalidateQueries({
+        queryKey: instructorQueryKeys.coursesWithStats({}),
+      });
+      queryClient.invalidateQueries({
+        queryKey: instructorQueryKeys.overview(),
+      });
+    },
+    ...options,
+  });
+};
+
+export const useToggleCourseStatus = (
+  options?: UseMutationOptions<
+    { success: boolean; message: string; data?: any },
+    Error,
+    string
+  >
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (courseId: string) => toggleCourseStatus(courseId),
+    onSuccess: () => {
+      // Invalidate course queries to refresh the data
+      queryClient.invalidateQueries({
+        queryKey: instructorQueryKeys.coursesWithStats({}),
+      });
+      queryClient.invalidateQueries({
+        queryKey: instructorQueryKeys.overview(),
       });
     },
     ...options,
