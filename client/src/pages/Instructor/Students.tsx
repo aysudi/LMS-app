@@ -52,7 +52,6 @@ const InstructorStudents = () => {
   const students = studentsData?.data?.students || [];
   const totalPages = studentsData?.data?.pagination?.totalPages || 1;
 
-  // Calculate total students across all courses for the instructor
   const totalStudents = instructorCourses.reduce(
     (acc, course) => acc + (course.studentsEnrolled?.length || 0),
     0
