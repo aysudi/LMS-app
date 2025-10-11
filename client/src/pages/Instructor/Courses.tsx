@@ -34,7 +34,6 @@ const InstructorCourses = () => {
   const [ratingFilter, setRatingFilter] = useState<RatingFilter>("all");
   const [page, setPage] = useState(1);
 
-  // Debounce search term
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
@@ -89,7 +88,6 @@ const InstructorCourses = () => {
   const totalPages = coursesData?.data?.pagination?.totalPages || 1;
   const totalCourses = coursesData?.data?.pagination?.totalCourses || 0;
 
-  // Helper functions
   function getSortByValue(
     sort: SortOption
   ): "createdAt" | "title" | "studentsCount" | "originalPrice" | "rating" {
@@ -121,7 +119,6 @@ const InstructorCourses = () => {
     return "desc";
   }
 
-  // Event handlers
   const handleSearchChange = (search: string) => {
     setSearchTerm(search);
   };
@@ -343,7 +340,6 @@ const InstructorCourses = () => {
     (course: any) => !course.isPublished
   ).length;
 
-  // Calculate rating only for published courses (not drafts) since users can't rate unpublished courses
   const publishedCoursesForRating = courses.filter(
     (course: any) => course.isPublished && course.rating > 0
   );
