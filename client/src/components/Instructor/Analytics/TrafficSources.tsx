@@ -16,9 +16,7 @@ const TrafficSources: React.FC<TrafficSourcesProps> = ({ data }) => {
       transition={{ delay: 0.4 }}
       className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
     >
-      <h2 className="text-xl font-bold text-gray-900 mb-6">
-        Traffic Sources
-      </h2>
+      <h2 className="text-xl font-bold text-gray-900 mb-6">Traffic Sources</h2>
 
       {/* Simple Bar Chart */}
       <div className="space-y-4 mb-6">
@@ -67,9 +65,7 @@ const TrafficSources: React.FC<TrafficSourcesProps> = ({ data }) => {
               strokeWidth="3"
             />
             {data.map((source, index) => {
-              const strokeDasharray = `${source.value} ${
-                100 - source.value
-              }`;
+              const strokeDasharray = `${source.value} ${100 - source.value}`;
               const strokeDashoffset = data
                 .slice(0, index)
                 .reduce((acc, curr) => acc + curr.value, 0);

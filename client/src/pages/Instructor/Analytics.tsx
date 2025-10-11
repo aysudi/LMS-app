@@ -193,14 +193,11 @@ const InstructorAnalytics = () => {
         </motion.div>
 
         {/* Revenue and Students Chart */}
-        <RevenueChart 
-          data={revenueData}
-          formatCurrency={formatCurrency}
-        />
+        <RevenueChart data={revenueData} formatCurrency={formatCurrency} />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           {/* Course Performance */}
-          <CoursePerformance 
+          <CoursePerformance
             courses={coursePerformanceData}
             formatCurrency={formatCurrency}
           />
@@ -267,7 +264,5 @@ const InstructorAnalytics = () => {
     </div>
   );
 };
-
-
 
 export default InstructorAnalytics;

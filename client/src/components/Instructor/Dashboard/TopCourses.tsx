@@ -98,7 +98,9 @@ const TopCourses: React.FC<TopCoursesProps> = ({
               transition={{ delay: 0.1 * index }}
               whileHover={{ scale: 1.02 }}
               className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all duration-300 cursor-pointer"
-              onClick={() => navigate(`/instructor/courses/${course._id}`)}
+              onClick={() =>
+                navigate(`/instructor/courses/${course._id}/preview`)
+              }
             >
               <div className="relative">
                 <div

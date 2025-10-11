@@ -22,7 +22,13 @@ export type SortOption =
 
 export type StatusFilter = "all" | "published" | "draft";
 
-export type PriceFilter = "all" | "free" | "paid" | "under-50" | "50-100" | "over-100";
+export type PriceFilter =
+  | "all"
+  | "free"
+  | "paid"
+  | "under-50"
+  | "50-100"
+  | "over-100";
 
 export type RatingFilter = "all" | "4-plus" | "3-plus" | "2-plus" | "1-plus";
 
@@ -184,21 +190,21 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
           <motion.div
             key="filters"
             initial={{ opacity: 0, height: 0, overflow: "hidden" }}
-            animate={{ 
-              opacity: 1, 
+            animate={{
+              opacity: 1,
               height: "auto",
-              transition: { 
+              transition: {
                 height: { duration: 0.3, ease: "easeInOut" },
-                opacity: { duration: 0.2, delay: 0.1 }
-              }
+                opacity: { duration: 0.2, delay: 0.1 },
+              },
             }}
-            exit={{ 
-              opacity: 0, 
+            exit={{
+              opacity: 0,
               height: 0,
-              transition: { 
+              transition: {
                 height: { duration: 0.3, ease: "easeInOut", delay: 0.1 },
-                opacity: { duration: 0.2 }
-              }
+                opacity: { duration: 0.2 },
+              },
             }}
             className="mt-6 pt-6 border-t border-gray-200"
             style={{ overflow: "hidden" }}
@@ -233,7 +239,9 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
                   </label>
                   <select
                     value={priceFilter}
-                    onChange={(e) => onPriceFilterChange(e.target.value as PriceFilter)}
+                    onChange={(e) =>
+                      onPriceFilterChange(e.target.value as PriceFilter)
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   >
                     {priceOptions.map((option) => (
@@ -253,7 +261,9 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
                   </label>
                   <select
                     value={ratingFilter}
-                    onChange={(e) => onRatingFilterChange(e.target.value as RatingFilter)}
+                    onChange={(e) =>
+                      onRatingFilterChange(e.target.value as RatingFilter)
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   >
                     {ratingOptions.map((option) => (
@@ -290,7 +300,9 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
                     {sortBy.includes("desc") ? (
                       <>
                         <FaSortAmountDown className="text-sm text-gray-600 mr-2" />
-                        <span className="text-sm text-gray-700">Descending</span>
+                        <span className="text-sm text-gray-700">
+                          Descending
+                        </span>
                       </>
                     ) : (
                       <>
@@ -380,7 +392,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
               animate={{ opacity: 1, scale: 1 }}
               className="inline-flex items-center px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm"
             >
-              Price: {priceOptions.find(p => p.value === priceFilter)?.label}
+              Price: {priceOptions.find((p) => p.value === priceFilter)?.label}
               <button
                 onClick={() => onPriceFilterChange?.("all")}
                 className="ml-2 text-orange-600 hover:text-orange-800"
@@ -396,7 +408,8 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
               animate={{ opacity: 1, scale: 1 }}
               className="inline-flex items-center px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm"
             >
-              Rating: {ratingOptions.find(r => r.value === ratingFilter)?.label}
+              Rating:{" "}
+              {ratingOptions.find((r) => r.value === ratingFilter)?.label}
               <button
                 onClick={() => onRatingFilterChange?.("all")}
                 className="ml-2 text-yellow-600 hover:text-yellow-800"

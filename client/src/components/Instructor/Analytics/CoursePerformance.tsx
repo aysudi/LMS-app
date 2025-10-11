@@ -11,9 +11,9 @@ interface CoursePerformanceProps {
   formatCurrency: (amount: number) => string;
 }
 
-const CoursePerformance: React.FC<CoursePerformanceProps> = ({ 
-  courses, 
-  formatCurrency 
+const CoursePerformance: React.FC<CoursePerformanceProps> = ({
+  courses,
+  formatCurrency,
 }) => {
   return (
     <motion.div

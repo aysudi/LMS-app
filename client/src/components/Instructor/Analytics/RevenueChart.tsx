@@ -9,7 +9,10 @@ interface RevenueChartProps {
   formatCurrency: (amount: number) => string;
 }
 
-const RevenueChart: React.FC<RevenueChartProps> = ({ data, formatCurrency }) => {
+const RevenueChart: React.FC<RevenueChartProps> = ({
+  data,
+  formatCurrency,
+}) => {
   const maxRevenue = Math.max(...data.map((d) => d.revenue));
   const maxStudents = Math.max(...data.map((d) => d.students));
 
@@ -46,7 +49,9 @@ const RevenueChart: React.FC<RevenueChartProps> = ({ data, formatCurrency }) => 
               <div
                 className="bg-indigo-500 rounded-t-lg transition-all duration-500 hover:bg-indigo-600 cursor-pointer relative group"
                 style={{
-                  height: `${maxRevenue > 0 ? (item.revenue / maxRevenue) * 100 : 5}%`,
+                  height: `${
+                    maxRevenue > 0 ? (item.revenue / maxRevenue) * 100 : 5
+                  }%`,
                   width: "40%",
                 }}
               >
@@ -57,7 +62,9 @@ const RevenueChart: React.FC<RevenueChartProps> = ({ data, formatCurrency }) => 
               <div
                 className="bg-green-500 rounded-t-lg transition-all duration-500 hover:bg-green-600 cursor-pointer relative group"
                 style={{
-                  height: `${maxStudents > 0 ? (item.students / maxStudents) * 100 : 5}%`,
+                  height: `${
+                    maxStudents > 0 ? (item.students / maxStudents) * 100 : 5
+                  }%`,
                   width: "40%",
                 }}
               >
