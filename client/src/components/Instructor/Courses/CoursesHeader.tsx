@@ -174,34 +174,6 @@ const CoursesHeader: React.FC<CoursesHeaderProps> = ({
           </motion.div>
         ))}
       </div>
-
-      {/* Quick Actions Bar */}
-      {/* <div className="flex flex-wrap gap-2">
-        <button
-          onClick={() => navigate("/instructor/create-course")}
-          className="px-4 py-2 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium hover:bg-indigo-200 transition-colors duration-200"
-        >
-          + New Course
-        </button>
-        <button
-          onClick={() => navigate("/instructor/analytics")}
-          className="px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-medium hover:bg-green-200 transition-colors duration-200"
-        >
-          View Analytics
-        </button>
-        <button
-          onClick={() => navigate("/instructor/students")}
-          className="px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-medium hover:bg-blue-200 transition-colors duration-200"
-        >
-          Manage Students
-        </button>
-        <button
-          onClick={onExport}
-          className="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors duration-200"
-        >
-          Export Data
-        </button>
-      </div> */}
     </div>
   );
 };
