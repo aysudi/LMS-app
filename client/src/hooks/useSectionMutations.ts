@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { UseMutationOptions } from "@tanstack/react-query";
 import type { Section } from "../types/course.type";
 import * as sectionService from "../services/section.service";
-import { courseQueryKeys } from "./useCourseQueries";
+import { courseQueryKeys } from "./useCourseHooks";
 
 interface SectionResponse {
   success: boolean;

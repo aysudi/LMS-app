@@ -11,8 +11,10 @@ import {
   FaBook,
   FaEllipsisV,
 } from "react-icons/fa";
-import { useInstructorMessages } from "../../hooks/useInstructor";
-import { useInstructorMessaging } from "../../hooks/useInstructorHelpers";
+import {
+  useInstructorMessages,
+  useInstructorMessaging,
+} from "../../hooks/useInstructor";
 import Loading from "../../components/Common/Loading";
 
 type MessageStatus = "all" | "unread" | "read" | "resolved";

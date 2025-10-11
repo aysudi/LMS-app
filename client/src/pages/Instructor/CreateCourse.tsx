@@ -10,10 +10,9 @@ import {
   FaBullseye,
   FaImage,
   FaSave,
-  FaList,
 } from "react-icons/fa";
 import { toast } from "react-hot-toast";
-import { useCreateCourse } from "../../hooks/useCourseMutations";
+import { useCreateCourse } from "../../hooks/useCourseHooks";
 import BasicInformationStep from "../../components/Instructor/CreateCourse/BasicInformationStep";
 import CourseDetailsStep from "../../components/Instructor/CreateCourse/CourseDetailsStep";
 import PricingSettingsStep from "../../components/Instructor/CreateCourse/PricingSettingsStep";
@@ -211,7 +210,10 @@ const CreateCourse = () => {
           const value = formData[key as keyof CourseFormData];
           if (Array.isArray(value)) {
             const processed = value.filter(Boolean).map(String);
-            formDataToSend.append(key, JSON.stringify(processed));
+            // Append each item individually instead of JSON stringifying
+            processed.forEach((item) => {
+              formDataToSend.append(key, item);
+            });
           }
         }
       }

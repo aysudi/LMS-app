@@ -15,7 +15,7 @@ import {
 } from "react-icons/fa";
 import type { Lesson, Section } from "../../types/course.type";
 import RichTextEditor from "../../components/UI/RichTextEditor";
-import { useCourse } from "../../hooks/useCourseQueries";
+import { useCourse } from "../../hooks/useCourseHooks";
 import { enqueueSnackbar } from "notistack";
 import { useUpdateLesson } from "../../hooks/useLessonMutations";
 

@@ -24,46 +24,39 @@ const InstructorStudents = () => {
   >("name");
   const [page, setPage] = useState(1);
 
-  // Fetch instructor courses
   const { data: coursesData, isLoading: coursesLoading } =
     useInstructorCoursesWithStats({
       page: 1,
-      limit: 100, // Get all courses
+      limit: 100,
       status: "published",
     });
 
   const instructorCourses = coursesData?.data?.courses || [];
-  const firstCourseId = instructorCourses[0]?._id;
-
-  // Fetch students for the selected course (or first course if "all" is selected)
-  const targetCourseId =
-    selectedCourse === "all" ? firstCourseId : selectedCourse;
+  const targetCourseId = selectedCourse === "all" ? undefined : selectedCourse;
 
   const {
     data: studentsData,
     isLoading: studentsLoading,
     error,
   } = useCourseStudents(
-    targetCourseId,
+    targetCourseId || instructorCourses[0]?._id,
     {
       page,
       limit: 20,
     },
     {
-      enabled: !!targetCourseId,
+      enabled: instructorCourses.length > 0,
     }
   );
 
   const students = studentsData?.data?.students || [];
   const totalPages = studentsData?.data?.pagination?.totalPages || 1;
 
-  // Calculate total students across all courses
+  // Calculate total students across all courses for the instructor
   const totalStudents = instructorCourses.reduce(
-    (acc, course) => acc + (course.enrollmentsCount || 0),
+    (acc, course) => acc + (course.studentsEnrolled?.length || 0),
     0
   );
-
-  // Calculate stats from real data
   const completedStudents = students.filter(
     (s) => s.enrollment?.progressPercentage === 100
   ).length;

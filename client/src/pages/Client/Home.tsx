@@ -23,7 +23,7 @@ import {
   useFreeCourses,
   useTrendingCourses,
   useUserCourses,
-} from "../../hooks/useCourseQueries";
+} from "../../hooks/useCourseHooks";
 import Loading from "../../components/Common/Loading";
 import ModernCourseCard from "../../components/Client/ModernCourseCard";
 import FreeCourseCard from "../../components/Client/FreeCourseCard";
@@ -733,7 +733,7 @@ const Home = () => {
                           <div className="relative overflow-hidden md:order-2">
                             <img
                               src={
-                                displayCourse.image ||
+                                displayCourse.image.url ||
                                 "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&h=400&fit=crop"
                               }
                               alt={displayCourse.title}

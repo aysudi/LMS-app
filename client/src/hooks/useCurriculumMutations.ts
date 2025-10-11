@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import type { Section } from "../types/course.type";
 import { useSectionOperations } from "./useSectionMutations";
-import { courseQueryKeys } from "./useCourseQueries";
+import { courseQueryKeys } from "./useCourseHooks";
 
 export const useCurriculumOperations = (courseId: string) => {
   const queryClient = useQueryClient();
