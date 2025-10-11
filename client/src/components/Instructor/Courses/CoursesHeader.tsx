@@ -54,18 +54,6 @@ const CoursesHeader: React.FC<CoursesHeaderProps> = ({
       icon: FaPause,
       color: "yellow",
     },
-    // {
-    //   label: "Total Students",
-    //   value: totalStudents,
-    //   icon: FaUsers,
-    //   color: "blue",
-    // },
-    // {
-    //   label: "Total Revenue",
-    //   value: formatCurrency(totalRevenue),
-    //   icon: FaDollarSign,
-    //   color: "emerald",
-    // },
     {
       label: "Average Rating",
       value: averageRating ? averageRating.toFixed(1) : "No ratings",
