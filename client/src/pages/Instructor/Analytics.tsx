@@ -26,7 +26,6 @@ const InstructorAnalytics = () => {
     "30d"
   );
 
-  // Fetch real data
   const { data: overview, isLoading: overviewLoading } =
     useInstructorOverview();
   const { data: coursesData, isLoading: coursesLoading } =
@@ -48,9 +47,6 @@ const InstructorAnalytics = () => {
 
   const stats = overview?.data?.overview;
   const courses = coursesData?.data?.courses || [];
-  // earnings data available if needed
-
-  // Generate revenue data from earnings (mock monthly breakdown for demo)
   const totalRevenue = stats?.totalRevenue || 0;
   const totalStudents = stats?.totalStudents || 0;
 
@@ -87,7 +83,6 @@ const InstructorAnalytics = () => {
     },
   ];
 
-  // Use real course data
   const coursePerformanceData = courses.slice(0, 5).map((course) => ({
     name: course.title,
     students: course.studentsEnrolled.length || 0,
@@ -95,7 +90,6 @@ const InstructorAnalytics = () => {
     revenue: course.originalPrice || 0,
   }));
 
-  // Mock traffic source data (would come from analytics API in real app)
   const trafficSourceData = [
     { name: "Organic Search", value: 45, color: "#3B82F6" },
     { name: "Social Media", value: 28, color: "#10B981" },
