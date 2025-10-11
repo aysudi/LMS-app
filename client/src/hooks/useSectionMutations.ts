@@ -4,7 +4,6 @@ import type { Section } from "../types/course.type";
 import * as sectionService from "../services/section.service";
 import { courseQueryKeys } from "./useCourseQueries";
 
-// Section mutation response types
 interface SectionResponse {
   success: boolean;
   data: Section;
@@ -26,7 +25,6 @@ export const useCreateSection = (
     mutationFn: (sectionData: Partial<Section>) =>
       sectionService.createSection(courseId, sectionData),
     onSuccess: (data) => {
-      // Update course details to include new section
       queryClient.setQueryData(
         courseQueryKeys.detail(courseId),
         (oldData: any) => {
@@ -41,9 +39,17 @@ export const useCreateSection = (
         }
       );
 
-      // Invalidate sections query
       queryClient.invalidateQueries({
         queryKey: ["sections", courseId],
+      });
+
+      queryClient.invalidateQueries({
+        predicate: (query) => {
+          return (
+            query.queryKey[0] === "instructor" &&
+            query.queryKey[1] === "courses"
+          );
+        },
       });
     },
     ...options,
@@ -65,7 +71,6 @@ export const useUpdateSection = (
     mutationFn: ({ sectionId, updateData }) =>
       sectionService.updateSection(courseId, sectionId, updateData),
     onSuccess: (data, { sectionId }) => {
-      // Update course details to reflect section changes
       queryClient.setQueryData(
         courseQueryKeys.detail(courseId),
         (oldData: any) => {
@@ -84,14 +89,21 @@ export const useUpdateSection = (
         }
       );
 
-      // Force immediate invalidation and refetch
       queryClient.invalidateQueries({
         queryKey: courseQueryKeys.detail(courseId),
       });
 
-      // Invalidate sections query
       queryClient.invalidateQueries({
         queryKey: ["sections", courseId],
+      });
+
+      queryClient.invalidateQueries({
+        predicate: (query) => {
+          return (
+            query.queryKey[0] === "instructor" &&
+            query.queryKey[1] === "courses"
+          );
+        },
       });
     },
     ...options,
@@ -113,14 +125,21 @@ export const useDeleteSection = (
     mutationFn: (sectionId) =>
       sectionService.deleteSection(courseId, sectionId),
     onSuccess: () => {
-      // Invalidate course details to force refetch
       queryClient.invalidateQueries({
         queryKey: courseQueryKeys.detail(courseId),
       });
 
-      // Invalidate sections query
       queryClient.invalidateQueries({
         queryKey: ["sections", courseId],
+      });
+
+      queryClient.invalidateQueries({
+        predicate: (query) => {
+          return (
+            query.queryKey[0] === "instructor" &&
+            query.queryKey[1] === "courses"
+          );
+        },
       });
     },
     ...options,

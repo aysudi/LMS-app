@@ -601,10 +601,24 @@ export const useDeleteCourse = (
   return useMutation({
     mutationFn: (courseId: string) => deleteCourse(courseId),
     onSuccess: () => {
-      // Invalidate all instructor course-related queries
-      queryClient.invalidateQueries({
-        queryKey: instructorQueryKeys.courses(),
+      queryClient.removeQueries({
+        predicate: (query) => {
+          return (
+            query.queryKey[0] === "instructor" &&
+            query.queryKey[1] === "courses"
+          );
+        },
       });
+
+      queryClient.refetchQueries({
+        predicate: (query) => {
+          return (
+            query.queryKey[0] === "instructor" &&
+            query.queryKey[1] === "courses"
+          );
+        },
+      });
+
       queryClient.invalidateQueries({
         queryKey: instructorQueryKeys.overview(),
       });
@@ -625,10 +639,26 @@ export const useToggleCourseStatus = (
   return useMutation({
     mutationFn: (courseId: string) => toggleCourseStatus(courseId),
     onSuccess: () => {
-      // Invalidate all instructor course-related queries
-      queryClient.invalidateQueries({
-        queryKey: instructorQueryKeys.courses(),
+      // Remove all instructor course-related cache entries immediately
+      queryClient.removeQueries({
+        predicate: (query) => {
+          return (
+            query.queryKey[0] === "instructor" &&
+            query.queryKey[1] === "courses"
+          );
+        },
       });
+
+      // Force refetch all instructor course queries
+      queryClient.refetchQueries({
+        predicate: (query) => {
+          return (
+            query.queryKey[0] === "instructor" &&
+            query.queryKey[1] === "courses"
+          );
+        },
+      });
+
       queryClient.invalidateQueries({
         queryKey: instructorQueryKeys.overview(),
       });

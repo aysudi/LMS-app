@@ -28,6 +28,7 @@ import {
 import { useInstructorAnalytics } from "../../hooks/useInstructorHelpers";
 import Loading from "../../components/Common/Loading";
 import { useToast } from "../../components/UI/ToastProvider";
+import { courseToasts } from "../../utils/toastUtils";
 import Swal from "sweetalert2";
 
 type ViewMode = "grid" | "list";
@@ -75,75 +76,64 @@ const InstructorCourses = () => {
     data: coursesData,
     isLoading,
     error,
-  } = useInstructorCoursesWithStats({
-    page,
-    limit: 12,
-    status:
-      filters.status !== "all" && filters.status !== "archived"
-        ? filters.status
-        : "all",
-    search: debouncedSearchTerm || undefined,
-    category: filters.category || undefined,
-    minPrice: filters.priceRange === "free" ? 0 : undefined,
-    maxPrice:
-      filters.priceRange === "free"
-        ? 0
-        : filters.priceRange === "paid"
-        ? undefined
-        : undefined,
-    sortBy:
-      sortBy === "newest"
-        ? "createdAt"
-        : sortBy === "oldest"
-        ? "createdAt"
-        : sortBy === "students"
-        ? "studentsCount"
-        : sortBy === "price"
-        ? "originalPrice"
-        : sortBy,
-    sortOrder: sortBy === "oldest" ? "asc" : "desc",
-  });
+    isPlaceholderData,
+    isFetching,
+  } = useInstructorCoursesWithStats(
+    {
+      page,
+      limit: 12,
+      status:
+        filters.status !== "all" && filters.status !== "archived"
+          ? filters.status
+          : "all",
+      search: debouncedSearchTerm || undefined,
+      category: filters.category || undefined,
+      minPrice:
+        filters.priceRange === "free"
+          ? 0
+          : filters.priceRange === "paid"
+          ? 1
+          : undefined,
+      maxPrice: filters.priceRange === "free" ? 0 : undefined,
+      sortBy:
+        sortBy === "newest"
+          ? "createdAt"
+          : sortBy === "oldest"
+          ? "createdAt"
+          : sortBy === "students"
+          ? "studentsCount"
+          : sortBy === "price"
+          ? "originalPrice"
+          : sortBy === "title"
+          ? "title"
+          : sortBy === "rating"
+          ? "rating"
+          : "createdAt",
+      sortOrder:
+        sortBy === "oldest" ? "asc" : sortBy === "title" ? "asc" : "desc",
+    },
+    {
+      placeholderData: (previousData) => previousData,
+      staleTime: 5 * 60 * 1000,
+    }
+  );
 
   const { formatCurrency } = useInstructorAnalytics();
   const { showToast } = useToast();
 
   const deleteMutation = useDeleteCourse({
-    onSuccess: (data) => {
-      showToast({
-        title: "✅ Course Deleted",
-        message: data.message,
-        type: "success",
-        duration: 3000,
-      });
+    onSuccess: () => {
+      showToast(courseToasts.deleted());
       setSelectedCourses((prev) => prev.filter((id) => !prev.includes(id)));
     },
-    onError: (error) => {
-      showToast({
-        title: "❌ Delete Failed",
-        message: error.message || "Failed to delete course. Please try again.",
-        type: "error",
-        duration: 4000,
-      });
+    onError: () => {
+      showToast(courseToasts.deleteError());
     },
   });
 
   const toggleStatusMutation = useToggleCourseStatus({
-    onSuccess: (data) => {
-      showToast({
-        title: "🎯 Status Updated",
-        message: data.message,
-        type: "success",
-        duration: 3000,
-      });
-    },
-    onError: (error) => {
-      showToast({
-        title: "❌ Status Update Failed",
-        message:
-          error.message || "Failed to update course status. Please try again.",
-        type: "error",
-        duration: 4000,
-      });
+    onError: () => {
+      showToast(courseToasts.statusToggleError());
     },
   });
 
@@ -216,7 +206,18 @@ const InstructorCourses = () => {
 
     if (result.isConfirmed) {
       try {
+        // Store the action and title for toast
+        const toastAction = action;
+        const toastTitle = courseTitle || "Course";
+
         await toggleStatusMutation.mutateAsync(courseId);
+
+        // Show appropriate toast based on the action performed
+        if (toastAction === "publish") {
+          showToast(courseToasts.published(toastTitle));
+        } else {
+          showToast(courseToasts.unpublished(toastTitle));
+        }
       } catch (error) {
         console.error("Failed to toggle course status:", error);
       }
@@ -260,7 +261,7 @@ const InstructorCourses = () => {
       }
     }
   };
-  if (isLoading) {
+  if (isLoading && !isPlaceholderData) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loading size="lg" />
@@ -393,13 +394,14 @@ const InstructorCourses = () => {
           </div>
 
           {/* Filters Panel */}
-          <AnimatePresence>
+          <AnimatePresence mode="wait">
             {showFilters && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
-                className="mt-6 pt-6 border-t border-gray-200"
+                transition={{ duration: 0.2, ease: "easeInOut" }}
+                className="mt-6 pt-6 border-t border-gray-200 overflow-hidden"
               >
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {/* Status Filter */}
@@ -417,7 +419,6 @@ const InstructorCourses = () => {
                       <option value="all">All Status</option>
                       <option value="draft">Draft</option>
                       <option value="published">Published</option>
-                      <option value="archived">Archived</option>
                     </select>
                   </div>
 
@@ -498,7 +499,20 @@ const InstructorCourses = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
+          className={`relative ${
+            isFetching && isPlaceholderData
+              ? "opacity-75 pointer-events-none"
+              : ""
+          }`}
         >
+          {/* Subtle loading indicator for background fetching */}
+          {isFetching && isPlaceholderData && (
+            <div className="absolute top-4 right-4 z-10">
+              <div className="bg-white rounded-full p-2 shadow-sm">
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-indigo-600 border-t-transparent"></div>
+              </div>
+            </div>
+          )}
           {courses.length === 0 ? (
             <div className="text-center py-16">
               <FaBook className="text-6xl text-gray-300 mx-auto mb-4" />
@@ -709,7 +723,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
                       onToggleStatus();
                       setShowMenu(false);
                     }}
-                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2 cursor-pointer"
                   >
                     <FaPlay className="text-xs" />
                     <span>{course.isPublished ? "Unpublish" : "Publish"}</span>
@@ -719,7 +733,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
                       onDelete();
                       setShowMenu(false);
                     }}
-                    className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
+                    className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2 cursor-pointer"
                   >
                     <FaTrash className="text-xs" />
                     <span>Delete</span>
@@ -761,7 +775,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
         <div className="flex space-x-2">
           <button
             onClick={onEdit}
-            className="flex-1 px-3 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors duration-200"
+            className="flex-1 px-3 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors duration-200 cursor-pointer"
           >
             Edit
           </button>
@@ -769,7 +783,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
             onClick={() =>
               navigate(`/instructor/courses/${course._id}/preview`)
             }
-            className="flex-1 px-3 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors duration-200"
+            className="flex-1 px-3 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
           >
             View
           </button>

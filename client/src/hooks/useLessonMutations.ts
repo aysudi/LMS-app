@@ -4,7 +4,6 @@ import type { Lesson } from "../types/course.type";
 import * as lessonService from "../services/lesson.service";
 import { courseQueryKeys } from "./useCourseQueries";
 
-// Lesson mutation response types
 interface LessonResponse {
   success: boolean;
   data: Lesson;
@@ -23,14 +22,21 @@ export const useCreateLesson = (
     mutationFn: (lessonData: Lesson) =>
       lessonService.createLesson(courseId, sectionId, lessonData),
     onSuccess: () => {
-      // Invalidate course details to include new lesson
       queryClient.invalidateQueries({
         queryKey: courseQueryKeys.detail(courseId),
       });
 
-      // Invalidate lessons query
       queryClient.invalidateQueries({
         queryKey: ["lessons", sectionId],
+      });
+
+      queryClient.invalidateQueries({
+        predicate: (query) => {
+          return (
+            query.queryKey[0] === "instructor" &&
+            query.queryKey[1] === "courses"
+          );
+        },
       });
     },
     ...options,
@@ -53,7 +59,6 @@ export const useUpdateLesson = (
     mutationFn: ({ lessonId, updateData }) =>
       lessonService.updateLesson(courseId, sectionId, lessonId, updateData),
     onSuccess: (data, { lessonId }) => {
-      // Update course details to reflect lesson changes immediately
       queryClient.setQueryData(
         courseQueryKeys.detail(courseId),
         (oldData: any) => {
@@ -79,14 +84,21 @@ export const useUpdateLesson = (
         }
       );
 
-      // Force invalidation for immediate UI updates
       queryClient.invalidateQueries({
         queryKey: courseQueryKeys.detail(courseId),
       });
 
-      // Invalidate lessons query
       queryClient.invalidateQueries({
         queryKey: ["lessons", sectionId],
+      });
+
+      queryClient.invalidateQueries({
+        predicate: (query) => {
+          return (
+            query.queryKey[0] === "instructor" &&
+            query.queryKey[1] === "courses"
+          );
+        },
       });
     },
     ...options,
@@ -109,19 +121,25 @@ export const useDeleteLesson = (
     mutationFn: (lessonId: string) =>
       lessonService.deleteLesson(courseId, sectionId, lessonId),
     onSuccess: () => {
-      // Invalidate course details to remove deleted lesson
       queryClient.invalidateQueries({
         queryKey: courseQueryKeys.detail(courseId),
       });
 
-      // Invalidate lessons query
       queryClient.invalidateQueries({
         queryKey: ["lessons", sectionId],
       });
 
-      // Also invalidate all sections for this course
       queryClient.invalidateQueries({
         queryKey: ["sections", courseId],
+      });
+
+      queryClient.invalidateQueries({
+        predicate: (query) => {
+          return (
+            query.queryKey[0] === "instructor" &&
+            query.queryKey[1] === "courses"
+          );
+        },
       });
     },
     ...options,

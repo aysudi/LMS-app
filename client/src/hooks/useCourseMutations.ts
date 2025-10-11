@@ -4,7 +4,6 @@ import { courseQueryKeys } from "./useCourseQueries";
 import { api } from "../services/api";
 import type { Course, CourseResponse } from "../types/course.type";
 
-// Course enrollment mutation
 interface EnrollCourseResponse {
   success: boolean;
   message: string;
@@ -22,7 +21,6 @@ interface UnenrollCourseResponse {
   message: string;
 }
 
-// Course rating mutation
 interface RateCourseData {
   rating: number;
   comment?: string;
@@ -38,7 +36,6 @@ interface RateCourseResponse {
   };
 }
 
-// Course progress mutation
 interface UpdateProgressData {
   lessonId: string;
   completed: boolean;
@@ -146,7 +143,6 @@ export const useEnrollCourse = (
   return useMutation({
     mutationFn: enrollInCourse,
     onSuccess: (data, courseId) => {
-      // Update course in cache to reflect enrollment
       queryClient.setQueryData(
         courseQueryKeys.detail(courseId),
         (oldData: CourseResponse | undefined) => {
@@ -165,12 +161,10 @@ export const useEnrollCourse = (
         }
       );
 
-      // Invalidate user courses to include the new enrollment
       queryClient.invalidateQueries({
         queryKey: courseQueryKeys.userCourses(),
       });
 
-      // Invalidate course lists to update enrollment counts
       queryClient.invalidateQueries({ queryKey: courseQueryKeys.lists() });
     },
     ...options,
@@ -186,7 +180,6 @@ export const useUnenrollCourse = (
   return useMutation({
     mutationFn: unenrollFromCourse,
     onSuccess: (_, courseId) => {
-      // Update course in cache to reflect unenrollment
       queryClient.setQueryData(
         courseQueryKeys.detail(courseId),
         (oldData: CourseResponse | undefined) => {
@@ -207,12 +200,10 @@ export const useUnenrollCourse = (
         }
       );
 
-      // Invalidate user courses to remove the course
       queryClient.invalidateQueries({
         queryKey: courseQueryKeys.userCourses(),
       });
 
-      // Invalidate course lists to update enrollment counts
       queryClient.invalidateQueries({ queryKey: courseQueryKeys.lists() });
     },
     ...options,
@@ -232,13 +223,11 @@ export const useRateCourse = (
   return useMutation({
     mutationFn: ({ courseId, ratingData }) => rateCourse(courseId, ratingData),
     onSuccess: (data, { courseId }) => {
-      // Update course rating in cache
       queryClient.setQueryData(
         courseQueryKeys.detail(courseId),
         (oldData: CourseResponse | undefined) => {
           if (!oldData) return oldData;
 
-          // Assuming the response includes updated rating info
           return {
             ...oldData,
             data: {
@@ -258,7 +247,6 @@ export const useRateCourse = (
         }
       );
 
-      // Invalidate course lists to update ratings
       queryClient.invalidateQueries({ queryKey: courseQueryKeys.lists() });
     },
     ...options,
@@ -279,7 +267,6 @@ export const useUpdateCourseProgress = (
     mutationFn: ({ courseId, progressData }) =>
       updateCourseProgress(courseId, progressData),
     onSuccess: (data, { courseId }) => {
-      // Update course progress in cache
       queryClient.setQueryData(
         courseQueryKeys.detail(courseId),
         (oldData: CourseResponse | undefined) => {
@@ -305,7 +292,24 @@ export const useUpdateCourseProgress = (
         }
       );
 
-      // Invalidate user courses to update progress
+      queryClient.removeQueries({
+        predicate: (query) => {
+          return (
+            query.queryKey[0] === "instructor" &&
+            query.queryKey[1] === "courses"
+          );
+        },
+      });
+
+      queryClient.refetchQueries({
+        predicate: (query) => {
+          return (
+            query.queryKey[0] === "instructor" &&
+            query.queryKey[1] === "courses"
+          );
+        },
+      });
+
       queryClient.invalidateQueries({
         queryKey: courseQueryKeys.userCourses(),
       });
@@ -323,7 +327,6 @@ export const useBookmarkCourse = (
   return useMutation({
     mutationFn: bookmarkCourse,
     onSuccess: () => {
-      // Invalidate personalization data to update bookmarks
       queryClient.invalidateQueries({ queryKey: ["personalization"] });
     },
     ...options,
@@ -339,7 +342,6 @@ export const useUnbookmarkCourse = (
   return useMutation({
     mutationFn: unbookmarkCourse,
     onSuccess: () => {
-      // Invalidate personalization data to update bookmarks
       queryClient.invalidateQueries({ queryKey: ["personalization"] });
     },
     ...options,
@@ -411,7 +413,6 @@ export const useCreateCourse = (
   return useMutation({
     mutationFn: createCourseWithFiles,
     onSuccess: (data) => {
-      // Immediately update the instructor courses cache with the new course
       queryClient.setQueryData(
         courseQueryKeys.instructorCourses(),
         (oldData: { success: boolean; data: Course[] } | undefined) => {
@@ -423,15 +424,27 @@ export const useCreateCourse = (
         }
       );
 
-      // Then invalidate the queries to refetch fresh data
-      queryClient.invalidateQueries({
-        queryKey: courseQueryKeys.instructorCourses(),
-        exact: true,
+      // Remove and refetch instructor course queries for immediate updates
+      queryClient.removeQueries({
+        predicate: (query) => {
+          return (
+            query.queryKey[0] === "instructor" &&
+            query.queryKey[1] === "courses"
+          );
+        },
+      });
+
+      queryClient.refetchQueries({
+        predicate: (query) => {
+          return (
+            query.queryKey[0] === "instructor" &&
+            query.queryKey[1] === "courses"
+          );
+        },
       });
 
       queryClient.invalidateQueries({
         queryKey: courseQueryKeys.lists(),
-        exact: true,
       });
     },
     ...options,

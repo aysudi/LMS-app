@@ -323,8 +323,24 @@ export const useUpdateCourse = (
         queryKey: courseQueryKeys.instructorCourses(),
       });
 
-      // Also invalidate instructor courses with stats for immediate UI updates
-      queryClient.invalidateQueries({ queryKey: ["instructor"] });
+      // Remove and refetch instructor courses for immediate UI updates
+      queryClient.removeQueries({
+        predicate: (query) => {
+          return (
+            query.queryKey[0] === "instructor" &&
+            query.queryKey[1] === "courses"
+          );
+        },
+      });
+
+      queryClient.refetchQueries({
+        predicate: (query) => {
+          return (
+            query.queryKey[0] === "instructor" &&
+            query.queryKey[1] === "courses"
+          );
+        },
+      });
     },
     ...options,
   });
@@ -343,13 +359,20 @@ export const useDeleteCourse = (
   return useMutation({
     mutationFn: deleteCourse,
     onSuccess: (_, courseId) => {
-      // Remove the course from cache
       queryClient.removeQueries({ queryKey: courseQueryKeys.detail(courseId) });
 
-      // Invalidate course lists
       queryClient.invalidateQueries({ queryKey: courseQueryKeys.lists() });
       queryClient.invalidateQueries({
         queryKey: courseQueryKeys.instructorCourses(),
+      });
+
+      queryClient.invalidateQueries({
+        predicate: (query) => {
+          return (
+            query.queryKey[0] === "instructor" &&
+            query.queryKey[1] === "courses"
+          );
+        },
       });
     },
     ...options,
