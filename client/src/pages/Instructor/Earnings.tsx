@@ -12,13 +12,12 @@ import {
   FaPiggyBank,
   FaClock,
 } from "react-icons/fa";
-
+import Loading from "../../components/Common/Loading";
 import {
+  useInstructorAnalytics,
   useInstructorEarnings,
   useInstructorEarningsByCourse,
 } from "../../hooks/useInstructor";
-import { useInstructorAnalytics } from "../../hooks/useInstructorHelpers";
-import Loading from "../../components/Common/Loading";
 
 const InstructorEarnings = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<"30d" | "90d" | "1y">(

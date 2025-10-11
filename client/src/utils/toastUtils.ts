@@ -8,65 +8,85 @@ export interface ToastConfig {
 // Course-related toasts
 export const courseToasts = {
   created: (courseTitle: string): ToastConfig => ({
-    title: "✅ Course Created",
-    message: `"${courseTitle}" has been created successfully`,
     type: "success",
-    duration: 3000,
+    title: "Course Created",
+    message: `"${courseTitle}" has been created successfully!`,
+    duration: 4000,
   }),
 
   updated: (courseTitle: string): ToastConfig => ({
-    title: "✅ Course Updated",
-    message: `"${courseTitle}" has been updated successfully`,
     type: "success",
-    duration: 3000,
+    title: "Course Updated",
+    message: `"${courseTitle}" has been updated successfully!`,
+    duration: 4000,
   }),
 
   deleted: (courseTitle?: string): ToastConfig => ({
-    title: "✅ Course Deleted",
-    message: courseTitle
-      ? `"${courseTitle}" has been deleted successfully`
-      : "Course has been deleted successfully",
     type: "success",
-    duration: 3000,
+    title: "Course Deleted",
+    message: courseTitle
+      ? `"${courseTitle}" has been deleted successfully!`
+      : "Course has been deleted successfully!",
+    duration: 4000,
   }),
 
   published: (courseTitle: string): ToastConfig => ({
-    title: "🎯 Course Published",
-    message: `"${courseTitle}" is now published and visible to students`,
     type: "success",
-    duration: 3000,
+    title: "Course Published",
+    message: `"${courseTitle}" is now live and visible to students!`,
+    duration: 4000,
   }),
 
   unpublished: (courseTitle: string): ToastConfig => ({
-    title: "🎯 Course Unpublished",
-    message: `"${courseTitle}" has been unpublished and hidden from students`,
-    type: "success",
-    duration: 3000,
+    type: "info",
+    title: "Course Unpublished",
+    message: `"${courseTitle}" has been unpublished and is no longer visible to new students.`,
+    duration: 4000,
   }),
 
-  deleteError: (): ToastConfig => ({
-    title: "❌ Delete Failed",
-    message: "Failed to delete course. Please try again.",
+  bulkPublished: (count: number): ToastConfig => ({
+    type: "success",
+    title: "Courses Published",
+    message: `${count} course${count > 1 ? "s" : ""} published successfully!`,
+    duration: 4000,
+  }),
+
+  bulkUnpublished: (count: number): ToastConfig => ({
+    type: "info",
+    title: "Courses Unpublished",
+    message: `${count} course${count > 1 ? "s" : ""} unpublished successfully!`,
+    duration: 4000,
+  }),
+
+  createError: (): ToastConfig => ({
     type: "error",
+    title: "Create Failed",
+    message: "Failed to create course. Please try again.",
     duration: 4000,
   }),
 
   updateError: (): ToastConfig => ({
-    title: "❌ Update Failed",
-    message: "Failed to update course. Please try again.",
     type: "error",
+    title: "Update Failed",
+    message:
+      "Failed to update course. Please check your connection and try again.",
+    duration: 4000,
+  }),
+
+  deleteError: (): ToastConfig => ({
+    type: "error",
+    title: "Delete Failed",
+    message: "Failed to delete course. Please try again.",
     duration: 4000,
   }),
 
   statusToggleError: (): ToastConfig => ({
-    title: "❌ Status Update Failed",
-    message: "Failed to update course status. Please try again.",
     type: "error",
+    title: "Status Update Failed",
+    message: "Failed to update course status. Please try again.",
     duration: 4000,
   }),
-};
-
-// Section-related toasts
+}; // Section-related toasts
 export const sectionToasts = {
   created: (sectionTitle: string): ToastConfig => ({
     title: "✅ Section Added",

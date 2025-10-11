@@ -27,12 +27,12 @@ import {
   FaShoppingCart,
 } from "react-icons/fa";
 import { useSnackbar } from "notistack";
-import { useCourse } from "../../hooks/useCourseQueries";
+import { useCourse } from "../../hooks/useCourseHooks";
 import { getImageUrl, getVideoUrl } from "../../utils/mediaHelpers";
 import { useToggleWishlist, useIsInWishlist } from "../../hooks/useWishlist";
 import { useAuthContext } from "../../context/AuthContext";
 import { useAddToCart, useIsInCart } from "../../hooks/useCart";
-import { useUserCourses } from "../../hooks/useCourseQueries";
+import { useUserCourses } from "../../hooks/useCourseHooks";
 import type { Course, Lesson } from "../../types/course.type";
 
 const CoursePreviewCard: React.FC<{

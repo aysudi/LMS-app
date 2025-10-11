@@ -13,9 +13,13 @@ import {
 import {
   useInstructorOverview,
   useInstructorCoursesWithStats,
+  useInstructorAnalytics,
 } from "../../hooks/useInstructor";
-import { useInstructorAnalytics } from "../../hooks/useInstructorHelpers";
 import Loading from "../../components/Common/Loading";
+import MetricCard from "../../components/Instructor/Analytics/MetricCard";
+import RevenueChart from "../../components/Instructor/Analytics/RevenueChart";
+import CoursePerformance from "../../components/Instructor/Analytics/CoursePerformance";
+import TrafficSources from "../../components/Instructor/Analytics/TrafficSources";
 
 const InstructorAnalytics = () => {
   const [dateRange, setDateRange] = useState<"7d" | "30d" | "90d" | "1y">(
@@ -31,7 +35,6 @@ const InstructorAnalytics = () => {
       limit: 50,
       status: "published",
     });
-  // const { data: earningsData } = useInstructorEarnings(); // Available if needed
 
   const { formatCurrency } = useInstructorAnalytics();
 
@@ -87,9 +90,9 @@ const InstructorAnalytics = () => {
   // Use real course data
   const coursePerformanceData = courses.slice(0, 5).map((course) => ({
     name: course.title,
-    students: course.enrollmentsCount || 0,
-    rating: course.averageRating || 0,
-    revenue: course.revenue || 0,
+    students: course.studentsEnrolled.length || 0,
+    rating: course.rating || 0,
+    revenue: course.originalPrice || 0,
   }));
 
   // Mock traffic source data (would come from analytics API in real app)
@@ -190,222 +193,17 @@ const InstructorAnalytics = () => {
         </motion.div>
 
         {/* Revenue and Students Chart */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8"
-        >
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900">
-              Revenue & Enrollments
-            </h2>
-            <div className="flex items-center space-x-4 text-sm">
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-indigo-500 rounded-full"></div>
-                <span className="text-gray-600">Revenue</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                <span className="text-gray-600">New Students</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="h-80 flex items-end justify-between space-x-4 px-4">
-            {revenueData.map((data) => (
-              <div
-                key={data.month}
-                className="flex flex-col items-center space-y-2 flex-1"
-              >
-                <div className="flex items-end space-x-1 w-full h-64">
-                  <div
-                    className="bg-indigo-500 rounded-t-lg transition-all duration-500 hover:bg-indigo-600 cursor-pointer relative group"
-                    style={{
-                      height: `${
-                        (data.revenue /
-                          Math.max(...revenueData.map((d) => d.revenue))) *
-                        100
-                      }%`,
-                      width: "40%",
-                    }}
-                  >
-                    <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded px-2 py-1 transition-opacity">
-                      {formatCurrency(data.revenue)}
-                    </div>
-                  </div>
-                  <div
-                    className="bg-green-500 rounded-t-lg transition-all duration-500 hover:bg-green-600 cursor-pointer relative group"
-                    style={{
-                      height: `${
-                        (data.students /
-                          Math.max(...revenueData.map((d) => d.students))) *
-                        100
-                      }%`,
-                      width: "40%",
-                    }}
-                  >
-                    <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded px-2 py-1 transition-opacity">
-                      {data.students} students
-                    </div>
-                  </div>
-                </div>
-                <span className="text-sm text-gray-600 font-medium">
-                  {data.month}
-                </span>
-              </div>
-            ))}
-          </div>
-        </motion.div>
+        <RevenueChart data={revenueData} formatCurrency={formatCurrency} />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           {/* Course Performance */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3 }}
-            className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
-          >
-            <h2 className="text-xl font-bold text-gray-900 mb-6">
-              Top Performing Courses
-            </h2>
-            <div className="space-y-4">
-              {coursePerformanceData.map((course, index) => (
-                <div
-                  key={course.name}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
-                >
-                  <div className="flex items-center space-x-4">
-                    <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium ${
-                        index === 0
-                          ? "bg-yellow-500"
-                          : index === 1
-                          ? "bg-gray-400"
-                          : index === 2
-                          ? "bg-orange-600"
-                          : "bg-indigo-500"
-                      }`}
-                    >
-                      {index + 1}
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900 truncate max-w-48">
-                        {course.name}
-                      </p>
-                      <div className="flex items-center space-x-4 text-sm text-gray-600">
-                        <span className="flex items-center space-x-1">
-                          <FaUsers className="text-xs" />
-                          <span>{course.students}</span>
-                        </span>
-                        <span className="flex items-center space-x-1">
-                          <FaStar className="text-xs text-yellow-400" />
-                          <span>{course.rating}</span>
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-gray-900">
-                      {formatCurrency(course.revenue)}
-                    </p>
-                    <p className="text-sm text-gray-500">Revenue</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </motion.div>
+          <CoursePerformance
+            courses={coursePerformanceData}
+            formatCurrency={formatCurrency}
+          />
 
           {/* Traffic Sources */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.4 }}
-            className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
-          >
-            <h2 className="text-xl font-bold text-gray-900 mb-6">
-              Traffic Sources
-            </h2>
-
-            {/* Simple Bar Chart */}
-            <div className="space-y-4 mb-6">
-              {trafficSourceData.map((source) => (
-                <div key={source.name} className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div
-                        className="w-3 h-3 rounded-full"
-                        style={{ backgroundColor: source.color }}
-                      />
-                      <span className="text-sm font-medium text-gray-700">
-                        {source.name}
-                      </span>
-                    </div>
-                    <span className="text-sm font-bold text-gray-900">
-                      {source.value}%
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className="h-2 rounded-full transition-all duration-500"
-                      style={{
-                        width: `${source.value}%`,
-                        backgroundColor: source.color,
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Donut Chart Visual */}
-            <div className="flex justify-center">
-              <div className="relative w-40 h-40">
-                <svg
-                  viewBox="0 0 42 42"
-                  className="w-full h-full transform -rotate-90"
-                >
-                  <circle
-                    cx="21"
-                    cy="21"
-                    r="15.915"
-                    fill="transparent"
-                    stroke="#e5e7eb"
-                    strokeWidth="3"
-                  />
-                  {trafficSourceData.map((source, index) => {
-                    const strokeDasharray = `${source.value} ${
-                      100 - source.value
-                    }`;
-                    const strokeDashoffset = trafficSourceData
-                      .slice(0, index)
-                      .reduce((acc, curr) => acc + curr.value, 0);
-
-                    return (
-                      <circle
-                        key={source.name}
-                        cx="21"
-                        cy="21"
-                        r="15.915"
-                        fill="transparent"
-                        stroke={source.color}
-                        strokeWidth="3"
-                        strokeDasharray={strokeDasharray}
-                        strokeDashoffset={-strokeDashoffset}
-                        className="transition-all duration-500"
-                      />
-                    );
-                  })}
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <p className="text-sm font-semibold text-gray-900">Total</p>
-                    <p className="text-xs text-gray-600">Traffic</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
+          <TrafficSources data={trafficSourceData} />
         </div>
 
         {/* Additional Metrics */}
@@ -462,56 +260,6 @@ const InstructorAnalytics = () => {
             </div>
           </div>
         </motion.div>
-      </div>
-    </div>
-  );
-};
-
-// Metric Card Component
-interface MetricCardProps {
-  icon: React.ComponentType<{ className?: string }>;
-  title: string;
-  value: string;
-  change?: number;
-  changeType?: "increase" | "decrease";
-  color: string;
-}
-
-const MetricCard: React.FC<MetricCardProps> = ({
-  icon: Icon,
-  title,
-  value,
-  change,
-  changeType,
-  color,
-}) => {
-  return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-      <div className="flex items-center justify-between">
-        <div className="flex-1">
-          <div className="flex items-center space-x-3 mb-3">
-            <div className={`p-3 rounded-xl ${color}`}>
-              <Icon className="text-xl text-white" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">{title}</p>
-              <p className="text-2xl font-bold text-gray-900">{value}</p>
-            </div>
-          </div>
-          {change !== undefined && (
-            <div
-              className={`flex items-center space-x-1 text-sm ${
-                changeType === "increase" ? "text-green-600" : "text-red-600"
-              }`}
-            >
-              <span>
-                {changeType === "increase" ? "+" : "-"}
-                {Math.abs(change)}%
-              </span>
-              <span className="text-gray-500">vs last period</span>
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );

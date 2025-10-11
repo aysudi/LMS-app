@@ -3,7 +3,7 @@ import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaArrowLeft, FaSave } from "react-icons/fa";
 import type { Course } from "../../types/course.type";
-import { useCourse, useUpdateCourse } from "../../hooks/useCourseQueries";
+import { useCourse, useUpdateCourse } from "../../hooks/useCourseHooks";
 import LoadingSpinner from "../../components/UI/LoadingSpinner";
 import ErrorState from "../../components/UI/ErrorState";
 import BasicInfoPanel from "../../components/Instructor/EditCourse/BasicInfoPanel";
@@ -11,7 +11,8 @@ import CurriculumPanel from "../../components/Instructor/EditCourse/CurriculumPa
 import MediaPanel from "../../components/Instructor/EditCourse/MediaPanel";
 import AnnouncementsPanel from "../../components/Instructor/EditCourse/AnnouncementsPanel";
 import SettingsPanel from "../../components/Instructor/EditCourse/SettingsPanel";
-import { enqueueSnackbar } from "notistack";
+import { useToast } from "../../components/UI/ToastProvider";
+import { courseToasts } from "../../utils/toastUtils";
 
 const TABS = [
   { id: "basic-info", label: "Basic Information", icon: "📝" },
@@ -32,17 +33,16 @@ const EditCourse = () => {
   const [formChanges, setFormChanges] = useState<Partial<Course>>({});
 
   const { data: courseData, isLoading, error, refetch } = useCourse(courseId!);
+  const { showToast } = useToast();
 
   const updateCourseMutation = useUpdateCourse({
     onSuccess: () => {
-      enqueueSnackbar("Course updated successfully!", { variant: "success" });
+      const courseTitle = courseData?.data?.title || "Course";
+      showToast(courseToasts.updated(courseTitle));
       setUnsavedChanges(false);
     },
-    onError: (error) => {
-      enqueueSnackbar("Failed to update course. Please try again.", {
-        variant: "error",
-      });
-      console.error("Error updating course:", error);
+    onError: () => {
+      showToast(courseToasts.updateError());
     },
   });
 

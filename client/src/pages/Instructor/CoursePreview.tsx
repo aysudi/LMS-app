@@ -18,7 +18,7 @@ import {
   FaPlayCircle,
   FaLock,
 } from "react-icons/fa";
-import { useCourse } from "../../hooks/useCourseQueries";
+import { useCourse } from "../../hooks/useCourseHooks";
 import Loading from "../../components/Common/Loading";
 
 const InstructorCoursePreview = () => {

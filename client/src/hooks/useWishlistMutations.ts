@@ -6,7 +6,7 @@ import {
 } from "../services/wishlist.service";
 import type { WishlistActionResponse } from "../types/wishlist.type";
 import { wishlistQueryKeys } from "./useWishlistQueries";
-import { courseQueryKeys } from "./useCourseQueries";
+import { courseQueryKeys } from "./useCourseHooks";
 
 export const useAddToWishlist = (
   options?: UseMutationOptions<WishlistActionResponse, Error, string>
