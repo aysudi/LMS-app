@@ -359,7 +359,7 @@ const CourseWatch: React.FC = () => {
     const video = videoRef.current;
 
     if (video) {
-      video.src = lesson.videoUrl;
+      video.src = lesson.video.url;
       video.load();
       setCurrentTime(0);
       setIsPlaying(false);
