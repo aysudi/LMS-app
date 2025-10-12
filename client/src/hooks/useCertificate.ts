@@ -34,7 +34,6 @@ export const useCertificateGeneration = () => {
       const { course, userId, userEmail, studentName, instructorName } = data;
 
       try {
-        // Check if course provides certificates
         if (!course.certificateProvided) {
           return {
             success: true,
@@ -43,10 +42,8 @@ export const useCertificateGeneration = () => {
           };
         }
 
-        // Generate certificate ID
         const certificateId = CertificateService.generateCertificateId();
 
-        // Prepare certificate data
         const certificateData: CertificateData = {
           studentName,
           courseName: course.title,
@@ -57,12 +54,10 @@ export const useCertificateGeneration = () => {
           certificateId,
         };
 
-        // Generate certificate
         const certificateBuffer = await CertificateService.generateCertificate(
           certificateData
         );
 
-        // Send certificate via email
         const emailSent = await EmailService.sendCertificateEmail(
           userEmail,
           studentName,
