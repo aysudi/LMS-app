@@ -22,6 +22,16 @@ import {
 } from "../middlewares/upload.middleware";
 import { validateRequest } from "../middlewares/validation.middleware";
 import { authenticateToken } from "../middlewares/auth.middleware";
+import {
+  registerValidationSchema,
+  loginValidationSchema,
+  resendVerificationSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+  getUsersQuerySchema,
+  getUserByIdSchema,
+  getUserByUsernameSchema,
+} from "../validations/user.validation";
 
 const validateQuery = (schema: any) => {
   return (req: any, res: any, next: any) => {
@@ -50,17 +60,6 @@ const validateParams = (schema: any) => {
     next();
   };
 };
-
-import {
-  registerValidationSchema,
-  loginValidationSchema,
-  resendVerificationSchema,
-  forgotPasswordSchema,
-  resetPasswordSchema,
-  getUsersQuerySchema,
-  getUserByIdSchema,
-  getUserByUsernameSchema,
-} from "../validations/user.validation";
 
 const userRouter = Router();
 

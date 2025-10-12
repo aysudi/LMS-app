@@ -3,7 +3,6 @@ import { useSnackbar } from "notistack";
 import * as userService from "../services/user.service";
 import { userQueryKeys } from "./useUserQueries";
 
-// Hook for updating user profile
 export const useUpdateProfile = () => {
   const queryClient = useQueryClient();
   const { enqueueSnackbar } = useSnackbar();
@@ -34,7 +33,6 @@ export const useUpdateProfile = () => {
   });
 };
 
-// Hook for changing password
 export const useChangePassword = () => {
   const { enqueueSnackbar } = useSnackbar();
 
@@ -62,7 +60,6 @@ export const useChangePassword = () => {
   });
 };
 
-// Hook for updating avatar
 export const useUpdateAvatar = () => {
   const queryClient = useQueryClient();
   const { enqueueSnackbar } = useSnackbar();
