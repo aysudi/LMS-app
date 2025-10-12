@@ -39,8 +39,6 @@ const QuizComponent: React.FC<QuizComponentProps> = ({
   const [showResults, setShowResults] = useState(false);
   const [timeLeft, setTimeLeft] = useState(timeLimit);
 
-
-  // Timer effect
   useEffect(() => {
     if (timeLimit && timeLeft && timeLeft > 0 && !showResults) {
       const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
@@ -74,10 +72,10 @@ const QuizComponent: React.FC<QuizComponentProps> = ({
     const correctAnswers = selectedAnswers.filter(
       (answer, index) => answer === questions[index].correctAnswer
     ).length;
-    
+
     const score = Math.round((correctAnswers / questions.length) * 100);
     const passed = score >= passingScore;
-    
+
     setShowResults(true);
     onQuizComplete(score, passed);
   };
@@ -117,7 +115,13 @@ const QuizComponent: React.FC<QuizComponentProps> = ({
       >
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           {/* Results Header */}
-          <div className={`p-8 text-white ${passed ? "bg-gradient-to-r from-green-500 to-emerald-600" : "bg-gradient-to-r from-red-500 to-pink-600"}`}>
+          <div
+            className={`p-8 text-white ${
+              passed
+                ? "bg-gradient-to-r from-green-500 to-emerald-600"
+                : "bg-gradient-to-r from-red-500 to-pink-600"
+            }`}
+          >
             <div className="text-center">
               <motion.div
                 initial={{ scale: 0 }}
@@ -135,10 +139,9 @@ const QuizComponent: React.FC<QuizComponentProps> = ({
                 {passed ? "🎉 Congratulations!" : "Keep Learning!"}
               </h2>
               <p className="text-xl opacity-90">
-                {passed 
-                  ? "You've successfully completed the quiz!" 
-                  : `You need ${passingScore}% to pass. Try again!`
-                }
+                {passed
+                  ? "You've successfully completed the quiz!"
+                  : `You need ${passingScore}% to pass. Try again!`}
               </p>
             </div>
           </div>
@@ -147,7 +150,9 @@ const QuizComponent: React.FC<QuizComponentProps> = ({
           <div className="p-8">
             <div className="grid md:grid-cols-3 gap-6 mb-8">
               <div className="text-center p-6 bg-gray-50 rounded-xl">
-                <div className={`text-4xl font-bold mb-2 ${getScoreColor(score)}`}>
+                <div
+                  className={`text-4xl font-bold mb-2 ${getScoreColor(score)}`}
+                >
                   {score}%
                 </div>
                 <p className="text-gray-600 font-medium">Your Score</p>
@@ -163,18 +168,26 @@ const QuizComponent: React.FC<QuizComponentProps> = ({
                   {getScoreIcon(score)}
                 </div>
                 <p className="text-gray-600 font-medium">
-                  {score >= 90 ? "Excellent" : score >= 80 ? "Great" : score >= 70 ? "Good" : "Needs Work"}
+                  {score >= 90
+                    ? "Excellent"
+                    : score >= 80
+                    ? "Great"
+                    : score >= 70
+                    ? "Good"
+                    : "Needs Work"}
                 </p>
               </div>
             </div>
 
             {/* Question Review */}
             <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Review Your Answers</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                Review Your Answers
+              </h3>
               {questions.map((question, index) => {
                 const userAnswer = selectedAnswers[index];
                 const isCorrect = userAnswer === question.correctAnswer;
-                
+
                 return (
                   <motion.div
                     key={question.id}
@@ -182,15 +195,17 @@ const QuizComponent: React.FC<QuizComponentProps> = ({
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
                     className={`p-4 rounded-lg border-2 ${
-                      isCorrect 
-                        ? "border-green-200 bg-green-50" 
+                      isCorrect
+                        ? "border-green-200 bg-green-50"
                         : "border-red-200 bg-red-50"
                     }`}
                   >
                     <div className="flex items-start gap-3">
-                      <div className={`p-1 rounded-full ${
-                        isCorrect ? "bg-green-500" : "bg-red-500"
-                      }`}>
+                      <div
+                        className={`p-1 rounded-full ${
+                          isCorrect ? "bg-green-500" : "bg-red-500"
+                        }`}
+                      >
                         {isCorrect ? (
                           <FaCheckCircle className="text-white text-sm" />
                         ) : (
@@ -204,13 +219,19 @@ const QuizComponent: React.FC<QuizComponentProps> = ({
                         <div className="space-y-1 text-sm">
                           <p>
                             <span className="font-medium">Your answer:</span>{" "}
-                            <span className={isCorrect ? "text-green-700" : "text-red-700"}>
+                            <span
+                              className={
+                                isCorrect ? "text-green-700" : "text-red-700"
+                              }
+                            >
                               {question.options[userAnswer] || "Not answered"}
                             </span>
                           </p>
                           {!isCorrect && (
                             <p>
-                              <span className="font-medium">Correct answer:</span>{" "}
+                              <span className="font-medium">
+                                Correct answer:
+                              </span>{" "}
                               <span className="text-green-700">
                                 {question.options[question.correctAnswer]}
                               </span>
@@ -218,7 +239,8 @@ const QuizComponent: React.FC<QuizComponentProps> = ({
                           )}
                           {question.explanation && (
                             <p className="text-gray-600 mt-2">
-                              <span className="font-medium">Explanation:</span> {question.explanation}
+                              <span className="font-medium">Explanation:</span>{" "}
+                              {question.explanation}
                             </p>
                           )}
                         </div>
@@ -277,9 +299,11 @@ const QuizComponent: React.FC<QuizComponentProps> = ({
                   Question {currentQuestion + 1} of {questions.length}
                 </span>
                 {timeLimit && timeLeft && (
-                  <span className={`flex items-center gap-2 ${
-                    timeLeft < 60 ? "text-yellow-300 font-bold" : ""
-                  }`}>
+                  <span
+                    className={`flex items-center gap-2 ${
+                      timeLeft < 60 ? "text-yellow-300 font-bold" : ""
+                    }`}
+                  >
                     <FaClock />
                     {formatTime(timeLeft)}
                   </span>
@@ -287,7 +311,9 @@ const QuizComponent: React.FC<QuizComponentProps> = ({
               </div>
             </div>
             <div className="text-right">
-              <div className="text-2xl font-bold">{Math.round(((currentQuestion + 1) / questions.length) * 100)}%</div>
+              <div className="text-2xl font-bold">
+                {Math.round(((currentQuestion + 1) / questions.length) * 100)}%
+              </div>
               <div className="text-sm text-purple-100">Complete</div>
             </div>
           </div>
@@ -297,7 +323,9 @@ const QuizComponent: React.FC<QuizComponentProps> = ({
             <motion.div
               className="bg-white rounded-full h-full"
               initial={{ width: 0 }}
-              animate={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
+              animate={{
+                width: `${((currentQuestion + 1) / questions.length) * 100}%`,
+              }}
               transition={{ duration: 0.5 }}
             />
           </div>
@@ -331,16 +359,20 @@ const QuizComponent: React.FC<QuizComponentProps> = ({
                     whileTap={{ scale: 0.98 }}
                   >
                     <div className="flex items-center gap-4">
-                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                        selectedAnswers[currentQuestion] === index
-                          ? "border-purple-500 bg-purple-500"
-                          : "border-gray-300"
-                      }`}>
+                      <div
+                        className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                          selectedAnswers[currentQuestion] === index
+                            ? "border-purple-500 bg-purple-500"
+                            : "border-gray-300"
+                        }`}
+                      >
                         {selectedAnswers[currentQuestion] === index && (
                           <FaCheckCircle className="text-white text-sm" />
                         )}
                       </div>
-                      <span className="font-medium">{String.fromCharCode(65 + index)}.</span>
+                      <span className="font-medium">
+                        {String.fromCharCode(65 + index)}.
+                      </span>
                       <span className="flex-1">{option}</span>
                     </div>
                   </motion.button>
@@ -379,7 +411,9 @@ const QuizComponent: React.FC<QuizComponentProps> = ({
               disabled={selectedAnswers[currentQuestion] === undefined}
               className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
-              {currentQuestion === questions.length - 1 ? "Submit Quiz" : "Next →"}
+              {currentQuestion === questions.length - 1
+                ? "Submit Quiz"
+                : "Next →"}
             </button>
           </div>
         </div>
