@@ -415,7 +415,6 @@ export const logoutController = async (
   }
 };
 
-// Update user profile
 export const updateProfileController = async (
   req: any,
   res: Response,
@@ -448,7 +447,6 @@ export const updateProfileController = async (
   }
 };
 
-// Change password
 export const changePasswordController = async (
   req: any,
   res: Response,
@@ -487,7 +485,6 @@ export const changePasswordController = async (
   }
 };
 
-// Update user avatar
 export const updateAvatarController = async (
   req: any,
   res: Response,
@@ -510,7 +507,6 @@ export const updateAvatarController = async (
       });
     }
 
-    // Upload to Cloudinary with new function that returns full result
     const uploadResult = (await new Promise((resolve, reject) => {
       cloudinary.uploader
         .upload_stream(
