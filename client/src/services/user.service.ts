@@ -6,13 +6,11 @@ import type {
 } from "../types/user.type";
 import { api } from "./api";
 
-// Get current user (me)
 export const getCurrentUser = async (): Promise<User> => {
   const response = await api.get("/api/auth/me");
   return response.data.data;
 };
 
-// Get all users with pagination and filtering
 export const getUsers = async (
   params: GetUsersParams = {}
 ): Promise<GetUsersResponse> => {
@@ -27,13 +25,11 @@ export const getUsers = async (
   return response.data;
 };
 
-// Get user by ID
 export const getUserById = async (userId: string): Promise<GetUserResponse> => {
   const response = await api.get(`/api/auth/id/${userId}`);
   return response.data;
 };
 
-// Get user by username
 export const getUserByUsername = async (
   username: string
 ): Promise<GetUserResponse> => {
@@ -41,13 +37,11 @@ export const getUserByUsername = async (
   return response.data;
 };
 
-// Update user profile
 export const updateProfile = async (profileData: any) => {
   const response = await api.put("/api/auth/profile", profileData);
   return response.data;
 };
 
-// Change password
 export const changePassword = async (passwordData: {
   currentPassword: string;
   newPassword: string;
@@ -56,7 +50,6 @@ export const changePassword = async (passwordData: {
   return response.data;
 };
 
-// Update avatar
 export const updateAvatar = async (avatarFile: File) => {
   const formData = new FormData();
   formData.append("avatar", avatarFile);
