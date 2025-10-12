@@ -195,7 +195,7 @@ const MyLearning = () => {
         ) : (
           // Course Grid
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {enrolledCourses.map((enrollment, index) => (
+            {enrolledCourses.map((enrollment: any, index: number) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}

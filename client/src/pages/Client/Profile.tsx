@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FaUser,
@@ -15,13 +15,134 @@ import {
   FaFire,
   FaCertificate,
   FaDownload,
+  FaLock,
 } from "react-icons/fa";
 import { useAuthContext } from "../../context/AuthContext";
+import {
+  useUpdateProfile,
+  useChangePassword,
+  useUpdateAvatar,
+} from "../../hooks/useProfile";
+import {
+  useUserEnrollments,
+  useLearningStats,
+} from "../../hooks/useEnrollment";
+import { toast } from "react-hot-toast";
 
 const Profile: React.FC = () => {
   const { user } = useAuthContext();
   const [activeTab, setActiveTab] = useState("overview");
   const [isEditing, setIsEditing] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Profile form state
+  const [profileForm, setProfileForm] = useState({
+    firstName: "",
+    lastName: "",
+    username: "",
+    bio: "",
+  });
+
+  // Update form when user data changes
+  React.useEffect(() => {
+    if (user) {
+      setProfileForm({
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        username: user.username || "",
+        bio: user.bio || "",
+      });
+    }
+  }, [user]);
+
+  // Password form state
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+
+  // Profile management hooks
+  const updateProfileMutation = useUpdateProfile();
+  const changePasswordMutation = useChangePassword();
+  const updateAvatarMutation = useUpdateAvatar();
+
+  // Enrollment and stats hooks
+  const { data: enrollmentsData } = useUserEnrollments({
+    status: "all",
+    sortBy: "lastAccessedAt",
+    sortOrder: "desc",
+    limit: 50,
+  });
+  const { data: statsData } = useLearningStats();
+
+  const enrolledCourses = enrollmentsData?.data?.enrollments || [];
+  const stats = statsData?.data;
+
+  // Handle profile form changes
+  const handleProfileChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setProfileForm((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  // Handle password form changes
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPasswordForm((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  // Handle profile update
+  const handleUpdateProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateProfileMutation.mutate(profileForm);
+    setIsEditing(false);
+  };
+
+  // Handle password change
+  const handleChangePassword = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast.error("New passwords don't match");
+      return;
+    }
+    changePasswordMutation.mutate({
+      currentPassword: passwordForm.currentPassword,
+      newPassword: passwordForm.newPassword,
+    });
+    setIsChangingPassword(false);
+    setPasswordForm({
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    });
+  };
+
+  // Handle avatar upload
+  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select a valid image file");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image size should be less than 5MB");
+      return;
+    }
+
+    updateAvatarMutation.mutate(file);
+  };
 
   if (!user) {
     return (
@@ -70,9 +191,22 @@ const Profile: React.FC = () => {
                 </div>
 
                 {/* Camera Button */}
-                <button className="absolute -bottom-2 -right-2 w-10 h-10 bg-purple-600 hover:bg-purple-700 text-white rounded-xl flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 cursor-pointer">
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={updateAvatarMutation.isPending}
+                  className="absolute -bottom-2 -right-2 w-10 h-10 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white rounded-xl flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 cursor-pointer disabled:cursor-not-allowed"
+                >
                   <FaCamera className="text-sm" />
                 </button>
+
+                {/* Hidden File Input */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarUpload}
+                  className="hidden"
+                />
               </div>
 
               {/* Basic User Info */}
@@ -108,7 +242,7 @@ const Profile: React.FC = () => {
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200 hover:shadow-md transition-all duration-300 text-center">
                   <div className="text-2xl font-bold text-purple-600 mb-1">
-                    12
+                    {stats?.totalEnrolledCourses || 0}
                   </div>
                   <div className="text-gray-600 text-sm font-medium">
                     Courses
@@ -116,7 +250,7 @@ const Profile: React.FC = () => {
                 </div>
                 <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200 hover:shadow-md transition-all duration-300 text-center">
                   <div className="text-2xl font-bold text-indigo-600 mb-1">
-                    85%
+                    {stats?.averageProgress || 0}%
                   </div>
                   <div className="text-gray-600 text-sm font-medium">
                     Progress
@@ -124,7 +258,7 @@ const Profile: React.FC = () => {
                 </div>
                 <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200 hover:shadow-md transition-all duration-300 text-center">
                   <div className="text-2xl font-bold text-emerald-600 mb-1">
-                    24
+                    {stats?.certificatesEarned || 0}
                   </div>
                   <div className="text-gray-600 text-sm font-medium">
                     Certificates
@@ -132,10 +266,10 @@ const Profile: React.FC = () => {
                 </div>
                 <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200 hover:shadow-md transition-all duration-300 text-center">
                   <div className="text-2xl font-bold text-amber-600 mb-1">
-                    7d
+                    {Math.floor((stats?.totalWatchTime || 0) / 86400) || 0}d
                   </div>
                   <div className="text-gray-600 text-sm font-medium">
-                    Streak
+                    Watch Time
                   </div>
                 </div>
               </div>
@@ -386,7 +520,7 @@ const Profile: React.FC = () => {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div className="text-center">
                             <div className="text-2xl font-bold text-purple-600 mb-1">
-                              12
+                              {stats?.totalEnrolledCourses || 0}
                             </div>
                             <div className="text-gray-600 text-sm">
                               Courses Enrolled
@@ -394,7 +528,7 @@ const Profile: React.FC = () => {
                           </div>
                           <div className="text-center">
                             <div className="text-2xl font-bold text-indigo-600 mb-1">
-                              8
+                              {stats?.totalCompletedCourses || 0}
                             </div>
                             <div className="text-gray-600 text-sm">
                               Completed
@@ -402,7 +536,10 @@ const Profile: React.FC = () => {
                           </div>
                           <div className="text-center">
                             <div className="text-2xl font-bold text-emerald-600 mb-1">
-                              147h
+                              {Math.floor(
+                                (stats?.totalWatchTime || 0) / 3600
+                              ) || 0}
+                              h
                             </div>
                             <div className="text-gray-600 text-sm">
                               Total Hours
@@ -417,62 +554,71 @@ const Profile: React.FC = () => {
                           Current Courses
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {[
-                            {
-                              name: "Advanced React Development",
-                              progress: 75,
-                              instructor: "John Doe",
-                              thumbnail: "🚀",
-                            },
-                            {
-                              name: "Machine Learning Fundamentals",
-                              progress: 45,
-                              instructor: "Jane Smith",
-                              thumbnail: "🤖",
-                            },
-                            {
-                              name: "Node.js Backend Development",
-                              progress: 90,
-                              instructor: "Mike Johnson",
-                              thumbnail: "⚡",
-                            },
-                            {
-                              name: "UI/UX Design Principles",
-                              progress: 30,
-                              instructor: "Sarah Wilson",
-                              thumbnail: "🎨",
-                            },
-                          ].map((course, index) => (
-                            <div
-                              key={index}
-                              className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-                            >
-                              <div className="flex items-start gap-3">
-                                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center text-white text-xl">
-                                  {course.thumbnail}
-                                </div>
-                                <div className="flex-1">
-                                  <h4 className="font-semibold text-gray-900 mb-1">
-                                    {course.name}
-                                  </h4>
-                                  <p className="text-sm text-gray-600 mb-2">
-                                    by {course.instructor}
-                                  </p>
-                                  <div className="flex items-center gap-2">
-                                    <div className="flex-1 bg-gray-200 rounded-full h-2">
-                                      <div
-                                        className="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full transition-all duration-300"
-                                        style={{ width: `${course.progress}%` }}
-                                      ></div>
+                          {enrolledCourses
+                            .filter(
+                              (enrollment: any) =>
+                                enrollment.status === "active" &&
+                                enrollment.progressPercentage < 100
+                            )
+                            .slice(0, 4)
+                            .map((enrollment: any, index: number) => (
+                              <div
+                                key={enrollment.id || index}
+                                className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                              >
+                                <div className="flex items-start gap-3">
+                                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center text-white text-xl overflow-hidden">
+                                    {enrollment.course?.image?.url ? (
+                                      <img
+                                        src={enrollment.course.image.url}
+                                        alt={enrollment.course.title}
+                                        className="w-full h-full object-cover rounded-lg"
+                                      />
+                                    ) : (
+                                      <FaGraduationCap />
+                                    )}
+                                  </div>
+                                  <div className="flex-1">
+                                    <h4 className="font-semibold text-gray-900 mb-1">
+                                      {enrollment.course?.title || "Course"}
+                                    </h4>
+                                    <p className="text-sm text-gray-600 mb-2">
+                                      by{" "}
+                                      {enrollment.course?.instructor?.firstName}{" "}
+                                      {enrollment.course?.instructor?.lastName}
+                                    </p>
+                                    <div className="flex items-center gap-2">
+                                      <div className="flex-1 bg-gray-200 rounded-full h-2">
+                                        <div
+                                          className="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full transition-all duration-300"
+                                          style={{
+                                            width: `${
+                                              enrollment.progressPercentage || 0
+                                            }%`,
+                                          }}
+                                        ></div>
+                                      </div>
+                                      <span className="text-sm font-medium text-gray-600">
+                                        {enrollment.progressPercentage || 0}%
+                                      </span>
                                     </div>
-                                    <span className="text-sm font-medium text-gray-600">
-                                      {course.progress}%
-                                    </span>
                                   </div>
                                 </div>
                               </div>
+                            ))}
+
+                          {enrolledCourses.filter(
+                            (enrollment: any) =>
+                              enrollment.status === "active" &&
+                              enrollment.progressPercentage < 100
+                          ).length === 0 && (
+                            <div className="col-span-full text-center py-8">
+                              <FaGraduationCap className="text-4xl text-gray-300 mx-auto mb-4" />
+                              <p className="text-gray-500">
+                                No courses in progress
+                              </p>
                             </div>
-                          ))}
+                          )}
                         </div>
                       </div>
 
@@ -482,65 +628,78 @@ const Profile: React.FC = () => {
                           Recently Completed
                         </h3>
                         <div className="space-y-3">
-                          {[
-                            {
-                              name: "JavaScript Fundamentals",
-                              completedDate: "2 weeks ago",
-                              rating: 5,
-                              certificate: true,
-                            },
-                            {
-                              name: "CSS Grid & Flexbox",
-                              completedDate: "1 month ago",
-                              rating: 4,
-                              certificate: true,
-                            },
-                            {
-                              name: "Git Version Control",
-                              completedDate: "2 months ago",
-                              rating: 5,
-                              certificate: true,
-                            },
-                          ].map((course, index) => (
-                            <div
-                              key={index}
-                              className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg"
-                            >
-                              <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
-                                  <FaCheck className="text-white text-sm" />
+                          {enrolledCourses
+                            .filter(
+                              (enrollment: any) =>
+                                enrollment.status === "completed"
+                            )
+                            .slice(0, 3)
+                            .map((enrollment: any, index: number) => {
+                              const completedDate = enrollment.completedAt
+                                ? new Date(enrollment.completedAt)
+                                : new Date(enrollment.enrolledAt);
+
+                              const timeAgo = Math.floor(
+                                (Date.now() - completedDate.getTime()) /
+                                  (1000 * 60 * 60 * 24)
+                              );
+
+                              return (
+                                <div
+                                  key={enrollment.id || index}
+                                  className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg"
+                                >
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                                      <FaCheck className="text-white text-sm" />
+                                    </div>
+                                    <div>
+                                      <h4 className="font-semibold text-gray-900">
+                                        {enrollment.course?.title || "Course"}
+                                      </h4>
+                                      <p className="text-sm text-gray-600">
+                                        Completed{" "}
+                                        {timeAgo === 0
+                                          ? "today"
+                                          : `${timeAgo} days ago`}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <div className="flex">
+                                      {[...Array(5)].map((_, i) => (
+                                        <FaTrophy
+                                          key={i}
+                                          className={`text-sm ${
+                                            i < (enrollment.averageRating || 5)
+                                              ? "text-yellow-400"
+                                              : "text-gray-300"
+                                          }`}
+                                        />
+                                      ))}
+                                    </div>
+                                    {enrollment.certificateIssued && (
+                                      <button className="ml-3 px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-xs rounded-full transition-colors">
+                                        <FaCertificate className="mr-1 inline" />
+                                        Certificate
+                                      </button>
+                                    )}
+                                  </div>
                                 </div>
-                                <div>
-                                  <h4 className="font-semibold text-gray-900">
-                                    {course.name}
-                                  </h4>
-                                  <p className="text-sm text-gray-600">
-                                    Completed {course.completedDate}
-                                  </p>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <div className="flex">
-                                  {[...Array(5)].map((_, i) => (
-                                    <FaTrophy
-                                      key={i}
-                                      className={`text-sm ${
-                                        i < course.rating
-                                          ? "text-yellow-400"
-                                          : "text-gray-300"
-                                      }`}
-                                    />
-                                  ))}
-                                </div>
-                                {course.certificate && (
-                                  <button className="ml-3 px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-xs rounded-full transition-colors">
-                                    <FaCertificate className="mr-1 inline" />
-                                    Certificate
-                                  </button>
-                                )}
-                              </div>
+                              );
+                            })}
+
+                          {enrolledCourses.filter(
+                            (enrollment: any) =>
+                              enrollment.status === "completed"
+                          ).length === 0 && (
+                            <div className="text-center py-8">
+                              <FaTrophy className="text-4xl text-gray-300 mx-auto mb-4" />
+                              <p className="text-gray-500">
+                                No completed courses yet
+                              </p>
                             </div>
-                          ))}
+                          )}
                         </div>
                       </div>
                     </motion.div>
@@ -563,7 +722,8 @@ const Profile: React.FC = () => {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                           <div className="text-center">
                             <div className="text-2xl font-bold text-yellow-600 mb-1">
-                              24
+                              {(stats?.certificatesEarned || 0) +
+                                (stats?.totalCompletedCourses || 0)}
                             </div>
                             <div className="text-gray-600 text-sm">
                               Total Badges
@@ -571,26 +731,26 @@ const Profile: React.FC = () => {
                           </div>
                           <div className="text-center">
                             <div className="text-2xl font-bold text-orange-600 mb-1">
-                              8
+                              {stats?.totalInProgressCourses || 0}
                             </div>
                             <div className="text-gray-600 text-sm">
-                              This Month
+                              In Progress
                             </div>
                           </div>
                           <div className="text-center">
                             <div className="text-2xl font-bold text-red-600 mb-1">
-                              3
+                              {stats?.certificatesEarned || 0}
                             </div>
                             <div className="text-gray-600 text-sm">
-                              Rare Badges
+                              Certificates
                             </div>
                           </div>
                           <div className="text-center">
                             <div className="text-2xl font-bold text-purple-600 mb-1">
-                              95%
+                              {stats?.averageProgress || 0}%
                             </div>
                             <div className="text-gray-600 text-sm">
-                              Completion Rate
+                              Avg Progress
                             </div>
                           </div>
                         </div>
@@ -736,7 +896,10 @@ const Profile: React.FC = () => {
                           <FaUser className="text-purple-600" />
                           Profile Settings
                         </h3>
-                        <div className="space-y-4">
+                        <form
+                          onSubmit={handleUpdateProfile}
+                          className="space-y-4"
+                        >
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -744,7 +907,9 @@ const Profile: React.FC = () => {
                               </label>
                               <input
                                 type="text"
-                                defaultValue={user.firstName}
+                                name="firstName"
+                                value={profileForm.firstName}
+                                onChange={handleProfileChange}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                               />
                             </div>
@@ -754,7 +919,9 @@ const Profile: React.FC = () => {
                               </label>
                               <input
                                 type="text"
-                                defaultValue={user.lastName}
+                                name="lastName"
+                                value={profileForm.lastName}
+                                onChange={handleProfileChange}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                               />
                             </div>
@@ -765,7 +932,9 @@ const Profile: React.FC = () => {
                             </label>
                             <input
                               type="text"
-                              defaultValue={user.username}
+                              name="username"
+                              value={profileForm.username}
+                              onChange={handleProfileChange}
                               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             />
                           </div>
@@ -775,14 +944,23 @@ const Profile: React.FC = () => {
                             </label>
                             <textarea
                               rows={3}
+                              name="bio"
+                              value={profileForm.bio}
+                              onChange={handleProfileChange}
                               placeholder="Tell us about yourself..."
                               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             />
                           </div>
-                          <button className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md transition-colors">
-                            Save Changes
+                          <button
+                            type="submit"
+                            disabled={updateProfileMutation.isPending}
+                            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white rounded-md transition-colors disabled:cursor-not-allowed cursor-pointer"
+                          >
+                            {updateProfileMutation.isPending
+                              ? "Saving..."
+                              : "Save Changes"}
                           </button>
-                        </div>
+                        </form>
                       </div>
 
                       {/* Account Settings */}
@@ -815,10 +993,145 @@ const Profile: React.FC = () => {
                             </div>
                           </div>
                           <div>
-                            <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setIsChangingPassword(!isChangingPassword)
+                              }
+                              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+                            >
                               Change Password
                             </button>
                           </div>
+
+                          {/* Password Change Form */}
+                          {isChangingPassword && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              exit={{ opacity: 0, height: 0 }}
+                              className="mt-6 p-6 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl shadow-sm"
+                            >
+                              <div className="flex items-center justify-between mb-4">
+                                <h4 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <FaLock className="text-blue-600 text-sm" />
+                                  </div>
+                                  Change Password
+                                </h4>
+                                <button
+                                  type="button"
+                                  onClick={() => setIsChangingPassword(false)}
+                                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                                >
+                                  <span className="text-xl">×</span>
+                                </button>
+                              </div>
+
+                              <form
+                                onSubmit={handleChangePassword}
+                                className="space-y-4"
+                              >
+                                <div className="grid grid-cols-1 gap-4">
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                      Current Password
+                                    </label>
+                                    <input
+                                      type="password"
+                                      name="currentPassword"
+                                      value={passwordForm.currentPassword}
+                                      onChange={handlePasswordChange}
+                                      required
+                                      placeholder="Enter your current password"
+                                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm"
+                                    />
+                                  </div>
+
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        New Password
+                                      </label>
+                                      <input
+                                        type="password"
+                                        name="newPassword"
+                                        value={passwordForm.newPassword}
+                                        onChange={handlePasswordChange}
+                                        required
+                                        minLength={6}
+                                        placeholder="Enter new password"
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm"
+                                      />
+                                    </div>
+
+                                    <div>
+                                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Confirm New Password
+                                      </label>
+                                      <input
+                                        type="password"
+                                        name="confirmPassword"
+                                        value={passwordForm.confirmPassword}
+                                        onChange={handlePasswordChange}
+                                        required
+                                        minLength={6}
+                                        placeholder="Confirm new password"
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center justify-end gap-3 pt-4 border-t border-blue-200">
+                                  <button
+                                    type="button"
+                                    onClick={() => setIsChangingPassword(false)}
+                                    className="px-6 py-2 text-gray-600 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 hover:text-gray-700 transition-all duration-200 font-medium"
+                                  >
+                                    Cancel
+                                  </button>
+                                  <button
+                                    type="submit"
+                                    disabled={changePasswordMutation.isPending}
+                                    className="px-6 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl transition-all duration-200 font-medium flex items-center gap-2 shadow-md"
+                                  >
+                                    {changePasswordMutation.isPending ? (
+                                      <>
+                                        <motion.div
+                                          animate={{ rotate: 360 }}
+                                          transition={{
+                                            duration: 1,
+                                            repeat: Infinity,
+                                            ease: "linear",
+                                          }}
+                                          className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                                        />
+                                        Changing...
+                                      </>
+                                    ) : (
+                                      <>
+                                        <FaCheck className="text-sm" />
+                                        Change Password
+                                      </>
+                                    )}
+                                  </button>
+                                </div>
+                              </form>
+
+                              {/* Password Requirements */}
+                              <div className="mt-4 p-4 bg-white/60 rounded-lg">
+                                <p className="text-sm font-medium text-gray-700 mb-2">
+                                  Password Requirements:
+                                </p>
+                                <ul className="text-xs text-gray-600 space-y-1">
+                                  <li>• At least 6 characters long</li>
+                                  <li>• Use a strong, unique password</li>
+                                  <li>• Consider using a password manager</li>
+                                </ul>
+                              </div>
+                            </motion.div>
+                          )}
                         </div>
                       </div>
 
@@ -1016,8 +1329,17 @@ const Profile: React.FC = () => {
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-bold text-white">Edit Profile</h3>
                 <button
-                  onClick={() => setIsEditing(false)}
-                  className="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors"
+                  onClick={() => {
+                    setIsEditing(false);
+                    // Reset form to original values
+                    setProfileForm({
+                      firstName: user?.firstName || "",
+                      lastName: user?.lastName || "",
+                      username: user?.username || "",
+                      bio: user?.bio || "",
+                    });
+                  }}
+                  className="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors cursor-pointer"
                 >
                   <span className="text-white text-lg">×</span>
                 </button>
@@ -1040,13 +1362,23 @@ const Profile: React.FC = () => {
                       user.avatarOrInitials
                     )}
                   </div>
-                  <button className="absolute bottom-4 right-0 w-8 h-8 bg-purple-600 hover:bg-purple-700 text-white rounded-full flex items-center justify-center shadow-lg transition-colors">
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={updateAvatarMutation.isPending}
+                    className="absolute bottom-4 right-0 w-8 h-8 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white rounded-full flex items-center justify-center shadow-lg transition-colors disabled:cursor-not-allowed cursor-pointer"
+                  >
                     <FaCamera className="text-sm" />
                   </button>
                 </div>
-                <button className="text-purple-600 hover:text-purple-700 text-sm font-medium">
-                  Upload New Photo
-                </button>
+                {/* <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={updateAvatarMutation.isPending}
+                  className="text-purple-600 hover:text-purple-700 disabled:text-gray-400 text-sm font-medium disabled:cursor-not-allowed"
+                >
+                  {updateAvatarMutation.isPending
+                    ? "Uploading..."
+                    : "Upload New Photo"}
+                </button> */}
               </div>
 
               {/* Personal Information */}
@@ -1061,7 +1393,9 @@ const Profile: React.FC = () => {
                     </label>
                     <input
                       type="text"
-                      defaultValue={user.firstName}
+                      name="firstName"
+                      value={profileForm.firstName}
+                      onChange={handleProfileChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     />
                   </div>
@@ -1071,7 +1405,9 @@ const Profile: React.FC = () => {
                     </label>
                     <input
                       type="text"
-                      defaultValue={user.lastName}
+                      name="lastName"
+                      value={profileForm.lastName}
+                      onChange={handleProfileChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     />
                   </div>
@@ -1082,7 +1418,9 @@ const Profile: React.FC = () => {
                   </label>
                   <input
                     type="text"
-                    defaultValue={user.username}
+                    name="username"
+                    value={profileForm.username}
+                    onChange={handleProfileChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   />
                 </div>
@@ -1114,6 +1452,9 @@ const Profile: React.FC = () => {
                   </label>
                   <textarea
                     rows={3}
+                    name="bio"
+                    value={profileForm.bio}
+                    onChange={handleProfileChange}
                     placeholder="Tell us about yourself, your interests, and learning goals..."
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
                   />
@@ -1122,18 +1463,36 @@ const Profile: React.FC = () => {
             </div>
 
             {/* Modal Footer */}
-            <div className="bg-gray-50 px-6 py-4 rounded-b-2xl flex justify-end gap-3">
-              <button
-                onClick={() => setIsEditing(false)}
-                className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
-              <button className="px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-lg transition-all duration-300 flex items-center gap-2">
-                <FaCheck className="text-sm" />
-                Save Changes
-              </button>
-            </div>
+            <form onSubmit={handleUpdateProfile}>
+              <div className="bg-gray-50 px-6 py-4 rounded-b-2xl flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsEditing(false);
+                    // Reset form to original values
+                    setProfileForm({
+                      firstName: user?.firstName || "",
+                      lastName: user?.lastName || "",
+                      username: user?.username || "",
+                      bio: user?.bio || "",
+                    });
+                  }}
+                  className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={updateProfileMutation.isPending}
+                  className="px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 text-white rounded-lg transition-all duration-300 flex items-center gap-2 disabled:cursor-not-allowed cursor-pointer"
+                >
+                  <FaCheck className="text-sm" />
+                  {updateProfileMutation.isPending
+                    ? "Saving..."
+                    : "Save Changes"}
+                </button>
+              </div>
+            </form>
           </motion.div>
         </div>
       )}

@@ -39,6 +39,9 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as qaService from "../../services/qa.service";
 import { useQAFilters, useQAFormState } from "../../hooks/useQAHelpers";
 import { HTMLRenderer } from "../../utils/htmlRenderer";
+import { CourseCompletionModal } from "../../components/Common/CourseCompletionModal";
+import { useAuthContext } from "../../context/AuthContext";
+import QuizComponent from "../../components/CourseDetails/QuizComponent";
 
 // Answers Section Component
 const AnswersSection: React.FC<{
@@ -178,6 +181,7 @@ const AnswersSection: React.FC<{
 const CourseWatch: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>();
   const navigate = useNavigate();
+  const { user } = useAuthContext();
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -217,8 +221,6 @@ const CourseWatch: React.FC = () => {
 
   const [newNote, setNewNote] = useState("");
 
-  const [quizAnswers, setQuizAnswers] = useState<{ [key: number]: number }>({});
-
   const [newReview, setNewReview] = useState("");
   const [newRating, setNewRating] = useState(5);
 
@@ -241,6 +243,9 @@ const CourseWatch: React.FC = () => {
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(
     new Set()
   );
+
+  // Course completion modal state
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
 
   const currentLessonObj =
     course?.sections[currentSection]?.lessons[currentLesson];
@@ -469,7 +474,8 @@ const CourseWatch: React.FC = () => {
     } else if (currentSection < course.sections.length - 1) {
       loadLesson(currentSection + 1, 0);
     } else {
-      alert("Congratulations! You've completed the entire course!");
+      // Course completed - show completion modal
+      setShowCompletionModal(true);
     }
   };
 
@@ -2138,59 +2144,35 @@ const CourseWatch: React.FC = () => {
         </div>
       )}
 
-      {/* Quiz Panel */}
+      {/* Quiz Component */}
       {showQuiz && currentLessonObj?.quiz && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 rounded-lg p-6 w-96 max-h-96 overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold">Lesson Quiz</h3>
-              <button
-                onClick={() => setShowQuiz(false)}
-                className="p-1 hover:bg-gray-700 rounded"
-              >
-                <FaTimes />
-              </button>
-            </div>
+        <QuizComponent
+          questions={currentLessonObj.quiz.map((q: any, index: number) => ({
+            id: `${currentLessonObj._id}-${index}`,
+            question: q.question,
+            options: q.options,
+            correctAnswer: q.correctAnswer,
+          }))}
+          onQuizComplete={(score: number, passed: boolean) => {
+            console.log("Quiz completed:", { score, passed });
+            setShowQuiz(false);
+            // Here you could update the lesson progress with quiz completion
+          }}
+          timeLimit={300} // 5 minutes
+          title={`${currentLessonObj.title} - Quiz`}
+        />
+      )}
 
-            <div className="space-y-4">
-              {currentLessonObj.quiz.map((question, index) => (
-                <div key={index} className="p-4 bg-gray-700 rounded-lg">
-                  <h4 className="font-medium mb-3">{question.question}</h4>
-                  <div className="space-y-2">
-                    {question.options.map((option, optionIndex) => (
-                      <button
-                        key={optionIndex}
-                        onClick={() =>
-                          setQuizAnswers((prev) => ({
-                            ...prev,
-                            [index]: optionIndex,
-                          }))
-                        }
-                        className={`w-full text-left p-2 rounded border ${
-                          quizAnswers[index] === optionIndex
-                            ? "border-blue-500 bg-blue-600/20"
-                            : "border-gray-600 hover:bg-gray-600"
-                        }`}
-                      >
-                        {option}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <button
-              onClick={() => {
-                console.log("Quiz submitted:", quizAnswers);
-                setShowQuiz(false);
-              }}
-              className="mt-4 w-full py-2 bg-green-600 hover:bg-green-700 rounded-lg"
-            >
-              Submit Quiz
-            </button>
-          </div>
-        </div>
+      {/* Course Completion Modal */}
+      {course && user && (
+        <CourseCompletionModal
+          isOpen={showCompletionModal}
+          onClose={() => setShowCompletionModal(false)}
+          course={course}
+          userId={user.id}
+          userEmail={user.email}
+          studentName={`${user.firstName} ${user.lastName}`}
+        />
       )}
     </div>
   );

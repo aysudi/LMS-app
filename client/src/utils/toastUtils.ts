@@ -30,6 +30,13 @@ export const courseToasts = {
     duration: 4000,
   }),
 
+  completed: (): ToastConfig => ({
+    type: "success",
+    title: "Course Completed",
+    message: `🎉 Congratulations! You have completed the course!`,
+    duration: 3000,
+  }),
+
   published: (courseTitle: string): ToastConfig => ({
     type: "success",
     title: "Course Published",
@@ -136,6 +143,13 @@ export const lessonToasts = {
   deleted: (lessonTitle: string): ToastConfig => ({
     title: "✅ Lesson Deleted",
     message: `"${lessonTitle}" has been removed from the section`,
+    type: "success",
+    duration: 3000,
+  }),
+
+  completed: (): ToastConfig => ({
+    title: "Lesson Completed",
+    message: `🎉 Congratulations! You have completed the lesson`,
     type: "success",
     duration: 3000,
   }),
