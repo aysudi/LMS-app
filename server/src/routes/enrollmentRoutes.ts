@@ -26,12 +26,10 @@ enrollmentRouter.get("/stats", authenticateToken, (req, res) =>
   getLearningStats(req as AuthRequest, res)
 );
 
-// POST /api/enrollments/free - Enroll in a free course
 enrollmentRouter.post("/free", authenticateToken, (req, res) =>
   enrollInFreeCourse(req as AuthRequest, res)
 );
 
-// POST /api/enrollments/recalculate-all-progress - Recalculate all user enrollments progress
 enrollmentRouter.post(
   "/recalculate-all-progress",
   authenticateToken,
@@ -42,41 +40,34 @@ enrollmentRouter.get("/:enrollmentId", authenticateToken, (req, res) =>
   getEnrollmentById(req as AuthRequest, res)
 );
 
-// PATCH /api/enrollments/:enrollmentId/progress - Update enrollment progress
 enrollmentRouter.patch(
   "/:enrollmentId/progress",
   authenticateToken,
   (req, res) => updateEnrollmentProgress(req as AuthRequest, res)
 );
 
-// GET /api/enrollments/:enrollmentId/notes - Get enrollment notes
 enrollmentRouter.get("/:enrollmentId/notes", authenticateToken, (req, res) =>
   getEnrollmentNotes(req as AuthRequest, res)
 );
 
-// POST /api/enrollments/:enrollmentId/notes - Add note to enrollment
 enrollmentRouter.post("/:enrollmentId/notes", authenticateToken, (req, res) =>
   addEnrollmentNote(req as AuthRequest, res)
 );
 
-// PATCH /api/enrollments/:enrollmentId/bookmark - Toggle lesson bookmark
 enrollmentRouter.patch(
   "/:enrollmentId/bookmark",
   authenticateToken,
   (req, res) => toggleLessonBookmark(req as AuthRequest, res)
 );
 
-// GET /api/enrollments/:enrollmentId/review - Get enrollment review
 enrollmentRouter.get("/:enrollmentId/review", authenticateToken, (req, res) =>
   getEnrollmentReviews(req as AuthRequest, res)
 );
 
-// POST /api/enrollments/:enrollmentId/review - Add course review
 enrollmentRouter.post("/:enrollmentId/review", authenticateToken, (req, res) =>
   addCourseReview(req as AuthRequest, res)
 );
 
-// POST /api/enrollments/:enrollmentId/recalculate-progress - Recalculate enrollment progress
 enrollmentRouter.post(
   "/:enrollmentId/recalculate-progress",
   authenticateToken,
