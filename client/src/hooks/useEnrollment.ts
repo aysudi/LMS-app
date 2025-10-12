@@ -1,11 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useSnackbar } from "notistack";
 import enrollmentService from "../services/enrollment.service";
 import type {
   AddNoteRequest,
   AddReviewRequest,
   UpdateProgressRequest,
 } from "../types/enrollment.type";
+import { useToast } from "../components/UI/ToastProvider";
+import { courseToasts, generalToasts, lessonToasts } from "../utils/toastUtils";
 
 // Hook for getting user enrollments
 export const useUserEnrollments = (
@@ -19,7 +20,9 @@ export const useUserEnrollments = (
 ) => {
   return useQuery({
     queryKey: ["enrollments", params],
-    queryFn: () => enrollmentService.getUserEnrollments(params),
+    queryFn: () => {
+      return enrollmentService.getUserEnrollments(params);
+    },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };
@@ -37,7 +40,7 @@ export const useEnrollment = (enrollmentId: string) => {
 // Hook for updating enrollment progress
 export const useUpdateEnrollmentProgress = () => {
   const queryClient = useQueryClient();
-  const { enqueueSnackbar } = useSnackbar();
+  const { showToast } = useToast();
 
   return useMutation({
     mutationFn: ({
@@ -58,22 +61,16 @@ export const useUpdateEnrollmentProgress = () => {
       queryClient.invalidateQueries({ queryKey: ["user-progress"] });
 
       if (data.data?.isCompleted) {
-        enqueueSnackbar("🎉 Congratulations! You completed the course!", {
-          variant: "success",
-          autoHideDuration: 5000,
-        });
+        showToast(courseToasts.completed());
       } else if (variables.progressData.completed) {
-        enqueueSnackbar("Lesson completed!", {
-          variant: "success",
-          autoHideDuration: 3000,
-        });
+        showToast(lessonToasts.completed());
       }
     },
 
     onError: (error: any) => {
       const message =
         error.response?.data?.message || "Failed to update progress";
-      enqueueSnackbar(message, { variant: "error" });
+      showToast(generalToasts.error("Failed to update progress", message));
     },
   });
 };
@@ -81,7 +78,7 @@ export const useUpdateEnrollmentProgress = () => {
 // Hook for adding enrollment notes
 export const useAddEnrollmentNote = () => {
   const queryClient = useQueryClient();
-  const { enqueueSnackbar } = useSnackbar();
+  const { showToast } = useToast();
 
   return useMutation({
     mutationFn: ({
@@ -99,12 +96,14 @@ export const useAddEnrollmentNote = () => {
       queryClient.invalidateQueries({
         queryKey: ["enrollment-notes", variables.enrollmentId],
       });
-      enqueueSnackbar("Note added successfully", { variant: "success" });
+      showToast(
+        generalToasts.success("Congratulations!", "Note added successfully")
+      );
     },
 
     onError: (error: any) => {
       const message = error.response?.data?.message || "Failed to add note";
-      enqueueSnackbar(message, { variant: "error" });
+      showToast(generalToasts.error("Failed to add note", message));
     },
   });
 };
@@ -112,7 +111,7 @@ export const useAddEnrollmentNote = () => {
 // Hook for toggling lesson bookmarks
 export const useToggleLessonBookmark = () => {
   const queryClient = useQueryClient();
-  const { enqueueSnackbar } = useSnackbar();
+  const { showToast } = useToast();
 
   return useMutation({
     mutationFn: ({
@@ -127,13 +126,13 @@ export const useToggleLessonBookmark = () => {
       queryClient.invalidateQueries({
         queryKey: ["enrollment", variables.enrollmentId],
       });
-      enqueueSnackbar("Bookmark toggled", { variant: "success" });
+      showToast(generalToasts.success("Congratulations!", "Bookmark toggled"));
     },
 
     onError: (error: any) => {
       const message =
         error.response?.data?.message || "Failed to toggle bookmark";
-      enqueueSnackbar(message, { variant: "error" });
+      showToast(generalToasts.error("Failed to toggle bookmark", message));
     },
   });
 };
@@ -141,7 +140,7 @@ export const useToggleLessonBookmark = () => {
 // Hook for adding course reviews
 export const useAddCourseReview = () => {
   const queryClient = useQueryClient();
-  const { enqueueSnackbar } = useSnackbar();
+  const { showToast } = useToast();
 
   return useMutation({
     mutationFn: ({
@@ -171,12 +170,14 @@ export const useAddCourseReview = () => {
         });
       }
 
-      enqueueSnackbar("Review added successfully!", { variant: "success" });
+      showToast(
+        generalToasts.success("Congratulations!", "Review added successfully!")
+      );
     },
 
     onError: (error: any) => {
       const message = error.response?.data?.message || "Failed to add review";
-      enqueueSnackbar(message, { variant: "error" });
+      showToast(generalToasts.error("Failed to add review", message));
     },
   });
 };
@@ -213,7 +214,7 @@ export const useEnrollmentReviews = (enrollmentId: string) => {
 // Hook for enrolling in a free course
 export const useEnrollInFreeCourse = () => {
   const queryClient = useQueryClient();
-  const { enqueueSnackbar } = useSnackbar();
+  const { showToast } = useToast();
 
   return useMutation({
     mutationFn: (courseId: string) =>
@@ -226,16 +227,18 @@ export const useEnrollInFreeCourse = () => {
       });
       queryClient.invalidateQueries({ queryKey: ["learning-stats"] });
 
-      enqueueSnackbar("🎉 Successfully enrolled in the course!", {
-        variant: "success",
-        autoHideDuration: 4000,
-      });
+      showToast(
+        generalToasts.success(
+          "Congratulations!",
+          "Enrolled in course successfully"
+        )
+      );
     },
 
     onError: (error: any) => {
       const message =
         error.response?.data?.message || "Failed to enroll in course";
-      enqueueSnackbar(message, { variant: "error" });
+      showToast(generalToasts.error("Failed to enroll in course", message));
     },
   });
 };

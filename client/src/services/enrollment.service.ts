@@ -4,7 +4,6 @@ import type {
   AddReviewRequest,
   AddReviewResponse,
   EnrollmentDetailsResponse,
-  EnrollmentListResponse,
   LearningStatsResponse,
   UpdateProgressRequest,
   UpdateProgressResponse,
@@ -20,7 +19,7 @@ class EnrollmentService {
       sortBy?: string;
       sortOrder?: "asc" | "desc";
     } = {}
-  ): Promise<EnrollmentListResponse> {
+  ): Promise<any> {
     const queryParams = new URLSearchParams();
 
     if (params.status) queryParams.append("status", params.status);
@@ -29,9 +28,7 @@ class EnrollmentService {
     if (params.sortBy) queryParams.append("sortBy", params.sortBy);
     if (params.sortOrder) queryParams.append("sortOrder", params.sortOrder);
 
-    const response = await api.get(
-      `/api/enrollments?${queryParams.toString()}`
-    );
+    const response = await api.get(`/api/enrollments`);
     return response.data;
   }
 

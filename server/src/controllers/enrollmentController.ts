@@ -667,38 +667,33 @@ export const enrollInFreeCourse = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Create new enrollment
     const enrollment = new Enrollment({
       user: userId,
       course: courseId,
       status: EnrollmentStatus.ACTIVE,
       enrolledAt: new Date(),
       lastAccessedAt: new Date(),
-      progress: {
-        completedLessons: [],
-        totalLessons: 0,
-        completionPercentage: 0,
-        timeSpent: 0,
-      },
+      progressPercentage: 0,
+      totalWatchTime: 0,
+      completedLessons: [],
     });
+    console.log("enrollment before save:", enrollment);
 
     await enrollment.save();
 
-    // Populate the enrollment with course and user data
     const populatedEnrollment = await Enrollment.findById(enrollment._id)
       .populate("course", "title description instructor image.url")
       .populate("user", "firstName lastName email");
 
-    // Update user's enrolled courses count
     await User.findByIdAndUpdate(userId, {
-      $inc: { coursesEnrolled: 1 },
+      $push: { enrolledCourses: courseId },
     });
 
-    // Update course's students enrolled count
     await Course.findByIdAndUpdate(courseId, {
-      $inc: { studentsEnrolled: 1 },
       $push: { studentsEnrolled: userId },
     });
+
+    console.log("populatedEnrollment:", populatedEnrollment);
 
     res.status(201).json({
       success: true,

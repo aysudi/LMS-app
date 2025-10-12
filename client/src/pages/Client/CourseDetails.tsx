@@ -27,15 +27,18 @@ import {
   FaTv,
   FaShoppingCart,
 } from "react-icons/fa";
-import { useSnackbar } from "notistack";
 import { useCourse } from "../../hooks/useCourseHooks";
 import { getImageUrl, getVideoUrl } from "../../utils/mediaHelpers";
 import { useToggleWishlist, useIsInWishlist } from "../../hooks/useWishlist";
 import { useAuthContext } from "../../context/AuthContext";
 import { useAddToCart, useIsInCart } from "../../hooks/useCart";
-import { useUserCourses } from "../../hooks/useCourseHooks";
-import { useEnrollInFreeCourse } from "../../hooks/useEnrollment";
+import {
+  useEnrollInFreeCourse,
+  useUserEnrollments,
+} from "../../hooks/useEnrollment";
 import type { Course, Lesson } from "../../types/course.type";
+import { useToast } from "../../components/UI/ToastProvider";
+import { cartToasts, generalToasts } from "../../utils/toastUtils";
 
 const CoursePreviewCard: React.FC<{
   course: Course;
@@ -181,7 +184,7 @@ const CoursePreviewCard: React.FC<{
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                navigate(`/course/${course.id}/watch`);
+                navigate(`/course/${course.id}/learn`);
               }}
               className="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-bold text-center rounded-lg transition-colors duration-200 cursor-pointer flex items-center justify-center space-x-2"
             >
@@ -390,45 +393,24 @@ const CourseDetails = () => {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
   const { isAuthenticated } = useAuthContext();
-  const { enqueueSnackbar } = useSnackbar();
 
   const { isInWishlist } = useIsInWishlist(courseId || "");
   const { toggleWishlist } = useToggleWishlist();
   const { data: isInCartData } = useIsInCart(courseId || "");
-  const { data: userCoursesData } = useUserCourses();
   const addToCartMutation = useAddToCart();
   const enrollInFreeCourseMutation = useEnrollInFreeCourse();
 
   const isInCart = isInCartData?.data?.isInCart || false;
-  const userCourses = userCoursesData?.data || [];
-  const isEnrolled = userCourses.some((c: any) => c.id === courseId);
+  const { data: enrollmentsData } = useUserEnrollments();
+
+  const userCourses = enrollmentsData?.data?.enrollments || [];
+  const isEnrolled = userCourses?.some((c: any) => c.course?.id === courseId);
+
+  const { showToast } = useToast();
 
   const handleWishlistToggle = () => {
     if (courseId && isAuthenticated) {
       toggleWishlist(courseId, isInWishlist);
-    }
-  };
-
-  const handleAddToCart = async () => {
-    if (!isAuthenticated) {
-      navigate("/auth/login");
-      return;
-    }
-
-    if (!courseId) return;
-
-    try {
-      await addToCartMutation.mutateAsync(courseId);
-      enqueueSnackbar("Course added to cart successfully!", {
-        variant: "success",
-        autoHideDuration: 3000,
-      });
-    } catch (error: any) {
-      const message = error.response?.data?.message || "Failed to add to cart";
-      enqueueSnackbar(message, {
-        variant: "error",
-        autoHideDuration: 3000,
-      });
     }
   };
 
@@ -466,10 +448,7 @@ const CourseDetails = () => {
       navigate("/cart");
     } catch (error: any) {
       const message = error.response?.data?.message || "Failed to add to cart";
-      enqueueSnackbar(message, {
-        variant: "error",
-        autoHideDuration: 3000,
-      });
+      showToast(generalToasts.error("Failed to add to cart", message));
     }
   };
 
@@ -499,6 +478,23 @@ const CourseDetails = () => {
 
       return newExpanded;
     });
+  };
+
+  const handleAddToCart = async () => {
+    if (!isAuthenticated) {
+      navigate("/auth/login");
+      return;
+    }
+
+    if (!courseId) return;
+
+    try {
+      await addToCartMutation.mutateAsync(courseId);
+      showToast(cartToasts.added(course.title));
+    } catch (error: any) {
+      const message = error.response?.data?.message || "Failed to add to cart";
+      showToast(generalToasts.error("Failed to add to cart", message));
+    }
   };
 
   const formatDuration = (seconds: number): string => {
@@ -533,6 +529,8 @@ const CourseDetails = () => {
     }
     return 0;
   };
+
+  // console.log("isEnrolled", isEnrolled);
 
   return (
     <div className="min-h-screen bg-gray-50">
