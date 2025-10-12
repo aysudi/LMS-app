@@ -318,6 +318,43 @@
   will-change: scroll-position;
 }
 
+/* Hide scrollbar utility */
+.scrollbar-hide {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}
+
+/* Prose styling for HTMLRenderer */
+.prose-invert {
+  color: rgb(203 213 225); /* text-slate-300 */
+}
+
+.prose-invert strong,
+.prose-invert b {
+  color: rgb(226 232 240); /* text-slate-200 */
+}
+
+.prose-invert em,
+.prose-invert i {
+  color: rgb(203 213 225); /* text-slate-300 */
+}
+
+.prose-invert pre {
+  background-color: rgb(15 23 42); /* bg-slate-900 */
+  border: 1px solid rgb(51 65 85); /* border-slate-600 */
+}
+
+.prose-invert code {
+  background-color: rgb(30 41 59); /* bg-slate-800 */
+  color: rgb(226 232 240); /* text-slate-200 */
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+}
+
 /* Reduce motion for users who prefer it */
 @media (prefers-reduced-motion: reduce) {
   .floating-action {
