@@ -24,6 +24,7 @@ import userProgressRouter from "./routes/userProgressRoutes.js";
 import instructorRouter from "./routes/instructorRoutes.js";
 import adminRouter from "./routes/adminRoutes.js";
 import qaRouter from "./routes/qaRoutes.js";
+import certificateRouter from "./routes/certificateRoutes.js";
 
 const app = express();
 
@@ -78,6 +79,7 @@ app.use("/api/user-progress", userProgressRouter);
 app.use("/api/instructor", instructorRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/qa", qaRouter);
+app.use("/api/certificates", certificateRouter);
 
 // 404 handler
 app.use(notFoundHandler);

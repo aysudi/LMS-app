@@ -2,7 +2,6 @@ import { useMutation } from "@tanstack/react-query";
 import { useToast } from "../components/UI/ToastProvider";
 import {
   CertificateService,
-  EmailService,
   type CertificateData,
 } from "../services/certificate.service";
 import type { Course } from "../types/course.type";
@@ -31,7 +30,7 @@ export const useCertificateGeneration = () => {
     CompleteCourseData
   >({
     mutationFn: async (data) => {
-      const { course, userId, userEmail, studentName, instructorName } = data;
+      const { course, userId, studentName, instructorName } = data;
 
       try {
         if (!course.certificateProvided) {
@@ -54,21 +53,15 @@ export const useCertificateGeneration = () => {
           certificateId,
         };
 
-        const certificateBuffer = await CertificateService.generateCertificate(
+        // Generate and send certificate
+        const result = await CertificateService.generateCertificate(
           certificateData
         );
 
-        const emailSent = await EmailService.sendCertificateEmail(
-          userEmail,
-          studentName,
-          course.title,
-          certificateBuffer
-        );
-
         return {
-          success: true,
-          certificateId,
-          emailSent,
+          success: result.success,
+          certificateId: result.certificateId || certificateId,
+          emailSent: result.emailSent || false,
         };
       } catch (error) {
         console.error("Certificate generation failed:", error);
@@ -118,65 +111,23 @@ export const useCertificateGeneration = () => {
   };
 };
 
-// Hook for downloading certificates
+// Simplified download function - certificates are sent via email
 export const useCertificateDownload = () => {
   const { showToast } = useToast();
 
-  const downloadCertificate = useMutation<void, Error, CertificateData>({
-    mutationFn: async (certificateData) => {
-      try {
-        // Generate certificate
-        const certificateBuffer = await CertificateService.generateCertificate(
-          certificateData
-        );
-
-        // Convert buffer to blob and trigger download
-        const blob = new Blob([new Uint8Array(certificateBuffer)], {
-          type: "text/html",
-        });
-        const url = URL.createObjectURL(blob);
-
-        // Create download link
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `certificate-${certificateData.courseName.replace(
-          /[^a-zA-Z0-9]/g,
-          "-"
-        )}.html`;
-
-        // Trigger download
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        // Cleanup
-        URL.revokeObjectURL(url);
-      } catch (error) {
-        console.error("Certificate download failed:", error);
-        throw new Error("Failed to download certificate");
-      }
-    },
-    onSuccess: () => {
-      showToast({
-        type: "success",
-        title: "Certificate Downloaded",
-        message: "Your certificate has been downloaded successfully.",
-        duration: 4000,
-      });
-    },
-    onError: () => {
-      showToast({
-        type: "error",
-        title: "Download Failed",
-        message: "Failed to download certificate. Please try again.",
-        duration: 4000,
-      });
-    },
-  });
+  const downloadCertificate = () => {
+    showToast({
+      type: "info",
+      title: "Certificate Delivery",
+      message:
+        "Your certificate has been sent to your email address. Please check your inbox.",
+      duration: 5000,
+    });
+  };
 
   return {
-    downloadCertificate: downloadCertificate.mutate,
-    isDownloading: downloadCertificate.isPending,
+    downloadCertificate,
+    isDownloading: false,
   };
 };
 

@@ -666,25 +666,50 @@ const CourseWatch: React.FC = () => {
         </div>
 
         <div className="relative h-screen pt-16">
-          <video
-            ref={videoRef}
-            className="w-full h-full object-contain bg-black cursor-pointer"
-            onClick={togglePlayPause}
-            onTimeUpdate={(e) => {
-              const video = e.target as HTMLVideoElement;
-              setCurrentTime(video.currentTime);
-            }}
-            onLoadedMetadata={(e) => {
-              const video = e.target as HTMLVideoElement;
-              setDuration(video.duration);
-            }}
-            onEnded={() => {
-              setIsPlaying(false);
-              goToNextLesson();
-            }}
-            onPlay={() => setIsPlaying(true)}
-            onPause={() => setIsPlaying(false)}
-          />
+          {showQuiz && currentLessonObj?.quiz ? (
+            // Show Quiz Component in place of video player
+            <div className="w-full h-full">
+              <QuizComponent
+                questions={currentLessonObj.quiz.map(
+                  (q: any, index: number) => ({
+                    id: `${currentLessonObj._id}-${index}`,
+                    question: q.question,
+                    options: q.options,
+                    correctAnswer: q.correctAnswer,
+                  })
+                )}
+                onQuizComplete={(score: number, passed: boolean) => {
+                  console.log("Quiz completed:", { score, passed });
+                  setShowQuiz(false);
+                  // Here you could update the lesson progress with quiz completion
+                }}
+                onClose={() => setShowQuiz(false)}
+                timeLimit={300} // 5 minutes
+                title={`${currentLessonObj.title} - Quiz`}
+              />
+            </div>
+          ) : (
+            // Show Video Player
+            <video
+              ref={videoRef}
+              className="w-full h-full object-contain bg-black cursor-pointer"
+              onClick={togglePlayPause}
+              onTimeUpdate={(e) => {
+                const video = e.target as HTMLVideoElement;
+                setCurrentTime(video.currentTime);
+              }}
+              onLoadedMetadata={(e) => {
+                const video = e.target as HTMLVideoElement;
+                setDuration(video.duration);
+              }}
+              onEnded={() => {
+                setIsPlaying(false);
+                goToNextLesson();
+              }}
+              onPlay={() => setIsPlaying(true)}
+              onPause={() => setIsPlaying(false)}
+            />
+          )}
 
           {/* Video Controls */}
           <div
@@ -2142,25 +2167,6 @@ const CourseWatch: React.FC = () => {
             </div>
           </div>
         </div>
-      )}
-
-      {/* Quiz Component */}
-      {showQuiz && currentLessonObj?.quiz && (
-        <QuizComponent
-          questions={currentLessonObj.quiz.map((q: any, index: number) => ({
-            id: `${currentLessonObj._id}-${index}`,
-            question: q.question,
-            options: q.options,
-            correctAnswer: q.correctAnswer,
-          }))}
-          onQuizComplete={(score: number, passed: boolean) => {
-            console.log("Quiz completed:", { score, passed });
-            setShowQuiz(false);
-            // Here you could update the lesson progress with quiz completion
-          }}
-          timeLimit={300} // 5 minutes
-          title={`${currentLessonObj.title} - Quiz`}
-        />
       )}
 
       {/* Course Completion Modal */}

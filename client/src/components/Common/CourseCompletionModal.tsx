@@ -1,10 +1,7 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Award, Download, Mail, CheckCircle } from "lucide-react";
-import {
-  useCertificateGeneration,
-  useCertificateDownload,
-} from "../../hooks/useCertificate";
+import { X, Award, Mail, CheckCircle } from "lucide-react";
+import { useCertificateGeneration } from "../../hooks/useCertificate";
 import type { Course } from "../../types/course.type";
 
 interface CourseCompletionModalProps {
@@ -26,9 +23,7 @@ export const CourseCompletionModal: React.FC<CourseCompletionModalProps> = ({
 }) => {
   const { completeCourseWithCertificate, isGeneratingCertificate } =
     useCertificateGeneration();
-  const { downloadCertificate, isDownloading } = useCertificateDownload();
   const [certificateGenerated, setCertificateGenerated] = React.useState(false);
-  const [certificateId] = React.useState<string>("");
 
   const instructorName = `${course.instructor.firstName} ${course.instructor.lastName}`;
 
@@ -41,20 +36,6 @@ export const CourseCompletionModal: React.FC<CourseCompletionModalProps> = ({
       instructorName,
     });
     setCertificateGenerated(true);
-  };
-
-  const handleDownloadCertificate = () => {
-    if (!certificateId) return;
-
-    downloadCertificate({
-      studentName,
-      courseName: course.title,
-      instructorName,
-      completionDate: new Date(),
-      courseId: course.id,
-      userId,
-      certificateId,
-    });
   };
 
   return (
@@ -167,23 +148,14 @@ export const CourseCompletionModal: React.FC<CourseCompletionModalProps> = ({
                         </span>
                       </div>
 
-                      <button
-                        onClick={handleDownloadCertificate}
-                        disabled={isDownloading}
-                        className="w-full bg-white hover:bg-gray-50 border border-gray-300 hover:border-gray-400 text-gray-700 py-2.5 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2"
-                      >
-                        {isDownloading ? (
-                          <>
-                            <div className="w-4 h-4 border-2 border-gray-400 border-t-gray-700 rounded-full animate-spin" />
-                            Downloading...
-                          </>
-                        ) : (
-                          <>
-                            <Download className="w-4 h-4" />
-                            Download Certificate
-                          </>
-                        )}
-                      </button>
+                      <div className="text-center">
+                        <p className="text-sm text-gray-600 mb-2">
+                          📧 Certificate sent to your email
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Check your inbox for the PDF certificate
+                        </p>
+                      </div>
                     </div>
                   )}
                 </div>
