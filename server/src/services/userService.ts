@@ -104,7 +104,6 @@ export const getUserById = async (userId: string): Promise<UserProfileDto> => {
   return formatMongoData(userProfile);
 };
 
-// Get user model by ID (for internal operations)
 export const getUserModelById = async (userId: string) => {
   if (!mongoose.Types.ObjectId.isValid(userId)) {
     throw new Error("Invalid user ID");
@@ -119,7 +118,6 @@ export const getUserModelById = async (userId: string) => {
   return user;
 };
 
-// Update user profile
 export const updateUserProfile = async (
   userId: string,
   updateData: any
@@ -132,16 +130,13 @@ export const updateUserProfile = async (
   delete updateData.role;
   delete updateData.isEmailVerified;
 
-  // Update user fields
   Object.assign(user, updateData);
   await user.save();
 
-  // Return formatted user profile
   const userProfile = createUserProfile(user);
   return formatMongoData(userProfile);
 };
 
-// Change user password
 export const changeUserPassword = async (
   userId: string,
   currentPassword: string,
@@ -159,7 +154,6 @@ export const changeUserPassword = async (
     throw new Error("User password not found");
   }
 
-  // Verify current password
   const isCurrentPasswordValid = await comparePassword(
     currentPassword,
     user.password
@@ -168,13 +162,11 @@ export const changeUserPassword = async (
     throw new Error("Current password is incorrect");
   }
 
-  // Hash and update new password
   const hashedNewPassword = await hashPassword(newPassword);
   user.password = hashedNewPassword;
   await user.save();
 };
 
-// Update user avatar
 export const updateUserAvatar = async (
   userId: string,
   avatarData: { url: string; publicId: string }
@@ -185,7 +177,6 @@ export const updateUserAvatar = async (
   user.public_id = avatarData.publicId;
   await user.save();
 
-  // Return formatted user profile
   const userProfile = createUserProfile(user);
   return formatMongoData(userProfile);
 };
