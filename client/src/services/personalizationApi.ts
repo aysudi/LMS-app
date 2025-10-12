@@ -4,6 +4,8 @@ import type {
 } from "../types/personalization.type";
 import { api } from "./api";
 
+export type { PersonalizedRecommendations, SearchHistoryItem };
+
 export const personalizationApi = {
   addToWishlist: (courseId: string) =>
     api.post(`/api/personalization/wishlist/add/${courseId}`),

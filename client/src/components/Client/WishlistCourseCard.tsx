@@ -85,7 +85,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
       <div className="relative h-40 overflow-hidden">
         <img
           src={
-            course.image ||
+            (course.image as any)?.url ||
             "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&h=200&fit=crop"
           }
           alt={course.title}

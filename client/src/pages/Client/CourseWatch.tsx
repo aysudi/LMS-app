@@ -21,6 +21,7 @@ import {
   FaTimes,
   FaStepBackward,
   FaStepForward,
+  FaTrophy,
 } from "react-icons/fa";
 import { useCourse } from "../../hooks/useCourseHooks";
 import {
@@ -41,6 +42,7 @@ import { useQAFilters, useQAFormState } from "../../hooks/useQAHelpers";
 import { HTMLRenderer } from "../../utils/htmlRenderer";
 import { CourseCompletionModal } from "../../components/Common/CourseCompletionModal";
 import { useAuthContext } from "../../context/AuthContext";
+import { useCertificateGeneration } from "../../hooks/useCertificate";
 import QuizComponent from "../../components/CourseDetails/QuizComponent";
 
 // Answers Section Component
@@ -182,6 +184,8 @@ const CourseWatch: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>();
   const navigate = useNavigate();
   const { user } = useAuthContext();
+  const { completeCourseWithCertificate, isGeneratingCertificate } =
+    useCertificateGeneration();
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -216,7 +220,13 @@ const CourseWatch: React.FC = () => {
   const [showNotes, setShowNotes] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
   const [activeTab, setActiveTab] = useState<
-    "overview" | "notes" | "reviews" | "resources" | "announcements" | "qa"
+    | "overview"
+    | "notes"
+    | "reviews"
+    | "resources"
+    | "announcements"
+    | "qa"
+    | "certificate"
   >("overview");
 
   const [newNote, setNewNote] = useState("");
@@ -511,6 +521,22 @@ const CourseWatch: React.FC = () => {
         },
       }
     );
+  };
+
+  // Check if course is completed
+  const isCourseCompleted = () => {
+    if (!course || !courseProgress) return false;
+
+    const totalLessons = course.sections.reduce(
+      (total, section) => total + section.lessons.length,
+      0
+    );
+
+    const completedLessons =
+      (courseProgress as any).lessons?.filter((lesson: any) => lesson.completed)
+        .length || 0;
+
+    return completedLessons >= totalLessons;
   };
 
   const addReview = () => {
@@ -1006,20 +1032,21 @@ const CourseWatch: React.FC = () => {
         <div className="bg-gradient-to-br from-slate-900/95 via-gray-900/95 to-slate-800/95 backdrop-blur-md border-t border-slate-700/30">
           {/* Tab Headers */}
           <div className="flex border-b border-slate-700/30 overflow-x-auto scrollbar-hide">
-            {(
-              [
-                "overview",
-                "notes",
-                "reviews",
-                "qa",
-                "resources",
-                "announcements",
-              ] as const
-            ).map((tab, index) => {
+            {[
+              "overview",
+              "notes",
+              "reviews",
+              "qa",
+              "resources",
+              "announcements",
+              ...(isCourseCompleted() && course?.certificateProvided
+                ? ["certificate" as const]
+                : []),
+            ].map((tab, index) => {
               return (
                 <button
                   key={index}
-                  onClick={() => setActiveTab(tab)}
+                  onClick={() => setActiveTab(tab as typeof activeTab)}
                   className={`group relative px-8 py-5 text-sm font-medium capitalize transition-all duration-300 cursor-pointer min-w-fit whitespace-nowrap overflow-hidden ${
                     activeTab === tab
                       ? "text-white bg-gradient-to-br from-blue-600/20 via-purple-600/15 to-violet-600/10 border-b-2 border-blue-400 shadow-lg shadow-blue-500/10"
@@ -2121,6 +2148,100 @@ const CourseWatch: React.FC = () => {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Certificate Tab */}
+      {activeTab === "certificate" && (
+        <div className="p-6">
+          <div className="text-center">
+            <div className="mb-6">
+              <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <FaTrophy className="text-3xl text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-2">
+                🎉 Congratulations!
+              </h3>
+              <p className="text-gray-300 mb-6">
+                You've successfully completed this course. Request your
+                certificate below.
+              </p>
+            </div>
+
+            {course?.certificateProvided && (
+              <div className="bg-gradient-to-br from-slate-800/50 to-slate-700/50 rounded-xl p-6 border border-slate-600/30 backdrop-blur-sm">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                    <svg
+                      className="w-6 h-6 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-white">
+                      Certificate Available
+                    </h4>
+                    <p className="text-sm text-gray-400">
+                      Get your certificate of completion
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    if (user && course) {
+                      completeCourseWithCertificate({
+                        course,
+                        userId: user.id,
+                        userEmail: user.email,
+                        studentName: `${user.firstName} ${user.lastName}`,
+                        instructorName: `${course.instructor.firstName} ${course.instructor.lastName}`,
+                      });
+                    }
+                  }}
+                  disabled={isGeneratingCertificate}
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-600 text-white py-3 px-6 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-3"
+                >
+                  {isGeneratingCertificate ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Generating Certificate...
+                    </>
+                  ) : (
+                    <>
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
+                      </svg>
+                      Request Certificate
+                    </>
+                  )}
+                </button>
+
+                <div className="mt-4 text-xs text-gray-500 text-center">
+                  📧 Certificate will be sent to your email as a PDF
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

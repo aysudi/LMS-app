@@ -24,7 +24,7 @@ type Props = {
   messageStats: any;
 };
 
-const Sidebar = ({ sidebarOpen, user, messageStats }: Props) => {
+const Sidebar = ({ sidebarOpen, user }: Props) => {
   const location = useLocation();
   const navigate = useNavigate();
 
