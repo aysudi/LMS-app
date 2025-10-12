@@ -617,3 +617,101 @@ export const recalculateAllUserProgress = async (
     });
   }
 };
+
+// Enroll in a free course
+export const enrollInFreeCourse = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const { course: courseId } = req.body;
+    console.log("courseId:", courseId);
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    if (!courseId) {
+      return res.status(400).json({
+        success: false,
+        message: "Course ID is required",
+      });
+    }
+
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found",
+      });
+    }
+
+    if (!course.isFree) {
+      return res.status(400).json({
+        success: false,
+        message: "This course is not free",
+      });
+    }
+
+    const existingEnrollment = await Enrollment.findOne({
+      user: userId,
+      course: courseId,
+    });
+
+    if (existingEnrollment) {
+      return res.status(400).json({
+        success: false,
+        message: "Already enrolled in this course",
+        data: { enrollment: existingEnrollment },
+      });
+    }
+
+    // Create new enrollment
+    const enrollment = new Enrollment({
+      user: userId,
+      course: courseId,
+      status: EnrollmentStatus.ACTIVE,
+      enrolledAt: new Date(),
+      lastAccessedAt: new Date(),
+      progress: {
+        completedLessons: [],
+        totalLessons: 0,
+        completionPercentage: 0,
+        timeSpent: 0,
+      },
+    });
+
+    await enrollment.save();
+
+    // Populate the enrollment with course and user data
+    const populatedEnrollment = await Enrollment.findById(enrollment._id)
+      .populate("course", "title description instructor image.url")
+      .populate("user", "firstName lastName email");
+
+    // Update user's enrolled courses count
+    await User.findByIdAndUpdate(userId, {
+      $inc: { coursesEnrolled: 1 },
+    });
+
+    // Update course's students enrolled count
+    await Course.findByIdAndUpdate(courseId, {
+      $inc: { studentsEnrolled: 1 },
+      $push: { studentsEnrolled: userId },
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Successfully enrolled in free course",
+      data: {
+        enrollment: formatMongoData(populatedEnrollment),
+      },
+    });
+  } catch (error: any) {
+    console.error("Free enrollment error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to enroll in course",
+    });
+  }
+};

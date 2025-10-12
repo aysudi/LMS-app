@@ -68,7 +68,6 @@ const Checkout = () => {
     0
   );
 
-  // Step 1: Create order
   const handleCreateOrder = async () => {
     try {
       const orderData: CreateOrderRequest = {
@@ -98,7 +97,6 @@ const Checkout = () => {
     }
   };
 
-  // Step 3: Handle successful payment
   const handlePaymentSuccess = async (paymentIntent: any) => {
     try {
       setPaymentStep("processing");
@@ -109,7 +107,6 @@ const Checkout = () => {
         paymentMethodId: paymentIntent.payment_method,
       });
 
-      // Clear entire cart after successful purchase
       await clearCartMutation.mutateAsync();
 
       setPaymentStep("success");

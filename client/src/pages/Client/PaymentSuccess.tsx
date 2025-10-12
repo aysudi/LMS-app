@@ -18,19 +18,16 @@ const PaymentSuccess = () => {
     const redirectStatus = searchParams.get("redirect_status");
 
     if (redirectStatus === "succeeded" && paymentIntent) {
-      // Payment succeeded
       setStatus("success");
       enqueueSnackbar("Payment successful! Welcome to your courses!", {
         variant: "success",
         autoHideDuration: 5000,
       });
 
-      // Redirect to My Learning after 3 seconds
       setTimeout(() => {
         navigate("/my-learning");
       }, 3000);
     } else if (redirectStatus === "failed") {
-      // Payment failed
       setStatus("error");
       enqueueSnackbar("Payment failed. Please try again.", {
         variant: "error",

@@ -102,6 +102,13 @@ class EnrollmentService {
     const response = await api.get(`/api/enrollments/${enrollmentId}/review`);
     return response.data;
   }
+
+  async enrollInFreeCourse(courseId: string) {
+    const response = await api.post("/api/enrollments/free", {
+      course: courseId,
+    });
+    return response.data;
+  }
 }
 
 export default new EnrollmentService();

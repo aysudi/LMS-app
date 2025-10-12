@@ -10,10 +10,14 @@ import {
   getUserById,
   getUserByUsername,
   refreshAccessToken,
+  updateUserProfile,
+  changeUserPassword,
+  updateUserAvatar,
 } from "../services/userService";
 import bcrypt from "bcrypt";
 import { uploadToCloudinary } from "../middlewares/upload.middleware";
 import formatMongoData from "../utils/formatMongoData";
+import cloudinary from "../configs/cloudinary.config";
 
 export const getCurrentUserController = async (
   req: any,
@@ -407,6 +411,142 @@ export const logoutController = async (
     res.status(500).json({
       success: false,
       message: "Logout failed",
+    });
+  }
+};
+
+// Update user profile
+export const updateProfileController = async (
+  req: any,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    const userId = req.user.userId;
+    const updateData = req.body;
+
+    const updatedUser = await updateUserProfile(userId, updateData);
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      data: updatedUser,
+    });
+  } catch (error: any) {
+    console.error("Update profile error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to update profile",
+    });
+  }
+};
+
+// Change password
+export const changePasswordController = async (
+  req: any,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    const userId = req.user.userId;
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Current password and new password are required",
+      });
+    }
+
+    await changeUserPassword(userId, currentPassword, newPassword);
+
+    res.status(200).json({
+      success: true,
+      message: "Password changed successfully",
+    });
+  } catch (error: any) {
+    console.error("Change password error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to change password",
+    });
+  }
+};
+
+// Update user avatar
+export const updateAvatarController = async (
+  req: any,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    const userId = req.user.userId;
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "No image file provided",
+      });
+    }
+
+    // Upload to Cloudinary with new function that returns full result
+    const uploadResult = (await new Promise((resolve, reject) => {
+      cloudinary.uploader
+        .upload_stream(
+          {
+            folder: "skillify/avatars",
+            transformation: [
+              { width: 200, height: 200, crop: "fill", gravity: "face" },
+              { quality: "auto", fetch_format: "auto" },
+            ],
+          },
+          (error, result) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(result);
+            }
+          }
+        )
+        .end(req.file.buffer);
+    })) as any;
+
+    const updatedUser = await updateUserAvatar(userId, {
+      url: uploadResult.secure_url,
+      publicId: uploadResult.public_id,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Avatar updated successfully",
+      data: updatedUser,
+    });
+  } catch (error: any) {
+    console.error("Update avatar error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to update avatar",
     });
   }
 };

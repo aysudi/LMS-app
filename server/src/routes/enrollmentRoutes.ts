@@ -11,6 +11,7 @@ import {
   getLearningStats,
   recalculateEnrollmentProgress,
   recalculateAllUserProgress,
+  enrollInFreeCourse,
 } from "../controllers/enrollmentController";
 import { authenticateToken } from "../middlewares/auth.middleware";
 import { AuthRequest } from "../types/common.types";
@@ -23,6 +24,11 @@ enrollmentRouter.get("/", authenticateToken, (req, res) =>
 
 enrollmentRouter.get("/stats", authenticateToken, (req, res) =>
   getLearningStats(req as AuthRequest, res)
+);
+
+// POST /api/enrollments/free - Enroll in a free course
+enrollmentRouter.post("/free", authenticateToken, (req, res) =>
+  enrollInFreeCourse(req as AuthRequest, res)
 );
 
 // POST /api/enrollments/recalculate-all-progress - Recalculate all user enrollments progress

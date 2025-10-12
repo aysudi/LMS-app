@@ -34,6 +34,7 @@ import { useToggleWishlist, useIsInWishlist } from "../../hooks/useWishlist";
 import { useAuthContext } from "../../context/AuthContext";
 import { useAddToCart, useIsInCart } from "../../hooks/useCart";
 import { useUserCourses } from "../../hooks/useCourseHooks";
+import { useEnrollInFreeCourse } from "../../hooks/useEnrollment";
 import type { Course, Lesson } from "../../types/course.type";
 
 const CoursePreviewCard: React.FC<{
@@ -48,7 +49,9 @@ const CoursePreviewCard: React.FC<{
   isEnrolled: boolean;
   handleAddToCart: () => void;
   handleBuyNow: () => void;
+  handleFreeEnrollment: () => void;
   addToCartMutation: any;
+  enrollInFreeCourseMutation: any;
   navigate: any;
 }> = ({
   course,
@@ -62,7 +65,9 @@ const CoursePreviewCard: React.FC<{
   isEnrolled,
   handleAddToCart,
   handleBuyNow,
+  handleFreeEnrollment,
   addToCartMutation,
+  enrollInFreeCourseMutation,
   navigate,
 }) => {
   return (
@@ -187,12 +192,30 @@ const CoursePreviewCard: React.FC<{
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                // Handle free enrollment
-                navigate(`/course/${course.id}/watch`);
+                handleFreeEnrollment();
               }}
-              className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold text-center rounded-lg transition-colors duration-200 cursor-pointer"
+              disabled={enrollInFreeCourseMutation.isPending}
+              className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold text-center rounded-lg transition-colors duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
             >
-              Enroll for Free
+              {enrollInFreeCourseMutation.isPending ? (
+                <>
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
+                    className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                  />
+                  <span>Enrolling...</span>
+                </>
+              ) : (
+                <>
+                  <FaPlay />
+                  <span>Enroll for Free</span>
+                </>
+              )}
             </button>
           ) : isInCart ? (
             <button
@@ -374,6 +397,7 @@ const CourseDetails = () => {
   const { data: isInCartData } = useIsInCart(courseId || "");
   const { data: userCoursesData } = useUserCourses();
   const addToCartMutation = useAddToCart();
+  const enrollInFreeCourseMutation = useEnrollInFreeCourse();
 
   const isInCart = isInCartData?.data?.isInCart || false;
   const userCourses = userCoursesData?.data || [];
@@ -405,6 +429,23 @@ const CourseDetails = () => {
         variant: "error",
         autoHideDuration: 3000,
       });
+    }
+  };
+
+  const handleFreeEnrollment = async () => {
+    if (!isAuthenticated) {
+      navigate("/auth/login");
+      return;
+    }
+
+    if (!courseId) return;
+
+    try {
+      await enrollInFreeCourseMutation.mutateAsync(courseId);
+      // The mutation success handler will show the success message
+      // and invalidate the queries to update the enrollment status
+    } catch (error: any) {
+      // Error is handled in the mutation's onError handler
     }
   };
 
@@ -625,7 +666,9 @@ const CourseDetails = () => {
                 isEnrolled={isEnrolled}
                 handleAddToCart={handleAddToCart}
                 handleBuyNow={handleBuyNow}
+                handleFreeEnrollment={handleFreeEnrollment}
                 addToCartMutation={addToCartMutation}
+                enrollInFreeCourseMutation={enrollInFreeCourseMutation}
                 navigate={navigate}
               />
             </div>
@@ -736,7 +779,9 @@ const CourseDetails = () => {
                 isEnrolled={isEnrolled}
                 handleAddToCart={handleAddToCart}
                 handleBuyNow={handleBuyNow}
+                handleFreeEnrollment={handleFreeEnrollment}
                 addToCartMutation={addToCartMutation}
+                enrollInFreeCourseMutation={enrollInFreeCourseMutation}
                 navigate={navigate}
               />
             </div>
