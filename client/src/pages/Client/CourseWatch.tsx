@@ -38,6 +38,7 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as qaService from "../../services/qa.service";
 import { useQAFilters, useQAFormState } from "../../hooks/useQAHelpers";
+import { HTMLRenderer } from "../../utils/htmlRenderer";
 
 // Answers Section Component
 const AnswersSection: React.FC<{
@@ -178,7 +179,6 @@ const CourseWatch: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>();
   const navigate = useNavigate();
 
-  // Video player state
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -222,7 +222,6 @@ const CourseWatch: React.FC = () => {
   const [newReview, setNewReview] = useState("");
   const [newRating, setNewRating] = useState(5);
 
-  // Q&A State
   const {
     filters: qaFilters,
     setSearch: setQASearch,
@@ -257,7 +256,6 @@ const CourseWatch: React.FC = () => {
   const addReviewMutation = useAddCourseReview();
   const queryClient = useQueryClient();
 
-  // Q&A Queries and Mutations
   const { data: questionsData, isLoading: questionsLoading } =
     useQuestionsByCourse(courseId!, qaFilters, { enabled: !!courseId });
 
@@ -266,7 +264,6 @@ const CourseWatch: React.FC = () => {
   const voteAnswerMutation = useVoteOnAnswer();
   const acceptAnswerMutation = useAcceptAnswer();
 
-  // Generic answer mutation that can work with any question ID
   const { mutate: createAnswerMutate } = useMutation({
     mutationFn: ({
       questionId,
@@ -276,7 +273,6 @@ const CourseWatch: React.FC = () => {
       data: { content: string };
     }) => qaService.createAnswer(questionId, data),
     onSuccess: () => {
-      // Invalidate all Q&A queries to refresh the data
       queryClient.invalidateQueries({
         predicate: (query) => query.queryKey.includes("qa"),
       });
@@ -437,7 +433,6 @@ const CourseWatch: React.FC = () => {
   };
 
   const markLessonComplete = () => {
-    // Only allow completion if lesson is not already completed
     if (!isLessonCompleted() && canCompleteLesson()) {
       if (!course) return;
       const lesson = course.sections[currentSection]?.lessons[currentLesson];
@@ -452,14 +447,12 @@ const CourseWatch: React.FC = () => {
     }
   };
 
-  // Check if user can complete the lesson (must be in last 1 minute)
   const canCompleteLesson = () => {
     if (!currentLessonObj || !duration || duration === 0) return false;
     const remainingTime = duration - currentTime;
     return remainingTime <= 60; // 60 seconds = 1 minute
   };
 
-  // Check if lesson is already completed
   const isLessonCompleted = () => {
     if (!currentLessonObj) return false;
     const lessonId = currentLessonObj._id;
@@ -536,7 +529,6 @@ const CourseWatch: React.FC = () => {
     );
   };
 
-  // Q&A Handler Functions
   const handleCreateQuestion = () => {
     if (!newQuestion.title.trim() || !newQuestion.content.trim()) return;
 
@@ -627,27 +619,30 @@ const CourseWatch: React.FC = () => {
     );
   }
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 text-white flex">
       {/* Video Player */}
       <div className={`flex-1 relative ${showSidebar ? "mr-80" : ""}`}>
         {/* Top Navigation Bar */}
-        <div className="absolute top-0 left-0 right-0 bg-gray-800/95 backdrop-blur-sm z-30 border-b border-gray-700">
+        <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-slate-900/95 via-gray-900/95 to-slate-800/95 backdrop-blur-md z-30 border-b border-slate-700/50 shadow-lg shadow-black/10">
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => navigate("/my-learning")}
-                className="text-gray-300 hover:text-white transition-colors cursor-pointer"
+                className="group flex items-center space-x-2 text-slate-300 hover:text-white transition-all duration-200 cursor-pointer hover:bg-slate-700/30 px-3 py-2 rounded-lg"
               >
-                ← Back to My Learning
+                <span className="text-lg group-hover:translate-x-[-2px] transition-transform duration-200">
+                  ←
+                </span>
+                <span className="hidden sm:inline">Back to My Learning</span>
               </button>
-              <div className="h-4 w-px bg-gray-600"></div>
-              <h1 className="text-lg font-semibold text-white truncate max-w-96">
+              <div className="h-4 w-px bg-gradient-to-b from-transparent via-slate-600 to-transparent"></div>
+              <h1 className="text-lg font-semibold truncate max-w-96 bg-gradient-to-r from-white to-slate-200 bg-clip-text text-transparent">
                 {course.title}
               </h1>
             </div>
 
-            <div className="flex items-center space-x-2">
-              <div className="text-sm text-gray-300">
+            <div className="flex items-center space-x-3">
+              <div className="px-3 py-1.5 bg-slate-800/60 rounded-lg border border-slate-700/50 text-sm text-slate-300 font-medium">
                 {currentSection + 1}.{currentLesson + 1} /{" "}
                 {course.sections.reduce(
                   (total, section) => total + section.lessons.length,
@@ -656,9 +651,9 @@ const CourseWatch: React.FC = () => {
               </div>
               <button
                 onClick={() => setShowSidebar(!showSidebar)}
-                className="p-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded"
+                className="p-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all duration-200 border border-transparent hover:border-slate-600/30 cursor-pointer"
               >
-                <FaList />
+                <FaList className="text-sm" />
               </button>
             </div>
           </div>
@@ -859,59 +854,66 @@ const CourseWatch: React.FC = () => {
         </div>
 
         {/* Lesson Info Section Below Video */}
-        <div className="bg-gray-800 border-t border-gray-700 p-4">
+        <div className="bg-gradient-to-r from-slate-900/95 via-gray-900/95 to-slate-800/95 backdrop-blur-md border-t border-slate-700/50 p-6 shadow-lg">
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <h1 className="text-xl font-bold text-white mb-1">
-                {currentLessonObj?.title}
-              </h1>
-              <p className="text-gray-400 text-sm">
-                Section {currentSection + 1}:{" "}
-                {course.sections[currentSection]?.title}
-              </p>
-              <div className="flex items-center space-x-4 mt-2 text-sm text-gray-400">
-                <span>
+              <div className="flex items-center space-x-3 mb-2">
+                <div className="px-2 py-1 bg-slate-700/50 text-slate-300 text-xs font-medium rounded-md border border-slate-600/30">
+                  Section {currentSection + 1}
+                </div>
+                <div className="px-2 py-1 bg-blue-600/20 text-blue-300 text-xs font-medium rounded-md border border-blue-500/30">
                   Lesson {currentLesson + 1} of{" "}
                   {course.sections[currentSection]?.lessons?.length || 0}
-                </span>
-                <span>•</span>
-                <span>
-                  Duration: {formatTime(currentLessonObj?.duration || 0)}
-                </span>
-                {currentLessonObj?.resources &&
-                  currentLessonObj.resources.length > 0 && (
-                    <>
-                      <span>•</span>
-                      <span className="text-blue-400">
-                        {currentLessonObj.resources.length} Resource
-                        {currentLessonObj.resources.length !== 1 ? "s" : ""}
-                      </span>
-                    </>
-                  )}
+                </div>
                 {currentLessonObj &&
                   getLessonProgress(currentLessonObj._id || currentLessonObj.id)
                     ?.completed && (
-                    <>
-                      <span>•</span>
-                      <div className="flex items-center text-green-400">
-                        <FaCheck className="mr-1" />
-                        Completed
-                      </div>
-                    </>
+                    <div className="flex items-center px-2 py-1 bg-green-600/20 text-green-300 text-xs font-medium rounded-md border border-green-500/30">
+                      <FaCheck className="mr-1.5 text-xs" />
+                      Completed
+                    </div>
+                  )}
+              </div>
+
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-white via-slate-100 to-slate-200 bg-clip-text text-transparent mb-2 leading-tight">
+                {currentLessonObj?.title}
+              </h1>
+
+              <p className="text-slate-400 text-base font-medium mb-3">
+                {course.sections[currentSection]?.title}
+              </p>
+
+              <div className="flex items-center space-x-6 text-sm text-slate-400">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                  <span>
+                    Duration: {formatTime(currentLessonObj?.duration || 0)}
+                  </span>
+                </div>
+
+                {currentLessonObj?.resources &&
+                  currentLessonObj.resources.length > 0 && (
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                      <span className="text-purple-300">
+                        {currentLessonObj.resources.length} Resource
+                        {currentLessonObj.resources.length !== 1 ? "s" : ""}
+                      </span>
+                    </div>
                   )}
               </div>
             </div>
 
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3">
               <button
                 onClick={markLessonComplete}
                 disabled={!canCompleteLesson() && !isLessonCompleted()}
-                className={`px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors  ${
+                className={`group px-6 py-3 rounded-xl flex items-center space-x-2 transition-all duration-300 font-medium ${
                   isLessonCompleted()
-                    ? "bg-green-500 text-white cursor-default"
+                    ? "bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg shadow-green-500/25 cursor-default"
                     : canCompleteLesson()
-                    ? "bg-green-600 hover:bg-green-700 text-white cursor-pointer"
-                    : "bg-gray-600 text-gray-400 cursor-not-allowed"
+                    ? "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg shadow-green-500/25 hover:shadow-green-500/40 hover:scale-105 cursor-pointer"
+                    : "bg-slate-700/50 text-slate-400 cursor-not-allowed border border-slate-600/30"
                 }`}
                 title={
                   isLessonCompleted()
@@ -921,29 +923,33 @@ const CourseWatch: React.FC = () => {
                     : "Complete the video to the last minute to mark as complete"
                 }
               >
-                <FaCheck />
-                <span className="text-sm">
-                  {isLessonCompleted() ? "Completed" : "Complete"}
-                </span>
+                <FaCheck
+                  className={`transition-transform duration-300 ${
+                    !isLessonCompleted() && canCompleteLesson()
+                      ? "group-hover:scale-110"
+                      : ""
+                  }`}
+                />
+                <span>{isLessonCompleted() ? "Completed" : "Complete"}</span>
               </button>
 
               <button
                 onClick={() => setShowNotes(!showNotes)}
-                className="p-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
+                className="group p-3 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 rounded-xl transition-all duration-300 shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 hover:scale-105"
                 title="Notes"
               >
-                <FaNotesMedical />
+                <FaNotesMedical className="group-hover:scale-110 transition-transform duration-300" />
               </button>
 
               {currentLessonObj?.resources &&
                 currentLessonObj.resources.length > 0 && (
                   <button
                     onClick={() => setActiveTab("resources")}
-                    className="p-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                    className="group p-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 rounded-xl transition-all duration-300 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-105"
                     title="Lesson Resources"
                   >
                     <svg
-                      className="w-5 h-5"
+                      className="w-5 h-5 group-hover:scale-110 transition-transform duration-300"
                       fill="currentColor"
                       viewBox="0 0 24 24"
                     >
@@ -955,10 +961,10 @@ const CourseWatch: React.FC = () => {
               {currentLessonObj?.quiz && currentLessonObj.quiz.length > 0 && (
                 <button
                   onClick={() => setShowQuiz(!showQuiz)}
-                  className="p-2 bg-orange-600 hover:bg-orange-700 rounded-lg transition-colors"
+                  className="group p-3 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 rounded-xl transition-all duration-300 shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-105"
                   title="Quiz"
                 >
-                  <FaQuestionCircle />
+                  <FaQuestionCircle className="group-hover:scale-110 transition-transform duration-300" />
                 </button>
               )}
             </div>
@@ -966,9 +972,9 @@ const CourseWatch: React.FC = () => {
         </div>
 
         {/* Tabs Section Below Video */}
-        <div className="bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 border-t border-gray-700/50 backdrop-blur-sm">
+        <div className="bg-gradient-to-br from-slate-900/95 via-gray-900/95 to-slate-800/95 backdrop-blur-md border-t border-slate-700/30">
           {/* Tab Headers */}
-          <div className="flex border-b border-gray-700/50 overflow-x-auto">
+          <div className="flex border-b border-slate-700/30 overflow-x-auto scrollbar-hide">
             {(
               [
                 "overview",
@@ -983,13 +989,13 @@ const CourseWatch: React.FC = () => {
                 <button
                   key={index}
                   onClick={() => setActiveTab(tab)}
-                  className={`group relative px-6 py-4 text-sm font-medium capitalize transition-all duration-300 cursor-pointer min-w-fit whitespace-nowrap ${
+                  className={`group relative px-8 py-5 text-sm font-medium capitalize transition-all duration-300 cursor-pointer min-w-fit whitespace-nowrap overflow-hidden ${
                     activeTab === tab
-                      ? "text-white bg-gradient-to-br from-purple-600/20 to-purple-500/10 border-b-2 border-purple-400 shadow-lg shadow-purple-500/10"
-                      : "text-gray-300 hover:text-white hover:bg-gradient-to-br hover:from-gray-700/50 hover:to-gray-600/30 hover:shadow-md transition-all duration-200"
+                      ? "text-white bg-gradient-to-br from-blue-600/20 via-purple-600/15 to-violet-600/10 border-b-2 border-blue-400 shadow-lg shadow-blue-500/10"
+                      : "text-slate-300 hover:text-white hover:bg-gradient-to-br hover:from-slate-700/30 hover:to-slate-600/20 hover:shadow-md transition-all duration-300"
                   }`}
                 >
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-3">
                     <span
                       className={`${
                         activeTab === tab ? "font-semibold" : "font-medium"
@@ -999,15 +1005,22 @@ const CourseWatch: React.FC = () => {
                     </span>
                   </div>
                   {activeTab === tab && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-400/5 to-transparent animate-pulse"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-400/0 via-blue-400/5 to-purple-400/0 animate-pulse"></div>
                   )}
+                  <div
+                    className={`absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-400 to-purple-400 transform origin-left transition-transform duration-300 ${
+                      activeTab === tab
+                        ? "scale-x-100"
+                        : "scale-x-0 group-hover:scale-x-100"
+                    }`}
+                  ></div>
                 </button>
               );
             })}
           </div>
 
           {/* Tab Content */}
-          <div className="p-6 min-h-96 bg-gradient-to-br from-gray-800/30 via-gray-900/20 to-gray-800/30">
+          <div className="p-8 min-h-96 bg-gradient-to-br from-slate-900/20 via-gray-900/10 to-slate-800/20">
             {activeTab === "overview" && (
               <div>
                 <h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
@@ -1018,9 +1031,12 @@ const CourseWatch: React.FC = () => {
                     <h4 className="font-semibold mb-3 text-purple-300 flex items-center space-x-2">
                       <span>About This Course</span>
                     </h4>
-                    <p className="text-gray-300 leading-relaxed">
-                      {course.description}
-                    </p>
+                    <div className="text-gray-300 leading-relaxed">
+                      <HTMLRenderer
+                        content={course.description}
+                        className="text-gray-300 prose-invert prose-sm"
+                      />
+                    </div>
                   </div>
                   <div className="p-6 bg-gradient-to-br from-gray-800/50 to-gray-900/30 rounded-2xl border border-gray-700/50 backdrop-blur-sm">
                     <h4 className="font-semibold mb-3 text-blue-300 flex items-center space-x-2">
@@ -1933,29 +1949,40 @@ const CourseWatch: React.FC = () => {
 
       {/* Sidebar */}
       {showSidebar && (
-        <div className="w-80 bg-gray-800 h-screen overflow-y-auto fixed right-0 top-0 border-l border-gray-700 z-40">
-          <div className="p-4">
+        <div className="w-80 bg-gradient-to-b from-slate-900/95 via-gray-900/95 to-slate-800/95 backdrop-blur-md h-screen overflow-y-auto fixed right-0 top-0 border-l border-slate-700/50 z-40 shadow-2xl shadow-black/20">
+          <div className="p-6">
             {/* Header with course info */}
-            <div className="bg-gray-900 -m-4 p-4 mb-4 border-b border-gray-700">
-              <div className="flex items-center justify-between mb-2">
-                <h2 className="text-lg font-bold">Course Content</h2>
+            <div className="bg-gradient-to-r from-slate-800/50 to-gray-800/50 -m-6 p-6 mb-6 border-b border-slate-700/30 backdrop-blur-sm">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-xl font-bold bg-gradient-to-r from-white to-slate-200 bg-clip-text text-transparent">
+                  Course Content
+                </h2>
                 <button
                   onClick={() => setShowSidebar(false)}
-                  className="p-1 hover:bg-gray-700 rounded cursor-pointer"
+                  className="group p-2 hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200 border border-transparent hover:border-slate-600/30"
                 >
-                  <FaTimes />
+                  <FaTimes className="text-slate-400 group-hover:text-white transition-colors duration-200" />
                 </button>
               </div>
-              <h3 className="text-sm font-medium text-gray-300 truncate">
+              <h3 className="text-base font-semibold text-slate-200 truncate mb-2">
                 {course.title}
               </h3>
-              <p className="text-xs text-gray-400 mt-1">
-                {course.sections.reduce(
-                  (total, section) => total + section.lessons.length,
-                  0
-                )}{" "}
-                lessons
-              </p>
+              <div className="flex items-center space-x-4 text-sm text-slate-400">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                  <span>
+                    {course.sections.reduce(
+                      (total, section) => total + section.lessons.length,
+                      0
+                    )}{" "}
+                    lessons
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                  <span>{course.sections.length} sections</span>
+                </div>
+              </div>
             </div>
 
             {/* Course Sections */}

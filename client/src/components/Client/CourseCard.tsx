@@ -4,6 +4,7 @@ import { usePersonalization } from "../../hooks/usePersonalization";
 import { motion } from "framer-motion";
 import type { Course } from "../../types/course.type";
 import { FaClock, FaStar, FaUsers } from "react-icons/fa";
+import { HTMLRenderer } from "../../utils/htmlRenderer";
 
 const CourseCard = ({
   course,
@@ -60,9 +61,21 @@ const CourseCard = ({
                 <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors duration-300">
                   {course.title}
                 </h3>
-                <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                  {course.shortDescription || course.description}
-                </p>
+                <div className="text-gray-600 text-sm mb-4 line-clamp-2">
+                  {course.shortDescription ? (
+                    <HTMLRenderer
+                      content={course.shortDescription}
+                      className="text-gray-600 prose-sm"
+                      maxLength={150}
+                    />
+                  ) : (
+                    <HTMLRenderer
+                      content={course.description}
+                      className="text-gray-600 prose-sm"
+                      maxLength={150}
+                    />
+                  )}
+                </div>
               </div>
               <div className="ml-4 text-right">
                 <div className="text-2xl font-bold text-gray-900 mb-1">
@@ -174,9 +187,21 @@ const CourseCard = ({
           {course.title}
         </h3>
 
-        <p className="text-gray-600 text-sm mb-5 line-clamp-2 leading-relaxed">
-          {course.shortDescription || course.description}
-        </p>
+        <div className="text-gray-600 text-sm mb-5 line-clamp-2 leading-relaxed">
+          {course.shortDescription ? (
+            <HTMLRenderer
+              content={course.shortDescription}
+              className="text-gray-600 prose-sm"
+              maxLength={120}
+            />
+          ) : (
+            <HTMLRenderer
+              content={course.description}
+              className="text-gray-600 prose-sm"
+              maxLength={120}
+            />
+          )}
+        </div>
 
         <div className="flex items-center justify-between text-sm mb-5">
           <div className="flex items-center space-x-1">

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { HTMLRenderer } from "../../utils/htmlRenderer";
 import {
   FaPlay,
   FaStar,
@@ -120,7 +121,7 @@ const CoursePreviewCard: React.FC<{
         )}
 
         {/* Play Button Overlay */}
-        {course.videoPromo && (
+        {course.videoPromo && course.videoPromo.url.length > 0 && (
           <button
             onClick={() => setIsVideoModalOpen(true)}
             className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/10 transition-all duration-300 group"
@@ -527,8 +528,19 @@ const CourseDetails = () => {
                 {course.title}
               </h1>
               <p className="text-xl text-gray-300 leading-relaxed mb-6 max-w-3xl">
-                {course.shortDescription ||
-                  course.description.slice(0, 200) + "..."}
+                {course.shortDescription ? (
+                  <HTMLRenderer
+                    content={course.shortDescription}
+                    className="text-gray-600"
+                    maxLength={200}
+                  />
+                ) : (
+                  <HTMLRenderer
+                    content={course.description}
+                    className="text-gray-600"
+                    maxLength={200}
+                  />
+                )}
               </p>
             </motion.div>
 
@@ -754,11 +766,10 @@ const CourseOverview: React.FC<{ course: Course }> = ({ course }) => {
           About this course
         </h3>
         <div className="prose prose-lg max-w-none text-gray-700">
-          {course.description.split("\n").map((paragraph, index) => (
-            <p key={index} className="mb-4 last:mb-0 leading-relaxed">
-              {paragraph}
-            </p>
-          ))}
+          <HTMLRenderer
+            content={course.description}
+            className="text-gray-700 prose-lg max-w-none"
+          />
         </div>
       </div>
 

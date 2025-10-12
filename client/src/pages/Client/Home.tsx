@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { HTMLRenderer } from "../../utils/htmlRenderer";
 import {
   FaStar,
   FaUsers,
@@ -849,9 +850,13 @@ const Home = () => {
                               {displayCourse.title}
                             </h3>
 
-                            <p className="text-gray-600 mb-6 text-lg leading-relaxed">
-                              {displayCourse.description}
-                            </p>
+                            <div className="text-gray-600 mb-6 text-lg leading-relaxed">
+                              <HTMLRenderer
+                                content={displayCourse.description}
+                                className="text-gray-600"
+                                maxLength={300}
+                              />
+                            </div>
 
                             <div className="text-lg text-gray-700 mb-6">
                               by{" "}

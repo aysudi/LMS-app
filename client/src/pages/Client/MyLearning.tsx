@@ -209,7 +209,7 @@ const MyLearning = () => {
                 {/* Image with Progress Overlay */}
                 <div className="relative h-48 overflow-hidden">
                   <img
-                    src={enrollment.course.image}
+                    src={enrollment.course.image.url}
                     alt={enrollment.course.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
