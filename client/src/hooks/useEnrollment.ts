@@ -209,3 +209,33 @@ export const useEnrollmentReviews = (enrollmentId: string) => {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };
+
+// Hook for enrolling in a free course
+export const useEnrollInFreeCourse = () => {
+  const queryClient = useQueryClient();
+  const { enqueueSnackbar } = useSnackbar();
+
+  return useMutation({
+    mutationFn: (courseId: string) =>
+      enrollmentService.enrollInFreeCourse(courseId),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["enrollments"] });
+      queryClient.invalidateQueries({
+        queryKey: ["courses", "user", "enrolled"],
+      });
+      queryClient.invalidateQueries({ queryKey: ["learning-stats"] });
+
+      enqueueSnackbar("🎉 Successfully enrolled in the course!", {
+        variant: "success",
+        autoHideDuration: 4000,
+      });
+    },
+
+    onError: (error: any) => {
+      const message =
+        error.response?.data?.message || "Failed to enroll in course";
+      enqueueSnackbar(message, { variant: "error" });
+    },
+  });
+};

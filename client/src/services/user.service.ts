@@ -40,3 +40,31 @@ export const getUserByUsername = async (
   const response = await api.get(`/api/auth/username/${username}`);
   return response.data;
 };
+
+// Update user profile
+export const updateProfile = async (profileData: any) => {
+  const response = await api.put("/api/auth/profile", profileData);
+  return response.data;
+};
+
+// Change password
+export const changePassword = async (passwordData: {
+  currentPassword: string;
+  newPassword: string;
+}) => {
+  const response = await api.put("/api/auth/change-password", passwordData);
+  return response.data;
+};
+
+// Update avatar
+export const updateAvatar = async (avatarFile: File) => {
+  const formData = new FormData();
+  formData.append("avatar", avatarFile);
+
+  const response = await api.put("/api/auth/avatar", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
+};

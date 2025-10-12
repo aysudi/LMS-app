@@ -12,6 +12,9 @@ import {
   getCurrentUserController,
   refreshTokenController,
   logoutController,
+  updateProfileController,
+  changePasswordController,
+  updateAvatarController,
 } from "../controllers/userController";
 import {
   uploadMiddleware,
@@ -110,6 +113,17 @@ userRouter.get(
   "/:userId",
   validateParams(getUserByIdSchema),
   getUserByIdController
+);
+
+// Profile management routes - must be authenticated
+userRouter.put("/profile", authenticateToken, updateProfileController);
+userRouter.put("/change-password", authenticateToken, changePasswordController);
+userRouter.put(
+  "/avatar",
+  authenticateToken,
+  uploadMiddleware,
+  uploadErrorHandler,
+  updateAvatarController
 );
 
 export default userRouter;

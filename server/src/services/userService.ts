@@ -104,6 +104,92 @@ export const getUserById = async (userId: string): Promise<UserProfileDto> => {
   return formatMongoData(userProfile);
 };
 
+// Get user model by ID (for internal operations)
+export const getUserModelById = async (userId: string) => {
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    throw new Error("Invalid user ID");
+  }
+
+  const user = await User.findOne({ _id: userId, isActive: true });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  return user;
+};
+
+// Update user profile
+export const updateUserProfile = async (
+  userId: string,
+  updateData: any
+): Promise<UserProfileDto> => {
+  const user = await getUserModelById(userId);
+
+  // Remove sensitive fields that shouldn't be updated via this endpoint
+  delete updateData.password;
+  delete updateData.email; // Email updates might require verification
+  delete updateData.role;
+  delete updateData.isEmailVerified;
+
+  // Update user fields
+  Object.assign(user, updateData);
+  await user.save();
+
+  // Return formatted user profile
+  const userProfile = createUserProfile(user);
+  return formatMongoData(userProfile);
+};
+
+// Change user password
+export const changeUserPassword = async (
+  userId: string,
+  currentPassword: string,
+  newPassword: string
+): Promise<void> => {
+  const user = await User.findOne({ _id: userId, isActive: true }).select(
+    "+password"
+  );
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  if (!user.password) {
+    throw new Error("User password not found");
+  }
+
+  // Verify current password
+  const isCurrentPasswordValid = await comparePassword(
+    currentPassword,
+    user.password
+  );
+  if (!isCurrentPasswordValid) {
+    throw new Error("Current password is incorrect");
+  }
+
+  // Hash and update new password
+  const hashedNewPassword = await hashPassword(newPassword);
+  user.password = hashedNewPassword;
+  await user.save();
+};
+
+// Update user avatar
+export const updateUserAvatar = async (
+  userId: string,
+  avatarData: { url: string; publicId: string }
+): Promise<UserProfileDto> => {
+  const user = await getUserModelById(userId);
+
+  user.avatar = avatarData.url;
+  user.public_id = avatarData.publicId;
+  await user.save();
+
+  // Return formatted user profile
+  const userProfile = createUserProfile(user);
+  return formatMongoData(userProfile);
+};
+
 export const getUserByUsername = async (
   username: string
 ): Promise<UserProfileDto> => {
