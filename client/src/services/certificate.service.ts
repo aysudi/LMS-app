@@ -11,20 +11,52 @@ export interface CertificateData {
 // We'll use a service like PDFKit or canvas-based generation
 // For now, let's create a service that can be extended with actual PDF generation
 export class CertificateService {
-  static async generateCertificate(data: CertificateData): Promise<Buffer> {
-    // This is a placeholder - in a real implementation, you'd use:
-    // - PDFKit for server-side PDF generation
-    // - Canvas API for client-side generation
-    // - Or a service like DocuSign, Adobe Sign, etc.
+  static async generateCertificate(data: CertificateData): Promise<{
+    success: boolean;
+    certificateId?: string;
+    emailSent?: boolean;
+    message?: string;
+  }> {
+    try {
+      const response = await fetch("/api/certificates/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          courseId: data.courseId,
+          userId: data.userId,
+          studentName: data.studentName,
+          instructorName: data.instructorName,
+          userEmail: localStorage.getItem("userEmail") || "user@example.com",
+          courseName: data.courseName,
+        }),
+      });
 
-    const certificateHTML = this.generateCertificateHTML(data);
+      const result = await response.json();
 
-    // For now, we'll return a simple buffer
-    // In production, you'd convert the HTML to PDF using libraries like:
-    // - puppeteer
-    // - html-pdf
-    // - jsPDF
-    return Buffer.from(certificateHTML, "utf8");
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to generate certificate");
+      }
+
+      return {
+        success: result.success,
+        certificateId: result.data?.certificateId,
+        emailSent: result.data?.emailSent,
+        message: result.message,
+      };
+    } catch (error) {
+      console.error("Certificate generation error:", error);
+      return {
+        success: false,
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to generate certificate",
+      };
+    }
   }
 
   private static generateCertificateHTML(data: CertificateData): string {
