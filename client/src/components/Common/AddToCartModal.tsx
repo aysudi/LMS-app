@@ -84,7 +84,7 @@ const AddToCartModal: React.FC<AddToCartModalProps> = ({
                   <div className="flex items-center space-x-4">
                     <img
                       src={
-                        addedCourse.image ||
+                        (addedCourse.image as any)?.url ||
                         "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=120&h=80&fit=crop"
                       }
                       alt={addedCourse.title}
@@ -137,7 +137,7 @@ const AddToCartModal: React.FC<AddToCartModalProps> = ({
                           <div className="flex items-start space-x-3">
                             <img
                               src={
-                                course.image ||
+                                (course.image as any)?.url ||
                                 "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=120&h=80&fit=crop"
                               }
                               alt={course.title}

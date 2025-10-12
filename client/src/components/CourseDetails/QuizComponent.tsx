@@ -45,6 +45,10 @@ const QuizComponent: React.FC<QuizComponentProps> = ({
   );
   const [showResults, setShowResults] = useState(false);
   const [timeLeft, setTimeLeft] = useState(timeLimit);
+  const [showQuestionResult, setShowQuestionResult] = useState(false);
+  const [questionAnswered, setQuestionAnswered] = useState<boolean[]>(
+    new Array(questions.length).fill(false)
+  );
 
   const currentQ = questions[currentQuestion];
 
@@ -61,6 +65,17 @@ const QuizComponent: React.FC<QuizComponentProps> = ({
     const newAnswers = [...selectedAnswers];
     newAnswers[currentQuestion] = answerIndex;
     setSelectedAnswers(newAnswers);
+
+    // Mark question as answered
+    const newQuestionAnswered = [...questionAnswered];
+    newQuestionAnswered[currentQuestion] = true;
+    setQuestionAnswered(newQuestionAnswered);
+
+    // Show result for this question briefly
+    setShowQuestionResult(true);
+    setTimeout(() => {
+      setShowQuestionResult(false);
+    }, 1500);
   };
 
   const handleNextQuestion = () => {
@@ -78,13 +93,13 @@ const QuizComponent: React.FC<QuizComponentProps> = ({
   };
 
   const handleSubmitQuiz = () => {
-    setShowResults(true);
     const correctAnswers = selectedAnswers.filter(
       (answer, index) => answer === questions[index].correctAnswer
     ).length;
     const score = Math.round((correctAnswers / questions.length) * 100);
     const passed = score >= passingScore;
-    onQuizComplete(score, passed);
+    setShowResults(true);
+    // onQuizComplete(score, passed);
   };
 
   const handleReturnToVideo = () => {
@@ -143,7 +158,7 @@ const QuizComponent: React.FC<QuizComponentProps> = ({
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                  className="inline-flex items-center justify-center w-16 h-16 mb-4"
+                  className="inline-flex items-end justify-end w-16 h-26 text-[4rem]"
                 >
                   {getScoreIcon(score)}
                 </motion.div>
@@ -365,6 +380,69 @@ const QuizComponent: React.FC<QuizComponentProps> = ({
                     </motion.button>
                   ))}
                 </div>
+
+                {/* Immediate Feedback */}
+                {showResults &&
+                  showQuestionResult &&
+                  selectedAnswers[currentQuestion] !== -1 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className={`mt-6 p-4 rounded-lg border-l-4 ${
+                        selectedAnswers[currentQuestion] ===
+                        currentQ.correctAnswer
+                          ? "border-green-500 bg-green-50"
+                          : "border-red-500 bg-red-50"
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        {selectedAnswers[currentQuestion] ===
+                        currentQ.correctAnswer ? (
+                          <FaCheckCircle className="text-green-600 text-lg mt-0.5" />
+                        ) : (
+                          <FaTimesCircle className="text-red-600 text-lg mt-0.5" />
+                        )}
+                        <div className="flex-1">
+                          <h4
+                            className={`font-semibold ${
+                              selectedAnswers[currentQuestion] ===
+                              currentQ.correctAnswer
+                                ? "text-green-800"
+                                : "text-red-800"
+                            }`}
+                          >
+                            {selectedAnswers[currentQuestion] ===
+                            currentQ.correctAnswer
+                              ? "Correct! 🎉"
+                              : "Incorrect"}
+                          </h4>
+                          {selectedAnswers[currentQuestion] !==
+                            currentQ.correctAnswer && (
+                            <p className="text-red-700 text-sm mt-1">
+                              The correct answer is:{" "}
+                              <strong>
+                                {currentQ.options[currentQ.correctAnswer]}
+                              </strong>
+                            </p>
+                          )}
+                          {currentQ.explanation && (
+                            <p
+                              className={`text-sm mt-2 ${
+                                selectedAnswers[currentQuestion] ===
+                                currentQ.correctAnswer
+                                  ? "text-green-700"
+                                  : "text-red-700"
+                              }`}
+                            >
+                              <strong>Explanation:</strong>{" "}
+                              {currentQ.explanation}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
               </div>
 
               {/* Navigation */}
@@ -379,18 +457,45 @@ const QuizComponent: React.FC<QuizComponentProps> = ({
                 </button>
 
                 <div className="flex items-center gap-2">
-                  {questions.map((_, index) => (
-                    <div
-                      key={index}
-                      className={`w-3 h-3 rounded-full ${
-                        index === currentQuestion
-                          ? "bg-blue-500"
-                          : selectedAnswers[index] !== -1
-                          ? "bg-green-500"
-                          : "bg-gray-300"
-                      }`}
-                    />
-                  ))}
+                  {questions.map((_, index) => {
+                    const isAnswered = selectedAnswers[index] !== -1;
+                    const isCorrect =
+                      isAnswered &&
+                      selectedAnswers[index] === questions[index].correctAnswer;
+                    const isCurrent = index === currentQuestion;
+
+                    return (
+                      <div
+                        key={index}
+                        className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                          isCurrent
+                            ? "bg-blue-500 border-blue-500 scale-125"
+                            : isAnswered
+                            ? isCorrect
+                              ? "bg-green-500 border-green-500"
+                              : "bg-red-500 border-red-500"
+                            : "bg-gray-200 border-gray-300"
+                        } transition-all duration-200`}
+                        title={
+                          isCurrent
+                            ? "Current question"
+                            : isAnswered
+                            ? isCorrect
+                              ? "Correct answer"
+                              : "Wrong answer"
+                            : "Not answered"
+                        }
+                      >
+                        {!isCurrent &&
+                          isAnswered &&
+                          (isCorrect ? (
+                            <FaCheckCircle className="text-white text-xs" />
+                          ) : (
+                            <FaTimesCircle className="text-white text-xs" />
+                          ))}
+                      </div>
+                    );
+                  })}
                 </div>
 
                 {currentQuestion === questions.length - 1 ? (
