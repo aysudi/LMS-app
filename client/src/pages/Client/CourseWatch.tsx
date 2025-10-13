@@ -46,7 +46,6 @@ import { useCertificateGeneration } from "../../hooks/useCertificate";
 import QuizComponent from "../../components/CourseDetails/QuizComponent";
 import { File } from "lucide-react";
 
-// Answers Section Component
 const AnswersSection: React.FC<{
   question: any;
   onVoteAnswer: (answerId: string, voteType: "upvote" | "downvote") => void;
@@ -257,10 +256,8 @@ const CourseWatch: React.FC = () => {
     new Set()
   );
 
-  // Course completion modal state
   const [showCompletionModal, setShowCompletionModal] = useState(false);
 
-  // Track lesson quiz states
   const [lessonQuizStates, setLessonQuizStates] = useState<{
     [key: string]: { completed: boolean; passed: boolean };
   }>({});
@@ -758,7 +755,6 @@ const CourseWatch: React.FC = () => {
               />
             </div>
           ) : (
-            // Show Video Player
             <video
               ref={videoRef}
               className="w-full h-full object-contain bg-black cursor-pointer"
@@ -773,7 +769,6 @@ const CourseWatch: React.FC = () => {
               }}
               onEnded={() => {
                 setIsPlaying(false);
-                // If lesson has quiz, show quiz automatically when video ends
                 if (
                   currentLessonObj?.quiz &&
                   currentLessonObj.quiz.length > 0 &&
@@ -1139,7 +1134,6 @@ const CourseWatch: React.FC = () => {
               "qa",
               "resources",
               "announcements",
-              // is
               ...(isCourseCompleted() ? ["certificate" as const] : []),
             ].map((tab, index) => {
               return (
@@ -2168,7 +2162,7 @@ const CourseWatch: React.FC = () => {
                           (_, index) => (
                             <button
                               key={index}
-                              onClick={() => setQASearch("")} // This should be setPage but keeping simple for now
+                              onClick={() => setQASearch("")}
                               className={`px-4 py-2 rounded-lg transition-all ${
                                 qaFilters.page === index + 1
                                   ? "bg-purple-600 text-white"

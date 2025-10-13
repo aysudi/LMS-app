@@ -100,12 +100,15 @@ const AdminDashboard: React.FC = () => {
   );
 
   const ActivityItem: React.FC<{
-    activity: typeof recentActivity[0];
+    activity: (typeof recentActivity)[0];
   }> = ({ activity }) => (
     <div className="flex items-start space-x-4 p-4 hover:bg-slate-50 rounded-xl transition-colors">
       <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
         <span className="text-white font-bold text-sm">
-          {activity.user.split(" ").map((n) => n[0]).join("")}
+          {activity.user
+            .split(" ")
+            .map((n) => n[0])
+            .join("")}
         </span>
       </div>
       <div className="flex-1 min-w-0">

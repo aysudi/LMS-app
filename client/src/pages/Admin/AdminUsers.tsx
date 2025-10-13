@@ -85,7 +85,8 @@ const AdminUsers: React.FC = () => {
       user.email.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesRole = filterRole === "all" || user.role === filterRole;
-    const matchesStatus = filterStatus === "all" || user.status === filterStatus;
+    const matchesStatus =
+      filterStatus === "all" || user.status === filterStatus;
 
     return matchesSearch && matchesRole && matchesStatus;
   });
@@ -196,31 +197,47 @@ const AdminUsers: React.FC = () => {
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
           <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-200/50">
-            <div className="text-2xl font-bold text-blue-700">{stats.total}</div>
+            <div className="text-2xl font-bold text-blue-700">
+              {stats.total}
+            </div>
             <div className="text-blue-600 text-sm font-medium">Total Users</div>
           </div>
           <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-xl border border-green-200/50">
-            <div className="text-2xl font-bold text-green-700">{stats.active}</div>
+            <div className="text-2xl font-bold text-green-700">
+              {stats.active}
+            </div>
             <div className="text-green-600 text-sm font-medium">Active</div>
           </div>
           <div className="bg-gradient-to-br from-red-50 to-red-100 p-4 rounded-xl border border-red-200/50">
-            <div className="text-2xl font-bold text-red-700">{stats.suspended}</div>
+            <div className="text-2xl font-bold text-red-700">
+              {stats.suspended}
+            </div>
             <div className="text-red-600 text-sm font-medium">Suspended</div>
           </div>
           <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-4 rounded-xl border border-yellow-200/50">
-            <div className="text-2xl font-bold text-yellow-700">{stats.pending}</div>
+            <div className="text-2xl font-bold text-yellow-700">
+              {stats.pending}
+            </div>
             <div className="text-yellow-600 text-sm font-medium">Pending</div>
           </div>
           <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 p-4 rounded-xl border border-emerald-200/50">
-            <div className="text-2xl font-bold text-emerald-700">{stats.students}</div>
+            <div className="text-2xl font-bold text-emerald-700">
+              {stats.students}
+            </div>
             <div className="text-emerald-600 text-sm font-medium">Students</div>
           </div>
           <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 p-4 rounded-xl border border-indigo-200/50">
-            <div className="text-2xl font-bold text-indigo-700">{stats.instructors}</div>
-            <div className="text-indigo-600 text-sm font-medium">Instructors</div>
+            <div className="text-2xl font-bold text-indigo-700">
+              {stats.instructors}
+            </div>
+            <div className="text-indigo-600 text-sm font-medium">
+              Instructors
+            </div>
           </div>
           <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-xl border border-purple-200/50">
-            <div className="text-2xl font-bold text-purple-700">{stats.admins}</div>
+            <div className="text-2xl font-bold text-purple-700">
+              {stats.admins}
+            </div>
             <div className="text-purple-600 text-sm font-medium">Admins</div>
           </div>
         </div>
@@ -297,7 +314,10 @@ const AdminUsers: React.FC = () => {
                 <th className="px-6 py-4 text-left">
                   <input
                     type="checkbox"
-                    checked={selectedUsers.length === filteredUsers.length && filteredUsers.length > 0}
+                    checked={
+                      selectedUsers.length === filteredUsers.length &&
+                      filteredUsers.length > 0
+                    }
                     onChange={handleSelectAll}
                     className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                   />
@@ -324,7 +344,10 @@ const AdminUsers: React.FC = () => {
             </thead>
             <tbody className="divide-y divide-slate-200">
               {filteredUsers.map((user) => (
-                <tr key={user.id} className="hover:bg-slate-50 transition-colors">
+                <tr
+                  key={user.id}
+                  className="hover:bg-slate-50 transition-colors"
+                >
                   <td className="px-6 py-4">
                     <input
                       type="checkbox"
@@ -337,14 +360,17 @@ const AdminUsers: React.FC = () => {
                     <div className="flex items-center space-x-4">
                       <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                         <span className="text-white font-bold text-sm">
-                          {user.firstName[0]}{user.lastName[0]}
+                          {user.firstName[0]}
+                          {user.lastName[0]}
                         </span>
                       </div>
                       <div>
                         <div className="font-medium text-slate-900">
                           {user.firstName} {user.lastName}
                         </div>
-                        <div className="text-sm text-slate-500">{user.email}</div>
+                        <div className="text-sm text-slate-500">
+                          {user.email}
+                        </div>
                       </div>
                     </div>
                   </td>
@@ -358,7 +384,9 @@ const AdminUsers: React.FC = () => {
                   </td>
                   <td className="px-6 py-4">{getStatusBadge(user.status)}</td>
                   <td className="px-6 py-4">
-                    <div className="text-sm text-slate-900">{user.lastActive}</div>
+                    <div className="text-sm text-slate-900">
+                      {user.lastActive}
+                    </div>
                     <div className="text-xs text-slate-500">
                       {user.coursesEnrolled
                         ? `${user.coursesEnrolled} courses enrolled`

@@ -196,7 +196,6 @@ export const useCreateCourse = (
   return useMutation({
     mutationFn: (courseData: FormData) => createCourse(courseData),
     onSuccess: () => {
-      // Remove and refetch instructor course queries for immediate updates
       queryClient.removeQueries({
         predicate: (query) => {
           return (
@@ -243,7 +242,6 @@ export const useUpdateCourse = (
 
       queryClient.invalidateQueries({ queryKey: courseQueryKeys.lists() });
 
-      // Remove and refetch instructor courses for immediate UI updates
       queryClient.removeQueries({
         predicate: (query) => {
           return (
@@ -282,7 +280,6 @@ export const useDeleteCourse = (
 
       queryClient.invalidateQueries({ queryKey: courseQueryKeys.lists() });
 
-      // Remove and refetch instructor course queries for immediate updates
       queryClient.removeQueries({
         predicate: (query) => {
           return (
@@ -331,7 +328,6 @@ export const useToggleCourseStatus = (
         }
       );
 
-      // Remove and refetch instructor course queries for immediate updates
       queryClient.removeQueries({
         predicate: (query) => {
           return (
