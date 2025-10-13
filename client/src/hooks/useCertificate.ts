@@ -1,7 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "../components/UI/ToastProvider";
-import {
-  CertificateService,
+import certificateService, {
   type CertificateData,
 } from "../services/certificate.service";
 import type { Course } from "../types/course.type";
@@ -41,7 +40,7 @@ export const useCertificateGeneration = () => {
           };
         }
 
-        const certificateId = CertificateService.generateCertificateId();
+        const certificateId = certificateService.generateCertificateId();
 
         const certificateData: CertificateData = {
           studentName,
@@ -51,10 +50,11 @@ export const useCertificateGeneration = () => {
           courseId: course.id,
           userId,
           certificateId,
+          userEmail: data.userEmail,
         };
 
         // Generate and send certificate
-        const result = await CertificateService.generateCertificate(
+        const result = await certificateService.generateCertificate(
           certificateData
         );
 
