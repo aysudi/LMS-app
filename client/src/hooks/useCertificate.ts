@@ -53,7 +53,6 @@ export const useCertificateGeneration = () => {
           userEmail: data.userEmail,
         };
 
-        // Generate and send certificate
         const result = await certificateService.generateCertificate(
           certificateData
         );

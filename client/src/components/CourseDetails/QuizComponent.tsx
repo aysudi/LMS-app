@@ -65,12 +65,9 @@ const QuizComponent: React.FC<QuizComponentProps> = ({
     newAnswers[currentQuestion] = answerIndex;
     setSelectedAnswers(newAnswers);
 
-    // Mark question as answered
     const newQuestionAnswered = [...questionAnswered];
     newQuestionAnswered[currentQuestion] = true;
     setQuestionAnswered(newQuestionAnswered);
-
-    // Remove immediate feedback - only show after quiz submission
   };
 
   const handleNextQuestion = () => {
