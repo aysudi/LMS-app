@@ -723,7 +723,8 @@ const CourseWatch: React.FC = () => {
                     correctAnswer: q.correctAnswer,
                   })
                 )}
-                onQuizComplete={(_: number, passed: boolean) => {
+                onQuizComplete={(score: number, passed: boolean) => {
+                  console.log("Quiz completed:", { score, passed });
                   setQuizCompleted(true);
                   setQuizPassed(passed);
 
@@ -737,11 +738,8 @@ const CourseWatch: React.FC = () => {
                     }));
                   }
 
-                  if (passed) {
-                    // Quiz passed, user can now complete the lesson
-                    setShowQuiz(false);
-                  }
-                  // Note: If quiz failed, keep quiz open or allow retry
+                  // Don't close quiz automatically - let user see results first
+                  // Quiz will close when user clicks "Continue to Video" or "Return to Video"
                 }}
                 onClose={() => {
                   setShowQuiz(false);

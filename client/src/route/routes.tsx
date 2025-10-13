@@ -34,6 +34,10 @@ import EditCourse from "../pages/Instructor/EditCourse";
 import CoursePreview from "../pages/Instructor/CoursePreview";
 import LessonEditor from "../pages/Instructor/LessonEditor";
 import LessonEditPage from "../pages/Instructor/LessonEditPage";
+// Admin Pages
+import AdminLayout from "../layout/AdminLayout";
+import AdminDashboard from "../pages/Admin/AdminDashboard";
+import AdminUsers from "../pages/Admin/AdminUsers";
 
 const ROUTES = [
   //client routes
@@ -217,6 +221,24 @@ const ROUTES = [
     ],
   },
   //admin routes
+  {
+    path: "/admin",
+    element: (
+      <ProtectedRoute>
+        <AdminLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        path: "dashboard",
+        element: <AdminDashboard />,
+      },
+      {
+        path: "users",
+        element: <AdminUsers />,
+      },
+    ],
+  },
 ];
 
 export default ROUTES;
