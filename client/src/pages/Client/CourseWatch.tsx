@@ -44,6 +44,7 @@ import { CourseCompletionModal } from "../../components/Common/CourseCompletionM
 import { useAuthContext } from "../../context/AuthContext";
 import { useCertificateGeneration } from "../../hooks/useCertificate";
 import QuizComponent from "../../components/CourseDetails/QuizComponent";
+import { File } from "lucide-react";
 
 // Answers Section Component
 const AnswersSection: React.FC<{
@@ -219,6 +220,8 @@ const CourseWatch: React.FC = () => {
   const [showSidebar, setShowSidebar] = useState(true);
   const [showNotes, setShowNotes] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
+  const [quizCompleted, setQuizCompleted] = useState(false);
+  const [quizPassed, setQuizPassed] = useState(false);
   const [activeTab, setActiveTab] = useState<
     | "overview"
     | "notes"
@@ -256,6 +259,11 @@ const CourseWatch: React.FC = () => {
 
   // Course completion modal state
   const [showCompletionModal, setShowCompletionModal] = useState(false);
+
+  // Track lesson quiz states
+  const [lessonQuizStates, setLessonQuizStates] = useState<{
+    [key: string]: { completed: boolean; passed: boolean };
+  }>({});
 
   const currentLessonObj =
     course?.sections[currentSection]?.lessons[currentLesson];
@@ -367,6 +375,19 @@ const CourseWatch: React.FC = () => {
     setCurrentLesson(lessonIndex);
 
     const lesson = course.sections[sectionIndex].lessons[lessonIndex];
+    const lessonId = lesson._id || lesson.id;
+
+    // Reset quiz states when changing lessons, but check if quiz was already completed for this lesson
+    setShowQuiz(false);
+    const quizState = lessonQuizStates[lessonId];
+    if (quizState) {
+      setQuizCompleted(quizState.completed);
+      setQuizPassed(quizState.passed);
+    } else {
+      setQuizCompleted(false);
+      setQuizPassed(false);
+    }
+
     const video = videoRef.current;
 
     if (video) {
@@ -375,7 +396,6 @@ const CourseWatch: React.FC = () => {
       setCurrentTime(0);
       setIsPlaying(false);
 
-      const lessonId = lesson._id || lesson.id;
       const progress = getLessonProgress(lessonId);
       if (progress && progress.watchTime > 0) {
         video.currentTime = Math.min(progress.watchTime, lesson.duration);
@@ -465,7 +485,14 @@ const CourseWatch: React.FC = () => {
   const canCompleteLesson = () => {
     if (!currentLessonObj || !duration || duration === 0) return false;
     const remainingTime = duration - currentTime;
-    return remainingTime <= 60; // 60 seconds = 1 minute
+    const videoWatched = remainingTime <= 60; // 60 seconds = 1 minute
+
+    // If lesson has quiz, user must pass it to complete the lesson
+    if (currentLessonObj.quiz && currentLessonObj.quiz.length > 0) {
+      return videoWatched && quizPassed;
+    }
+
+    return videoWatched;
   };
 
   const isLessonCompleted = () => {
@@ -527,16 +554,7 @@ const CourseWatch: React.FC = () => {
   const isCourseCompleted = () => {
     if (!course || !courseProgress) return false;
 
-    const totalLessons = course.sections.reduce(
-      (total, section) => total + section.lessons.length,
-      0
-    );
-
-    const completedLessons =
-      (courseProgress as any).lessons?.filter((lesson: any) => lesson.completed)
-        .length || 0;
-
-    return completedLessons >= totalLessons;
+    return true ? courseProgress?.data?.progressPercentage == 100 : false;
   };
 
   const addReview = () => {
@@ -650,10 +668,11 @@ const CourseWatch: React.FC = () => {
       </div>
     );
   }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 text-white flex">
       {/* Video Player */}
-      <div className={`flex-1 relative ${showSidebar ? "mr-80" : ""}`}>
+      <div className={`flex-1 relative ${showSidebar ? "mr-87" : ""}`}>
         {/* Top Navigation Bar */}
         <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-slate-900/95 via-gray-900/95 to-slate-800/95 backdrop-blur-md z-30 border-b border-slate-700/50 shadow-lg shadow-black/10">
           <div className="flex items-center justify-between p-4">
@@ -704,12 +723,38 @@ const CourseWatch: React.FC = () => {
                     correctAnswer: q.correctAnswer,
                   })
                 )}
-                onQuizComplete={(score: number, passed: boolean) => {
-                  console.log("Quiz completed:", { score, passed });
-                  setShowQuiz(false);
-                  // Here you could update the lesson progress with quiz completion
+                onQuizComplete={(_: number, passed: boolean) => {
+                  setQuizCompleted(true);
+                  setQuizPassed(passed);
+
+                  // Store quiz state for this lesson
+                  if (currentLessonObj) {
+                    const lessonId =
+                      currentLessonObj._id || currentLessonObj.id;
+                    setLessonQuizStates((prev) => ({
+                      ...prev,
+                      [lessonId]: { completed: true, passed },
+                    }));
+                  }
+
+                  if (passed) {
+                    // Quiz passed, user can now complete the lesson
+                    setShowQuiz(false);
+                  }
+                  // Note: If quiz failed, keep quiz open or allow retry
                 }}
-                onClose={() => setShowQuiz(false)}
+                onClose={() => {
+                  setShowQuiz(false);
+                  // Ensure video player is properly restored
+                  const video = videoRef.current;
+                  if (video && currentLessonObj) {
+                    // Reload the video source to fix any playback issues
+                    const currentSrc = video.src;
+                    video.src = "";
+                    video.src = currentSrc;
+                    video.load();
+                  }
+                }}
                 timeLimit={300} // 5 minutes
                 title={`${currentLessonObj.title} - Quiz`}
               />
@@ -730,7 +775,16 @@ const CourseWatch: React.FC = () => {
               }}
               onEnded={() => {
                 setIsPlaying(false);
-                goToNextLesson();
+                // If lesson has quiz, show quiz automatically when video ends
+                if (
+                  currentLessonObj?.quiz &&
+                  currentLessonObj.quiz.length > 0 &&
+                  !quizCompleted
+                ) {
+                  setShowQuiz(true);
+                } else {
+                  goToNextLesson();
+                }
               }}
               onPlay={() => setIsPlaying(true)}
               onPause={() => setIsPlaying(false)}
@@ -948,6 +1002,36 @@ const CourseWatch: React.FC = () => {
                   </span>
                 </div>
 
+                {currentLessonObj?.quiz && currentLessonObj.quiz.length > 0 && (
+                  <div className="flex items-center space-x-2">
+                    <div
+                      className={`w-2 h-2 rounded-full ${
+                        quizPassed
+                          ? "bg-green-400"
+                          : quizCompleted
+                          ? "bg-red-400"
+                          : "bg-orange-400"
+                      }`}
+                    ></div>
+                    <span
+                      className={
+                        quizPassed
+                          ? "text-green-300"
+                          : quizCompleted
+                          ? "text-red-300"
+                          : "text-orange-300"
+                      }
+                    >
+                      Quiz:{" "}
+                      {quizPassed
+                        ? "Passed"
+                        : quizCompleted
+                        ? "Failed"
+                        : "Required"}
+                    </span>
+                  </div>
+                )}
+
                 {currentLessonObj?.resources &&
                   currentLessonObj.resources.length > 0 && (
                     <div className="flex items-center space-x-2">
@@ -977,6 +1061,12 @@ const CourseWatch: React.FC = () => {
                     ? "Lesson Completed"
                     : canCompleteLesson()
                     ? "Mark as Complete"
+                    : currentLessonObj?.quiz && currentLessonObj.quiz.length > 0
+                    ? quizCompleted && !quizPassed
+                      ? "Pass the quiz to complete this lesson"
+                      : !quizCompleted
+                      ? "Complete the video and pass the quiz to mark as complete"
+                      : "Complete the video to the last minute to mark as complete"
                     : "Complete the video to the last minute to mark as complete"
                 }
               >
@@ -1018,8 +1108,20 @@ const CourseWatch: React.FC = () => {
               {currentLessonObj?.quiz && currentLessonObj.quiz.length > 0 && (
                 <button
                   onClick={() => setShowQuiz(!showQuiz)}
-                  className="group p-3 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 rounded-xl transition-all duration-300 shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-105"
-                  title="Quiz"
+                  className={`group p-3 rounded-xl transition-all duration-300 shadow-lg hover:scale-105 ${
+                    quizPassed
+                      ? "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-green-500/25 hover:shadow-green-500/40"
+                      : quizCompleted && !quizPassed
+                      ? "bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 shadow-red-500/25 hover:shadow-red-500/40"
+                      : "bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 shadow-orange-500/25 hover:shadow-orange-500/40"
+                  }`}
+                  title={
+                    quizPassed
+                      ? "Quiz Passed ✓"
+                      : quizCompleted && !quizPassed
+                      ? "Quiz Failed - Try Again"
+                      : "Take Quiz"
+                  }
                 >
                   <FaQuestionCircle className="group-hover:scale-110 transition-transform duration-300" />
                 </button>
@@ -1039,9 +1141,8 @@ const CourseWatch: React.FC = () => {
               "qa",
               "resources",
               "announcements",
-              ...(isCourseCompleted() && course?.certificateProvided
-                ? ["certificate" as const]
-                : []),
+              // is
+              ...(isCourseCompleted() ? ["certificate" as const] : []),
             ].map((tab, index) => {
               return (
                 <button
@@ -1208,7 +1309,6 @@ const CourseWatch: React.FC = () => {
                     </div>
                   ) : (
                     allCourseNotes.map((note: any) => {
-                      // Find the lesson info for this note
                       let lessonTitle = "Unknown Lesson";
                       let sectionTitle = "Unknown Section";
                       let sectionIndex = -1;
@@ -1228,7 +1328,6 @@ const CourseWatch: React.FC = () => {
                               lIdx++
                             ) {
                               const lesson = section.lessons[lIdx];
-                              // Try different ID formats for compatibility
                               const lessonId = lesson._id || lesson.id;
                               const noteLesson = note.lesson;
 
@@ -1264,23 +1363,18 @@ const CourseWatch: React.FC = () => {
                             <div className="flex flex-col">
                               <button
                                 onClick={() => {
-                                  // Navigate to the lesson first if not current lesson
                                   if (
                                     sectionIndex !== -1 &&
                                     lessonIndex !== -1
                                   ) {
-                                    // Always load the lesson first
                                     loadLesson(sectionIndex, lessonIndex);
 
-                                    // Set up a delayed function to seek to timestamp
                                     const seekToTime = () => {
                                       const video = videoRef.current;
                                       if (video && video.readyState >= 2) {
-                                        // Check if video is ready
                                         video.currentTime = note.timestamp;
                                         setCurrentTime(note.timestamp);
                                       } else if (video) {
-                                        // Wait for video to be ready
                                         const handleCanPlay = () => {
                                           video.currentTime = note.timestamp;
                                           setCurrentTime(note.timestamp);
@@ -1296,15 +1390,12 @@ const CourseWatch: React.FC = () => {
                                       }
                                     };
 
-                                    // Delay based on whether it's the same lesson or different
                                     if (
                                       sectionIndex === currentSection &&
                                       lessonIndex === currentLesson
                                     ) {
-                                      // Same lesson, seek immediately
                                       setTimeout(seekToTime, 100);
                                     } else {
-                                      // Different lesson, wait for load
                                       setTimeout(seekToTime, 1500);
                                     }
                                   }
@@ -1591,6 +1682,100 @@ const CourseWatch: React.FC = () => {
                 <p className="text-gray-400">
                   Course announcements will be displayed here.
                 </p>
+              </div>
+            )}
+
+            {activeTab === "certificate" && (
+              <div>
+                <h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
+                  🎉 Course Certificate
+                </h3>
+                <div className="text-center">
+                  <div className="mb-6">
+                    <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <FaTrophy className="text-3xl text-white" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-white mb-2">
+                      Congratulations!
+                    </h3>
+                    <p className="text-gray-300 mb-6">
+                      You've successfully completed this course. Request your
+                      certificate below.
+                    </p>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-slate-800/50 to-slate-700/50 rounded-xl p-6 border border-slate-600/30 backdrop-blur-sm">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        <svg
+                          className="w-6 h-6 text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                      </div>
+                      <div className="text-left">
+                        <h4 className="font-semibold text-white">
+                          Certificate Available
+                        </h4>
+                        <p className="text-sm text-gray-400">
+                          Get your certificate of completion
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        if (user && course) {
+                          completeCourseWithCertificate({
+                            course,
+                            userId: user.id,
+                            userEmail: user.email,
+                            studentName: `${user.firstName} ${user.lastName}`,
+                            instructorName: `${course.instructor.firstName} ${course.instructor.lastName}`,
+                          });
+                        }
+                      }}
+                      disabled={isGeneratingCertificate}
+                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-600 text-white py-3 px-6 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-3"
+                    >
+                      {isGeneratingCertificate ? (
+                        <>
+                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          Generating Certificate...
+                        </>
+                      ) : (
+                        <>
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                            />
+                          </svg>
+                          Request Certificate
+                        </>
+                      )}
+                    </button>
+
+                    <div className="mt-4 text-xs text-gray-500 text-center">
+                      📧 Certificate will be sent to your email as a PDF
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -2007,11 +2192,11 @@ const CourseWatch: React.FC = () => {
 
       {/* Sidebar */}
       {showSidebar && (
-        <div className="w-80 bg-gradient-to-b from-slate-900/95 via-gray-900/95 to-slate-800/95 backdrop-blur-md h-screen overflow-y-auto fixed right-0 top-0 border-l border-slate-700/50 z-40 shadow-2xl shadow-black/20">
-          <div className="p-6">
+        <div className="w-89 bg-gradient-to-b from-slate-900/95 via-gray-900/95 to-slate-800/95 backdrop-blur-md h-screen overflow-y-auto fixed right-0 top-0 border-l border-slate-700/50 z-40 shadow-2xl shadow-black/20">
+          <div className="px-6 py-4">
             {/* Header with course info */}
             <div className="bg-gradient-to-r from-slate-800/50 to-gray-800/50 -m-6 p-6 mb-6 border-b border-slate-700/30 backdrop-blur-sm">
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold bg-gradient-to-r from-white to-slate-200 bg-clip-text text-transparent">
                   Course Content
                 </h2>
@@ -2022,7 +2207,7 @@ const CourseWatch: React.FC = () => {
                   <FaTimes className="text-slate-400 group-hover:text-white transition-colors duration-200" />
                 </button>
               </div>
-              <h3 className="text-base font-semibold text-slate-200 truncate mb-2">
+              <h3 className="text-base font-semibold text-slate-200 truncate mb-1">
                 {course.title}
               </h3>
               <div className="flex items-center space-x-4 text-sm text-slate-400">
@@ -2097,20 +2282,45 @@ const CourseWatch: React.FC = () => {
                               </p>
                             </div>
                             <div className="flex items-center space-x-1">
-                              {lesson.isPreview && (
-                                <span className="text-xs bg-green-600 px-2 py-1 rounded">
-                                  Preview
-                                </span>
-                              )}
                               {lesson.resources &&
                                 lesson.resources.length > 0 && (
                                   <span
-                                    className="text-xs bg-blue-600 px-2 py-1 rounded"
+                                    className=" bg-blue-600 px-1 py-1 rounded"
                                     title="Has Resources"
                                   >
-                                    📁
+                                    <File size={16} />
                                   </span>
                                 )}
+                              {lesson.quiz && lesson.quiz.length > 0 && (
+                                <span
+                                  className={`text-xs px-2 py-1 rounded ${
+                                    progress?.completed
+                                      ? "bg-green-600 text-white"
+                                      : // lessonQuizStates[
+                                        //     lesson._id || lesson.id
+                                        //   ]?.completed
+                                        // ? "bg-red-600 text-white" :
+                                        "bg-orange-400 text-white"
+                                  }`}
+                                  title={
+                                    lessonQuizStates[lesson._id || lesson.id]
+                                      ?.passed
+                                      ? "Quiz Passed"
+                                      : lessonQuizStates[
+                                          lesson._id || lesson.id
+                                        ]?.completed
+                                      ? "Quiz Failed"
+                                      : "Has Quiz"
+                                  }
+                                >
+                                  {progress?.completed
+                                    ? "✓ Quiz"
+                                    : // : lessonQuizStates[lesson._id || lesson.id]
+                                      //     ?.completed
+                                      // ? "✗ Quiz"
+                                      "❓ Quiz"}
+                                </span>
+                              )}
                             </div>
                           </div>
                         </button>
@@ -2148,100 +2358,6 @@ const CourseWatch: React.FC = () => {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Certificate Tab */}
-      {activeTab === "certificate" && (
-        <div className="p-6">
-          <div className="text-center">
-            <div className="mb-6">
-              <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FaTrophy className="text-3xl text-white" />
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-2">
-                🎉 Congratulations!
-              </h3>
-              <p className="text-gray-300 mb-6">
-                You've successfully completed this course. Request your
-                certificate below.
-              </p>
-            </div>
-
-            {course?.certificateProvided && (
-              <div className="bg-gradient-to-br from-slate-800/50 to-slate-700/50 rounded-xl p-6 border border-slate-600/30 backdrop-blur-sm">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                    <svg
-                      className="w-6 h-6 text-white"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-white">
-                      Certificate Available
-                    </h4>
-                    <p className="text-sm text-gray-400">
-                      Get your certificate of completion
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => {
-                    if (user && course) {
-                      completeCourseWithCertificate({
-                        course,
-                        userId: user.id,
-                        userEmail: user.email,
-                        studentName: `${user.firstName} ${user.lastName}`,
-                        instructorName: `${course.instructor.firstName} ${course.instructor.lastName}`,
-                      });
-                    }
-                  }}
-                  disabled={isGeneratingCertificate}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-600 text-white py-3 px-6 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-3"
-                >
-                  {isGeneratingCertificate ? (
-                    <>
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Generating Certificate...
-                    </>
-                  ) : (
-                    <>
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                        />
-                      </svg>
-                      Request Certificate
-                    </>
-                  )}
-                </button>
-
-                <div className="mt-4 text-xs text-gray-500 text-center">
-                  📧 Certificate will be sent to your email as a PDF
-                </div>
-              </div>
-            )}
           </div>
         </div>
       )}

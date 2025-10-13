@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   FaQuestionCircle,
   FaCheckCircle,
-  FaTimesCircle,
   FaClock,
   FaTrophy,
   FaBrain,
@@ -45,10 +44,10 @@ const QuizComponent: React.FC<QuizComponentProps> = ({
   );
   const [showResults, setShowResults] = useState(false);
   const [timeLeft, setTimeLeft] = useState(timeLimit);
-  const [showQuestionResult, setShowQuestionResult] = useState(false);
   const [questionAnswered, setQuestionAnswered] = useState<boolean[]>(
     new Array(questions.length).fill(false)
   );
+  const [quizPassed, setQuizPassed] = useState(false);
 
   const currentQ = questions[currentQuestion];
 
@@ -71,11 +70,7 @@ const QuizComponent: React.FC<QuizComponentProps> = ({
     newQuestionAnswered[currentQuestion] = true;
     setQuestionAnswered(newQuestionAnswered);
 
-    // Show result for this question briefly
-    setShowQuestionResult(true);
-    setTimeout(() => {
-      setShowQuestionResult(false);
-    }, 1500);
+    // Remove immediate feedback - only show after quiz submission
   };
 
   const handleNextQuestion = () => {
@@ -98,8 +93,9 @@ const QuizComponent: React.FC<QuizComponentProps> = ({
     ).length;
     const score = Math.round((correctAnswers / questions.length) * 100);
     const passed = score >= passingScore;
+    setQuizPassed(passed);
     setShowResults(true);
-    // onQuizComplete(score, passed);
+    onQuizComplete(score, passed);
   };
 
   const handleReturnToVideo = () => {
@@ -135,10 +131,14 @@ const QuizComponent: React.FC<QuizComponentProps> = ({
             <h2 className="text-xl font-bold text-gray-900">Quiz Results</h2>
             <button
               onClick={handleReturnToVideo}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors cursor-pointer ${
+                quizPassed
+                  ? "bg-green-500 hover:bg-green-600 text-white"
+                  : "bg-gray-500 hover:bg-gray-600 text-gray-300"
+              }`}
             >
               <FaPlay className="text-sm" />
-              Return to Video
+              {quizPassed ? "Continue to Video" : "Return to Video"}
             </button>
           </div>
         </div>
@@ -174,95 +174,35 @@ const QuizComponent: React.FC<QuizComponentProps> = ({
                 </div>
                 <p className="text-sm text-gray-500 mt-2">
                   {passed
-                    ? `Passing score: ${passingScore}%`
-                    : `You need ${passingScore}% to pass`}
+                    ? `✅ Passed! (Passing score: ${passingScore}%)`
+                    : `❌ Failed - You need ${passingScore}% to pass`}
                 </p>
+                {!passed && (
+                  <div className="mt-4 p-4 bg-red-900/20 rounded-lg border border-red-500/30">
+                    <p className="text-red-300 text-sm mb-3">
+                      You must pass this quiz to complete the lesson. Review the
+                      material and try again.
+                    </p>
+                    <button
+                      onClick={() => {
+                        setShowResults(false);
+                        setCurrentQuestion(0);
+                        setSelectedAnswers(
+                          new Array(questions.length).fill(-1)
+                        );
+                        setQuestionAnswered(
+                          new Array(questions.length).fill(false)
+                        );
+                        setQuizPassed(false);
+                      }}
+                      className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                    >
+                      Try Again
+                    </button>
+                  </div>
+                )}
               </div>
             </motion.div>
-
-            {/* Question Review */}
-            <div className="space-y-4">
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">
-                Question Review
-              </h4>
-              {questions.map((question, index) => {
-                const userAnswer = selectedAnswers[index];
-                const isCorrect = userAnswer === question.correctAnswer;
-                const wasAnswered = userAnswer !== -1;
-
-                return (
-                  <motion.div
-                    key={question.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className={`p-6 bg-white rounded-lg shadow border-l-4 ${
-                      isCorrect
-                        ? "border-green-500"
-                        : wasAnswered
-                        ? "border-red-500"
-                        : "border-gray-300"
-                    }`}
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0">
-                        {isCorrect ? (
-                          <FaCheckCircle className="text-green-500 text-xl" />
-                        ) : wasAnswered ? (
-                          <FaTimesCircle className="text-red-500 text-xl" />
-                        ) : (
-                          <FaQuestionCircle className="text-gray-400 text-xl" />
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <h5 className="font-medium text-gray-900 mb-3">
-                          {index + 1}. {question.question}
-                        </h5>
-                        <div className="space-y-2 text-sm">
-                          {wasAnswered && (
-                            <p>
-                              <span className="font-medium">Your answer:</span>{" "}
-                              <span
-                                className={
-                                  isCorrect ? "text-green-700" : "text-red-700"
-                                }
-                              >
-                                {question.options[userAnswer]}
-                              </span>
-                            </p>
-                          )}
-                          {!wasAnswered && (
-                            <p className="text-gray-600">
-                              <span className="font-medium">Not answered</span>
-                            </p>
-                          )}
-                          {!isCorrect && (
-                            <p>
-                              <span className="font-medium">
-                                Correct answer:
-                              </span>{" "}
-                              <span className="text-green-700">
-                                {question.options[question.correctAnswer]}
-                              </span>
-                            </p>
-                          )}
-                          {question.explanation && (
-                            <div className="mt-3 p-3 bg-blue-50 rounded-lg">
-                              <p className="text-blue-800">
-                                <span className="font-medium">
-                                  Explanation:
-                                </span>{" "}
-                                {question.explanation}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
           </div>
         </div>
       </div>
@@ -380,69 +320,6 @@ const QuizComponent: React.FC<QuizComponentProps> = ({
                     </motion.button>
                   ))}
                 </div>
-
-                {/* Immediate Feedback */}
-                {showResults &&
-                  showQuestionResult &&
-                  selectedAnswers[currentQuestion] !== -1 && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className={`mt-6 p-4 rounded-lg border-l-4 ${
-                        selectedAnswers[currentQuestion] ===
-                        currentQ.correctAnswer
-                          ? "border-green-500 bg-green-50"
-                          : "border-red-500 bg-red-50"
-                      }`}
-                    >
-                      <div className="flex items-start gap-3">
-                        {selectedAnswers[currentQuestion] ===
-                        currentQ.correctAnswer ? (
-                          <FaCheckCircle className="text-green-600 text-lg mt-0.5" />
-                        ) : (
-                          <FaTimesCircle className="text-red-600 text-lg mt-0.5" />
-                        )}
-                        <div className="flex-1">
-                          <h4
-                            className={`font-semibold ${
-                              selectedAnswers[currentQuestion] ===
-                              currentQ.correctAnswer
-                                ? "text-green-800"
-                                : "text-red-800"
-                            }`}
-                          >
-                            {selectedAnswers[currentQuestion] ===
-                            currentQ.correctAnswer
-                              ? "Correct! 🎉"
-                              : "Incorrect"}
-                          </h4>
-                          {selectedAnswers[currentQuestion] !==
-                            currentQ.correctAnswer && (
-                            <p className="text-red-700 text-sm mt-1">
-                              The correct answer is:{" "}
-                              <strong>
-                                {currentQ.options[currentQ.correctAnswer]}
-                              </strong>
-                            </p>
-                          )}
-                          {currentQ.explanation && (
-                            <p
-                              className={`text-sm mt-2 ${
-                                selectedAnswers[currentQuestion] ===
-                                currentQ.correctAnswer
-                                  ? "text-green-700"
-                                  : "text-red-700"
-                              }`}
-                            >
-                              <strong>Explanation:</strong>{" "}
-                              {currentQ.explanation}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
               </div>
 
               {/* Navigation */}
@@ -459,9 +336,6 @@ const QuizComponent: React.FC<QuizComponentProps> = ({
                 <div className="flex items-center gap-2">
                   {questions.map((_, index) => {
                     const isAnswered = selectedAnswers[index] !== -1;
-                    const isCorrect =
-                      isAnswered &&
-                      selectedAnswers[index] === questions[index].correctAnswer;
                     const isCurrent = index === currentQuestion;
 
                     return (
@@ -471,28 +345,20 @@ const QuizComponent: React.FC<QuizComponentProps> = ({
                           isCurrent
                             ? "bg-blue-500 border-blue-500 scale-125"
                             : isAnswered
-                            ? isCorrect
-                              ? "bg-green-500 border-green-500"
-                              : "bg-red-500 border-red-500"
+                            ? "bg-gray-500 border-gray-500"
                             : "bg-gray-200 border-gray-300"
                         } transition-all duration-200`}
                         title={
                           isCurrent
                             ? "Current question"
                             : isAnswered
-                            ? isCorrect
-                              ? "Correct answer"
-                              : "Wrong answer"
+                            ? "Answered"
                             : "Not answered"
                         }
                       >
-                        {!isCurrent &&
-                          isAnswered &&
-                          (isCorrect ? (
-                            <FaCheckCircle className="text-white text-xs" />
-                          ) : (
-                            <FaTimesCircle className="text-white text-xs" />
-                          ))}
+                        {!isCurrent && isAnswered && (
+                          <FaCheckCircle className="text-white text-xs" />
+                        )}
                       </div>
                     );
                   })}
@@ -502,7 +368,7 @@ const QuizComponent: React.FC<QuizComponentProps> = ({
                   <button
                     onClick={handleSubmitQuiz}
                     disabled={selectedAnswers[currentQuestion] === -1}
-                    className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
                   >
                     Submit Quiz
                     <FaCheckCircle />
