@@ -42,7 +42,10 @@ import { useQAFilters, useQAFormState } from "../../hooks/useQAHelpers";
 import { HTMLRenderer } from "../../utils/htmlRenderer";
 import { CourseCompletionModal } from "../../components/Common/CourseCompletionModal";
 import { useAuthContext } from "../../context/AuthContext";
-import { useCertificateGeneration } from "../../hooks/useCertificate";
+import {
+  useCertificateGeneration,
+  useCertificateStatus,
+} from "../../hooks/useCertificate";
 import QuizComponent from "../../components/CourseDetails/QuizComponent";
 import { File } from "lucide-react";
 
@@ -551,8 +554,17 @@ const CourseWatch: React.FC = () => {
   const isCourseCompleted = () => {
     if (!course || !courseProgress) return false;
 
+    // setShowCompletionModal(true);
     return true ? courseProgress?.data?.progressPercentage == 100 : false;
   };
+
+  // Certificate status tracking
+  const { data: certificateStatus, refetch: refetchCertificateStatus } =
+    useCertificateStatus(
+      courseId || "",
+      user?.id || "",
+      !!courseId && !!user?.id && isCourseCompleted()
+    );
 
   const addReview = () => {
     if (!newReview.trim() || !enrollment || newRating < 1 || newRating > 5)
@@ -666,6 +678,10 @@ const CourseWatch: React.FC = () => {
     );
   }
 
+  // if (isCourseCompleted()) {
+  //   console.log("showCompletionModal", showCompletionModal);
+  // }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 text-white flex">
       {/* Video Player */}
@@ -721,7 +737,7 @@ const CourseWatch: React.FC = () => {
                   })
                 )}
                 onQuizComplete={(score: number, passed: boolean) => {
-                  console.log("Quiz completed:", { score, passed });
+                  // console.log("Quiz completed:", { score, passed });
                   setQuizCompleted(true);
                   setQuizPassed(passed);
 
@@ -1691,81 +1707,152 @@ const CourseWatch: React.FC = () => {
                       Congratulations!
                     </h3>
                     <p className="text-gray-300 mb-6">
-                      You've successfully completed this course. Request your
-                      certificate below.
+                      You've successfully completed this course.
                     </p>
                   </div>
 
                   <div className="bg-gradient-to-br from-slate-800/50 to-slate-700/50 rounded-xl p-6 border border-slate-600/30 backdrop-blur-sm">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                        <svg
-                          className="w-6 h-6 text-white"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
+                    {certificateStatus?.hasCertificate ? (
+                      // Certificate already issued
+                      <div>
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
+                            <svg
+                              className="w-6 h-6 text-white"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                              />
+                            </svg>
+                          </div>
+                          <div className="text-left">
+                            <h4 className="font-semibold text-white">
+                              Certificate Issued
+                            </h4>
+                            <p className="text-sm text-gray-400">
+                              Your certificate has been sent to your email
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-4 mb-4">
+                          <div className="flex items-center gap-3">
+                            <svg
+                              className="w-5 h-5 text-green-400"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M5 13l4 4L19 7"
+                              />
+                            </svg>
+                            <div className="text-left">
+                              <p className="text-green-300 font-medium">
+                                Certificate ID:{" "}
+                                {certificateStatus.certificateId}
+                              </p>
+                              {certificateStatus.issuedAt && (
+                                <p className="text-green-400 text-sm">
+                                  Issued on{" "}
+                                  {certificateStatus.issuedAt.toLocaleDateString()}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="mt-4 text-xs text-gray-500 text-center">
+                          ✅ Certificate has been sent to your email address
+                        </div>
+                      </div>
+                    ) : (
+                      // Certificate not yet issued
+                      <div>
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                            <svg
+                              className="w-6 h-6 text-white"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                              />
+                            </svg>
+                          </div>
+                          <div className="text-left">
+                            <h4 className="font-semibold text-white">
+                              Certificate Available
+                            </h4>
+                            <p className="text-sm text-gray-400">
+                              Get your certificate of completion
+                            </p>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => {
+                            if (user && course) {
+                              completeCourseWithCertificate({
+                                course,
+                                userId: user.id,
+                                userEmail: user.email,
+                                studentName: `${user.firstName} ${user.lastName}`,
+                                instructorName: `${course.instructor.firstName} ${course.instructor.lastName}`,
+                              });
+                              // Refetch certificate status after generation
+                              setTimeout(() => {
+                                refetchCertificateStatus();
+                              }, 2000);
+                            }
+                          }}
+                          disabled={isGeneratingCertificate}
+                          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-600 text-white py-3 px-6 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-3"
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                      </div>
-                      <div className="text-left">
-                        <h4 className="font-semibold text-white">
-                          Certificate Available
-                        </h4>
-                        <p className="text-sm text-gray-400">
-                          Get your certificate of completion
-                        </p>
-                      </div>
-                    </div>
+                          {isGeneratingCertificate ? (
+                            <>
+                              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                              Generating Certificate...
+                            </>
+                          ) : (
+                            <>
+                              <svg
+                                className="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                />
+                              </svg>
+                              Request Certificate
+                            </>
+                          )}
+                        </button>
 
-                    <button
-                      onClick={() => {
-                        if (user && course) {
-                          completeCourseWithCertificate({
-                            course,
-                            userId: user.id,
-                            userEmail: user.email,
-                            studentName: `${user.firstName} ${user.lastName}`,
-                            instructorName: `${course.instructor.firstName} ${course.instructor.lastName}`,
-                          });
-                        }
-                      }}
-                      disabled={isGeneratingCertificate}
-                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-600 text-white py-3 px-6 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-3"
-                    >
-                      {isGeneratingCertificate ? (
-                        <>
-                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          Generating Certificate...
-                        </>
-                      ) : (
-                        <>
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                            />
-                          </svg>
-                          Request Certificate
-                        </>
-                      )}
-                    </button>
-
-                    <div className="mt-4 text-xs text-gray-500 text-center">
-                      📧 Certificate will be sent to your email as a PDF
-                    </div>
+                        <div className="mt-4 text-xs text-gray-500 text-center">
+                          📧 Certificate will be sent to your email as a PDF
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

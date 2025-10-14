@@ -9,87 +9,44 @@ import {
   FaEdit,
   FaEye,
 } from "react-icons/fa";
-
-interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  role: "student" | "instructor" | "admin";
-  status: "active" | "suspended" | "pending";
-  joinDate: string;
-  coursesEnrolled?: number;
-  coursesCreated?: number;
-  lastActive: string;
-  avatar?: string;
-}
+import {
+  useAdminUsers,
+  useUpdateUserStatus,
+  useUpdateUserRole,
+  useBulkUpdateUsers,
+} from "../../hooks/useAdmin";
+// AdminUser type is handled by the API response
 
 const AdminUsers: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterRole, setFilterRole] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  // Mock data - replace with real API call
-  const [users, setUsers] = useState<User[]>([
-    {
-      id: "1",
-      firstName: "John",
-      lastName: "Doe",
-      email: "john.doe@example.com",
-      role: "student",
-      status: "active",
-      joinDate: "2024-01-15",
-      coursesEnrolled: 5,
-      lastActive: "2 hours ago",
-    },
-    {
-      id: "2",
-      firstName: "Jane",
-      lastName: "Smith",
-      email: "jane.smith@example.com",
-      role: "instructor",
-      status: "active",
-      joinDate: "2023-11-20",
-      coursesCreated: 12,
-      lastActive: "1 day ago",
-    },
-    {
-      id: "3",
-      firstName: "Mike",
-      lastName: "Johnson",
-      email: "mike.johnson@example.com",
-      role: "student",
-      status: "suspended",
-      joinDate: "2024-02-10",
-      coursesEnrolled: 2,
-      lastActive: "1 week ago",
-    },
-    {
-      id: "4",
-      firstName: "Sarah",
-      lastName: "Wilson",
-      email: "sarah.wilson@example.com",
-      role: "instructor",
-      status: "pending",
-      joinDate: "2024-03-01",
-      coursesCreated: 0,
-      lastActive: "3 hours ago",
-    },
-  ]);
-
-  const filteredUsers = users.filter((user) => {
-    const matchesSearch =
-      user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesRole = filterRole === "all" || user.role === filterRole;
-    const matchesStatus =
-      filterStatus === "all" || user.status === filterStatus;
-
-    return matchesSearch && matchesRole && matchesStatus;
+  // API hooks
+  const {
+    data: usersResponse,
+    isLoading,
+    error,
+    refetch,
+  } = useAdminUsers({
+    page: currentPage,
+    limit: 10,
+    role: filterRole !== "all" ? filterRole : undefined,
+    status: filterStatus !== "all" ? filterStatus : undefined,
+    search: searchTerm || undefined,
   });
+
+  const updateUserStatusMutation = useUpdateUserStatus();
+  const updateUserRoleMutation = useUpdateUserRole();
+  const bulkUpdateMutation = useBulkUpdateUsers();
+
+  // Extract users from API response
+  const users = usersResponse?.data?.users || [];
+  const pagination = usersResponse?.data?.pagination;
+
+  // Server-side filtering is now handled by the API
 
   const handleSelectUser = (userId: string) => {
     setSelectedUsers((prev) =>
@@ -100,32 +57,51 @@ const AdminUsers: React.FC = () => {
   };
 
   const handleSelectAll = () => {
-    if (selectedUsers.length === filteredUsers.length) {
+    if (selectedUsers.length === users.length) {
       setSelectedUsers([]);
     } else {
-      setSelectedUsers(filteredUsers.map((user) => user.id));
+      setSelectedUsers(users.map((user) => user.id));
     }
   };
 
   const handlePromoteToInstructor = (userId: string) => {
-    setUsers((prev) =>
-      prev.map((user) =>
-        user.id === userId ? { ...user, role: "instructor" as const } : user
-      )
-    );
+    updateUserRoleMutation.mutate({
+      userId,
+      role: "instructor",
+    });
   };
 
   const handleSuspendUser = (userId: string) => {
-    setUsers((prev) =>
-      prev.map((user) =>
-        user.id === userId
-          ? {
-              ...user,
-              status: user.status === "suspended" ? "active" : "suspended",
-            }
-          : user
-      )
-    );
+    const user = users.find((u) => u.id === userId);
+    if (user) {
+      updateUserStatusMutation.mutate({
+        userId,
+        status: user.status === "suspended" ? "active" : "suspended",
+      });
+    }
+  };
+
+  const handleBulkAction = (action: string) => {
+    if (selectedUsers.length === 0) return;
+
+    if (action === "promote") {
+      bulkUpdateMutation.mutate({
+        userIds: selectedUsers,
+        updates: { role: "instructor" },
+      });
+    } else if (action === "suspend") {
+      bulkUpdateMutation.mutate({
+        userIds: selectedUsers,
+        updates: { status: "suspended" },
+      });
+    } else if (action === "activate") {
+      bulkUpdateMutation.mutate({
+        userIds: selectedUsers,
+        updates: { status: "active" },
+      });
+    }
+
+    setSelectedUsers([]);
   };
 
   const getRoleIcon = (role: string) => {
@@ -167,7 +143,7 @@ const AdminUsers: React.FC = () => {
   };
 
   const stats = {
-    total: users.length,
+    total: pagination?.totalUsers || 0,
     active: users.filter((u) => u.status === "active").length,
     suspended: users.filter((u) => u.status === "suspended").length,
     pending: users.filter((u) => u.status === "pending").length,
@@ -175,6 +151,59 @@ const AdminUsers: React.FC = () => {
     instructors: users.filter((u) => u.role === "instructor").length,
     admins: users.filter((u) => u.role === "admin").length,
   };
+
+  // Handle search with debounce
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1); // Reset to first page when searching
+  };
+
+  // Handle filter changes
+  const handleRoleFilterChange = (role: string) => {
+    setFilterRole(role);
+    setCurrentPage(1);
+  };
+
+  const handleStatusFilterChange = (status: string) => {
+    setFilterStatus(status);
+    setCurrentPage(1);
+  };
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="text-red-500 mb-4">
+            <svg
+              className="w-16 h-16 mx-auto"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            Error Loading Users
+          </h2>
+          <p className="text-gray-600 mb-4">
+            There was a problem loading the user data.
+          </p>
+          <button
+            onClick={() => refetch()}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -254,8 +283,9 @@ const AdminUsers: React.FC = () => {
                 type="text"
                 placeholder="Search users by name or email..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                disabled={isLoading}
               />
             </div>
           </div>
@@ -263,8 +293,9 @@ const AdminUsers: React.FC = () => {
           {/* Role Filter */}
           <select
             value={filterRole}
-            onChange={(e) => setFilterRole(e.target.value)}
+            onChange={(e) => handleRoleFilterChange(e.target.value)}
             className="px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+            disabled={isLoading}
           >
             <option value="all">All Roles</option>
             <option value="student">Students</option>
@@ -275,8 +306,9 @@ const AdminUsers: React.FC = () => {
           {/* Status Filter */}
           <select
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
+            onChange={(e) => handleStatusFilterChange(e.target.value)}
             className="px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+            disabled={isLoading}
           >
             <option value="all">All Status</option>
             <option value="active">Active</option>
@@ -293,11 +325,26 @@ const AdminUsers: React.FC = () => {
                 {selectedUsers.length} user(s) selected
               </span>
               <div className="flex space-x-2">
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                <button
+                  onClick={() => handleBulkAction("promote")}
+                  disabled={bulkUpdateMutation.isPending}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm disabled:opacity-50"
+                >
                   Promote to Instructor
                 </button>
-                <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm">
+                <button
+                  onClick={() => handleBulkAction("suspend")}
+                  disabled={bulkUpdateMutation.isPending}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm disabled:opacity-50"
+                >
                   Suspend Users
+                </button>
+                <button
+                  onClick={() => handleBulkAction("activate")}
+                  disabled={bulkUpdateMutation.isPending}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm disabled:opacity-50"
+                >
+                  Activate Users
                 </button>
               </div>
             </div>
@@ -315,8 +362,7 @@ const AdminUsers: React.FC = () => {
                   <input
                     type="checkbox"
                     checked={
-                      selectedUsers.length === filteredUsers.length &&
-                      filteredUsers.length > 0
+                      selectedUsers.length === users.length && users.length > 0
                     }
                     onChange={handleSelectAll}
                     className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
@@ -343,97 +389,156 @@ const AdminUsers: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
-              {filteredUsers.map((user) => (
-                <tr
-                  key={user.id}
-                  className="hover:bg-slate-50 transition-colors"
-                >
-                  <td className="px-6 py-4">
-                    <input
-                      type="checkbox"
-                      checked={selectedUsers.includes(user.id)}
-                      onChange={() => handleSelectUser(user.id)}
-                      className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                    />
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                        <span className="text-white font-bold text-sm">
-                          {user.firstName[0]}
-                          {user.lastName[0]}
-                        </span>
-                      </div>
-                      <div>
-                        <div className="font-medium text-slate-900">
-                          {user.firstName} {user.lastName}
-                        </div>
-                        <div className="text-sm text-slate-500">
-                          {user.email}
+              {isLoading ? (
+                // Loading skeleton
+                Array.from({ length: 5 }).map((_, index) => (
+                  <tr
+                    key={index}
+                    className="border-b border-slate-200 animate-pulse"
+                  >
+                    <td className="px-6 py-4">
+                      <div className="w-4 h-4 bg-slate-200 rounded"></div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-slate-200 rounded-full"></div>
+                        <div className="space-y-2">
+                          <div className="w-32 h-4 bg-slate-200 rounded"></div>
+                          <div className="w-24 h-3 bg-slate-200 rounded"></div>
                         </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center space-x-2">
-                      {getRoleIcon(user.role)}
-                      <span className="text-sm font-medium text-slate-700 capitalize">
-                        {user.role}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">{getStatusBadge(user.status)}</td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-slate-900">
-                      {user.lastActive}
-                    </div>
-                    <div className="text-xs text-slate-500">
-                      {user.coursesEnrolled
-                        ? `${user.coursesEnrolled} courses enrolled`
-                        : user.coursesCreated
-                        ? `${user.coursesCreated} courses created`
-                        : "No activity"}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-500">
-                    {new Date(user.joinDate).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-end space-x-2">
-                      <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                        <FaEye />
-                      </button>
-                      <button className="p-2 text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">
-                        <FaEdit />
-                      </button>
-                      {user.role === "student" && (
-                        <button
-                          onClick={() => handlePromoteToInstructor(user.id)}
-                          className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                          title="Promote to Instructor"
-                        >
-                          <FaGraduationCap />
-                        </button>
-                      )}
-                      <button
-                        onClick={() => handleSuspendUser(user.id)}
-                        className={`p-2 rounded-lg transition-colors ${
-                          user.status === "suspended"
-                            ? "text-green-600 hover:bg-green-50"
-                            : "text-red-600 hover:bg-red-50"
-                        }`}
-                        title={
-                          user.status === "suspended"
-                            ? "Activate User"
-                            : "Suspend User"
-                        }
-                      >
-                        {user.status === "suspended" ? <FaCheck /> : <FaBan />}
-                      </button>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="w-16 h-4 bg-slate-200 rounded"></div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="w-20 h-6 bg-slate-200 rounded-full"></div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="w-24 h-4 bg-slate-200 rounded"></div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="w-20 h-4 bg-slate-200 rounded"></div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex space-x-2">
+                        <div className="w-8 h-8 bg-slate-200 rounded"></div>
+                        <div className="w-8 h-8 bg-slate-200 rounded"></div>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : users.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-12 text-center">
+                    <div className="flex flex-col items-center">
+                      <FaUser className="w-12 h-12 text-slate-300 mb-4" />
+                      <h3 className="text-lg font-medium text-slate-900 mb-2">
+                        No users found
+                      </h3>
+                      <p className="text-slate-500">
+                        Try adjusting your search or filter criteria.
+                      </p>
                     </div>
                   </td>
                 </tr>
-              ))}
+              ) : (
+                users.map((user) => (
+                  <tr
+                    key={user.id}
+                    className="hover:bg-slate-50 transition-colors"
+                  >
+                    <td className="px-6 py-4">
+                      <input
+                        type="checkbox"
+                        checked={selectedUsers.includes(user.id)}
+                        onChange={() => handleSelectUser(user.id)}
+                        className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                      />
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                          <span className="text-white font-bold text-sm">
+                            {user.firstName[0]}
+                            {user.lastName[0]}
+                          </span>
+                        </div>
+                        <div>
+                          <div className="font-medium text-slate-900">
+                            {user.firstName} {user.lastName}
+                          </div>
+                          <div className="text-sm text-slate-500">
+                            {user.email}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center space-x-2">
+                        {getRoleIcon(user.role)}
+                        <span className="text-sm font-medium text-slate-700 capitalize">
+                          {user.role}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">{getStatusBadge(user.status)}</td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-slate-900">
+                        {user.lastActive}
+                      </div>
+                      <div className="text-xs text-slate-500">
+                        {user.coursesEnrolled
+                          ? `${user.coursesEnrolled} courses enrolled`
+                          : user.coursesCreated
+                          ? `${user.coursesCreated} courses created`
+                          : "No activity"}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-slate-500">
+                      {new Date(user.joinDate).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-end space-x-2">
+                        <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                          <FaEye />
+                        </button>
+                        <button className="p-2 text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">
+                          <FaEdit />
+                        </button>
+                        {user.role === "student" && (
+                          <button
+                            onClick={() => handlePromoteToInstructor(user.id)}
+                            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                            title="Promote to Instructor"
+                          >
+                            <FaGraduationCap />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleSuspendUser(user.id)}
+                          className={`p-2 rounded-lg transition-colors ${
+                            user.status === "suspended"
+                              ? "text-green-600 hover:bg-green-50"
+                              : "text-red-600 hover:bg-red-50"
+                          }`}
+                          title={
+                            user.status === "suspended"
+                              ? "Activate User"
+                              : "Suspend User"
+                          }
+                        >
+                          {user.status === "suspended" ? (
+                            <FaCheck />
+                          ) : (
+                            <FaBan />
+                          )}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -442,16 +547,24 @@ const AdminUsers: React.FC = () => {
         <div className="px-6 py-4 border-t border-slate-200 bg-slate-50">
           <div className="flex items-center justify-between">
             <div className="text-sm text-slate-500">
-              Showing {filteredUsers.length} of {users.length} users
+              Showing {users.length} of {pagination?.totalUsers || 0} users
             </div>
             <div className="flex space-x-2">
-              <button className="px-3 py-1 text-sm bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors">
+              <button
+                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                disabled={!pagination?.hasPreviousPage || isLoading}
+                className="px-3 py-1 text-sm bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 Previous
               </button>
-              <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded-lg">
-                1
-              </button>
-              <button className="px-3 py-1 text-sm bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors">
+              <span className="px-3 py-1 text-sm bg-blue-600 text-white rounded-lg">
+                {pagination?.currentPage || 1} of {pagination?.totalPages || 1}
+              </span>
+              <button
+                onClick={() => setCurrentPage(currentPage + 1)}
+                disabled={!pagination?.hasNextPage || isLoading}
+                className="px-3 py-1 text-sm bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 Next
               </button>
             </div>

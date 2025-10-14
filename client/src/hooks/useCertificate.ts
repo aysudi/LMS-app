@@ -1,7 +1,8 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useToast } from "../components/UI/ToastProvider";
 import certificateService, {
   type CertificateData,
+  type CertificateStatus,
 } from "../services/certificate.service";
 import type { Course } from "../types/course.type";
 
@@ -110,6 +111,21 @@ export const useCertificateGeneration = () => {
   };
 };
 
+// Certificate status hook
+export const useCertificateStatus = (
+  courseId: string,
+  userId: string,
+  enabled: boolean = true
+) => {
+  return useQuery<CertificateStatus>({
+    queryKey: ["certificateStatus", courseId, userId],
+    queryFn: () => certificateService.getCertificateStatus(courseId, userId),
+    enabled: enabled && !!courseId && !!userId,
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
+
 // Simplified download function - certificates are sent via email
 export const useCertificateDownload = () => {
   const { showToast } = useToast();
@@ -130,4 +146,8 @@ export const useCertificateDownload = () => {
   };
 };
 
-export default { useCertificateGeneration, useCertificateDownload };
+export default {
+  useCertificateGeneration,
+  useCertificateDownload,
+  useCertificateStatus,
+};
