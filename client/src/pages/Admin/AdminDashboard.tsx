@@ -9,18 +9,55 @@ import {
   FaClock,
   FaTrophy,
 } from "react-icons/fa";
+import { useAdminDashboardStats } from "../../hooks/useAdmin";
 
 const AdminDashboard: React.FC = () => {
-  // Mock data - replace with real API calls
-  const stats = {
-    totalUsers: 12547,
-    totalInstructors: 342,
-    totalCourses: 1876,
-    totalRevenue: 89650,
-    pendingApprovals: 23,
-    activeStudents: 8965,
-    completedCourses: 15432,
-    certificatesIssued: 12890,
+  const { data: statsData, error } = useAdminDashboardStats();
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="text-red-500 mb-4">
+            <svg
+              className="w-16 h-16 mx-auto"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            Error Loading Dashboard
+          </h2>
+          <p className="text-gray-600 mb-4">
+            There was a problem loading the dashboard data.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Use API data with fallback values
+  const stats = statsData || {
+    totalUsers: 0,
+    totalInstructors: 0,
+    totalStudents: 0,
+    totalCourses: 0,
+    totalRevenue: 0,
+    pendingApprovals: 0,
+    activeStudents: 0,
+    completedCourses: 0,
+    certificatesIssued: 0,
+    revenueGrowth: 0,
+    userGrowth: 0,
+    courseGrowth: 0,
   };
 
   const recentActivity = [
@@ -169,121 +206,125 @@ const AdminDashboard: React.FC = () => {
 
       {/* Additional Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="Pending Approvals"
-          value={stats.pendingApprovals}
-          icon={<FaClock />}
-          change="Requires attention"
-          changeType="neutral"
-          color="bg-gradient-to-br from-orange-500 to-orange-600"
-        />
-        <StatCard
-          title="Active Students"
-          value={stats.activeStudents}
-          icon={<FaChartLine />}
-          change="+18% from last month"
-          changeType="positive"
-          color="bg-gradient-to-br from-cyan-500 to-cyan-600"
-        />
-        <StatCard
-          title="Course Completions"
-          value={stats.completedCourses}
-          icon={<FaArrowUp />}
-          change="+25% from last month"
-          changeType="positive"
-          color="bg-gradient-to-br from-indigo-500 to-indigo-600"
-        />
-        <StatCard
-          title="Certificates Issued"
-          value={stats.certificatesIssued}
-          icon={<FaTrophy />}
-          change="+20% from last month"
-          changeType="positive"
-          color="bg-gradient-to-br from-yellow-500 to-yellow-600"
-        />
-      </div>
-
-      {/* Recent Activity & Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Recent Activity */}
-        <div className="lg:col-span-2">
-          <div className="bg-white rounded-2xl shadow-lg border border-slate-200/50 overflow-hidden">
-            <div className="p-6 border-b border-slate-200/50">
-              <h2 className="text-2xl font-bold text-slate-900 mb-2">
-                Recent Activity
-              </h2>
-              <p className="text-slate-600">
-                Latest platform activities and user interactions
-              </p>
-            </div>
-            <div className="divide-y divide-slate-200/50">
-              {recentActivity.map((activity) => (
-                <ActivityItem key={activity.id} activity={activity} />
-              ))}
-            </div>
-            <div className="p-6 bg-slate-50/50 border-t border-slate-200/50">
-              <button className="text-blue-600 hover:text-blue-700 font-medium transition-colors">
-                View All Activity →
-              </button>
-            </div>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <StatCard
+            title="Pending Approvals"
+            value={stats.pendingApprovals}
+            icon={<FaClock />}
+            change="Requires attention"
+            changeType="neutral"
+            color="bg-gradient-to-br from-orange-500 to-orange-600"
+          />
+          <StatCard
+            title="Active Students"
+            value={stats.activeStudents}
+            icon={<FaChartLine />}
+            change="+18% from last month"
+            changeType="positive"
+            color="bg-gradient-to-br from-cyan-500 to-cyan-600"
+          />
+          <StatCard
+            title="Course Completions"
+            value={stats.completedCourses}
+            icon={<FaArrowUp />}
+            change="+25% from last month"
+            changeType="positive"
+            color="bg-gradient-to-br from-indigo-500 to-indigo-600"
+          />
+          <StatCard
+            title="Certificates Issued"
+            value={stats.certificatesIssued}
+            icon={<FaTrophy />}
+            change="+20% from last month"
+            changeType="positive"
+            color="bg-gradient-to-br from-yellow-500 to-yellow-600"
+          />
         </div>
 
-        {/* Quick Actions */}
-        <div className="space-y-6">
-          <div className="bg-white rounded-2xl shadow-lg border border-slate-200/50 p-6">
-            <h3 className="text-xl font-bold text-slate-900 mb-4">
-              Quick Actions
-            </h3>
-            <div className="space-y-3">
-              <button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-700 hover:to-purple-700 transition-all">
-                Review Pending Courses
-              </button>
-              <button className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 px-4 rounded-xl font-medium hover:from-green-700 hover:to-emerald-700 transition-all">
-                Approve Instructors
-              </button>
-              <button className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-3 px-4 rounded-xl font-medium hover:from-orange-700 hover:to-red-700 transition-all">
-                Handle Reports
-              </button>
-              <button className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 px-4 rounded-xl font-medium hover:from-purple-700 hover:to-indigo-700 transition-all">
-                Platform Analytics
-              </button>
+        {/* Recent Activity & Quick Actions */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Recent Activity */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-2xl shadow-lg border border-slate-200/50 overflow-hidden">
+              <div className="p-6 border-b border-slate-200/50">
+                <h2 className="text-2xl font-bold text-slate-900 mb-2">
+                  Recent Activity
+                </h2>
+                <p className="text-slate-600">
+                  Latest platform activities and user interactions
+                </p>
+              </div>
+              <div className="divide-y divide-slate-200/50">
+                {recentActivity.map((activity) => (
+                  <ActivityItem key={activity.id} activity={activity} />
+                ))}
+              </div>
+              <div className="p-6 bg-slate-50/50 border-t border-slate-200/50">
+                <button className="text-blue-600 hover:text-blue-700 font-medium transition-colors">
+                  View All Activity →
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* System Status */}
-          <div className="bg-white rounded-2xl shadow-lg border border-slate-200/50 p-6">
-            <h3 className="text-xl font-bold text-slate-900 mb-4">
-              System Status
-            </h3>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-slate-600">Server Status</span>
-                <span className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-green-600 font-medium">Online</span>
-                </span>
+          {/* Quick Actions */}
+          <div className="space-y-6">
+            <div className="bg-white rounded-2xl shadow-lg border border-slate-200/50 p-6">
+              <h3 className="text-xl font-bold text-slate-900 mb-4">
+                Quick Actions
+              </h3>
+              <div className="space-y-3">
+                <button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-700 hover:to-purple-700 transition-all">
+                  Review Pending Courses
+                </button>
+                <button className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 px-4 rounded-xl font-medium hover:from-green-700 hover:to-emerald-700 transition-all">
+                  Approve Instructors
+                </button>
+                <button className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-3 px-4 rounded-xl font-medium hover:from-orange-700 hover:to-red-700 transition-all">
+                  Handle Reports
+                </button>
+                <button className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 px-4 rounded-xl font-medium hover:from-purple-700 hover:to-indigo-700 transition-all">
+                  Platform Analytics
+                </button>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-slate-600">Database</span>
-                <span className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-green-600 font-medium">Connected</span>
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-slate-600">Email Service</span>
-                <span className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-green-600 font-medium">Active</span>
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-slate-600">Payment Gateway</span>
-                <span className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                  <span className="text-yellow-600 font-medium">Testing</span>
-                </span>
+            </div>
+
+            {/* System Status */}
+            <div className="bg-white rounded-2xl shadow-lg border border-slate-200/50 p-6">
+              <h3 className="text-xl font-bold text-slate-900 mb-4">
+                System Status
+              </h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-600">Server Status</span>
+                  <span className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-green-600 font-medium">Online</span>
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-600">Database</span>
+                  <span className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-green-600 font-medium">
+                      Connected
+                    </span>
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-600">Email Service</span>
+                  <span className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-green-600 font-medium">Active</span>
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-600">Payment Gateway</span>
+                  <span className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                    <span className="text-yellow-600 font-medium">Testing</span>
+                  </span>
+                </div>
               </div>
             </div>
           </div>

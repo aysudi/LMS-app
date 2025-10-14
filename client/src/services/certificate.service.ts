@@ -18,6 +18,12 @@ export interface CertificateResponse {
   message?: string;
 }
 
+export interface CertificateStatus {
+  hasCertificate: boolean;
+  certificateId?: string;
+  issuedAt?: Date;
+}
+
 export const certificateService = {
   generateCertificate: async (
     data: CertificateData
@@ -46,6 +52,31 @@ export const certificateService = {
           error.response?.data?.message ||
           error.message ||
           "Failed to generate certificate",
+      };
+    }
+  },
+
+  getCertificateStatus: async (
+    courseId: string,
+    userId: string
+  ): Promise<CertificateStatus> => {
+    try {
+      const response = await api.get(
+        `/api/certificates/status/${courseId}/${userId}`
+      );
+
+      return {
+        hasCertificate:
+          response.data.success && response.data.data?.hasCertificate,
+        certificateId: response.data.data?.certificateId,
+        issuedAt: response.data.data?.issuedAt
+          ? new Date(response.data.data.issuedAt)
+          : undefined,
+      };
+    } catch (error: any) {
+      console.error("Certificate status error:", error);
+      return {
+        hasCertificate: false,
       };
     }
   },

@@ -11,6 +11,7 @@ export const generateAndSendCertificate = async (
   try {
     // Validate request body
     const { error, value } = validateCertificateGeneration(req.body);
+    console.log("error", error);
     if (error) {
       return res.status(400).json({
         success: false,
@@ -70,6 +71,40 @@ export const generateAndSendCertificate = async (
         error instanceof Error
           ? error.message
           : "Failed to generate certificate",
+    });
+  }
+};
+
+// Get certificate status
+export const getCertificateStatus = async (req: Request, res: Response) => {
+  try {
+    const { courseId, userId } = req.params;
+
+    if (!courseId || !userId) {
+      return res.status(400).json({
+        success: false,
+        message: "Course ID and User ID are required",
+      });
+    }
+
+    // For now, we'll simulate certificate status checking
+    // In a real implementation, you would check a database
+    // This is a placeholder that always returns no certificate
+    // You should implement actual certificate storage and retrieval
+
+    res.status(200).json({
+      success: true,
+      data: {
+        hasCertificate: false,
+        certificateId: null,
+        issuedAt: null,
+      },
+    });
+  } catch (error) {
+    console.error("Certificate status error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to get certificate status",
     });
   }
 };
