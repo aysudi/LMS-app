@@ -15,7 +15,6 @@ import {
   useUpdateUserRole,
   useBulkUpdateUsers,
 } from "../../hooks/useAdmin";
-// AdminUser type is handled by the API response
 
 const AdminUsers: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -24,7 +23,6 @@ const AdminUsers: React.FC = () => {
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // API hooks
   const {
     data: usersResponse,
     isLoading,
@@ -42,11 +40,8 @@ const AdminUsers: React.FC = () => {
   const updateUserRoleMutation = useUpdateUserRole();
   const bulkUpdateMutation = useBulkUpdateUsers();
 
-  // Extract users from API response
   const users = usersResponse?.data?.users || [];
   const pagination = usersResponse?.data?.pagination;
-
-  // Server-side filtering is now handled by the API
 
   const handleSelectUser = (userId: string) => {
     setSelectedUsers((prev) =>
@@ -152,13 +147,11 @@ const AdminUsers: React.FC = () => {
     admins: users.filter((u) => u.role === "admin").length,
   };
 
-  // Handle search with debounce
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);
     setCurrentPage(1); // Reset to first page when searching
   };
 
-  // Handle filter changes
   const handleRoleFilterChange = (role: string) => {
     setFilterRole(role);
     setCurrentPage(1);

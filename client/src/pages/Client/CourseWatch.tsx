@@ -509,7 +509,6 @@ const CourseWatch: React.FC = () => {
     } else if (currentSection < course.sections.length - 1) {
       loadLesson(currentSection + 1, 0);
     } else {
-      // Course completed - show completion modal
       setShowCompletionModal(true);
     }
   };
@@ -738,16 +737,11 @@ const CourseWatch: React.FC = () => {
                       [lessonId]: { completed: true, passed },
                     }));
                   }
-
-                  // Don't close quiz automatically - let user see results first
-                  // Quiz will close when user clicks "Continue to Video" or "Return to Video"
                 }}
                 onClose={() => {
                   setShowQuiz(false);
-                  // Ensure video player is properly restored
                   const video = videoRef.current;
                   if (video && currentLessonObj) {
-                    // Reload the video source to fix any playback issues
                     const currentSrc = video.src;
                     video.src = "";
                     video.src = currentSrc;
