@@ -47,7 +47,6 @@ export const getAdminDashboardStats = async (
       createdAt: { $gte: thirtyDaysAgo },
     });
 
-    // Calculate basic statistics
     const stats = {
       totalUsers,
       totalInstructors,
@@ -103,7 +102,6 @@ export const getAdminUsers = async (req: AuthRequest, res: Response) => {
     const limitNum = parseInt(limit as string);
     const skip = (pageNum - 1) * limitNum;
 
-    // Build query filters
     const filters: any = {};
     if (role && role !== "all") {
       filters.role = role;
@@ -119,7 +117,6 @@ export const getAdminUsers = async (req: AuthRequest, res: Response) => {
       ];
     }
 
-    // Build sort object
     const sort: any = {};
     sort[sortBy as string] = sortOrder === "desc" ? -1 : 1;
 
