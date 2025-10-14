@@ -205,7 +205,6 @@ export const CourseCompletionModal: React.FC<CourseCompletionModalProps> = ({
                 </button>
                 <button
                   onClick={() => {
-                    // Navigate to course or explore more courses
                     onClose();
                   }}
                   className="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white py-3 px-4 rounded-lg font-medium transition-all duration-200"
