@@ -377,7 +377,6 @@ const CourseWatch: React.FC = () => {
     const lesson = course.sections[sectionIndex].lessons[lessonIndex];
     const lessonId = lesson._id || lesson.id;
 
-    // Reset quiz states when changing lessons, but check if quiz was already completed for this lesson
     setShowQuiz(false);
     const quizState = lessonQuizStates[lessonId];
     if (quizState) {
@@ -487,7 +486,6 @@ const CourseWatch: React.FC = () => {
     const remainingTime = duration - currentTime;
     const videoWatched = remainingTime <= 60; // 60 seconds = 1 minute
 
-    // If lesson has quiz, user must pass it to complete the lesson
     if (currentLessonObj.quiz && currentLessonObj.quiz.length > 0) {
       return videoWatched && quizPassed;
     }
@@ -550,15 +548,12 @@ const CourseWatch: React.FC = () => {
     );
   };
 
-  // Check if course is completed
   const isCourseCompleted = () => {
     if (!course || !courseProgress) return false;
 
-    // setShowCompletionModal(true);
     return true ? courseProgress?.data?.progressPercentage == 100 : false;
   };
 
-  // Certificate status tracking
   const { data: certificateStatus, refetch: refetchCertificateStatus } =
     useCertificateStatus(
       courseId || "",
@@ -678,10 +673,6 @@ const CourseWatch: React.FC = () => {
     );
   }
 
-  // if (isCourseCompleted()) {
-  //   console.log("showCompletionModal", showCompletionModal);
-  // }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 text-white flex">
       {/* Video Player */}
@@ -725,7 +716,6 @@ const CourseWatch: React.FC = () => {
 
         <div className="relative h-screen pt-16">
           {showQuiz && currentLessonObj?.quiz ? (
-            // Show Quiz Component in place of video player
             <div className="w-full h-full">
               <QuizComponent
                 questions={currentLessonObj.quiz.map(
@@ -736,12 +726,10 @@ const CourseWatch: React.FC = () => {
                     correctAnswer: q.correctAnswer,
                   })
                 )}
-                onQuizComplete={(score: number, passed: boolean) => {
-                  // console.log("Quiz completed:", { score, passed });
+                onQuizComplete={(_: number, passed: boolean) => {
                   setQuizCompleted(true);
                   setQuizPassed(passed);
 
-                  // Store quiz state for this lesson
                   if (currentLessonObj) {
                     const lessonId =
                       currentLessonObj._id || currentLessonObj.id;
