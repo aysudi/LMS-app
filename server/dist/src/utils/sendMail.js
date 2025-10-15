@@ -333,9 +333,34 @@ export const sendNotificationEmail = async (email, firstName, subject, message) 
   `;
     await sendEmail(email, subject, htmlContent, textContent);
 };
+// Certificate email function with attachment
+export const sendCertificateEmail = async (email, subject, htmlContent, certificateBuffer, fileName) => {
+    try {
+        const mailOptions = {
+            from: `"${process.env.EMAIL_FROM_NAME || "Skillify"}" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
+            to: email,
+            subject,
+            html: htmlContent,
+            attachments: [
+                {
+                    filename: fileName,
+                    content: certificateBuffer,
+                    contentType: "application/pdf",
+                },
+            ],
+        };
+        const result = await transporter.sendMail(mailOptions);
+        console.log("Certificate email sent successfully:", result.messageId);
+    }
+    catch (error) {
+        console.error("Error sending certificate email:", error);
+        throw new Error("Failed to send certificate email");
+    }
+};
 export default {
     sendVerificationEmail,
     sendUnlockAccountEmail,
     sendForgotPasswordEmail,
     sendNotificationEmail,
+    sendCertificateEmail,
 };

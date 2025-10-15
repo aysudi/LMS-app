@@ -1,8 +1,10 @@
 import Course from "../models/Course";
+import User from "../models/User";
 import Section from "../models/Section";
 import Lesson from "../models/Lesson";
 import UserNote from "../models/UserNote";
 import UserProgress from "../models/UserProgress";
+import { deleteFromCloudinary, } from "../middlewares/course-upload.middleware.js";
 export const getAllCoursesService = async (query = {}) => {
     const { page = 1, limit = 10, category, level, search, instructor, minPrice, maxPrice, sortBy = "createdAt", sortOrder = "desc", } = query;
     const filter = {};
@@ -52,11 +54,8 @@ export const getAllCoursesService = async (query = {}) => {
         },
     };
 };
-export const getCourseByIdService = async (id, includeUnpublished = false) => {
+export const getCourseByIdService = async (id) => {
     const filter = { _id: id };
-    if (!includeUnpublished) {
-        filter.isPublished = true;
-    }
     const course = await Course.findOne(filter)
         .populate("instructor", "firstName lastName email avatar bio")
         .populate("sections")
@@ -82,10 +81,21 @@ export const getCourseByIdService = async (id, includeUnpublished = false) => {
     };
 };
 export const createCourseService = async (courseData, instructorId) => {
-    const course = new Course({
-        ...courseData,
-        instructor: instructorId,
-    });
+    const coursePayload = { ...courseData, instructor: instructorId };
+    if (courseData.uploadedFiles?.image) {
+        coursePayload.image = {
+            url: courseData.uploadedFiles.image.url,
+            publicId: courseData.uploadedFiles.image.publicId,
+        };
+    }
+    if (courseData.uploadedFiles?.videoPromo) {
+        coursePayload.videoPromo = {
+            url: courseData.uploadedFiles.videoPromo.url,
+            publicId: courseData.uploadedFiles.videoPromo.publicId,
+        };
+    }
+    delete coursePayload.uploadedFiles;
+    const course = new Course(coursePayload);
     await course.save();
     return course.populate("instructor", "firstName lastName email avatar");
 };
@@ -97,6 +107,25 @@ export const updateCourseService = async (id, updateData, instructorId) => {
     if (!course) {
         throw new Error("Course not found or you are not authorized to update it");
     }
+    if (updateData.uploadedFiles?.image) {
+        if (course.image?.publicId) {
+            await deleteFromCloudinary(course.image.publicId, "image");
+        }
+        updateData.image = {
+            url: updateData.uploadedFiles.image.url,
+            publicId: updateData.uploadedFiles.image.publicId,
+        };
+    }
+    if (updateData.uploadedFiles?.videoPromo) {
+        if (course.videoPromo?.publicId) {
+            await deleteFromCloudinary(course.videoPromo.publicId, "video");
+        }
+        updateData.videoPromo = {
+            url: updateData.uploadedFiles.videoPromo.url,
+            publicId: updateData.uploadedFiles.videoPromo.publicId,
+        };
+    }
+    delete updateData.uploadedFiles;
     Object.assign(course, updateData);
     if (updateData.isPublished && !course.publishedAt) {
         course.publishedAt = new Date();
@@ -113,10 +142,20 @@ export const deleteCourseService = async (id, instructorId) => {
     if (!course) {
         throw new Error("Course not found or you are not authorized to delete it");
     }
-    await Lesson.deleteMany({ course: id });
-    await Section.deleteMany({ course: id });
-    await UserNote.deleteMany({ course: id });
-    await UserProgress.deleteMany({ course: id });
+    const deletionPromises = [];
+    if (course.image?.publicId) {
+        deletionPromises.push(deleteFromCloudinary(course.image.publicId, "image"));
+    }
+    if (course.videoPromo?.publicId) {
+        deletionPromises.push(deleteFromCloudinary(course.videoPromo.publicId, "video"));
+    }
+    await Promise.allSettled(deletionPromises);
+    await Promise.all([
+        Lesson.deleteMany({ course: id }),
+        Section.deleteMany({ course: id }),
+        UserNote.deleteMany({ course: id }),
+        UserProgress.deleteMany({ course: id }),
+    ]);
     await Course.deleteOne({ _id: id });
     return { message: "Course and all related data deleted successfully" };
 };
@@ -130,26 +169,7 @@ export const getUserCoursesService = async (userId) => {
         .populate("sections")
         .select("title description image price level rating totalDuration totalLessons")
         .lean();
-    const coursesWithProgress = await Promise.all(courses.map(async (course) => {
-        const UserProgress = require("../models/UserProgress").default;
-        const userProgress = await UserProgress.find({
-            user: userId,
-            course: course._id,
-        }).lean();
-        const totalLessons = await Lesson.countDocuments({ course: course._id });
-        const completedLessons = userProgress.filter((p) => p.isCompleted).length;
-        const progressPercentage = totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0;
-        return {
-            ...course,
-            totalLessons,
-            userProgress: {
-                progressPercentage,
-                completedLessons,
-                totalLessons,
-            },
-        };
-    }));
-    return coursesWithProgress;
+    return courses;
 };
 // Get instructor's courses
 export const getInstructorCoursesService = async (instructorId) => {
@@ -160,7 +180,6 @@ export const getInstructorCoursesService = async (instructorId) => {
 };
 // Get course statistics for instructor
 export const getCourseStatisticsService = async (courseId, instructorId) => {
-    // Verify course ownership
     const course = await Course.findOne({
         _id: courseId,
         instructor: instructorId,
@@ -168,10 +187,8 @@ export const getCourseStatisticsService = async (courseId, instructorId) => {
     if (!course) {
         throw new Error("Course not found or you are not authorized to view it");
     }
-    // Get course sections and lessons count
     const sectionsCount = await Section.countDocuments({ course: courseId });
     const lessonsCount = await Lesson.countDocuments({ course: courseId });
-    // Import UserProgress to get completion statistics
     const UserProgress = require("../models/UserProgress").default;
     const totalEnrollments = course.studentsEnrolled.length;
     const completedStudents = await UserProgress.distinct("user", {
@@ -198,11 +215,32 @@ export const getCourseStatisticsService = async (courseId, instructorId) => {
         },
     };
 };
+// Toggle course publish status
+export const toggleCourseStatusService = async (id, instructorId) => {
+    const course = await Course.findOne({
+        _id: id,
+        instructor: instructorId,
+    });
+    if (!course) {
+        throw new Error("Course not found or you are not authorized to modify it");
+    }
+    course.isPublished = !course.isPublished;
+    if (course.isPublished && !course.publishedAt) {
+        course.publishedAt = new Date();
+    }
+    course.lastUpdated = new Date();
+    await course.save();
+    return course.populate("instructor", "firstName lastName email avatar");
+};
 // Enroll user in course
 export const enrollUserInCourseService = async (courseId, userId) => {
     const course = await Course.findById(courseId);
+    const user = await User.findById(userId);
     if (!course) {
         throw new Error("Course not found");
+    }
+    if (!user) {
+        throw new Error("User not found");
     }
     if (!course.isPublished) {
         throw new Error("Cannot enroll in unpublished course");
@@ -212,5 +250,9 @@ export const enrollUserInCourseService = async (courseId, userId) => {
     }
     course.studentsEnrolled.push(userId);
     await course.save();
+    if (!user.enrolledCourses.includes(courseId)) {
+        user.enrolledCourses.push(courseId);
+        await user.save();
+    }
     return { message: "Successfully enrolled in course" };
 };

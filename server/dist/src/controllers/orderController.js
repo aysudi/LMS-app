@@ -256,6 +256,12 @@ export const completeOrder = async (orderId, paymentDetails) => {
             $inc: { totalSpent: order.total },
             lastPurchaseAt: new Date(),
         });
+        // Update each course's studentsEnrolled array
+        for (const courseId of courseIds) {
+            await Course.findByIdAndUpdate(courseId, {
+                $addToSet: { studentsEnrolled: order.user }, // $addToSet prevents duplicates
+            });
+        }
         return order;
     }
     catch (error) {
@@ -331,6 +337,12 @@ export const confirmPayment = async (req, res) => {
             $inc: { totalSpent: order.total },
             lastPurchaseAt: new Date(),
         });
+        // Update each course's studentsEnrolled array
+        for (const courseId of courseIds) {
+            await Course.findByIdAndUpdate(courseId, {
+                $addToSet: { studentsEnrolled: order.user }, // $addToSet prevents duplicates
+            });
+        }
         res.json({
             success: true,
             data: {

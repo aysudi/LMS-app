@@ -10,9 +10,9 @@ const lessonSchema = new mongoose.Schema({
         type: String,
         trim: true,
     },
-    videoUrl: {
-        type: String,
-        required: true,
+    video: {
+        url: String,
+        publicId: String,
     },
     duration: {
         type: Number,
@@ -47,9 +47,23 @@ const lessonSchema = new mongoose.Schema({
                 type: String,
                 required: true,
             },
+            publicId: {
+                type: String,
+                required: true,
+            },
             type: {
                 type: String,
-                enum: ["pdf", "zip", "doc", "other"],
+                enum: [
+                    "pdf",
+                    "doc",
+                    "ppt",
+                    "xls",
+                    "zip",
+                    "image",
+                    "audio",
+                    "video",
+                    "other",
+                ],
                 default: "other",
             },
         },

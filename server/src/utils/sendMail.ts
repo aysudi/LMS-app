@@ -29,7 +29,6 @@ const sendEmail = async (
     };
 
     const result = await transporter.sendMail(mailOptions);
-    console.log("Email sent successfully:", result.messageId);
   } catch (error) {
     console.error("Error sending email:", error);
     throw new Error("Failed to send email");
@@ -407,7 +406,6 @@ export const sendCertificateEmail = async (
     };
 
     const result = await transporter.sendMail(mailOptions);
-    console.log("Certificate email sent successfully:", result.messageId);
   } catch (error) {
     console.error("Error sending certificate email:", error);
     throw new Error("Failed to send certificate email");

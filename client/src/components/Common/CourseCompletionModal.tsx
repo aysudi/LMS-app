@@ -1,7 +1,10 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Award, Mail, CheckCircle } from "lucide-react";
-import { useCertificateGeneration } from "../../hooks/useCertificate";
+import {
+  useCertificateGeneration,
+  useCertificateStatus,
+} from "../../hooks/useCertificate";
 import type { Course } from "../../types/course.type";
 
 interface CourseCompletionModalProps {
@@ -25,17 +28,41 @@ export const CourseCompletionModal: React.FC<CourseCompletionModalProps> = ({
     useCertificateGeneration();
   const [certificateGenerated, setCertificateGenerated] = React.useState(false);
 
+  const { data: certificateStatus, refetch: refetchCertificateStatus } =
+    useCertificateStatus(course.id, userId, !!course.id && !!userId);
+
   const instructorName = `${course.instructor.firstName} ${course.instructor.lastName}`;
 
-  const handleGenerateCertificate = async () => {
-    completeCourseWithCertificate({
-      course,
-      userId,
-      userEmail,
-      studentName,
-      instructorName,
-    });
-    setCertificateGenerated(true);
+  React.useEffect(() => {
+    if (certificateStatus?.hasCertificate) {
+      setCertificateGenerated(true);
+    }
+  }, [certificateStatus?.hasCertificate]);
+
+  const handleGenerateCertificate = () => {
+    if (certificateStatus?.hasCertificate) {
+      setCertificateGenerated(true);
+      return;
+    }
+
+    completeCourseWithCertificate(
+      {
+        course,
+        userId,
+        userEmail,
+        studentName,
+        instructorName,
+      },
+      {
+        onSuccess: () => {
+          setCertificateGenerated(true);
+          setTimeout(() => {
+            refetchCertificateStatus();
+          }, 1000);
+        },
+        onError: () => {},
+      }
+    );
   };
 
   return (
@@ -60,7 +87,7 @@ export const CourseCompletionModal: React.FC<CourseCompletionModalProps> = ({
             <div className="relative bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 p-6 text-white">
               <button
                 onClick={onClose}
-                className="absolute top-4 right-4 p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
+                className="absolute top-4 right-4 p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -121,11 +148,12 @@ export const CourseCompletionModal: React.FC<CourseCompletionModalProps> = ({
                     </div>
                   </div>
 
-                  {!certificateGenerated ? (
+                  {!certificateGenerated &&
+                  !certificateStatus?.hasCertificate ? (
                     <button
                       onClick={handleGenerateCertificate}
                       disabled={isGeneratingCertificate}
-                      className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 disabled:from-gray-400 disabled:to-gray-400 text-white py-3 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2"
+                      className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 disabled:from-gray-400 disabled:to-gray-400 text-white py-3 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
                     >
                       {isGeneratingCertificate ? (
                         <>
@@ -144,14 +172,23 @@ export const CourseCompletionModal: React.FC<CourseCompletionModalProps> = ({
                       <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 p-3 rounded-lg">
                         <CheckCircle className="w-5 h-5" />
                         <span className="text-sm font-medium">
-                          Certificate sent to your email!
+                          {certificateStatus?.hasCertificate
+                            ? "Certificate already issued!"
+                            : "Certificate sent to your email!"}
                         </span>
                       </div>
 
                       <div className="text-center">
                         <p className="text-sm text-gray-600 mb-2">
-                          📧 Certificate sent to your email
+                          📧 Certificate{" "}
+                          {certificateStatus?.hasCertificate ? "has been" : ""}{" "}
+                          sent to your email
                         </p>
+                        {certificateStatus?.certificateId && (
+                          <p className="text-xs text-gray-500 mb-1">
+                            Certificate ID: {certificateStatus.certificateId}
+                          </p>
+                        )}
                         <p className="text-xs text-gray-500">
                           Check your inbox for the PDF certificate
                         </p>
@@ -196,20 +233,12 @@ export const CourseCompletionModal: React.FC<CourseCompletionModalProps> = ({
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-3">
+              <div className="flex">
                 <button
                   onClick={onClose}
-                  className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 px-4 rounded-lg font-medium transition-colors"
+                  className="flex-1 bg-gray-200 hover:bg-gray-200 text-gray-700 py-3 px-4 rounded-lg font-medium transition-colors cursor-pointer"
                 >
                   Close
-                </button>
-                <button
-                  onClick={() => {
-                    onClose();
-                  }}
-                  className="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white py-3 px-4 rounded-lg font-medium transition-all duration-200"
-                >
-                  Explore More
                 </button>
               </div>
             </div>

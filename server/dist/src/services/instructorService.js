@@ -6,7 +6,6 @@ import UserProgress from "../models/UserProgress";
 import mongoose from "mongoose";
 // Get instructor dashboard overview
 export const getInstructorOverviewService = async (instructorId) => {
-    // Get instructor's courses
     const courses = await Course.find({
         instructor: instructorId,
         isPublished: true,
@@ -16,13 +15,11 @@ export const getInstructorOverviewService = async (instructorId) => {
         course: { $in: courseIds },
         status: "active",
     });
-    // Get total revenue
     const earnings = await InstructorEarnings.aggregate([
         { $match: { instructor: new mongoose.Types.ObjectId(instructorId) } },
         { $group: { _id: null, total: { $sum: "$instructorShare" } } },
     ]);
     const totalRevenue = earnings[0]?.total || 0;
-    // Get monthly revenue
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth() + 1;
     const currentYear = currentDate.getFullYear();
@@ -108,20 +105,57 @@ export const getInstructorOverviewService = async (instructorId) => {
     };
 };
 // Get instructor courses with detailed stats
-export const getInstructorCoursesWithStatsService = async (instructorId, page = 1, limit = 10, status = "all") => {
+export const getInstructorCoursesWithStatsService = async (instructorId, queryParams = {}) => {
+    const { page = 1, limit = 10, status = "all", search, category, level, minPrice, maxPrice, sortBy = "createdAt", sortOrder = "desc", } = queryParams;
     const skip = (page - 1) * limit;
     let filter = { instructor: instructorId };
     if (status === "published")
         filter.isPublished = true;
     if (status === "draft")
         filter.isPublished = false;
+    if (search) {
+        filter.$or = [
+            { title: { $regex: search, $options: "i" } },
+            { description: { $regex: search, $options: "i" } },
+            { tags: { $in: [new RegExp(search, "i")] } },
+        ];
+    }
+    if (category) {
+        filter.category = { $regex: category, $options: "i" };
+    }
+    if (level) {
+        filter.level = level;
+    }
+    if (minPrice !== undefined || maxPrice !== undefined) {
+        filter.originalPrice = {};
+        if (minPrice !== undefined)
+            filter.originalPrice.$gte = minPrice;
+        if (maxPrice !== undefined)
+            filter.originalPrice.$lte = maxPrice;
+    }
+    let sort = {};
+    switch (sortBy) {
+        case "title":
+            sort.title = sortOrder === "asc" ? 1 : -1;
+            break;
+        case "rating":
+            sort.rating = sortOrder === "asc" ? 1 : -1;
+            break;
+        case "originalPrice":
+            sort.originalPrice = sortOrder === "asc" ? 1 : -1;
+            break;
+        case "studentsCount":
+            sort.studentsEnrolled = sortOrder === "asc" ? 1 : -1;
+            break;
+        default:
+            sort.createdAt = sortOrder === "asc" ? 1 : -1;
+    }
     const courses = await Course.find(filter)
-        .sort({ createdAt: -1 })
+        .sort(sort)
         .skip(skip)
         .limit(limit)
         .lean();
     const totalCourses = await Course.countDocuments(filter);
-    // Get detailed stats for each course
     const coursesWithStats = await Promise.all(courses.map(async (course) => {
         const enrollmentsCount = await Enrollment.countDocuments({
             course: course._id,
@@ -180,7 +214,6 @@ export const getCourseStudentsService = async (instructorId, courseId, page = 1,
         .skip(skip)
         .limit(limit);
     const totalStudents = await Enrollment.countDocuments({ course: courseId });
-    // Get additional stats for each student
     const studentsWithStats = await Promise.all(enrollments.map(async (enrollment) => {
         const progress = await UserProgress.find({
             user: enrollment.user,

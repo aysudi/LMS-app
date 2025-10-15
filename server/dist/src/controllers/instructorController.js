@@ -27,14 +27,26 @@ export const getInstructorOverview = async (req, res) => {
 export const getInstructorCoursesWithStats = async (req, res) => {
     try {
         const instructorId = req.user?.id;
-        const { page = 1, limit = 10, status = "all" } = req.query;
+        const { page = 1, limit = 10, status = "all", search, category, level, minPrice, maxPrice, sortBy = "createdAt", sortOrder = "desc" } = req.query;
         if (!instructorId) {
             return res.status(401).json({
                 success: false,
                 message: "Authentication required",
             });
         }
-        const data = await getInstructorCoursesWithStatsService(instructorId, Number(page), Number(limit), status);
+        const queryParams = {
+            page: Number(page),
+            limit: Number(limit),
+            status: status,
+            search: search,
+            category: category,
+            level: level,
+            minPrice: minPrice ? Number(minPrice) : undefined,
+            maxPrice: maxPrice ? Number(maxPrice) : undefined,
+            sortBy: sortBy,
+            sortOrder: sortOrder
+        };
+        const data = await getInstructorCoursesWithStatsService(instructorId, queryParams);
         res.json({
             success: true,
             data

@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { validateCertificateGeneration } from "../validations/certificateValidation";
 import { sendCertificateEmail } from "../utils/sendMail";
 import { generateCertificate } from "../services/certificateService";
+import Certificate from "../models/Certificate";
+import mongoose from "mongoose";
 
 // Generate and send certificate
 export const generateAndSendCertificate = async (
@@ -11,7 +13,6 @@ export const generateAndSendCertificate = async (
   try {
     // Validate request body
     const { error, value } = validateCertificateGeneration(req.body);
-    console.log("error", error);
     if (error) {
       return res.status(400).json({
         success: false,
@@ -27,6 +28,24 @@ export const generateAndSendCertificate = async (
       userEmail,
       courseName,
     } = value;
+
+    // Check if certificate already exists for this user and course
+    const existingCertificate = await Certificate.findOne({
+      userId: new mongoose.Types.ObjectId(userId),
+      courseId: new mongoose.Types.ObjectId(courseId),
+    });
+
+    if (existingCertificate) {
+      return res.status(400).json({
+        success: false,
+        message: "Certificate already exists for this course",
+        data: {
+          certificateId: existingCertificate.certificateId,
+          issuedAt: existingCertificate.issuedAt,
+          emailSent: existingCertificate.emailSent,
+        },
+      });
+    }
 
     // Generate certificate
     const certificateData = {
@@ -53,18 +72,44 @@ export const generateAndSendCertificate = async (
       certificateData.certificateId
     );
 
+    const emailSuccess = Boolean(emailSent);
+
+    // Save certificate to database
+    const certificate = new Certificate({
+      userId: new mongoose.Types.ObjectId(userId),
+      courseId: new mongoose.Types.ObjectId(courseId),
+      studentName,
+      courseName,
+      instructorName,
+      certificateId: certificateData.certificateId,
+      issuedAt: new Date(),
+      emailSent: emailSuccess,
+    });
+
+    await certificate.save();
+
     res.status(200).json({
       success: true,
-      message: emailSent
+      message: emailSuccess
         ? "Certificate generated and sent successfully"
         : "Certificate generated but email sending failed",
       data: {
         certificateId: certificateData.certificateId,
-        emailSent,
+        issuedAt: certificate.issuedAt,
+        emailSent: emailSuccess,
       },
     });
   } catch (error) {
     console.error("Certificate generation error:", error);
+
+    // Handle duplicate key error (in case of race condition)
+    if (error instanceof Error && error.message.includes("E11000")) {
+      return res.status(400).json({
+        success: false,
+        message: "Certificate already exists for this course",
+      });
+    }
+
     res.status(500).json({
       success: false,
       message:
@@ -87,17 +132,30 @@ export const getCertificateStatus = async (req: Request, res: Response) => {
       });
     }
 
-    // For now, we'll simulate certificate status checking
-    // In a real implementation, you would check a database
-    // This is a placeholder that always returns no certificate
-    // You should implement actual certificate storage and retrieval
+    // Validate ObjectId format
+    if (
+      !mongoose.Types.ObjectId.isValid(courseId) ||
+      !mongoose.Types.ObjectId.isValid(userId)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid course ID or user ID format",
+      });
+    }
+
+    // Check if certificate exists for this user and course
+    const certificate = await Certificate.findOne({
+      userId: new mongoose.Types.ObjectId(userId),
+      courseId: new mongoose.Types.ObjectId(courseId),
+    });
 
     res.status(200).json({
       success: true,
       data: {
-        hasCertificate: false,
-        certificateId: null,
-        issuedAt: null,
+        hasCertificate: !!certificate,
+        certificateId: certificate?.certificateId || null,
+        issuedAt: certificate?.issuedAt || null,
+        emailSent: certificate?.emailSent || false,
       },
     });
   } catch (error) {
@@ -114,18 +172,44 @@ export const downloadCertificate = async (req: Request, res: Response) => {
   try {
     const { certificateId } = req.params;
 
-    // In a real implementation, you would:
-    // 1. Validate the certificate ID exists in database
-    // 2. Check if user has permission to download this certificate
-    // 3. Retrieve certificate data from database
-    // 4. Generate the certificate again or serve from storage
+    if (!certificateId) {
+      return res.status(400).json({
+        success: false,
+        message: "Certificate ID is required",
+      });
+    }
 
-    // For now, we'll return an error asking for complete certificate data
-    res.status(400).json({
-      success: false,
-      message:
-        "Certificate download requires complete certificate data. Use the generation endpoint instead.",
-    });
+    // Find certificate in database
+    const certificate = await Certificate.findOne({ certificateId });
+
+    if (!certificate) {
+      return res.status(404).json({
+        success: false,
+        message: "Certificate not found",
+      });
+    }
+
+    // Generate certificate PDF from stored data
+    const certificateData = {
+      studentName: certificate.studentName,
+      courseName: certificate.courseName,
+      instructorName: certificate.instructorName,
+      completionDate: certificate.issuedAt,
+      courseId: certificate.courseId.toString(),
+      userId: certificate.userId.toString(),
+      certificateId: certificate.certificateId,
+    };
+
+    const certificateBuffer = await generateCertificate(certificateData);
+
+    // Set headers for PDF download
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="certificate-${certificateId}.pdf"`
+    );
+
+    res.send(certificateBuffer);
   } catch (error) {
     console.error("Certificate download error:", error);
     res.status(500).json({

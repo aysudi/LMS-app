@@ -1,4 +1,6 @@
 import Enrollment from "../models/Enrollment";
+import Course from "../models/Course";
+import User from "../models/User";
 import { EnrollmentStatus } from "../types/enrollment.types";
 import formatMongoData from "../utils/formatMongoData";
 export const getUserEnrollments = async (req, res) => {
@@ -497,6 +499,86 @@ export const recalculateAllUserProgress = async (req, res) => {
         res.status(500).json({
             success: false,
             message: "Failed to recalculate progress",
+        });
+    }
+};
+// Enroll in a free course
+export const enrollInFreeCourse = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        const { course: courseId } = req.body;
+        console.log("courseId:", courseId);
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: "Authentication required",
+            });
+        }
+        if (!courseId) {
+            return res.status(400).json({
+                success: false,
+                message: "Course ID is required",
+            });
+        }
+        const course = await Course.findById(courseId);
+        if (!course) {
+            return res.status(404).json({
+                success: false,
+                message: "Course not found",
+            });
+        }
+        if (!course.isFree) {
+            return res.status(400).json({
+                success: false,
+                message: "This course is not free",
+            });
+        }
+        const existingEnrollment = await Enrollment.findOne({
+            user: userId,
+            course: courseId,
+        });
+        if (existingEnrollment) {
+            return res.status(400).json({
+                success: false,
+                message: "Already enrolled in this course",
+                data: { enrollment: existingEnrollment },
+            });
+        }
+        const enrollment = new Enrollment({
+            user: userId,
+            course: courseId,
+            status: EnrollmentStatus.ACTIVE,
+            enrolledAt: new Date(),
+            lastAccessedAt: new Date(),
+            progressPercentage: 0,
+            totalWatchTime: 0,
+            completedLessons: [],
+        });
+        console.log("enrollment before save:", enrollment);
+        await enrollment.save();
+        const populatedEnrollment = await Enrollment.findById(enrollment._id)
+            .populate("course", "title description instructor image.url")
+            .populate("user", "firstName lastName email");
+        await User.findByIdAndUpdate(userId, {
+            $push: { enrolledCourses: courseId },
+        });
+        await Course.findByIdAndUpdate(courseId, {
+            $push: { studentsEnrolled: userId },
+        });
+        console.log("populatedEnrollment:", populatedEnrollment);
+        res.status(201).json({
+            success: true,
+            message: "Successfully enrolled in free course",
+            data: {
+                enrollment: formatMongoData(populatedEnrollment),
+            },
+        });
+    }
+    catch (error) {
+        console.error("Free enrollment error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to enroll in course",
         });
     }
 };

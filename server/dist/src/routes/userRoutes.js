@@ -1,8 +1,9 @@
 import { Router } from "express";
-import { registerUser, loginUser, verifyEmailController, resendVerificationEmailController, forgotPasswordController, resetPasswordController, getAllUsersController, getUserByIdController, getUserByUsernameController, getCurrentUserController, refreshTokenController, logoutController, } from "../controllers/userController";
+import { registerUser, loginUser, verifyEmailController, resendVerificationEmailController, forgotPasswordController, resetPasswordController, getAllUsersController, getUserByIdController, getUserByUsernameController, getCurrentUserController, refreshTokenController, logoutController, updateProfileController, changePasswordController, updateAvatarController, } from "../controllers/userController";
 import { uploadMiddleware, uploadErrorHandler, } from "../middlewares/upload.middleware";
 import { validateRequest } from "../middlewares/validation.middleware";
 import { authenticateToken } from "../middlewares/auth.middleware";
+import { registerValidationSchema, loginValidationSchema, resendVerificationSchema, forgotPasswordSchema, resetPasswordSchema, getUsersQuerySchema, getUserByIdSchema, getUserByUsernameSchema, } from "../validations/user.validation";
 const validateQuery = (schema) => {
     return (req, res, next) => {
         const { error, value } = schema.validate(req.query);
@@ -29,7 +30,6 @@ const validateParams = (schema) => {
         next();
     };
 };
-import { registerValidationSchema, loginValidationSchema, resendVerificationSchema, forgotPasswordSchema, resetPasswordSchema, getUsersQuerySchema, getUserByIdSchema, getUserByUsernameSchema, } from "../validations/user.validation";
 const userRouter = Router();
 // Protected route - must be before other routes to avoid conflicts
 userRouter.get("/me", authenticateToken, getCurrentUserController);
@@ -44,4 +44,8 @@ userRouter.post("/forgot-password", validateRequest(forgotPasswordSchema), forgo
 userRouter.post("/reset-password", validateRequest(resetPasswordSchema), resetPasswordController);
 userRouter.get("/username/:username", validateParams(getUserByUsernameSchema), getUserByUsernameController);
 userRouter.get("/:userId", validateParams(getUserByIdSchema), getUserByIdController);
+// Profile management routes - must be authenticated
+userRouter.put("/profile", authenticateToken, updateProfileController);
+userRouter.put("/change-password", authenticateToken, changePasswordController);
+userRouter.put("/avatar", authenticateToken, uploadMiddleware, uploadErrorHandler, updateAvatarController);
 export default userRouter;

@@ -260,6 +260,7 @@ const CourseWatch: React.FC = () => {
   );
 
   const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [hasShownCompletionModal, setHasShownCompletionModal] = useState(false);
 
   const [lessonQuizStates, setLessonQuizStates] = useState<{
     [key: string]: { completed: boolean; passed: boolean };
@@ -315,6 +316,15 @@ const CourseWatch: React.FC = () => {
     }
   }, [course]);
 
+  // Check if completion modal has been shown for this course
+  useEffect(() => {
+    if (courseId && user?.id) {
+      const modalKey = `completion-modal-shown-${courseId}-${user.id}`;
+      const hasShown = localStorage.getItem(modalKey) === "true";
+      setHasShownCompletionModal(hasShown);
+    }
+  }, [courseId, user?.id]);
+
   useEffect(() => {
     const handleMouseMove = () => {
       setShowControls(true);
@@ -367,6 +377,31 @@ const CourseWatch: React.FC = () => {
       }
     };
   }, [isPlaying, currentTime]);
+
+  useEffect(() => {
+    if (
+      courseProgress?.data?.progressPercentage === 100 &&
+      course &&
+      user &&
+      !hasShownCompletionModal &&
+      !showCompletionModal
+    ) {
+      const timer = setTimeout(() => {
+        setShowCompletionModal(true);
+        const modalKey = `completion-modal-shown-${courseId}-${user.id}`;
+        localStorage.setItem(modalKey, "true");
+        setHasShownCompletionModal(true);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [
+    courseProgress?.data?.progressPercentage,
+    course,
+    user,
+    hasShownCompletionModal,
+    showCompletionModal,
+    courseId,
+  ]);
 
   const loadLesson = (sectionIndex: number, lessonIndex: number) => {
     if (!course || !course.sections[sectionIndex]?.lessons[lessonIndex]) return;
@@ -1697,10 +1732,10 @@ const CourseWatch: React.FC = () => {
                     {certificateStatus?.hasCertificate ? (
                       // Certificate already issued
                       <div>
-                        <div className="flex items-center gap-3 mb-4">
-                          <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
+                        <div className="flex items-center justify-center mb-6">
+                          <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center shadow-lg">
                             <svg
-                              className="w-6 h-6 text-white"
+                              className="w-8 h-8 text-white"
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -1713,20 +1748,134 @@ const CourseWatch: React.FC = () => {
                               />
                             </svg>
                           </div>
-                          <div className="text-left">
-                            <h4 className="font-semibold text-white">
-                              Certificate Issued
-                            </h4>
-                            <p className="text-sm text-gray-400">
-                              Your certificate has been sent to your email
-                            </p>
+                        </div>
+
+                        <div className="text-center mb-6">
+                          <h4 className="text-xl font-bold text-white mb-2">
+                            🎉 Certificate Issued Successfully!
+                          </h4>
+                          <p className="text-gray-300">
+                            Your certificate has been generated and sent to your
+                            email address.
+                          </p>
+                        </div>
+
+                        <div className="bg-gradient-to-br from-green-900/40 to-emerald-900/30 border border-green-500/30 rounded-xl p-6 mb-6 backdrop-blur-sm">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
+                                <svg
+                                  className="w-5 h-5 text-green-400"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+                                  />
+                                </svg>
+                              </div>
+                              <div>
+                                <p className="text-sm text-gray-400">
+                                  Certificate ID
+                                </p>
+                                <p className="text-green-300 font-mono text-sm font-medium">
+                                  {certificateStatus.certificateId}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                                <svg
+                                  className="w-5 h-5 text-blue-400"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                  />
+                                </svg>
+                              </div>
+                              <div>
+                                <p className="text-sm text-gray-400">
+                                  Issued Date
+                                </p>
+                                <p className="text-blue-300 font-medium text-sm">
+                                  {certificateStatus.issuedAt
+                                    ? new Date(
+                                        certificateStatus.issuedAt
+                                      ).toLocaleDateString("en-US", {
+                                        year: "numeric",
+                                        month: "long",
+                                        day: "numeric",
+                                      })
+                                    : "Today"}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                                <svg
+                                  className="w-5 h-5 text-purple-400"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                                  />
+                                </svg>
+                              </div>
+                              <div>
+                                <p className="text-sm text-gray-400">Course</p>
+                                <p className="text-purple-300 font-medium text-sm">
+                                  {course?.title}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-orange-500/20 rounded-lg flex items-center justify-center">
+                                <svg
+                                  className="w-5 h-5 text-orange-400"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                  />
+                                </svg>
+                              </div>
+                              <div>
+                                <p className="text-sm text-gray-400">Student</p>
+                                <p className="text-orange-300 font-medium text-sm">
+                                  {user?.firstName} {user?.lastName}
+                                </p>
+                              </div>
+                            </div>
                           </div>
                         </div>
 
-                        <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-4 mb-4">
-                          <div className="flex items-center gap-3">
+                        <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-4">
+                          <div className="flex items-start gap-3">
                             <svg
-                              className="w-5 h-5 text-green-400"
+                              className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0"
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -1735,35 +1884,39 @@ const CourseWatch: React.FC = () => {
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                                 strokeWidth={2}
-                                d="M5 13l4 4L19 7"
+                                d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                               />
                             </svg>
-                            <div className="text-left">
-                              <p className="text-green-300 font-medium">
-                                Certificate ID:{" "}
-                                {certificateStatus.certificateId}
+                            <div>
+                              <p className="text-blue-300 font-medium text-sm mb-1">
+                                📧 Certificate Sent to Email
                               </p>
-                              {certificateStatus.issuedAt && (
-                                <p className="text-green-400 text-sm">
-                                  Issued on{" "}
-                                  {certificateStatus.issuedAt.toLocaleDateString()}
-                                </p>
-                              )}
+                              <p className="text-gray-400 text-sm">
+                                Your certificate has been sent to{" "}
+                                <span className="text-blue-300 font-medium">
+                                  {user?.email}
+                                </span>
+                                . Please check your inbox and spam folder if you
+                                can't find it.
+                              </p>
                             </div>
                           </div>
                         </div>
 
-                        <div className="mt-4 text-xs text-gray-500 text-center">
-                          ✅ Certificate has been sent to your email address
+                        <div className="text-center">
+                          <p className="text-xs text-gray-500 mb-4">
+                            🎯 This certificate verifies your successful
+                            completion of this course on Skillify
+                          </p>
                         </div>
                       </div>
                     ) : (
                       // Certificate not yet issued
                       <div>
-                        <div className="flex items-center gap-3 mb-4">
-                          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        <div className="text-center mb-6">
+                          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
                             <svg
-                              className="w-6 h-6 text-white"
+                              className="w-8 h-8 text-white"
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -1776,13 +1929,77 @@ const CourseWatch: React.FC = () => {
                               />
                             </svg>
                           </div>
-                          <div className="text-left">
-                            <h4 className="font-semibold text-white">
-                              Certificate Available
-                            </h4>
-                            <p className="text-sm text-gray-400">
-                              Get your certificate of completion
-                            </p>
+                          <h4 className="text-xl font-bold text-white mb-2">
+                            📜 Certificate Ready
+                          </h4>
+                          <p className="text-gray-300">
+                            Your certificate of completion is ready to be
+                            generated and sent to your email.
+                          </p>
+                        </div>
+
+                        <div className="bg-gradient-to-br from-blue-900/30 to-purple-900/20 border border-blue-500/30 rounded-xl p-6 mb-6">
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
+                                <svg
+                                  className="w-4 h-4 text-green-400"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M5 13l4 4L19 7"
+                                  />
+                                </svg>
+                              </div>
+                              <span className="text-green-300 text-sm font-medium">
+                                Course completed successfully
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                                <svg
+                                  className="w-4 h-4 text-blue-400"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                                  />
+                                </svg>
+                              </div>
+                              <span className="text-blue-300 text-sm font-medium">
+                                Certificate will be sent to {user?.email}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                                <svg
+                                  className="w-4 h-4 text-purple-400"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                                  />
+                                </svg>
+                              </div>
+                              <span className="text-purple-300 text-sm font-medium">
+                                Digitally signed and verifiable
+                              </span>
+                            </div>
                           </div>
                         </div>
 
@@ -1803,17 +2020,17 @@ const CourseWatch: React.FC = () => {
                             }
                           }}
                           disabled={isGeneratingCertificate}
-                          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-600 text-white py-3 px-6 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-3"
+                          className="group w-full bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 hover:from-blue-700 hover:via-purple-700 hover:to-blue-800 disabled:from-gray-600 disabled:to-gray-700 text-white py-4 px-8 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:shadow-blue-500/25 hover:scale-105 active:scale-95 disabled:hover:scale-100"
                         >
                           {isGeneratingCertificate ? (
                             <>
-                              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                              Generating Certificate...
+                              <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                              <span>Generating Your Certificate...</span>
                             </>
                           ) : (
                             <>
                               <svg
-                                className="w-5 h-5"
+                                className="w-6 h-6 group-hover:scale-110 transition-transform duration-200"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -1825,10 +2042,14 @@ const CourseWatch: React.FC = () => {
                                   d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                                 />
                               </svg>
-                              Request Certificate
+                              <span>🎉 Request My Certificate</span>
                             </>
                           )}
                         </button>
+
+                        <p className="text-xs text-gray-500 text-center mt-4">
+                          ⚡ Certificate generation takes 15-30 seconds
+                        </p>
 
                         <div className="mt-4 text-xs text-gray-500 text-center">
                           📧 Certificate will be sent to your email as a PDF

@@ -37,6 +37,7 @@ export const getSectionById = async (sectionId) => {
     }
     return section;
 };
+import { deleteFromCloudinary } from "../middlewares/course-upload.middleware";
 export const createSection = async (sectionData, instructorId) => {
     const course = await Course.findOne({
         _id: sectionData.course,
@@ -52,12 +53,21 @@ export const createSection = async (sectionData, instructorId) => {
             .select("order");
         order = lastSection ? lastSection.order + 1 : 1;
     }
-    const section = new Section({
+    // Handle thumbnail upload
+    const sectionPayload = {
         title: sectionData.title,
         description: sectionData.description,
         order,
-        course: sectionData.course,
-    });
+        course: new mongoose.Types.ObjectId(sectionData.course),
+        thumbnail: undefined,
+    };
+    if (sectionData.uploadedFiles?.thumbnail) {
+        sectionPayload.thumbnail = {
+            url: sectionData.uploadedFiles.thumbnail.url,
+            publicId: sectionData.uploadedFiles.thumbnail.publicId,
+        };
+    }
+    const section = new Section(sectionPayload);
     await section.save();
     return section.populate("course", "title instructor");
 };
@@ -69,7 +79,21 @@ export const updateSection = async (sectionId, updateData, instructorId) => {
     if (section.course.instructor.toString() !== instructorId) {
         throw new Error("You are not authorized to update this section");
     }
-    Object.assign(section, updateData);
+    // Handle thumbnail update
+    const updatePayload = { ...updateData };
+    if (updatePayload.uploadedFiles?.thumbnail) {
+        // Delete old thumbnail if exists
+        if (section.thumbnail?.publicId) {
+            await deleteFromCloudinary(section.thumbnail.publicId, "image");
+        }
+        updatePayload.thumbnail = {
+            url: updatePayload.uploadedFiles.thumbnail.url,
+            publicId: updatePayload.uploadedFiles.thumbnail.publicId,
+        };
+    }
+    // Remove uploadedFiles from payload before saving
+    delete updatePayload.uploadedFiles;
+    Object.assign(section, updatePayload);
     await section.save();
     return section;
 };

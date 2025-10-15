@@ -14,7 +14,7 @@ const enrollmentSchema = new mongoose.Schema({
     order: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Order",
-        required: true,
+        required: false, // Optional for free courses
     },
     status: {
         type: String,

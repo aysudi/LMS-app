@@ -19,6 +19,9 @@ import stripeRouter from "./routes/stripeRoute.js";
 import enrollmentRouter from "./routes/enrollmentRoutes.js";
 import userProgressRouter from "./routes/userProgressRoutes.js";
 import instructorRouter from "./routes/instructorRoutes.js";
+import adminRouter from "./routes/adminRoutes.js";
+import qaRouter from "./routes/qaRoutes.js";
+import certificateRouter from "./routes/certificateRoutes.js";
 const app = express();
 app.use(passport.initialize());
 // Middleware
@@ -62,6 +65,9 @@ app.use("/api/payments", stripeRouter);
 app.use("/api/enrollments", enrollmentRouter);
 app.use("/api/user-progress", userProgressRouter);
 app.use("/api/instructor", instructorRouter);
+app.use("/api/admin", adminRouter);
+app.use("/api/qa", qaRouter);
+app.use("/api/certificates", certificateRouter);
 // 404 handler
 app.use(notFoundHandler);
 // Global error handler
