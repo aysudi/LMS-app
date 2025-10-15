@@ -93,7 +93,9 @@ export const courseToasts = {
     message: "Failed to update course status. Please try again.",
     duration: 4000,
   }),
-}; // Section-related toasts
+};
+
+// Section-related toasts
 export const sectionToasts = {
   created: (sectionTitle: string): ToastConfig => ({
     title: "✅ Section Added",

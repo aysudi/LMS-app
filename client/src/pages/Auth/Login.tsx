@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useFormik } from "formik";
-import { useSnackbar } from "notistack";
 import {
   FaEnvelope,
   FaLock,
@@ -22,6 +21,8 @@ import { useAuthContext } from "../../context/AuthContext";
 import { getErrorMessage } from "../../utils/errorUtils";
 import loginValidationSchema from "../../validations/loginValidation";
 import Loading from "../../components/Common/Loading";
+import { useToast } from "../../components/UI/ToastProvider";
+import { generalToasts } from "../../utils/toastUtils";
 
 type LoginStatus = "idle" | "loading" | "success" | "error";
 
@@ -32,24 +33,17 @@ const Login = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { enqueueSnackbar } = useSnackbar();
+  const { showToast } = useToast();
   const { refetchUser } = useAuthContext();
   const loginMutation = useLogin();
 
   useEffect(() => {
     const { fromVerification, message } = location.state || {};
     if (fromVerification && message) {
-      enqueueSnackbar(message, {
-        variant: "success",
-        autoHideDuration: 6000,
-        anchorOrigin: {
-          vertical: "top",
-          horizontal: "right",
-        },
-      });
+      showToast(generalToasts.success("Email Verified", message));
       navigate("/auth/login", { replace: true });
     }
-  }, [location.state, enqueueSnackbar, navigate]);
+  }, [location.state, showToast, navigate]);
 
   const formik = useFormik({
     initialValues: {
@@ -69,10 +63,22 @@ const Login = () => {
 
         setLoginStatus("success");
 
-        enqueueSnackbar(`🎉 Welcome back, ${result.data.user.firstName}!`, {
-          variant: "success",
-          autoHideDuration: 4000,
-        });
+        showToast(
+          generalToasts.success(
+            "Welcome back!",
+            `🎉 Welcome back, ${result.data.user.firstName}!`
+          )
+        );
+
+        // Redirect based on user role
+        setTimeout(() => {
+          const user = result.data.user;
+          if (user.role === "admin") {
+            navigate("/admin/dashboard", { replace: true });
+          } else {
+            navigate("/", { replace: true });
+          }
+        }, 1500);
 
         if (rememberMe) {
           localStorage.setItem("rememberMe", "true");
@@ -83,26 +89,17 @@ const Login = () => {
         }
 
         if (!result.data.user.isEmailVerified) {
-          enqueueSnackbar(
-            "📧 Please verify your email to access all features",
-            {
-              variant: "info",
-              autoHideDuration: 6000,
-            }
+          showToast(
+            generalToasts.info(
+              "Email Verification Required",
+              "📧 Please verify your email to access all features"
+            )
           );
         }
-
-        setTimeout(() => {
-          navigate("/", { replace: true });
-        }, 1000);
       } catch (error) {
         setLoginStatus("error");
         const errorMessage = getErrorMessage(error);
-
-        enqueueSnackbar(`❌ Login failed: ${errorMessage}`, {
-          variant: "error",
-          autoHideDuration: 8000,
-        });
+        showToast(generalToasts.error("Login Failed", errorMessage));
 
         setTimeout(() => {
           setLoginStatus("idle");

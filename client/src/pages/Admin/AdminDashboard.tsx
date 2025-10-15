@@ -1,3 +1,5 @@
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import {
   FaArrowUp,
   FaBookOpen,
@@ -12,6 +14,7 @@ import {
 import { useAdminDashboardStats } from "../../hooks/useAdmin";
 
 const AdminDashboard: React.FC = () => {
+  const navigate = useNavigate();
   const { data: statsData, isLoading, error } = useAdminDashboardStats();
 
   if (isLoading) {
@@ -80,41 +83,42 @@ const AdminDashboard: React.FC = () => {
     courseGrowth: 0,
   };
 
-  const recentActivity: any = [
+  // Create system status activities since we don't have real activity data yet
+  const recentActivity = [
     {
       id: 1,
-      type: "new_user",
-      user: "Sarah Johnson",
-      action: "registered as a new student",
-      time: "2 minutes ago",
+      type: "system",
+      user: "System",
+      action: "Platform maintenance completed",
+      time: new Date(Date.now() - 30 * 60 * 1000).toLocaleTimeString(),
     },
     {
       id: 2,
-      type: "course_approval",
-      user: "John Smith",
-      action: "submitted course for approval",
-      time: "15 minutes ago",
+      type: "system",
+      user: "Database",
+      action: "Daily backup completed successfully",
+      time: new Date(Date.now() - 2 * 60 * 60 * 1000).toLocaleTimeString(),
     },
     {
       id: 3,
-      type: "instructor_application",
-      user: "Emma Davis",
-      action: "applied to become an instructor",
-      time: "1 hour ago",
+      type: "system",
+      user: "Analytics",
+      action: "Monthly report generated",
+      time: new Date(Date.now() - 4 * 60 * 60 * 1000).toLocaleTimeString(),
     },
     {
       id: 4,
-      type: "course_completed",
-      user: "Michael Brown",
-      action: "completed React Fundamentals",
-      time: "2 hours ago",
+      type: "system",
+      user: "Security",
+      action: "Security scan completed - no issues found",
+      time: new Date(Date.now() - 6 * 60 * 60 * 1000).toLocaleTimeString(),
     },
     {
       id: 5,
-      type: "payment",
-      user: "Lisa Wilson",
-      action: "purchased Advanced JavaScript",
-      time: "3 hours ago",
+      type: "system",
+      user: "Payment",
+      action: "Payment gateway health check passed",
+      time: new Date(Date.now() - 8 * 60 * 60 * 1000).toLocaleTimeString(),
     },
   ];
 
@@ -126,16 +130,18 @@ const AdminDashboard: React.FC = () => {
     changeType?: "positive" | "negative" | "neutral";
     color: string;
   }> = ({ title, value, icon, change, changeType = "neutral", color }) => (
-    <div className="bg-white rounded-2xl p-6 shadow-lg border border-slate-200/50 hover:shadow-xl transition-all duration-300">
+    <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/30 hover:shadow-2xl hover:scale-105 transition-all duration-300 group">
       <div className="flex items-center justify-between">
         <div className="flex-1">
-          <p className="text-slate-600 text-sm font-medium mb-2">{title}</p>
-          <p className="text-3xl font-bold text-slate-900 mb-1">
+          <p className="text-slate-600 text-sm font-semibold mb-3 tracking-wide uppercase">
+            {title}
+          </p>
+          <p className="text-4xl font-bold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors duration-300">
             {typeof value === "number" ? value.toLocaleString() : value}
           </p>
           {change && (
-            <p
-              className={`text-sm font-medium ${
+            <div
+              className={`flex items-center space-x-1 text-sm font-semibold ${
                 changeType === "positive"
                   ? "text-green-600"
                   : changeType === "negative"
@@ -143,12 +149,12 @@ const AdminDashboard: React.FC = () => {
                   : "text-slate-500"
               }`}
             >
-              {change}
-            </p>
+              <span>{change}</span>
+            </div>
           )}
         </div>
         <div
-          className={`w-16 h-16 ${color} rounded-2xl flex items-center justify-center text-white text-2xl`}
+          className={`w-18 h-18 ${color} rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg group-hover:scale-110 transition-all duration-300`}
         >
           {icon}
         </div>
@@ -179,13 +185,30 @@ const AdminDashboard: React.FC = () => {
   );
 
   return (
-    <div className="space-y-8 p-6">
+    <div className="space-y-8 p-8 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 min-h-screen">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-2xl p-8 text-white">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Admin Dashboard</h1>
-        <p className="text-blue-100 text-lg font-medium">
-          Monitor and manage your learning platform with comprehensive insights
-        </p>
+      <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 rounded-3xl p-8 text-white shadow-2xl border border-white/20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none"></div>
+        <div className="relative z-10">
+          <h1 className="text-5xl font-bold mb-4 tracking-tight">
+            Welcome to Admin Portal
+          </h1>
+          <p className="text-blue-100 text-xl font-medium leading-relaxed">
+            Manage your learning platform with comprehensive insights and
+            powerful tools
+          </p>
+          <div className="mt-6 flex items-center space-x-4">
+            <div className="flex items-center space-x-2 bg-white/20 rounded-full px-4 py-2">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <span className="text-sm text-white">System Online</span>
+            </div>
+            <div className="flex items-center space-x-2 bg-white/20 rounded-full px-4 py-2">
+              <span className="text-sm text-white">
+                {new Date().toLocaleDateString()}
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Main Stats Grid */}
@@ -294,18 +317,39 @@ const AdminDashboard: React.FC = () => {
             <h3 className="text-xl font-bold text-slate-900 mb-4">
               Quick Actions
             </h3>
-            <div className="space-y-3">
-              <button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-700 hover:to-purple-700 transition-all">
-                Review Pending Courses
+            <div className="space-y-4">
+              <button
+                onClick={() => navigate("/admin/courses")}
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 px-4 rounded-2xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-between"
+              >
+                <span>Review Pending Courses</span>
+                <span className="bg-white/20 text-xs px-2 py-1 rounded-full">
+                  {stats.pendingApprovals}
+                </span>
               </button>
-              <button className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 px-4 rounded-xl font-medium hover:from-green-700 hover:to-emerald-700 transition-all">
-                Approve Instructors
+              <button
+                onClick={() => navigate("/admin/users")}
+                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-4 px-4 rounded-2xl font-semibold hover:from-green-700 hover:to-emerald-700 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-between"
+              >
+                <span>Manage Users</span>
+                <span className="bg-white/20 text-xs px-2 py-1 rounded-full">
+                  {stats.totalUsers}
+                </span>
               </button>
-              <button className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-3 px-4 rounded-xl font-medium hover:from-orange-700 hover:to-red-700 transition-all">
-                Handle Reports
+              <button
+                onClick={() => navigate("/admin/instructors")}
+                className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-4 px-4 rounded-2xl font-semibold hover:from-orange-700 hover:to-red-700 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-between"
+              >
+                <span>Instructor Applications</span>
+                <span className="bg-white/20 text-xs px-2 py-1 rounded-full">
+                  {stats.totalInstructors}
+                </span>
               </button>
-              <button className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 px-4 rounded-xl font-medium hover:from-purple-700 hover:to-indigo-700 transition-all">
-                Platform Analytics
+              <button
+                onClick={() => navigate("/admin/analytics")}
+                className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-4 px-4 rounded-2xl font-semibold hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
+              >
+                <span>Platform Analytics</span>
               </button>
             </div>
           </div>

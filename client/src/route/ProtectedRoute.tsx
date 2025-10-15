@@ -7,13 +7,10 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { user, isAuthenticated, isLoading } = useAuthContext();
+  const { isAuthenticated, isLoading } = useAuthContext();
 
   if (isLoading) {
     return <Loading variant="overlay" message="Verifying access..." />;
-  }
-  if (user && user?.role === "admin") {
-    return <Navigate to="/admin/dashboard" replace />;
   }
 
   return isAuthenticated ? (
