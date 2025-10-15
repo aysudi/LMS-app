@@ -8,6 +8,7 @@ const AdminLayout: React.FC = () => {
   const location = useLocation();
 
   const isActive = (path: string) => {
+    console.log(location.pathname === path);
     return location.pathname === path;
   };
 

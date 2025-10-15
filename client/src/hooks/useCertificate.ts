@@ -58,10 +58,20 @@ export const useCertificateGeneration = () => {
           certificateData
         );
 
+        if (!result.success && result.message?.includes("already exists")) {
+          return {
+            success: true,
+            certificateId: certificateId,
+            emailSent: true,
+            error: "Certificate already exists",
+          };
+        }
+
         return {
           success: result.success,
           certificateId: result.certificateId || certificateId,
           emailSent: result.emailSent || false,
+          error: result.success ? undefined : result.message,
         };
       } catch (error) {
         console.error("Certificate generation failed:", error);
@@ -94,7 +104,12 @@ export const useCertificateGeneration = () => {
         });
       }
     },
-    onError: (_error, data) => {
+    onError: (error, data) => {
+      // Don't show error toast if certificate already exists
+      if (error.message?.includes("already exists")) {
+        return;
+      }
+
       showToast({
         type: "error",
         title: "Certificate Generation Failed",

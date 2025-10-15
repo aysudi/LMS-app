@@ -32,15 +32,16 @@ export const generateCertificate = async (
       landscape: true,
       printBackground: true,
       margin: {
-        top: "0.5in",
-        right: "0.5in",
-        bottom: "0.5in",
-        left: "0.5in",
+        top: "0.2in",
+        right: "0.2in",
+        bottom: "0.2in",
+        left: "0.2in",
       },
+      preferCSSPageSize: true,
     });
 
     await browser.close();
-    return pdfBuffer;
+    return Buffer.from(pdfBuffer);
   } catch (error) {
     console.error("Certificate generation error:", error);
     throw new Error("Failed to generate certificate PDF");
@@ -70,7 +71,7 @@ const generateCertificateHTML = (data: CertificateData): string => {
         
         .certificate {
           width: 10.5in;
-          height: 7.5in;
+          height: 7in;
           background: white;
           border-radius: 20px;
           padding: 60px;
@@ -237,8 +238,8 @@ const generateCertificateHTML = (data: CertificateData): string => {
         
         .seal {
           position: absolute;
-          bottom: 80px;
-          right: 80px;
+          top: 32px;
+          left: 23px;
           width: 120px;
           height: 120px;
           border-radius: 50%;

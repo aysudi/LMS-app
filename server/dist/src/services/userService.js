@@ -56,6 +56,52 @@ export const getUserById = async (userId) => {
     const userProfile = createUserProfile(user);
     return formatMongoData(userProfile);
 };
+export const getUserModelById = async (userId) => {
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+        throw new Error("Invalid user ID");
+    }
+    const user = await User.findOne({ _id: userId, isActive: true });
+    if (!user) {
+        throw new Error("User not found");
+    }
+    return user;
+};
+export const updateUserProfile = async (userId, updateData) => {
+    const user = await getUserModelById(userId);
+    // Remove sensitive fields that shouldn't be updated via this endpoint
+    delete updateData.password;
+    delete updateData.email; // Email updates might require verification
+    delete updateData.role;
+    delete updateData.isEmailVerified;
+    Object.assign(user, updateData);
+    await user.save();
+    const userProfile = createUserProfile(user);
+    return formatMongoData(userProfile);
+};
+export const changeUserPassword = async (userId, currentPassword, newPassword) => {
+    const user = await User.findOne({ _id: userId, isActive: true }).select("+password");
+    if (!user) {
+        throw new Error("User not found");
+    }
+    if (!user.password) {
+        throw new Error("User password not found");
+    }
+    const isCurrentPasswordValid = await comparePassword(currentPassword, user.password);
+    if (!isCurrentPasswordValid) {
+        throw new Error("Current password is incorrect");
+    }
+    const hashedNewPassword = await hashPassword(newPassword);
+    user.password = hashedNewPassword;
+    await user.save();
+};
+export const updateUserAvatar = async (userId, avatarData) => {
+    const user = await getUserModelById(userId);
+    user.avatar = avatarData.url;
+    user.public_id = avatarData.publicId;
+    await user.save();
+    const userProfile = createUserProfile(user);
+    return formatMongoData(userProfile);
+};
 export const getUserByUsername = async (username) => {
     const user = await User.findOne({ username, isActive: true })
         .select("-password -emailVerificationToken -passwordResetToken")

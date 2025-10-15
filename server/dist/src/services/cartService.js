@@ -92,14 +92,11 @@ export const removeCourseFromCart = async (userId, courseId) => {
 };
 export const clearUserCart = async (userId) => {
     const cart = await Cart.findOne({ userId });
-    console.log("Clearing cart for user:", userId);
     if (!cart) {
         throw new Error("Cart not found");
     }
-    // Clear cart collection
     cart.items = [];
     await cart.save();
-    // Also clear user's cart array
     await User.findByIdAndUpdate(userId, { $set: { cart: [] } }, { new: true });
     return {
         totalItems: 0,

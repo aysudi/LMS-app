@@ -46,6 +46,7 @@ export const updateLesson = async (req, res) => {
         });
     }
     catch (error) {
+        console.error("Error updating lesson:", error);
         res.status(400).json({
             success: false,
             message: error.message,

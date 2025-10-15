@@ -1,4 +1,4 @@
-import { getInstructorTotalEarnings, getInstructorEarningsByCourse, updatePayoutStatus } from "../services/instructorEarningsService.js";
+import { getInstructorTotalEarnings, getInstructorEarningsByCourse, updatePayoutStatus, } from "../services/instructorEarningsService.js";
 // Get instructor total earnings summary
 export const getInstructorEarnings = async (req, res) => {
     try {
@@ -12,14 +12,14 @@ export const getInstructorEarnings = async (req, res) => {
         const earnings = await getInstructorTotalEarnings(instructorId);
         res.json({
             success: true,
-            data: earnings
+            data: earnings,
         });
     }
     catch (error) {
         console.error("Get instructor earnings error:", error);
         res.status(500).json({
             success: false,
-            message: "Failed to get instructor earnings"
+            message: "Failed to get instructor earnings",
         });
     }
 };
@@ -37,14 +37,14 @@ export const getInstructorEarningsByCourseController = async (req, res) => {
         const earnings = await getInstructorEarningsByCourse(instructorId, courseId);
         res.json({
             success: true,
-            data: earnings
+            data: earnings,
         });
     }
     catch (error) {
         console.error("Get instructor earnings by course error:", error);
         res.status(500).json({
             success: false,
-            message: "Failed to get instructor earnings by course"
+            message: "Failed to get instructor earnings by course",
         });
     }
 };
@@ -62,13 +62,13 @@ export const updateInstructorPayoutStatus = async (req, res) => {
         if (!earningIds || !Array.isArray(earningIds) || earningIds.length === 0) {
             return res.status(400).json({
                 success: false,
-                message: "Earning IDs are required"
+                message: "Earning IDs are required",
             });
         }
         if (!["pending", "processing", "completed", "failed"].includes(status)) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid payout status"
+                message: "Invalid payout status",
             });
         }
         const result = await updatePayoutStatus(instructorId, earningIds, status);
@@ -76,15 +76,15 @@ export const updateInstructorPayoutStatus = async (req, res) => {
             success: true,
             data: {
                 modifiedCount: result.modifiedCount,
-                message: `Updated ${result.modifiedCount} earning records`
-            }
+                message: `Updated ${result.modifiedCount} earning records`,
+            },
         });
     }
     catch (error) {
         console.error("Update payout status error:", error);
         res.status(500).json({
             success: false,
-            message: "Failed to update payout status"
+            message: "Failed to update payout status",
         });
     }
 };

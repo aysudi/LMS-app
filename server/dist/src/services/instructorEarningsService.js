@@ -12,7 +12,7 @@ export const createInstructorEarningsForOrder = async (order) => {
             }
             const grossAmount = item.actualPrice;
             // Platform takes 30% commission, instructor gets 70%
-            const platformFeePercentage = 0.30;
+            const platformFeePercentage = 0.3;
             const platformFee = grossAmount * platformFeePercentage;
             const instructorShare = grossAmount - platformFee;
             // Check if earnings already exist to prevent duplicates
@@ -65,31 +65,31 @@ export const getInstructorTotalEarnings = async (instructorId) => {
                         $cond: [
                             { $eq: ["$payoutStatus", "pending"] },
                             "$instructorShare",
-                            0
-                        ]
-                    }
+                            0,
+                        ],
+                    },
                 },
                 totalPaid: {
                     $sum: {
                         $cond: [
                             { $eq: ["$payoutStatus", "completed"] },
                             "$instructorShare",
-                            0
-                        ]
-                    }
+                            0,
+                        ],
+                    },
                 },
-                count: { $sum: 1 }
-            }
-        }
+                count: { $sum: 1 },
+            },
+        },
     ]);
-    return earnings[0] || {
+    return (earnings[0] || {
         totalGross: 0,
         totalPlatformFees: 0,
         totalInstructorShare: 0,
         totalPending: 0,
         totalPaid: 0,
-        count: 0
-    };
+        count: 0,
+    });
 };
 // Get instructor earnings by course
 export const getInstructorEarningsByCourse = async (instructorId, courseId) => {
@@ -106,9 +106,9 @@ export const getInstructorEarningsByCourse = async (instructorId, courseId) => {
 export const updatePayoutStatus = async (instructorId, earningIds, status) => {
     return await InstructorEarnings.updateMany({
         _id: { $in: earningIds },
-        instructor: instructorId
+        instructor: instructorId,
     }, {
         payoutStatus: status,
-        ...(status === "completed" && { paidAt: new Date() })
+        ...(status === "completed" && { paidAt: new Date() }),
     });
 };

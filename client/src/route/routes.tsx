@@ -38,6 +38,9 @@ import LessonEditPage from "../pages/Instructor/LessonEditPage";
 import AdminLayout from "../layout/AdminLayout";
 import AdminDashboard from "../pages/Admin/AdminDashboard";
 import AdminUsers from "../pages/Admin/AdminUsers";
+import AdminInstructors from "../pages/Admin/AdminInstructors";
+import AdminCourses from "../pages/Admin/AdminCourses";
+import AdminAnalytics from "../pages/Admin/AdminAnalytics";
 
 const ROUTES = [
   //client routes
@@ -236,6 +239,18 @@ const ROUTES = [
       {
         path: "users",
         element: <AdminUsers />,
+      },
+      {
+        path: "instructors",
+        element: <AdminInstructors />,
+      },
+      {
+        path: "courses",
+        element: <AdminCourses />,
+      },
+      {
+        path: "analytics",
+        element: <AdminAnalytics />,
       },
     ],
   },
