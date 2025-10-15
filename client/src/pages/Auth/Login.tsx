@@ -70,7 +70,6 @@ const Login = () => {
           )
         );
 
-        // Redirect based on user role
         setTimeout(() => {
           const user = result.data.user;
           if (user.role === "admin") {

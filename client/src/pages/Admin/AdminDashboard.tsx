@@ -67,7 +67,6 @@ const AdminDashboard: React.FC = () => {
     );
   }
 
-  // Use API data with fallback values
   const stats = statsData || {
     totalUsers: 0,
     totalInstructors: 0,
@@ -83,7 +82,6 @@ const AdminDashboard: React.FC = () => {
     courseGrowth: 0,
   };
 
-  // Create system status activities since we don't have real activity data yet
   const recentActivity = [
     {
       id: 1,
