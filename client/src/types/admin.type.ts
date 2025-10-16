@@ -12,6 +12,11 @@ export interface AdminUser {
   coursesCreated?: number;
   totalSpent?: number;
   totalEarned?: number;
+  isBanned?: boolean;
+  banReason?: string;
+  bannedAt?: string;
+  bannedBy?: string;
+  banExpiresAt?: string;
 }
 
 export interface AdminUsersQuery {

@@ -13,6 +13,14 @@ export const getAdminDashboardStats =
     return response.data.data;
   };
 
+// Admin Recent Activity
+export const getRecentActivity = async (limit: number = 10) => {
+  const response = await api.get(
+    `/api/admin/dashboard/activity?limit=${limit}`
+  );
+  return response.data.data;
+};
+
 // Admin User Management
 export const getAdminUsers = async (
   params: AdminUsersQuery = {}
@@ -69,6 +77,25 @@ export const deleteUser = async (
   return response.data;
 };
 
+export const banUser = async (
+  userId: string,
+  banDuration: number,
+  reason: string
+): Promise<{ success: boolean; message: string }> => {
+  const response = await api.post(`/api/auth/${userId}/ban`, {
+    banDuration,
+    reason,
+  });
+  return response.data;
+};
+
+export const unbanUser = async (
+  userId: string
+): Promise<{ success: boolean; message: string }> => {
+  const response = await api.post(`/api/auth/${userId}/unban`);
+  return response.data;
+};
+
 // Admin Course Management
 export const getAdminCourses = async (
   params: {
@@ -108,11 +135,14 @@ export const getAdminAnalytics = async (
 
 export default {
   getAdminDashboardStats,
+  getRecentActivity,
   getAdminUsers,
   updateUserStatus,
   updateUserRole,
   bulkUpdateUsers,
   deleteUser,
+  banUser,
+  unbanUser,
   getAdminCourses,
   approveCourse,
   rejectCourse,

@@ -11,11 +11,16 @@ import {
   FaTrophy,
   FaUsers,
 } from "react-icons/fa";
-import { useAdminDashboardStats } from "../../hooks/useAdmin";
+import {
+  useAdminDashboardStats,
+  useRecentActivity,
+} from "../../hooks/useAdmin";
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { data: statsData, isLoading, error } = useAdminDashboardStats();
+  const { data: recentActivityData, isLoading: activityLoading } =
+    useRecentActivity(5);
 
   if (isLoading) {
     return (
@@ -82,43 +87,20 @@ const AdminDashboard: React.FC = () => {
     courseGrowth: 0,
   };
 
-  const recentActivity = [
-    {
-      id: 1,
-      type: "system",
-      user: "System",
-      action: "Platform maintenance completed",
-      time: new Date(Date.now() - 30 * 60 * 1000).toLocaleTimeString(),
-    },
-    {
-      id: 2,
-      type: "system",
-      user: "Database",
-      action: "Daily backup completed successfully",
-      time: new Date(Date.now() - 2 * 60 * 60 * 1000).toLocaleTimeString(),
-    },
-    {
-      id: 3,
-      type: "system",
-      user: "Analytics",
-      action: "Monthly report generated",
-      time: new Date(Date.now() - 4 * 60 * 60 * 1000).toLocaleTimeString(),
-    },
-    {
-      id: 4,
-      type: "system",
-      user: "Security",
-      action: "Security scan completed - no issues found",
-      time: new Date(Date.now() - 6 * 60 * 60 * 1000).toLocaleTimeString(),
-    },
-    {
-      id: 5,
-      type: "system",
-      user: "Payment",
-      action: "Payment gateway health check passed",
-      time: new Date(Date.now() - 8 * 60 * 60 * 1000).toLocaleTimeString(),
-    },
-  ];
+  // Use real activity data or fallback to loading state
+  const recentActivity =
+    recentActivityData ||
+    (activityLoading
+      ? []
+      : [
+          {
+            id: "loading1",
+            type: "system",
+            user: "System",
+            action: "Loading recent activities...",
+            time: new Date().toLocaleTimeString(),
+          },
+        ]);
 
   const StatCard: React.FC<{
     title: string;

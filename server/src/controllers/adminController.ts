@@ -366,6 +366,120 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
   }
 };
 
+// Get recent activity
+export const getRecentActivity = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
+
+    if (!userId || userRole !== UserRole.ADMIN) {
+      return res.status(403).json({
+        success: false,
+        message: "Admin access required",
+      });
+    }
+
+    const limit = parseInt(req.query.limit as string) || 10;
+
+    // Get recent activities from different sources
+    const [recentUsers, recentCourses, recentEnrollments] = await Promise.all([
+      // Recent user registrations
+      User.find()
+        .sort({ createdAt: -1 })
+        .limit(3)
+        .select("firstName lastName email role createdAt"),
+
+      // Recent course submissions/updates
+      Course.find()
+        .sort({ updatedAt: -1 })
+        .limit(3)
+        .populate("instructor", "firstName lastName")
+        .select("title instructor isPublished updatedAt createdAt"),
+
+      // Recent enrollments
+      Enrollment.find()
+        .sort({ createdAt: -1 })
+        .limit(4)
+        .populate("user", "firstName lastName")
+        .populate("course", "title")
+        .select("user course createdAt"),
+    ]);
+
+    // Format activities into a unified structure
+    const activities: any[] = [];
+
+    // Add user registrations
+    recentUsers.forEach((user) => {
+      activities.push({
+        id: `user_${user._id}`,
+        type: "new_user",
+        user: `${user.firstName} ${user.lastName}`,
+        action: `registered as ${user.role}`,
+        time: user.createdAt,
+        metadata: { email: user.email, role: user.role },
+      });
+    });
+
+    // Add course activities
+    recentCourses.forEach((course) => {
+      const instructor = course.instructor as any;
+      const isPublished = (course as any).isPublished;
+      activities.push({
+        id: `course_${course._id}`,
+        type: isPublished ? "course_update" : "course_submission",
+        user: instructor
+          ? `${instructor.firstName} ${instructor.lastName}`
+          : "Unknown Instructor",
+        action: isPublished
+          ? `published course "${course.title}"`
+          : `submitted "${course.title}" for approval`,
+        time: course.updatedAt,
+        metadata: { courseTitle: course.title, isPublished },
+      });
+    });
+
+    // Add enrollment activities
+    recentEnrollments.forEach((enrollment) => {
+      const user = enrollment.user as any;
+      const course = enrollment.course as any;
+      activities.push({
+        id: `enrollment_${enrollment._id}`,
+        type: "user_action",
+        user: user ? `${user.firstName} ${user.lastName}` : "Unknown User",
+        action: course
+          ? `enrolled in "${course.title}"`
+          : "enrolled in a course",
+        time: enrollment.createdAt,
+        metadata: { courseTitle: course?.title },
+      });
+    });
+
+    // Sort by time (most recent first) and limit
+    activities.sort(
+      (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
+    );
+    const limitedActivities = activities.slice(0, limit);
+
+    // Format timestamps
+    const formattedActivities = limitedActivities.map((activity) => ({
+      ...activity,
+      time: new Date(activity.time).toLocaleString(),
+    }));
+
+    res.status(200).json({
+      success: true,
+      data: formattedActivities,
+    });
+  } catch (error: any) {
+    console.error("Error fetching recent activity:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch recent activity",
+      error: error.message,
+    });
+  }
+};
+
 export default {
   getAdminDashboardStats,
   getAdminUsers,
@@ -373,4 +487,5 @@ export default {
   updateUserRole,
   bulkUpdateUsers,
   deleteUser,
+  getRecentActivity,
 };

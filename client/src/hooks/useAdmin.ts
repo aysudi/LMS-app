@@ -20,6 +20,15 @@ export const useAdminDashboardStats = () => {
   });
 };
 
+export const useRecentActivity = (limit: number = 10) => {
+  return useQuery({
+    queryKey: ["recentActivity", limit],
+    queryFn: () => adminService.getRecentActivity(limit),
+    refetchInterval: 2 * 60 * 1000, // Refetch every 2 minutes
+    staleTime: 1 * 60 * 1000, // 1 minute
+  });
+};
+
 // Admin User Management Hooks
 export const useAdminUsers = (params: AdminUsersQuery = {}) => {
   return useQuery<AdminUsersResponse>({
@@ -151,6 +160,68 @@ export const useDeleteUser = () => {
         type: "error",
         title: "Delete Failed",
         message: error.response?.data?.message || "Failed to delete user",
+        duration: 5000,
+      });
+    },
+  });
+};
+
+export const useBanUser = () => {
+  const queryClient = useQueryClient();
+  const { showToast } = useToast();
+
+  return useMutation({
+    mutationFn: ({
+      userId,
+      banDuration,
+      reason,
+    }: {
+      userId: string;
+      banDuration: number;
+      reason: string;
+    }) => adminService.banUser(userId, banDuration, reason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["adminUsers"] });
+      queryClient.invalidateQueries({ queryKey: ["adminDashboardStats"] });
+      showToast({
+        type: "success",
+        title: "User Banned",
+        message: "User has been successfully banned",
+        duration: 3000,
+      });
+    },
+    onError: (error: any) => {
+      showToast({
+        type: "error",
+        title: "Ban Failed",
+        message: error.response?.data?.message || "Failed to ban user",
+        duration: 5000,
+      });
+    },
+  });
+};
+
+export const useUnbanUser = () => {
+  const queryClient = useQueryClient();
+  const { showToast } = useToast();
+
+  return useMutation({
+    mutationFn: (userId: string) => adminService.unbanUser(userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["adminUsers"] });
+      queryClient.invalidateQueries({ queryKey: ["adminDashboardStats"] });
+      showToast({
+        type: "success",
+        title: "User Unbanned",
+        message: "User has been successfully unbanned",
+        duration: 3000,
+      });
+    },
+    onError: (error: any) => {
+      showToast({
+        type: "error",
+        title: "Unban Failed",
+        message: error.response?.data?.message || "Failed to unban user",
         duration: 5000,
       });
     },
