@@ -10,16 +10,14 @@ interface EmailOptions {
 // Create transporter for sending emails
 const createTransporter = () => {
   if (process.env.NODE_ENV === "production") {
-    // Production email configuration
     return nodemailer.createTransport({
-      service: "gmail", // or your preferred email service
+      service: "gmail",
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASSWORD,
       },
     });
   } else {
-    // Development: Create a test transporter that doesn't actually send emails
     return nodemailer.createTransport({
       streamTransport: true,
       newline: "unix",
@@ -43,7 +41,6 @@ export const sendEmail = async (options: EmailOptions): Promise<void> => {
     };
 
     if (process.env.NODE_ENV === "production") {
-      // Actually send email in production
       const result = await transporter.sendMail(mailOptions);
       console.log(
         `✅ Email sent successfully to ${options.to}:`,
@@ -51,7 +48,6 @@ export const sendEmail = async (options: EmailOptions): Promise<void> => {
       );
     }
 
-    // Simulate email sending delay
     await new Promise((resolve) => setTimeout(resolve, 100));
   } catch (error: any) {
     console.error("Failed to send email:", error);

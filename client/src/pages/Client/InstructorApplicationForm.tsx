@@ -147,7 +147,7 @@ const InstructorApplicationForm: React.FC = () => {
           !formik.errors.motivation
         );
       case 4:
-        return true; // Optional step
+        return true;
       default:
         return false;
     }
