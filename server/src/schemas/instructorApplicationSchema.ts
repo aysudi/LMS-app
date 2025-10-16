@@ -132,7 +132,6 @@ const instructorApplicationSchema = new Schema<IInstructorApplication>(
   }
 );
 
-// Indexes for better query performance
 instructorApplicationSchema.index({ status: 1 });
 instructorApplicationSchema.index({ submittedAt: -1 });
 
