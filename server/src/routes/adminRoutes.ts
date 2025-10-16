@@ -12,6 +12,7 @@ import {
   updateUserRole,
   bulkUpdateUsers,
   deleteUser,
+  getRecentActivity,
 } from "../controllers/adminController";
 import { authenticateToken } from "../middlewares/auth.middleware";
 import { AuthRequest } from "../types/common.types";
@@ -21,6 +22,9 @@ const adminRouter = express.Router();
 // Dashboard routes
 adminRouter.get("/dashboard/stats", authenticateToken, (req, res) =>
   getAdminDashboardStats(req as AuthRequest, res)
+);
+adminRouter.get("/dashboard/activity", authenticateToken, (req, res) =>
+  getRecentActivity(req as AuthRequest, res)
 );
 
 // User management routes

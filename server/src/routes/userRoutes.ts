@@ -15,6 +15,8 @@ import {
   updateProfileController,
   changePasswordController,
   updateAvatarController,
+  banUserController,
+  unbanUserController,
 } from "../controllers/userController";
 import {
   uploadMiddleware,
@@ -124,5 +126,9 @@ userRouter.put(
   uploadErrorHandler,
   updateAvatarController
 );
+
+// Admin routes for user management
+userRouter.post("/:userId/ban", authenticateToken, banUserController);
+userRouter.post("/:userId/unban", authenticateToken, unbanUserController);
 
 export default userRouter;

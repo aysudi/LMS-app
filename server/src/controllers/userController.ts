@@ -546,3 +546,76 @@ export const updateAvatarController = async (
     });
   }
 };
+
+export const banUserController = async (
+  req: any,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    const { userId } = req.params;
+    const { banDuration, reason } = req.body;
+    const bannedBy = req.user.userId;
+
+    if (!banDuration || !reason) {
+      return res.status(400).json({
+        success: false,
+        message: "Ban duration and reason are required",
+      });
+    }
+
+    const { banUser } = await import("../services/userService");
+    const updatedUser = await banUser(userId, bannedBy, banDuration, reason);
+
+    res.status(200).json({
+      success: true,
+      message: "User banned successfully",
+      data: updatedUser,
+    });
+  } catch (error: any) {
+    console.error("Ban user error:", error);
+    res.status(400).json({
+      success: false,
+      message: error.message || "Failed to ban user",
+    });
+  }
+};
+
+export const unbanUserController = async (
+  req: any,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    const { userId } = req.params;
+
+    const { unbanUser } = await import("../services/userService");
+    const updatedUser = await unbanUser(userId);
+
+    res.status(200).json({
+      success: true,
+      message: "User unbanned successfully",
+      data: updatedUser,
+    });
+  } catch (error: any) {
+    console.error("Unban user error:", error);
+    res.status(400).json({
+      success: false,
+      message: error.message || "Failed to unban user",
+    });
+  }
+};

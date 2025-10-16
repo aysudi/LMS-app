@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
-import { useSnackbar } from "notistack";
 import {
   FaUser,
   FaEnvelope,
@@ -22,6 +21,8 @@ import { useRegister } from "../../hooks/useAuth";
 import { registerValidationSchema } from "../../validations/registerValidation";
 import { User } from "../../classes/User";
 import { getErrorMessage } from "../../utils/errorUtils";
+import { useToast } from "../../components/UI/ToastProvider";
+import { generalToasts } from "../../utils/toastUtils";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -31,8 +32,8 @@ const Register = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
-  const { enqueueSnackbar } = useSnackbar();
   const registerMutation = useRegister();
+  const { showToast } = useToast();
 
   const formik = useFormik({
     initialValues: {
@@ -73,16 +74,11 @@ const Register = () => {
             "Account created successfully! Please check your email for verification."
         );
 
-        enqueueSnackbar(
-          "🎉 Account created successfully! Check your email for verification.",
-          {
-            variant: "success",
-            autoHideDuration: 6000,
-            anchorOrigin: {
-              vertical: "top",
-              horizontal: "right",
-            },
-          }
+        showToast(
+          generalToasts.success(
+            "Registration successful!",
+            "🎉 Account created successfully! Check your email for verification."
+          )
         );
 
         setTimeout(() => {
@@ -98,14 +94,7 @@ const Register = () => {
         const errorMsg = getErrorMessage(error);
         setErrorMessage(errorMsg);
 
-        enqueueSnackbar(`❌ Registration failed: ${errorMsg}`, {
-          variant: "error",
-          autoHideDuration: 8000,
-          anchorOrigin: {
-            vertical: "top",
-            horizontal: "right",
-          },
-        });
+        showToast(generalToasts.error("Registration failed", errorMsg));
       }
     },
   });

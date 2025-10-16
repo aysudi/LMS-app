@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from "react";
 import {
   FaSearch,
-  FaTrash,
+  FaBan,
   FaUsers,
   FaUserCheck,
   FaUserTimes,
+  FaUnlock,
 } from "react-icons/fa";
+import Swal from "sweetalert2";
 import {
   useAdminUsers,
   useUpdateUserRole,
   useUpdateUserStatus,
-  useDeleteUser,
+  useBanUser,
+  useUnbanUser,
 } from "../../hooks/useAdmin";
 import type { AdminUser } from "../../types/admin.type";
 
@@ -56,7 +59,8 @@ const AdminUsers: React.FC = () => {
   // Initialize mutation hooks
   const updateRoleMutation = useUpdateUserRole();
   const updateStatusMutation = useUpdateUserStatus();
-  const deleteUserMutation = useDeleteUser();
+  const banUserMutation = useBanUser();
+  const unbanUserMutation = useUnbanUser();
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchInput(e.target.value);
@@ -70,11 +74,18 @@ const AdminUsers: React.FC = () => {
     userId: string,
     newRole: "student" | "instructor" | "admin"
   ) => {
-    if (
-      window.confirm(
-        `Are you sure you want to change this user's role to ${newRole}?`
-      )
-    ) {
+    const result = await Swal.fire({
+      title: "Change User Role",
+      text: `Are you sure you want to change this user's role to ${newRole}?`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, change it!",
+      cancelButtonText: "Cancel",
+    });
+
+    if (result.isConfirmed) {
       await updateRoleMutation.mutateAsync({ userId, role: newRole });
     }
   };
@@ -83,7 +94,18 @@ const AdminUsers: React.FC = () => {
     const newStatus = currentStatus === "active" ? "suspended" : "active";
     const action = newStatus === "active" ? "activate" : "suspend";
 
-    if (window.confirm(`Are you sure you want to ${action} this user?`)) {
+    const result = await Swal.fire({
+      title: `${action.charAt(0).toUpperCase() + action.slice(1)} User`,
+      text: `Are you sure you want to ${action} this user?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: newStatus === "active" ? "#10b981" : "#f59e0b",
+      cancelButtonColor: "#d33",
+      confirmButtonText: `Yes, ${action}!`,
+      cancelButtonText: "Cancel",
+    });
+
+    if (result.isConfirmed) {
       await updateStatusMutation.mutateAsync({
         userId,
         status: newStatus as "active" | "suspended" | "pending",
@@ -91,13 +113,85 @@ const AdminUsers: React.FC = () => {
     }
   };
 
-  const handleDeleteUser = async (userId: string, userName: string) => {
-    if (
-      window.confirm(
-        `Are you sure you want to permanently delete ${userName}? This action cannot be undone.`
-      )
-    ) {
-      await deleteUserMutation.mutateAsync(userId);
+  const handleBanUser = async (
+    userId: string,
+    userName: string,
+    currentlyBanned: boolean = false
+  ) => {
+    if (currentlyBanned) {
+      // Unban user
+      const result = await Swal.fire({
+        title: "Unban User",
+        text: `Are you sure you want to unban ${userName}?`,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonColor: "#10b981",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, unban!",
+        cancelButtonText: "Cancel",
+      });
+
+      if (result.isConfirmed) {
+        await unbanUserMutation.mutateAsync(userId);
+      }
+      return;
+    }
+
+    // Ban user with duration selection
+    const { value: formValues } = await Swal.fire({
+      title: `Ban ${userName}`,
+      html: `
+        <div class="text-left">
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Ban Duration</label>
+            <select id="banDuration" class="w-full p-2 border border-gray-300 rounded-md">
+              <option value="1">1 Hour</option>
+              <option value="6">6 Hours</option>
+              <option value="12">12 Hours</option>
+              <option value="24">1 Day</option>
+              <option value="72">3 Days</option>
+              <option value="168">1 Week</option>
+              <option value="720">1 Month</option>
+              <option value="0">Permanent</option>
+            </select>
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Reason</label>
+            <textarea id="banReason" class="w-full p-2 border border-gray-300 rounded-md" rows="3" placeholder="Enter reason for ban..."></textarea>
+          </div>
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Ban User",
+      cancelButtonText: "Cancel",
+      preConfirm: () => {
+        const banDuration = (
+          document.getElementById("banDuration") as HTMLSelectElement
+        ).value;
+        const banReason = (
+          document.getElementById("banReason") as HTMLTextAreaElement
+        ).value;
+
+        if (!banReason.trim()) {
+          Swal.showValidationMessage("Please provide a reason for the ban");
+          return false;
+        }
+
+        return {
+          banDuration: parseInt(banDuration),
+          banReason: banReason.trim(),
+        };
+      },
+    });
+
+    if (formValues) {
+      await banUserMutation.mutateAsync({
+        userId,
+        banDuration: formValues.banDuration,
+        reason: formValues.banReason,
+      });
     }
   };
 
@@ -252,9 +346,9 @@ const AdminUsers: React.FC = () => {
                   <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                     Role
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  {/* <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                     Status
-                  </th>
+                  </th> */}
                   <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                     Joined
                   </th>
@@ -298,7 +392,7 @@ const AdminUsers: React.FC = () => {
                         {user.role}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
+                    {/* <td className="px-6 py-4">
                       <span
                         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                           user.status === "active"
@@ -310,7 +404,7 @@ const AdminUsers: React.FC = () => {
                       >
                         {user.status}
                       </span>
-                    </td>
+                    </td> */}
                     <td className="px-6 py-4 text-sm text-slate-500">
                       {new Date(user.joinDate).toLocaleDateString()}
                     </td>
@@ -359,18 +453,23 @@ const AdminUsers: React.FC = () => {
                           )}
                         </button>
 
-                        {/* Delete Button */}
+                        {/* Ban/Unban Button */}
                         <button
                           onClick={() =>
-                            handleDeleteUser(
+                            handleBanUser(
                               user.id,
-                              `${user.firstName} ${user.lastName}`
+                              `${user.firstName} ${user.lastName}`,
+                              user.isBanned
                             )
                           }
-                          className="text-red-600 hover:text-red-800 transition-colors duration-200 p-2 hover:bg-red-50 rounded-lg"
-                          title="Delete user"
+                          className={`transition-colors duration-200 p-2 rounded-lg ${
+                            user.isBanned
+                              ? "text-green-600 hover:text-green-800 hover:bg-green-50"
+                              : "text-red-600 hover:text-red-800 hover:bg-red-50"
+                          }`}
+                          title={user.isBanned ? "Unban user" : "Ban user"}
                         >
-                          <FaTrash />
+                          {user.isBanned ? <FaUnlock /> : <FaBan />}
                         </button>
                       </div>
                     </td>

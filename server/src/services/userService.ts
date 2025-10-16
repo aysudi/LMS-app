@@ -332,6 +332,36 @@ export const login = async (loginData: LoginUserDto): Promise<AuthResponse> => {
     throw new Error("Account has been deactivated. Please contact support.");
   }
 
+  // Check if user is banned
+  if (user.isBanned) {
+    if (user.banExpiresAt && user.banExpiresAt > new Date()) {
+      const remainingTime = Math.ceil(
+        (user.banExpiresAt.getTime() - Date.now()) / (1000 * 60 * 60)
+      );
+      throw new Error(
+        `Your account is temporarily banned. Ban expires in ${remainingTime} hour(s). Reason: ${
+          user.banReason || "No reason provided"
+        }`
+      );
+    } else if (user.banExpiresAt && user.banExpiresAt <= new Date()) {
+      // Auto-unban expired bans
+      await User.findByIdAndUpdate(user._id, {
+        isBanned: false,
+        banReason: null,
+        bannedAt: null,
+        bannedBy: null,
+        banExpiresAt: null,
+      });
+    } else {
+      // Permanent ban
+      throw new Error(
+        `Your account is permanently banned. Reason: ${
+          user.banReason || "No reason provided"
+        }`
+      );
+    }
+  }
+
   await checkAndUnlockAccount(user);
 
   if (user.lockUntil && user.lockUntil > new Date()) {
@@ -560,4 +590,83 @@ export const refreshAccessToken = async (
   } catch (error) {
     throw new Error("Invalid refresh token");
   }
+};
+
+// Ban user functionality
+export const banUser = async (
+  userId: string,
+  bannedBy: string,
+  banDuration: number, // in hours
+  reason: string
+): Promise<IUser> => {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  if (user.role === "admin") {
+    throw new Error("Cannot ban admin users");
+  }
+
+  const banExpiresAt = new Date(Date.now() + banDuration * 60 * 60 * 1000);
+
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    {
+      isBanned: true,
+      banReason: reason,
+      bannedAt: new Date(),
+      bannedBy: new mongoose.Types.ObjectId(bannedBy),
+      banExpiresAt,
+    },
+    { new: true, runValidators: true }
+  );
+
+  if (!updatedUser) {
+    throw new Error("Failed to ban user");
+  }
+
+  return formatMongoData(updatedUser.toObject());
+};
+
+export const unbanUser = async (userId: string): Promise<IUser> => {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    {
+      isBanned: false,
+      banReason: null,
+      bannedAt: null,
+      bannedBy: null,
+      banExpiresAt: null,
+    },
+    { new: true, runValidators: true }
+  );
+
+  if (!updatedUser) {
+    throw new Error("Failed to unban user");
+  }
+
+  return formatMongoData(updatedUser.toObject());
+};
+
+export const checkAndUnbanExpiredUsers = async (): Promise<void> => {
+  const now = new Date();
+  await User.updateMany(
+    {
+      isBanned: true,
+      banExpiresAt: { $lte: now },
+    },
+    {
+      isBanned: false,
+      banReason: null,
+      bannedAt: null,
+      bannedBy: null,
+      banExpiresAt: null,
+    }
+  );
 };
