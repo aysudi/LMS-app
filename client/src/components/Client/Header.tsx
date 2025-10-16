@@ -605,6 +605,20 @@ const Header: React.FC = () => {
                     <span className="font-medium">My Learning</span>
                   </motion.button>
 
+                  {/* Become Instructor - Only for students */}
+                  {!userDisplayData.isInstructor() && (
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => navigate("/become-instructor/apply")}
+                      className="hidden xl:flex items-center space-x-2 px-3 py-2 text-gray-700 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-all duration-200 cursor-pointer"
+                      title="Become an Instructor"
+                    >
+                      <FaChalkboardTeacher className="text-sm" />
+                      <span className="font-medium">Teach</span>
+                    </motion.button>
+                  )}
+
                   {/* Notifications */}
                   <motion.button
                     whileHover={{ scale: 1.05 }}
@@ -844,6 +858,18 @@ const Header: React.FC = () => {
                     <FaBookOpen />
                     <span>My Learning</span>
                   </Link>
+
+                  {/* Become Instructor - Only for students */}
+                  {!userDisplayData.isInstructor() && (
+                    <Link
+                      to="/become-instructor/apply"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center space-x-3 p-3 text-gray-700 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-all duration-200"
+                    >
+                      <FaChalkboardTeacher />
+                      <span>Become an Instructor</span>
+                    </Link>
+                  )}
 
                   <Link
                     to="/notifications"
