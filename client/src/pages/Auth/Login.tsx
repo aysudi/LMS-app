@@ -77,7 +77,7 @@ const Login = () => {
           } else {
             navigate("/", { replace: true });
           }
-        }, 1500);
+        }, 300); // Reduced delay for faster redirect
 
         if (rememberMe) {
           localStorage.setItem("rememberMe", "true");
