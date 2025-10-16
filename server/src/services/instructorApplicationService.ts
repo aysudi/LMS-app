@@ -12,7 +12,6 @@ export const submitInstructorApplication = async (
   applicationData: Partial<IInstructorApplication>
 ): Promise<IInstructorApplication> => {
   try {
-    // Check if user already has an application
     const existingApplication = await InstructorApplication.findOne({
       user: userId,
     });
@@ -20,7 +19,6 @@ export const submitInstructorApplication = async (
       throw new Error("You have already submitted an instructor application");
     }
 
-    // Check if user is already an instructor
     const user = await User.findById(userId);
     if (!user) {
       throw new Error("User not found");
@@ -30,7 +28,6 @@ export const submitInstructorApplication = async (
       throw new Error("You are already an instructor");
     }
 
-    // Create new application
     const application = new InstructorApplication({
       ...applicationData,
       user: userId,
@@ -40,7 +37,6 @@ export const submitInstructorApplication = async (
 
     await application.save();
 
-    // Send confirmation email to applicant
     await sendEmail({
       to: application.email,
       subject: "Instructor Application Received - Skillify",
