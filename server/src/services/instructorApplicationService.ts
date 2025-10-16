@@ -38,7 +38,6 @@ export const submitInstructorApplication = async (
 
     await application.save();
 
-    // Send confirmation email to applicant
     const emailTemplate = emailTemplates.instructorApplicationReceived(
       application.firstName,
       application.lastName
@@ -140,7 +139,6 @@ export const approveInstructorApplication = async (
       await user.save();
     }
 
-    // Send approval email
     const emailTemplate = emailTemplates.instructorApplicationApproved(
       application.firstName,
       application.lastName,
@@ -183,7 +181,6 @@ export const rejectInstructorApplication = async (
     application.adminFeedback = adminFeedback;
     await application.save();
 
-    // Send rejection email
     const emailTemplate = emailTemplates.instructorApplicationRejected(
       application.firstName,
       application.lastName,
