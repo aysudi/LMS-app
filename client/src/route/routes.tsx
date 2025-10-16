@@ -11,6 +11,7 @@ import VerifyEmail from "../pages/Auth/VerifyEmail";
 import About from "../pages/Client/About";
 import Contact from "../pages/Client/Contact";
 import BecomeInstructor from "../pages/Client/BecomeInstructor";
+import InstructorApplicationForm from "../pages/Client/InstructorApplicationForm";
 import CourseDetails from "../pages/Client/CourseDetails";
 import Courses from "../pages/Client/Courses";
 import Wishlist from "../pages/Client/Wishlist";
@@ -120,6 +121,14 @@ const ROUTES = [
       {
         path: "become-instructor",
         element: <BecomeInstructor />,
+      },
+      {
+        path: "become-instructor/apply",
+        element: (
+          <ProtectedRoute>
+            <InstructorApplicationForm />
+          </ProtectedRoute>
+        ),
       },
     ],
   },

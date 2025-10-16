@@ -132,7 +132,6 @@ const instructorApplicationSchema = new Schema<IInstructorApplication>(
   }
 );
 
-instructorApplicationSchema.index({ user: 1 });
 instructorApplicationSchema.index({ status: 1 });
 instructorApplicationSchema.index({ submittedAt: -1 });
 
