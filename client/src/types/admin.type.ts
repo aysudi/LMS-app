@@ -5,7 +5,7 @@ export interface AdminUser {
   email: string;
   role: "student" | "instructor" | "admin";
   status: "active" | "suspended" | "pending";
-  joinDate: string;
+  createdAt: string;
   lastActive: string;
   avatar?: string;
   coursesEnrolled?: number;

@@ -11,7 +11,6 @@ import Swal from "sweetalert2";
 import {
   useAdminUsers,
   useUpdateUserRole,
-  useUpdateUserStatus,
   useBanUser,
   useUnbanUser,
 } from "../../hooks/useAdmin";
@@ -58,7 +57,6 @@ const AdminUsers: React.FC = () => {
 
   // Initialize mutation hooks
   const updateRoleMutation = useUpdateUserRole();
-  const updateStatusMutation = useUpdateUserStatus();
   const banUserMutation = useBanUser();
   const unbanUserMutation = useUnbanUser();
 
@@ -87,29 +85,6 @@ const AdminUsers: React.FC = () => {
 
     if (result.isConfirmed) {
       await updateRoleMutation.mutateAsync({ userId, role: newRole });
-    }
-  };
-
-  const handleToggleStatus = async (userId: string, currentStatus: string) => {
-    const newStatus = currentStatus === "active" ? "suspended" : "active";
-    const action = newStatus === "active" ? "activate" : "suspend";
-
-    const result = await Swal.fire({
-      title: `${action.charAt(0).toUpperCase() + action.slice(1)} User`,
-      text: `Are you sure you want to ${action} this user?`,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: newStatus === "active" ? "#10b981" : "#f59e0b",
-      cancelButtonColor: "#d33",
-      confirmButtonText: `Yes, ${action}!`,
-      cancelButtonText: "Cancel",
-    });
-
-    if (result.isConfirmed) {
-      await updateStatusMutation.mutateAsync({
-        userId,
-        status: newStatus as "active" | "suspended" | "pending",
-      });
     }
   };
 
@@ -346,9 +321,6 @@ const AdminUsers: React.FC = () => {
                   <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                     Role
                   </th>
-                  {/* <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                    Status
-                  </th> */}
                   <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                     Joined
                   </th>
@@ -358,123 +330,89 @@ const AdminUsers: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-slate-200">
-                {users.map((user) => (
-                  <tr
-                    key={user.id}
-                    className="hover:bg-slate-50 transition-colors duration-200"
-                  >
-                    <td className="px-6 py-4">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
-                          {user.firstName?.charAt(0)}
-                          {user.lastName?.charAt(0)}
-                        </div>
-                        <div>
-                          <div className="text-sm font-medium text-slate-900">
-                            {user.firstName} {user.lastName}
+                {users.map((user) => {
+                  return (
+                    <tr
+                      key={user.id}
+                      className="hover:bg-slate-50 transition-colors duration-200"
+                    >
+                      <td className="px-6 py-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
+                            {user.firstName?.charAt(0)}
+                            {user.lastName?.charAt(0)}
                           </div>
-                          <div className="text-sm text-slate-500">
-                            {user.email}
+                          <div>
+                            <div className="text-sm font-medium text-slate-900">
+                              {user.firstName} {user.lastName}
+                            </div>
+                            <div className="text-sm text-slate-500">
+                              {user.email}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          user.role === "admin"
-                            ? "bg-purple-100 text-purple-800"
-                            : user.role === "instructor"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-green-100 text-green-800"
-                        }`}
-                      >
-                        {user.role}
-                      </span>
-                    </td>
-                    {/* <td className="px-6 py-4">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          user.status === "active"
-                            ? "bg-green-100 text-green-800"
-                            : user.status === "suspended"
-                            ? "bg-red-100 text-red-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}
-                      >
-                        {user.status}
-                      </span>
-                    </td> */}
-                    <td className="px-6 py-4 text-sm text-slate-500">
-                      {new Date(user.joinDate).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end space-x-2">
-                        {/* Role Change Dropdown */}
-                        <select
-                          value={user.role}
-                          onChange={(e) =>
-                            handleChangeRole(
-                              user.id,
-                              e.target.value as
-                                | "student"
-                                | "instructor"
-                                | "admin"
-                            )
-                          }
-                          className="text-sm border border-slate-300 rounded-lg px-2 py-1 hover:bg-blue-50 transition-colors"
-                          title="Change user role"
-                        >
-                          <option value="student">Student</option>
-                          <option value="instructor">Instructor</option>
-                          <option value="admin">Admin</option>
-                        </select>
-
-                        {/* Status Toggle */}
-                        <button
-                          onClick={() =>
-                            handleToggleStatus(user.id, user.status)
-                          }
-                          className={`transition-colors duration-200 p-2 rounded-lg ${
-                            user.status === "active"
-                              ? "text-orange-600 hover:text-orange-800 hover:bg-orange-50"
-                              : "text-green-600 hover:text-green-800 hover:bg-green-50"
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            user.role === "admin"
+                              ? "bg-purple-100 text-purple-800"
+                              : user.role === "instructor"
+                              ? "bg-blue-100 text-blue-800"
+                              : "bg-green-100 text-green-800"
                           }`}
-                          title={
-                            user.status === "active"
-                              ? "Suspend user"
-                              : "Activate user"
-                          }
                         >
-                          {user.status === "active" ? (
-                            <FaUserTimes />
-                          ) : (
-                            <FaUserCheck />
-                          )}
-                        </button>
+                          {user.role}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-slate-500">
+                        {new Date(user.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end space-x-2">
+                          {/* Role Change Dropdown */}
+                          <select
+                            value={user.role}
+                            onChange={(e) =>
+                              handleChangeRole(
+                                user.id,
+                                e.target.value as
+                                  | "student"
+                                  | "instructor"
+                                  | "admin"
+                              )
+                            }
+                            className="text-sm border border-slate-300 rounded-lg px-2 py-1 hover:bg-blue-50 transition-colors"
+                            title="Change user role"
+                          >
+                            <option value="student">Student</option>
+                            <option value="instructor">Instructor</option>
+                            <option value="admin">Admin</option>
+                          </select>
 
-                        {/* Ban/Unban Button */}
-                        <button
-                          onClick={() =>
-                            handleBanUser(
-                              user.id,
-                              `${user.firstName} ${user.lastName}`,
+                          {/* Ban/Unban Button */}
+                          <button
+                            onClick={() =>
+                              handleBanUser(
+                                user.id,
+                                `${user.firstName} ${user.lastName}`,
+                                user.isBanned
+                              )
+                            }
+                            className={`transition-colors duration-200 p-2 rounded-lg ${
                               user.isBanned
-                            )
-                          }
-                          className={`transition-colors duration-200 p-2 rounded-lg ${
-                            user.isBanned
-                              ? "text-green-600 hover:text-green-800 hover:bg-green-50"
-                              : "text-red-600 hover:text-red-800 hover:bg-red-50"
-                          }`}
-                          title={user.isBanned ? "Unban user" : "Ban user"}
-                        >
-                          {user.isBanned ? <FaUnlock /> : <FaBan />}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                                ? "text-green-600 hover:text-green-800 hover:bg-green-50"
+                                : "text-red-600 hover:text-red-800 hover:bg-red-50"
+                            }`}
+                            title={user.isBanned ? "Unban user" : "Ban user"}
+                          >
+                            {user.isBanned ? <FaUnlock /> : <FaBan />}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

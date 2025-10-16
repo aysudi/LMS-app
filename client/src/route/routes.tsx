@@ -10,6 +10,7 @@ import ResetPassword from "../pages/Auth/ResetPassword";
 import VerifyEmail from "../pages/Auth/VerifyEmail";
 import About from "../pages/Client/About";
 import Contact from "../pages/Client/Contact";
+import BecomeInstructor from "../pages/Client/BecomeInstructor";
 import CourseDetails from "../pages/Client/CourseDetails";
 import Courses from "../pages/Client/Courses";
 import Wishlist from "../pages/Client/Wishlist";
@@ -115,6 +116,10 @@ const ROUTES = [
       {
         path: "contact",
         element: <Contact />,
+      },
+      {
+        path: "become-instructor",
+        element: <BecomeInstructor />,
       },
     ],
   },
