@@ -139,14 +139,12 @@ export const approveInstructorApplication = async (
       throw new Error("Application has already been processed");
     }
 
-    // Update application status
     application.status = "approved";
     application.reviewedAt = new Date();
     application.reviewedBy = new mongoose.Types.ObjectId(adminId);
     application.adminFeedback = adminFeedback;
     await application.save();
 
-    // Update user role to instructor
     const user = await User.findById(application.user);
     if (user) {
       user.role = UserRole.INSTRUCTOR;
@@ -228,7 +226,6 @@ export const rejectInstructorApplication = async (
       throw new Error("Application has already been processed");
     }
 
-    // Update application status
     application.status = "rejected";
     application.reviewedAt = new Date();
     application.reviewedBy = new mongoose.Types.ObjectId(adminId);
