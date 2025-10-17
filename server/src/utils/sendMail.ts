@@ -491,9 +491,7 @@ export const sendApplicationApprovedEmail = async (
   await sendEmail(email, subject, htmlContent, textContent);
 };
 
-// Function to format rejection reason properly
 const formatRejectionReason = (reason: string): string => {
-  // Convert snake_case to readable format
   const reasonMap: { [key: string]: string } = {
     expertise_mismatch:
       "Your expertise doesn't align with our current course categories or requirements.",
@@ -511,10 +509,10 @@ const formatRejectionReason = (reason: string): string => {
       "Your portfolio or work samples don't demonstrate the required level of expertise.",
     background_check:
       "Issues were found during the background verification process.",
-    other: reason, // If it's already a custom message, use it as is
+    other: reason,
   };
 
-  return reasonMap[reason] || reason; // Fallback to original if not found in map
+  return reasonMap[reason] || reason;
 };
 
 export const sendApplicationRejectedEmail = async (
