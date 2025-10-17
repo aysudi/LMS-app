@@ -8,6 +8,7 @@ import type {
   AdminUserUpdateData,
   AdminCoursesResponse,
   AdminAnalytics,
+  AdminCertificatesResponse,
 } from "../types/admin.type";
 
 // Admin Dashboard Hooks
@@ -316,6 +317,21 @@ export const useAdminAnalytics = (
   });
 };
 
+// Admin Certificates Hooks
+export const useAdminCertificates = (
+  params: {
+    page?: number;
+    limit?: number;
+  } = {}
+) => {
+  return useQuery<AdminCertificatesResponse>({
+    queryKey: ["adminCertificates", params],
+    queryFn: () => adminService.getAdminCertificates(params),
+    refetchOnWindowFocus: false,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+  });
+};
+
 export default {
   useAdminDashboardStats,
   useAdminUsers,
@@ -327,4 +343,5 @@ export default {
   useApproveCourse,
   useRejectCourse,
   useAdminAnalytics,
+  useAdminCertificates,
 };

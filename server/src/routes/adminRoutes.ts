@@ -13,6 +13,8 @@ import {
   bulkUpdateUsers,
   deleteUser,
   getRecentActivity,
+  getAdminAnalytics,
+  getAdminCertificates,
 } from "../controllers/adminController";
 import { authenticateToken } from "../middlewares/auth.middleware";
 import { AuthRequest } from "../types/common.types";
@@ -42,6 +44,16 @@ adminRouter.patch("/users/bulk", authenticateToken, (req, res) =>
 );
 adminRouter.delete("/users/:userId", authenticateToken, (req, res) =>
   deleteUser(req as AuthRequest, res)
+);
+
+// Analytics routes
+adminRouter.get("/analytics", authenticateToken, (req, res) =>
+  getAdminAnalytics(req as AuthRequest, res)
+);
+
+// Certificates routes
+adminRouter.get("/certificates", authenticateToken, (req, res) =>
+  getAdminCertificates(req as AuthRequest, res)
 );
 
 // Data migration routes (for development/maintenance)

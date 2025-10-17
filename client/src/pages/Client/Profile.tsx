@@ -332,9 +332,7 @@ const Profile: React.FC = () => {
                     About
                   </h3>
                   <p className="text-gray-700 leading-relaxed">
-                    Welcome to my learning journey! I'm passionate about
-                    technology and continuous learning. Always excited to
-                    explore new topics and share knowledge with the community.
+                    {user.bio || "No bio available."}
                   </p>
                 </div>
               </div>

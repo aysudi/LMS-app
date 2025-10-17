@@ -6,6 +6,10 @@ import { UserRole } from "../types/user.types";
 import mongoose from "mongoose";
 import { sendEmail } from "../utils/emailService";
 import { emailTemplates } from "../utils/emailTemplates";
+import {
+  sendApplicationApprovedEmail,
+  sendApplicationRejectedEmail,
+} from "../utils/sendMail";
 
 // Submit instructor application
 export const submitInstructorApplication = async (
@@ -139,17 +143,10 @@ export const approveInstructorApplication = async (
       await user.save();
     }
 
-    const emailTemplate = emailTemplates.instructorApplicationApproved(
-      application.firstName,
-      application.lastName,
-      adminFeedback
+    await sendApplicationApprovedEmail(
+      application.email,
+      `${user?.firstName} ${user?.lastName}`
     );
-
-    await sendEmail({
-      to: application.email,
-      subject: emailTemplate.subject,
-      html: emailTemplate.html,
-    });
 
     return application;
   } catch (error: any) {
@@ -181,18 +178,11 @@ export const rejectInstructorApplication = async (
     application.adminFeedback = adminFeedback;
     await application.save();
 
-    const emailTemplate = emailTemplates.instructorApplicationRejected(
-      application.firstName,
-      application.lastName,
-      rejectionReason,
-      adminFeedback
+    await sendApplicationRejectedEmail(
+      application.email,
+      `${application.firstName} ${application.lastName}`,
+      rejectionReason
     );
-
-    await sendEmail({
-      to: application.email,
-      subject: emailTemplate.subject,
-      html: emailTemplate.html,
-    });
 
     return application;
   } catch (error: any) {

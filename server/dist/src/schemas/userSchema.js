@@ -167,6 +167,26 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: true,
     },
+    // Ban system
+    isBanned: {
+        type: Boolean,
+        default: false,
+    },
+    banReason: {
+        type: String,
+        trim: true,
+        maxlength: [500, "Ban reason cannot exceed 500 characters"],
+    },
+    bannedAt: {
+        type: Date,
+    },
+    bannedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+    },
+    banExpiresAt: {
+        type: Date,
+    },
     // Payment & Learning related fields
     totalSpent: {
         type: Number,

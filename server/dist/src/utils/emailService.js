@@ -1,83 +1,68 @@
 import nodemailer from "nodemailer";
 import config from "../configs/config";
-
-interface EmailOptions {
-  to: string;
-  subject: string;
-  html: string;
-  text?: string;
-}
-
 // Create transporter based on environment
 const createTransporter = () => {
-  const isDevelopment = process.env.NODE_ENV === "development";
-
-  if (!isDevelopment) {
-    // Production email configuration (use your actual email service)
-    return nodemailer.createTransport({
-      service: "gmail", // or your email service
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-  } else {
-    // Development: Create test account or use console
-    return nodemailer.createTransport({
-      host: "smtp.ethereal.email",
-      port: 587,
-      secure: false,
-      auth: {
-        user: "ethereal.user@ethereal.email",
-        pass: "ethereal.pass",
-      },
-    });
-  }
-};
-
-export const sendEmail = async (options: EmailOptions): Promise<boolean> => {
-  try {
-    const transporter = createTransporter();
-
-    const mailOptions = {
-      from: config.GMAIL_USER,
-      to: options.to,
-      subject: options.subject,
-      html: options.html,
-      text: options.text || options.html.replace(/<[^>]*>/g, ""),
-    };
-
-    if (process.env.NODE_ENV === "development") {
-      // In development, log email details instead of sending
-      // console.log("\n📧 EMAIL WOULD BE SENT IN PRODUCTION:");
-      // console.log("==================================================");
-      // console.log(`📬 To: ${mailOptions.to}`);
-      // console.log(`📝 Subject: ${mailOptions.subject}`);
-      // console.log("📄 HTML Content:");
-      // console.log("--------------------------------------------------");
-      // console.log(mailOptions.html);
-      // console.log("==================================================\n");
-
-      return true; // Simulate successful send in development
+    const isDevelopment = process.env.NODE_ENV === "development";
+    if (!isDevelopment) {
+        // Production email configuration (use your actual email service)
+        return nodemailer.createTransport({
+            service: "gmail", // or your email service
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS,
+            },
+        });
     }
-
-    // Send actual email in production
-    const result = await transporter.sendMail(mailOptions);
-    console.log("📧 Email sent successfully:", result.messageId);
-
-    return true;
-  } catch (error) {
-    console.error("❌ Failed to send email:", error);
-    return false;
-  }
+    else {
+        // Development: Create test account or use console
+        return nodemailer.createTransport({
+            host: "smtp.ethereal.email",
+            port: 587,
+            secure: false,
+            auth: {
+                user: "ethereal.user@ethereal.email",
+                pass: "ethereal.pass",
+            },
+        });
+    }
 };
-
+export const sendEmail = async (options) => {
+    try {
+        const transporter = createTransporter();
+        const mailOptions = {
+            from: config.GMAIL_USER,
+            to: options.to,
+            subject: options.subject,
+            html: options.html,
+            text: options.text || options.html.replace(/<[^>]*>/g, ""),
+        };
+        if (process.env.NODE_ENV === "development") {
+            // In development, log email details instead of sending
+            // console.log("\n📧 EMAIL WOULD BE SENT IN PRODUCTION:");
+            // console.log("==================================================");
+            // console.log(`📬 To: ${mailOptions.to}`);
+            // console.log(`📝 Subject: ${mailOptions.subject}`);
+            // console.log("📄 HTML Content:");
+            // console.log("--------------------------------------------------");
+            // console.log(mailOptions.html);
+            // console.log("==================================================\n");
+            return true; // Simulate successful send in development
+        }
+        // Send actual email in production
+        const result = await transporter.sendMail(mailOptions);
+        console.log("📧 Email sent successfully:", result.messageId);
+        return true;
+    }
+    catch (error) {
+        console.error("❌ Failed to send email:", error);
+        return false;
+    }
+};
 // Email templates
 export const emailTemplates = {
-  instructorApplicationApproved: (instructorName: string) => ({
-    subject:
-      "🎉 Congratulations! Your Instructor Application Has Been Approved",
-    html: `
+    instructorApplicationApproved: (instructorName) => ({
+        subject: "🎉 Congratulations! Your Instructor Application Has Been Approved",
+        html: `
       <!DOCTYPE html>
       <html>
       <head>
@@ -128,11 +113,10 @@ export const emailTemplates = {
       </body>
       </html>
     `,
-  }),
-
-  instructorApplicationRejected: (instructorName: string, reason: string) => ({
-    subject: "Update on Your Instructor Application",
-    html: `
+    }),
+    instructorApplicationRejected: (instructorName, reason) => ({
+        subject: "Update on Your Instructor Application",
+        html: `
       <!DOCTYPE html>
       <html>
       <head>
@@ -185,7 +169,6 @@ export const emailTemplates = {
       </body>
       </html>
     `,
-  }),
+    }),
 };
-
 export default { sendEmail, emailTemplates };

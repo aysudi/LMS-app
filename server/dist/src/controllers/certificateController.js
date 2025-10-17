@@ -8,7 +8,6 @@ export const generateAndSendCertificate = async (req, res) => {
     try {
         // Validate request body
         const { error, value } = validateCertificateGeneration(req.body);
-        console.log("error", error);
         if (error) {
             return res.status(400).json({
                 success: false,
@@ -76,7 +75,7 @@ export const generateAndSendCertificate = async (req, res) => {
     catch (error) {
         console.error("Certificate generation error:", error);
         // Handle duplicate key error (in case of race condition)
-        if (error instanceof Error && error.message.includes('E11000')) {
+        if (error instanceof Error && error.message.includes("E11000")) {
             return res.status(400).json({
                 success: false,
                 message: "Certificate already exists for this course",
@@ -101,7 +100,8 @@ export const getCertificateStatus = async (req, res) => {
             });
         }
         // Validate ObjectId format
-        if (!mongoose.Types.ObjectId.isValid(courseId) || !mongoose.Types.ObjectId.isValid(userId)) {
+        if (!mongoose.Types.ObjectId.isValid(courseId) ||
+            !mongoose.Types.ObjectId.isValid(userId)) {
             return res.status(400).json({
                 success: false,
                 message: "Invalid course ID or user ID format",
@@ -160,8 +160,8 @@ export const downloadCertificate = async (req, res) => {
         };
         const certificateBuffer = await generateCertificate(certificateData);
         // Set headers for PDF download
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="certificate-${certificateId}.pdf"`);
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Content-Disposition", `attachment; filename="certificate-${certificateId}.pdf"`);
         res.send(certificateBuffer);
     }
     catch (error) {

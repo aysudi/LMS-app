@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { registerUser, loginUser, verifyEmailController, resendVerificationEmailController, forgotPasswordController, resetPasswordController, getAllUsersController, getUserByIdController, getUserByUsernameController, getCurrentUserController, refreshTokenController, logoutController, updateProfileController, changePasswordController, updateAvatarController, } from "../controllers/userController";
+import { registerUser, loginUser, verifyEmailController, resendVerificationEmailController, forgotPasswordController, resetPasswordController, getAllUsersController, getUserByIdController, getUserByUsernameController, getCurrentUserController, refreshTokenController, logoutController, updateProfileController, changePasswordController, updateAvatarController, banUserController, unbanUserController, } from "../controllers/userController";
 import { uploadMiddleware, uploadErrorHandler, } from "../middlewares/upload.middleware";
 import { validateRequest } from "../middlewares/validation.middleware";
 import { authenticateToken } from "../middlewares/auth.middleware";
@@ -48,4 +48,7 @@ userRouter.get("/:userId", validateParams(getUserByIdSchema), getUserByIdControl
 userRouter.put("/profile", authenticateToken, updateProfileController);
 userRouter.put("/change-password", authenticateToken, changePasswordController);
 userRouter.put("/avatar", authenticateToken, uploadMiddleware, uploadErrorHandler, updateAvatarController);
+// Admin routes for user management
+userRouter.post("/:userId/ban", authenticateToken, banUserController);
+userRouter.post("/:userId/unban", authenticateToken, unbanUserController);
 export default userRouter;

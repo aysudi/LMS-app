@@ -44,9 +44,7 @@ const certificateSchema = new Schema({
 }, {
     timestamps: true,
 });
-// Create compound index to ensure one certificate per user per course
 certificateSchema.index({ userId: 1, courseId: 1 }, { unique: true });
-// Create indexes for efficient certificate lookups
 certificateSchema.index({ userId: 1 });
 certificateSchema.index({ courseId: 1 });
 const Certificate = mongoose.model("Certificate", certificateSchema);
