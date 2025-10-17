@@ -19,7 +19,6 @@ const sendEmail = async (to, subject, htmlContent, textContent) => {
             html: htmlContent,
         };
         const result = await transporter.sendMail(mailOptions);
-        console.log("Email sent successfully:", result.messageId);
     }
     catch (error) {
         console.error("Error sending email:", error);
@@ -350,12 +349,180 @@ export const sendCertificateEmail = async (email, subject, htmlContent, certific
             ],
         };
         const result = await transporter.sendMail(mailOptions);
-        console.log("Certificate email sent successfully:", result.messageId);
     }
     catch (error) {
         console.error("Error sending certificate email:", error);
         throw new Error("Failed to send certificate email");
     }
+};
+export const sendApplicationApprovedEmail = async (email, instructorName) => {
+    const subject = "Your Instructor Application has been Approved! 🎉";
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Application Approved</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #fff; padding: 30px; border: 1px solid #ddd; }
+          .footer { background: #f8f9fa; padding: 20px; text-align: center; border-radius: 0 0 10px 10px; font-size: 14px; color: #666; }
+          .button { display: inline-block; background: #667eea; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+          .emoji { font-size: 24px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <span class="emoji">🎉</span>
+            <h1>Welcome to the Skillify Instructor Team!</h1>
+          </div>
+          <div class="content">
+            <h2>Dear ${instructorName},</h2>
+            <p>We're thrilled to inform you that your instructor application has been <strong>approved</strong>!</p>
+            
+            <p>You can now:</p>
+            <ul>
+              <li>✅ Create and publish courses</li>
+              <li>📚 Manage your course content</li>
+              <li>👥 Interact with students</li>
+              <li>💰 Earn revenue from your expertise</li>
+            </ul>
+            
+            <p>Ready to get started? Click the button below to access your instructor dashboard:</p>
+            <p style="text-align: center;">
+              <a href="http://localhost:5173/instructor/dashboard" class="button">Go to Dashboard</a>
+            </p>
+            
+            <p>If you have any questions or need assistance, our support team is here to help.</p>
+            
+            <p>Welcome aboard!<br>
+            The Skillify Team</p>
+          </div>
+          <div class="footer">
+            <p>© 2024 Skillify. All rights reserved.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+    const textContent = `
+      Dear ${instructorName},
+
+      We're thrilled to inform you that your instructor application has been approved!
+
+      You can now:
+      - Create and publish courses
+      - Manage your course content
+      - Interact with students
+      - Earn revenue from your expertise
+
+      Ready to get started? Visit your instructor dashboard: http://localhost:5173/instructor/dashboard
+
+      If you have any questions or need assistance, our support team is here to help.
+
+      Welcome aboard!
+      The Skillify Team
+    `;
+    console.log("email: ", email);
+    await sendEmail(email, subject, htmlContent, textContent);
+};
+// Function to format rejection reason properly
+const formatRejectionReason = (reason) => {
+    // Convert snake_case to readable format
+    const reasonMap = {
+        expertise_mismatch: "Your expertise doesn't align with our current course categories or requirements.",
+        incomplete_application: "Your application is missing required information or documentation.",
+        insufficient_experience: "We require more teaching or professional experience in your field.",
+        quality_standards: "Your application doesn't meet our current quality standards for instructors.",
+        technical_requirements: "You don't meet the technical requirements for creating online courses.",
+        communication_skills: "We need instructors with stronger communication and presentation skills.",
+        portfolio_insufficient: "Your portfolio or work samples don't demonstrate the required level of expertise.",
+        background_check: "Issues were found during the background verification process.",
+        other: reason // If it's already a custom message, use it as is
+    };
+    return reasonMap[reason] || reason; // Fallback to original if not found in map
+};
+export const sendApplicationRejectedEmail = async (email, instructorName, reason) => {
+    const subject = "Update on Your Instructor Application - Skillify";
+    const formattedReason = formatRejectionReason(reason);
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Application Update</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #fff; padding: 30px; border: 1px solid #ddd; }
+          .footer { background: #f8f9fa; padding: 20px; text-align: center; border-radius: 0 0 10px 10px; font-size: 14px; color: #666; }
+          .button { display: inline-block; background: #667eea; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+          .reason-box { background: #fff8e1; border-left: 4px solid #ff9800; padding: 20px; border-radius: 5px; margin: 20px 0; }
+          .tips-box { background: #e3f2fd; border-left: 4px solid #2196f3; padding: 20px; border-radius: 5px; margin: 20px 0; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>📋 Application Review Complete</h1>
+          </div>
+          <div class="content">
+            <h2>Dear ${instructorName},</h2>
+            <p>Thank you for your interest in becoming an instructor on Skillify. We have carefully reviewed your application.</p>
+            
+            <p>After thorough consideration, we are unable to approve your application at this time. We understand this may be disappointing, but we want to provide you with specific feedback to help you in future applications.</p>
+            
+            <div class="reason-box">
+              <h3>📝 Reason for Decision:</h3>
+              <p><strong>${formattedReason}</strong></p>
+            </div>
+            
+            <div class="tips-box">
+              <h3>💡 Next Steps:</h3>
+              <ul>
+                <li>📚 Review our detailed instructor guidelines and requirements</li>
+                <li>🛠️ Address the specific feedback mentioned above</li>
+                <li>📈 Consider gaining additional experience or certifications in your field</li>
+                <li>🔄 You're welcome to reapply once you've made improvements</li>
+                <li>💬 Reach out to our support team if you need clarification</li>
+              </ul>
+            </div>
+            
+            <p>We appreciate the time and effort you put into your application. Our standards help us maintain the quality of education our students expect, and we encourage you to continue developing your expertise.</p>
+            
+            <p style="text-align: center;">
+              <a href="http://localhost:5173/become-instructor" class="button">View Guidelines & Requirements</a>
+            </p>
+            
+            <p>We wish you the best in your professional journey and hope to potentially work with you in the future.</p>
+            
+            <p>Best regards,<br>
+            The Skillify Review Team</p>
+          </div>
+          <div class="footer">
+            <p>© 2024 Skillify. All rights reserved.</p>
+            <p>Questions? Contact us at <a href="mailto:support@skillify.com">support@skillify.com</a></p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+    const textContent = `
+      Dear ${instructorName},
+
+      Thank you for your interest in becoming an instructor on Skillify. After careful review, we regret to inform you that we cannot approve your application at this time.
+
+      We encourage you to:
+      - Review our instructor guidelines
+      - Address the feedback provided
+      - Reapply once you've made the necessary improvements
+      The Skillify Team
+    `;
+    await sendEmail(email, subject, htmlContent, textContent);
 };
 export default {
     sendVerificationEmail,

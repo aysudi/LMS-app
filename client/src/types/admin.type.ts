@@ -137,3 +137,48 @@ export interface RecentActivity {
   time: string;
   metadata?: any;
 }
+
+export interface AdminCertificate {
+  id: string;
+  certificateId: string;
+  student: {
+    id: string;
+    name: string;
+    email: string;
+    avatar?: string;
+  };
+  course: {
+    id: string;
+    title: string;
+    category: string;
+    instructor?: {
+      name: string;
+    };
+  };
+  issuedAt: string;
+  completedAt: string;
+  enrolledAt: string;
+  progress: number;
+  grade: string;
+}
+
+export interface AdminCertificatesStats {
+  totalCertificates: number;
+  issuedThisMonth: number;
+  averageCompletionTime: number;
+}
+
+export interface AdminCertificatesResponse {
+  success: boolean;
+  data: {
+    certificates: AdminCertificate[];
+    stats: AdminCertificatesStats;
+    pagination: {
+      currentPage: number;
+      totalPages: number;
+      totalCertificates: number;
+      hasNextPage: boolean;
+      hasPreviousPage: boolean;
+    };
+  };
+}

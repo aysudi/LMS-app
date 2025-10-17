@@ -12,6 +12,7 @@ import About from "../pages/Client/About";
 import Contact from "../pages/Client/Contact";
 import BecomeInstructor from "../pages/Client/BecomeInstructor";
 import InstructorApplicationForm from "../pages/Client/InstructorApplicationForm";
+import InstructorApplicationSuccess from "../pages/Client/InstructorApplicationSuccess";
 import CourseDetails from "../pages/Client/CourseDetails";
 import Courses from "../pages/Client/Courses";
 import Wishlist from "../pages/Client/Wishlist";
@@ -43,6 +44,7 @@ import AdminUsers from "../pages/Admin/AdminUsers";
 import AdminInstructors from "../pages/Admin/AdminInstructors";
 import AdminCourses from "../pages/Admin/AdminCourses";
 import AdminAnalytics from "../pages/Admin/AdminAnalytics";
+import AdminCertificates from "../pages/Admin/AdminCertificates";
 
 const ROUTES = [
   //client routes
@@ -127,6 +129,14 @@ const ROUTES = [
         element: (
           <ProtectedRoute>
             <InstructorApplicationForm />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "instructor-application-success",
+        element: (
+          <ProtectedRoute>
+            <InstructorApplicationSuccess />
           </ProtectedRoute>
         ),
       },
@@ -265,6 +275,10 @@ const ROUTES = [
       {
         path: "analytics",
         element: <AdminAnalytics />,
+      },
+      {
+        path: "certificates",
+        element: <AdminCertificates />,
       },
     ],
   },

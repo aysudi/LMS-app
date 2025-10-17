@@ -133,6 +133,16 @@ export const getAdminAnalytics = async (
   return response.data;
 };
 
+export const getAdminCertificates = async (
+  params: {
+    page?: number;
+    limit?: number;
+  } = {}
+) => {
+  const response = await api.get("/api/admin/certificates", { params });
+  return response.data;
+};
+
 export default {
   getAdminDashboardStats,
   getRecentActivity,
@@ -147,4 +157,5 @@ export default {
   approveCourse,
   rejectCourse,
   getAdminAnalytics,
+  getAdminCertificates,
 };
