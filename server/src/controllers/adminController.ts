@@ -22,7 +22,6 @@ export const getAdminDashboardStats = async (
       });
     }
 
-    // Get counts and statistics
     const [
       totalUsers,
       totalInstructors,
@@ -52,14 +51,14 @@ export const getAdminDashboardStats = async (
       totalInstructors,
       totalStudents,
       totalCourses,
-      totalRevenue: 0, // TODO: Calculate from payments/orders
+      totalRevenue: 0,
       pendingApprovals: pendingCourses,
-      activeStudents: totalStudents, // TODO: Calculate active students
-      completedCourses: 0, // TODO: Calculate from enrollments
-      certificatesIssued: 0, // TODO: Calculate from certificates
-      revenueGrowth: 0, // TODO: Calculate growth
+      activeStudents: totalStudents,
+      completedCourses: 0,
+      certificatesIssued: 0,
+      revenueGrowth: 0,
       userGrowth: Math.round((recentUsers / totalUsers) * 100),
-      courseGrowth: 0, // TODO: Calculate course growth
+      courseGrowth: 0,
     };
 
     res.status(200).json({
@@ -132,7 +131,6 @@ export const getAdminUsers = async (req: AuthRequest, res: Response) => {
       User.countDocuments(filters),
     ]);
 
-    // Get additional user data (enrollments, courses created, etc.)
     const usersWithStats = await Promise.all(
       users.map(async (user) => {
         const [enrollmentCount, coursesCreated] = await Promise.all([
@@ -148,7 +146,7 @@ export const getAdminUsers = async (req: AuthRequest, res: Response) => {
           ...formatMongoData(user),
           coursesEnrolled: enrollmentCount,
           coursesCreated: coursesCreated,
-          lastActive: "Recently", // TODO: Implement actual last active tracking
+          lastActive: "Recently",
         };
       })
     );
@@ -296,7 +294,6 @@ export const bulkUpdateUsers = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Validate updates
     const allowedFields = ["status", "role"];
     const validUpdates: any = {};
 
@@ -339,7 +336,6 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Instead of hard delete, we'll set status to 'deleted'
     const user = await User.findByIdAndUpdate(
       targetUserId,
       { status: "deleted", deletedAt: new Date() },
@@ -381,22 +377,18 @@ export const getRecentActivity = async (req: AuthRequest, res: Response) => {
 
     const limit = parseInt(req.query.limit as string) || 10;
 
-    // Get recent activities from different sources
     const [recentUsers, recentCourses, recentEnrollments] = await Promise.all([
-      // Recent user registrations
       User.find()
         .sort({ createdAt: -1 })
         .limit(3)
         .select("firstName lastName email role createdAt"),
 
-      // Recent course submissions/updates
       Course.find()
         .sort({ updatedAt: -1 })
         .limit(3)
         .populate("instructor", "firstName lastName")
         .select("title instructor isPublished updatedAt createdAt"),
 
-      // Recent enrollments
       Enrollment.find()
         .sort({ createdAt: -1 })
         .limit(4)
@@ -405,10 +397,8 @@ export const getRecentActivity = async (req: AuthRequest, res: Response) => {
         .select("user course createdAt"),
     ]);
 
-    // Format activities into a unified structure
     const activities: any[] = [];
 
-    // Add user registrations
     recentUsers.forEach((user) => {
       activities.push({
         id: `user_${user._id}`,
@@ -420,7 +410,6 @@ export const getRecentActivity = async (req: AuthRequest, res: Response) => {
       });
     });
 
-    // Add course activities
     recentCourses.forEach((course) => {
       const instructor = course.instructor as any;
       const isPublished = (course as any).isPublished;
@@ -438,7 +427,6 @@ export const getRecentActivity = async (req: AuthRequest, res: Response) => {
       });
     });
 
-    // Add enrollment activities
     recentEnrollments.forEach((enrollment) => {
       const user = enrollment.user as any;
       const course = enrollment.course as any;
@@ -454,13 +442,11 @@ export const getRecentActivity = async (req: AuthRequest, res: Response) => {
       });
     });
 
-    // Sort by time (most recent first) and limit
     activities.sort(
       (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
     );
     const limitedActivities = activities.slice(0, limit);
 
-    // Format timestamps
     const formattedActivities = limitedActivities.map((activity) => ({
       ...activity,
       time: new Date(activity.time).toLocaleString(),
@@ -497,7 +483,6 @@ export const getAdminAnalytics = async (req: AuthRequest, res: Response) => {
     const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 
-    // Get current month data
     const [
       totalUsers,
       totalCourses,
@@ -512,7 +497,6 @@ export const getAdminAnalytics = async (req: AuthRequest, res: Response) => {
       lastMonthEnrollments,
       lastMonthRevenue,
     ] = await Promise.all([
-      // Total counts
       User.countDocuments(),
       Course.countDocuments({ isPublished: true }),
       Enrollment.countDocuments(),
@@ -520,7 +504,6 @@ export const getAdminAnalytics = async (req: AuthRequest, res: Response) => {
         { $group: { _id: null, total: { $sum: "$price" } } },
       ]).then((result) => result[0]?.total || 0),
 
-      // This month counts
       User.countDocuments({ createdAt: { $gte: startOfThisMonth } }),
       Course.countDocuments({
         createdAt: { $gte: startOfThisMonth },
@@ -532,7 +515,6 @@ export const getAdminAnalytics = async (req: AuthRequest, res: Response) => {
         { $group: { _id: null, total: { $sum: "$price" } } },
       ]).then((result) => result[0]?.total || 0),
 
-      // Last month counts
       User.countDocuments({
         createdAt: {
           $gte: startOfLastMonth,
@@ -565,13 +547,11 @@ export const getAdminAnalytics = async (req: AuthRequest, res: Response) => {
       ]).then((result) => result[0]?.total || 0),
     ]);
 
-    // Calculate growth percentages
     const calculateGrowth = (current: number, previous: number) => {
       if (previous === 0) return current > 0 ? 100 : 0;
       return ((current - previous) / previous) * 100;
     };
 
-    // Get monthly data for charts (last 6 months)
     const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
 
     const monthlyUserData = await User.aggregate([
@@ -602,7 +582,6 @@ export const getAdminAnalytics = async (req: AuthRequest, res: Response) => {
       { $sort: { "_id.year": 1, "_id.month": 1 } },
     ]);
 
-    // Get course categories
     const courseCategories = await Course.aggregate([
       { $match: { isPublished: true } },
       { $group: { _id: "$category", count: { $sum: 1 } } },
@@ -610,7 +589,6 @@ export const getAdminAnalytics = async (req: AuthRequest, res: Response) => {
       { $limit: 10 },
     ]);
 
-    // Calculate completion rate
     const completedEnrollments = await Enrollment.countDocuments({
       completionStatus: "completed",
     });
@@ -619,7 +597,6 @@ export const getAdminAnalytics = async (req: AuthRequest, res: Response) => {
         ? (completedEnrollments / totalEnrollments) * 100
         : 0;
 
-    // Format monthly data for frontend
     const formatMonthlyData = (data: any[]) => {
       return data.map((item) => ({
         month: new Date(item._id.year, item._id.month - 1).toISOString(),
@@ -699,7 +676,6 @@ export const getAdminCertificates = async (req: AuthRequest, res: Response) => {
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
 
-    // Get certificates with user and course data
     const certificates: any = await Enrollment.find({
       certificateIssued: true,
       status: "completed",
@@ -722,7 +698,6 @@ export const getAdminCertificates = async (req: AuthRequest, res: Response) => {
       status: "completed",
     });
 
-    // Get certificate statistics
     const stats = {
       totalCertificates: totalCount,
       issuedThisMonth: await Enrollment.countDocuments({
@@ -757,7 +732,6 @@ export const getAdminCertificates = async (req: AuthRequest, res: Response) => {
       ]).then((result) => Math.round(result[0]?.avgTime || 0)),
     };
 
-    // Format certificates data
     const formattedCertificates = certificates.map((enrollment: any) => ({
       id: enrollment._id,
       certificateId: enrollment.certificateId,

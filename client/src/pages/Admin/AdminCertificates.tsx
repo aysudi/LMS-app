@@ -111,7 +111,6 @@ const AdminCertificates: React.FC = () => {
   }
 
   const { certificates = [], stats, pagination } = certificatesData?.data || {};
-  console.log(stats);
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
