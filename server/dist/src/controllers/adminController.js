@@ -405,56 +405,56 @@ export const getAdminAnalytics = async (req, res) => {
         const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
         const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
         // Get current month data
-        const [totalUsers, totalCourses, totalEnrollments, totalRevenue, thisMonthUsers, thisMonthCourses, thisMonthEnrollments, thisMonthRevenue, lastMonthUsers, lastMonthCourses, lastMonthEnrollments, lastMonthRevenue] = await Promise.all([
+        const [totalUsers, totalCourses, totalEnrollments, totalRevenue, thisMonthUsers, thisMonthCourses, thisMonthEnrollments, thisMonthRevenue, lastMonthUsers, lastMonthCourses, lastMonthEnrollments, lastMonthRevenue,] = await Promise.all([
             // Total counts
             User.countDocuments(),
             Course.countDocuments({ isPublished: true }),
             Enrollment.countDocuments(),
             Enrollment.aggregate([
-                { $group: { _id: null, total: { $sum: "$price" } } }
-            ]).then(result => result[0]?.total || 0),
+                { $group: { _id: null, total: { $sum: "$price" } } },
+            ]).then((result) => result[0]?.total || 0),
             // This month counts
             User.countDocuments({ createdAt: { $gte: startOfThisMonth } }),
             Course.countDocuments({
                 createdAt: { $gte: startOfThisMonth },
-                isPublished: true
+                isPublished: true,
             }),
             Enrollment.countDocuments({ createdAt: { $gte: startOfThisMonth } }),
             Enrollment.aggregate([
                 { $match: { createdAt: { $gte: startOfThisMonth } } },
-                { $group: { _id: null, total: { $sum: "$price" } } }
-            ]).then(result => result[0]?.total || 0),
+                { $group: { _id: null, total: { $sum: "$price" } } },
+            ]).then((result) => result[0]?.total || 0),
             // Last month counts
             User.countDocuments({
                 createdAt: {
                     $gte: startOfLastMonth,
-                    $lt: startOfThisMonth
-                }
+                    $lt: startOfThisMonth,
+                },
             }),
             Course.countDocuments({
                 createdAt: {
                     $gte: startOfLastMonth,
-                    $lt: startOfThisMonth
+                    $lt: startOfThisMonth,
                 },
-                isPublished: true
+                isPublished: true,
             }),
             Enrollment.countDocuments({
                 createdAt: {
                     $gte: startOfLastMonth,
-                    $lt: startOfThisMonth
-                }
+                    $lt: startOfThisMonth,
+                },
             }),
             Enrollment.aggregate([
                 {
                     $match: {
                         createdAt: {
                             $gte: startOfLastMonth,
-                            $lt: startOfThisMonth
-                        }
-                    }
+                            $lt: startOfThisMonth,
+                        },
+                    },
                 },
-                { $group: { _id: null, total: { $sum: "$price" } } }
-            ]).then(result => result[0]?.total || 0)
+                { $group: { _id: null, total: { $sum: "$price" } } },
+            ]).then((result) => result[0]?.total || 0),
         ]);
         // Calculate growth percentages
         const calculateGrowth = (current, previous) => {
@@ -470,12 +470,12 @@ export const getAdminAnalytics = async (req, res) => {
                 $group: {
                     _id: {
                         year: { $year: "$createdAt" },
-                        month: { $month: "$createdAt" }
+                        month: { $month: "$createdAt" },
                     },
-                    users: { $sum: 1 }
-                }
+                    users: { $sum: 1 },
+                },
             },
-            { $sort: { "_id.year": 1, "_id.month": 1 } }
+            { $sort: { "_id.year": 1, "_id.month": 1 } },
         ]);
         const monthlyRevenueData = await Enrollment.aggregate([
             { $match: { createdAt: { $gte: sixMonthsAgo } } },
@@ -483,31 +483,33 @@ export const getAdminAnalytics = async (req, res) => {
                 $group: {
                     _id: {
                         year: { $year: "$createdAt" },
-                        month: { $month: "$createdAt" }
+                        month: { $month: "$createdAt" },
                     },
-                    revenue: { $sum: "$price" }
-                }
+                    revenue: { $sum: "$price" },
+                },
             },
-            { $sort: { "_id.year": 1, "_id.month": 1 } }
+            { $sort: { "_id.year": 1, "_id.month": 1 } },
         ]);
         // Get course categories
         const courseCategories = await Course.aggregate([
             { $match: { isPublished: true } },
             { $group: { _id: "$category", count: { $sum: 1 } } },
             { $sort: { count: -1 } },
-            { $limit: 10 }
+            { $limit: 10 },
         ]);
         // Calculate completion rate
         const completedEnrollments = await Enrollment.countDocuments({
-            completionStatus: "completed"
+            completionStatus: "completed",
         });
-        const completionRate = totalEnrollments > 0 ? (completedEnrollments / totalEnrollments) * 100 : 0;
+        const completionRate = totalEnrollments > 0
+            ? (completedEnrollments / totalEnrollments) * 100
+            : 0;
         // Format monthly data for frontend
         const formatMonthlyData = (data) => {
-            return data.map(item => ({
+            return data.map((item) => ({
                 month: new Date(item._id.year, item._id.month - 1).toISOString(),
                 users: item.users,
-                revenue: item.revenue
+                revenue: item.revenue,
             }));
         };
         const analytics = {
@@ -516,38 +518,38 @@ export const getAdminAnalytics = async (req, res) => {
                 thisMonth: thisMonthRevenue,
                 lastMonth: lastMonthRevenue,
                 growth: calculateGrowth(thisMonthRevenue, lastMonthRevenue),
-                byMonth: monthlyRevenueData.map(item => ({
+                byMonth: monthlyRevenueData.map((item) => ({
                     month: new Date(item._id.year, item._id.month - 1).toISOString(),
-                    revenue: item.revenue
-                }))
+                    revenue: item.revenue,
+                })),
             },
             users: {
                 total: totalUsers,
                 thisMonth: thisMonthUsers,
                 lastMonth: lastMonthUsers,
                 growth: calculateGrowth(thisMonthUsers, lastMonthUsers),
-                byMonth: monthlyUserData.map(item => ({
+                byMonth: monthlyUserData.map((item) => ({
                     month: new Date(item._id.year, item._id.month - 1).toISOString(),
-                    users: item.users
-                }))
+                    users: item.users,
+                })),
             },
             courses: {
                 total: totalCourses,
                 thisMonth: thisMonthCourses,
                 lastMonth: lastMonthCourses,
                 growth: calculateGrowth(thisMonthCourses, lastMonthCourses),
-                byCategory: courseCategories.map(cat => ({
-                    category: cat._id || 'Uncategorized',
-                    count: cat.count
-                }))
+                byCategory: courseCategories.map((cat) => ({
+                    category: cat._id || "Uncategorized",
+                    count: cat.count,
+                })),
             },
             enrollments: {
                 total: totalEnrollments,
                 thisMonth: thisMonthEnrollments,
                 lastMonth: lastMonthEnrollments,
                 growth: calculateGrowth(thisMonthEnrollments, lastMonthEnrollments),
-                completionRate: completionRate
-            }
+                completionRate: completionRate,
+            },
         };
         res.status(200).json({
             success: true,
@@ -563,7 +565,7 @@ export const getAdminAnalytics = async (req, res) => {
         });
     }
 };
-// Get admin certificates data  
+// Get admin certificates data
 export const getAdminCertificates = async (req, res) => {
     try {
         const userId = req.user?.id;
@@ -581,24 +583,24 @@ export const getAdminCertificates = async (req, res) => {
         const [certificates, totalCount] = await Promise.all([
             Enrollment.find({
                 certificateIssued: true,
-                completionStatus: "completed"
+                completionStatus: "completed",
             })
-                .populate('user', 'firstName lastName email avatar')
-                .populate('course', 'title instructor category')
+                .populate("user", "firstName lastName email avatar")
+                .populate("course", "title instructor category")
                 .populate({
-                path: 'course',
+                path: "course",
                 populate: {
-                    path: 'instructor',
-                    select: 'firstName lastName'
-                }
+                    path: "instructor",
+                    select: "firstName lastName",
+                },
             })
                 .sort({ certificateIssuedAt: -1 })
                 .skip(skip)
                 .limit(limit),
             Enrollment.countDocuments({
                 certificateIssued: true,
-                completionStatus: "completed"
-            })
+                completionStatus: "completed",
+            }),
         ]);
         // Get certificate statistics
         const stats = {
@@ -607,8 +609,8 @@ export const getAdminCertificates = async (req, res) => {
                 certificateIssued: true,
                 completionStatus: "completed",
                 certificateIssuedAt: {
-                    $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1)
-                }
+                    $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+                },
             }),
             averageCompletionTime: await Enrollment.aggregate([
                 {
@@ -616,8 +618,8 @@ export const getAdminCertificates = async (req, res) => {
                         certificateIssued: true,
                         completionStatus: "completed",
                         completedAt: { $exists: true },
-                        enrolledAt: { $exists: true }
-                    }
+                        enrolledAt: { $exists: true },
+                    },
                 },
                 {
                     $group: {
@@ -626,13 +628,13 @@ export const getAdminCertificates = async (req, res) => {
                             $avg: {
                                 $divide: [
                                     { $subtract: ["$completedAt", "$enrolledAt"] },
-                                    1000 * 60 * 60 * 24 // Convert to days
-                                ]
-                            }
-                        }
-                    }
-                }
-            ]).then(result => Math.round(result[0]?.avgTime || 0))
+                                    1000 * 60 * 60 * 24, // Convert to days
+                                ],
+                            },
+                        },
+                    },
+                },
+            ]).then((result) => Math.round(result[0]?.avgTime || 0)),
         };
         // Format certificates data
         const formattedCertificates = certificates.map((enrollment) => ({
@@ -642,21 +644,23 @@ export const getAdminCertificates = async (req, res) => {
                 id: enrollment.user._id,
                 name: `${enrollment.user.firstName} ${enrollment.user.lastName}`,
                 email: enrollment.user.email,
-                avatar: enrollment.user.avatar
+                avatar: enrollment.user.avatar,
             },
             course: {
                 id: enrollment.course._id,
                 title: enrollment.course.title,
                 category: enrollment.course.category,
-                instructor: enrollment.course.instructor ? {
-                    name: `${enrollment.course.instructor.firstName} ${enrollment.course.instructor.lastName}`
-                } : null
+                instructor: enrollment.course.instructor
+                    ? {
+                        name: `${enrollment.course.instructor.firstName} ${enrollment.course.instructor.lastName}`,
+                    }
+                    : null,
             },
             issuedAt: enrollment.certificateIssuedAt,
             completedAt: enrollment.completedAt,
             enrolledAt: enrollment.enrolledAt,
             progress: enrollment.progress,
-            grade: enrollment.grade || 'Pass'
+            grade: enrollment.grade || "Pass",
         }));
         const totalPages = Math.ceil(totalCount / limit);
         res.status(200).json({
@@ -670,8 +674,8 @@ export const getAdminCertificates = async (req, res) => {
                     totalCertificates: totalCount,
                     hasNextPage: page < totalPages,
                     hasPreviousPage: page > 1,
-                }
-            }
+                },
+            },
         });
     }
     catch (error) {
