@@ -692,7 +692,7 @@ const InstructorApplicationForm: React.FC = () => {
                 disabled={!canProceedToNext()}
                 whileHover={{ scale: canProceedToNext() ? 1.02 : 1 }}
                 whileTap={{ scale: canProceedToNext() ? 0.98 : 1 }}
-                className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
+                className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-semibold transition-all duration-200 cursor-pointer ${
                   canProceedToNext()
                     ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg hover:shadow-xl"
                     : "bg-gray-300 text-gray-500 cursor-not-allowed"
