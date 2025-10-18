@@ -13,7 +13,6 @@ const AdminCertificates: React.FC = () => {
     page: currentPage,
     limit,
   });
-  // console.log(certificatesData);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -30,6 +29,7 @@ const AdminCertificates: React.FC = () => {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays < 7) return `${diffDays} days`;
+    if (diffDays < 14 && diffDays > 7) return `1 week`;
     if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks`;
     return `${Math.floor(diffDays / 30)} months`;
   };
@@ -111,7 +111,7 @@ const AdminCertificates: React.FC = () => {
   }
 
   const { certificates = [], stats, pagination } = certificatesData?.data || {};
-  // console.log("certificates", certificates);
+  console.log(stats);
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">

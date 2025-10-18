@@ -2,9 +2,7 @@ import InstructorApplication from "../schemas/instructorApplicationSchema";
 import User from "../models/User";
 import { UserRole } from "../types/user.types";
 import mongoose from "mongoose";
-import { sendEmail } from "../utils/emailService";
-import { emailTemplates } from "../utils/emailTemplates";
-import { sendApplicationApprovedEmail, sendApplicationRejectedEmail, } from "../utils/sendMail";
+import { sendApplicationApprovedEmail, sendApplicationReceivedEmail, sendApplicationRejectedEmail, } from "../utils/sendMail";
 // Submit instructor application
 export const submitInstructorApplication = async (userId, applicationData) => {
     try {
@@ -28,12 +26,7 @@ export const submitInstructorApplication = async (userId, applicationData) => {
             submittedAt: new Date(),
         });
         await application.save();
-        const emailTemplate = emailTemplates.instructorApplicationReceived(application.firstName, application.lastName);
-        await sendEmail({
-            to: application.email,
-            subject: emailTemplate.subject,
-            html: emailTemplate.html,
-        });
+        await sendApplicationReceivedEmail(application.email, user.firstName, user.lastName);
         return application;
     }
     catch (error) {

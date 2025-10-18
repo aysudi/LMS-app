@@ -130,7 +130,7 @@ export const getAdminAnalytics = async (
   } = {}
 ) => {
   const response = await api.get("/api/admin/analytics", { params });
-  return response.data;
+  return response.data.data; // Return the actual analytics data
 };
 
 export const getAdminCertificates = async (

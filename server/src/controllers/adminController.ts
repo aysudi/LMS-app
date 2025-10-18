@@ -700,36 +700,34 @@ export const getAdminCertificates = async (req: AuthRequest, res: Response) => {
     const skip = (page - 1) * limit;
 
     // Get certificates with user and course data
-    const [certificates, totalCount] = await Promise.all([
-      Enrollment.find({
-        certificateIssued: true,
-        completionStatus: "completed",
+    const certificates: any = await Enrollment.find({
+      certificateIssued: true,
+      status: "completed",
+    })
+      .populate("user", "firstName lastName email avatar")
+      .populate("course", "title instructor category")
+      .populate({
+        path: "course",
+        populate: {
+          path: "instructor",
+          select: "firstName lastName",
+        },
       })
-        .populate("user", "firstName lastName email avatar")
-        .populate("course", "title instructor category")
-        .populate({
-          path: "course",
-          populate: {
-            path: "instructor",
-            select: "firstName lastName",
-          },
-        })
-        .sort({ certificateIssuedAt: -1 })
-        .skip(skip)
-        .limit(limit),
+      .sort({ certificateIssuedAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
-      Enrollment.countDocuments({
-        certificateIssued: true,
-        completionStatus: "completed",
-      }),
-    ]);
+    const totalCount: any = await Enrollment.countDocuments({
+      certificateIssued: true,
+      status: "completed",
+    });
 
     // Get certificate statistics
     const stats = {
       totalCertificates: totalCount,
       issuedThisMonth: await Enrollment.countDocuments({
         certificateIssued: true,
-        completionStatus: "completed",
+        status: "completed",
         certificateIssuedAt: {
           $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
         },
@@ -738,7 +736,7 @@ export const getAdminCertificates = async (req: AuthRequest, res: Response) => {
         {
           $match: {
             certificateIssued: true,
-            completionStatus: "completed",
+            status: "completed",
             completedAt: { $exists: true },
             enrolledAt: { $exists: true },
           },

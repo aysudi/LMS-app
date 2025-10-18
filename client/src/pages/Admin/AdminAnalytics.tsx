@@ -78,7 +78,35 @@ const AdminAnalytics: React.FC = () => {
     );
   }
 
-  const { revenue, users, courses, enrollments } = analytics;
+  // Safely extract data with fallbacks
+  const revenue = analytics.revenue || {
+    total: 0,
+    thisMonth: 0,
+    lastMonth: 0,
+    growth: 0,
+    byMonth: [],
+  };
+  const users = analytics.users || {
+    total: 0,
+    thisMonth: 0,
+    lastMonth: 0,
+    growth: 0,
+    byMonth: [],
+  };
+  const courses = analytics.courses || {
+    total: 0,
+    thisMonth: 0,
+    lastMonth: 0,
+    growth: 0,
+    byCategory: [],
+  };
+  const enrollments = analytics.enrollments || {
+    total: 0,
+    thisMonth: 0,
+    lastMonth: 0,
+    growth: 0,
+    completionRate: 0,
+  };
 
   const statCards = [
     {
@@ -199,7 +227,7 @@ const AdminAnalytics: React.FC = () => {
             </h3>
             <div className="space-y-4">
               {users.byMonth && users.byMonth.length > 0 ? (
-                users.byMonth.slice(-6).map((data, index) => (
+                users.byMonth.slice(-6).map((data: any, index: number) => (
                   <div
                     key={index}
                     className="flex items-center justify-between"
@@ -218,7 +246,7 @@ const AdminAnalytics: React.FC = () => {
                             width: `${
                               (data.users /
                                 Math.max(
-                                  ...users.byMonth.map((d) => d.users)
+                                  ...users.byMonth.map((d: any) => d.users)
                                 )) *
                               100
                             }%`,
@@ -246,7 +274,7 @@ const AdminAnalytics: React.FC = () => {
             </h3>
             <div className="space-y-4">
               {revenue.byMonth && revenue.byMonth.length > 0 ? (
-                revenue.byMonth.slice(-6).map((data, index) => (
+                revenue.byMonth.slice(-6).map((data: any, index: number) => (
                   <div
                     key={index}
                     className="flex items-center justify-between"
@@ -265,7 +293,7 @@ const AdminAnalytics: React.FC = () => {
                             width: `${
                               (data.revenue /
                                 Math.max(
-                                  ...revenue.byMonth.map((d) => d.revenue)
+                                  ...revenue.byMonth.map((d: any) => d.revenue)
                                 )) *
                               100
                             }%`,
@@ -296,7 +324,7 @@ const AdminAnalytics: React.FC = () => {
             </h3>
             <div className="space-y-4">
               {courses.byCategory && courses.byCategory.length > 0 ? (
-                courses.byCategory.map((category, index) => (
+                courses.byCategory.map((category: any, index: number) => (
                   <div
                     key={index}
                     className="flex items-center justify-between"
@@ -312,7 +340,7 @@ const AdminAnalytics: React.FC = () => {
                             width: `${
                               (category.count /
                                 Math.max(
-                                  ...courses.byCategory.map((c) => c.count)
+                                  ...courses.byCategory.map((c: any) => c.count)
                                 )) *
                               100
                             }%`,
