@@ -13,6 +13,7 @@ const AdminCertificates: React.FC = () => {
     page: currentPage,
     limit,
   });
+  // console.log(certificatesData);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -110,6 +111,7 @@ const AdminCertificates: React.FC = () => {
   }
 
   const { certificates = [], stats, pagination } = certificatesData?.data || {};
+  // console.log("certificates", certificates);
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">

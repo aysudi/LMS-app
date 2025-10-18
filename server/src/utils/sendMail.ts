@@ -486,7 +486,73 @@ export const sendApplicationApprovedEmail = async (
       Welcome aboard!
       The Skillify Team
     `;
-  console.log("email: ", email);
+
+  await sendEmail(email, subject, htmlContent, textContent);
+};
+
+export const sendApplicationReceivedEmail = async (
+  email: string,
+  firstName: string,
+  lastName: string
+): Promise<void> => {
+  const subject = "Instructor Application Received - Skillify";
+  const htmlContent = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <div style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+          <h1 style="margin: 0; font-size: 28px;">🎉 Application Received!</h1>
+          <p style="margin: 10px 0 0 0; font-size: 18px;">Thank you for applying to become an instructor</p>
+        </div>
+        
+        <div style="padding: 30px; background-color: white;">
+          <p style="font-size: 16px; color: #374151;">Dear ${firstName} ${lastName},</p>
+          
+          <p style="font-size: 16px; color: #374151; line-height: 1.6;">
+            We have received your instructor application and are excited to review your qualifications. 
+            Your passion for teaching and expertise will help create an amazing learning experience for our students.
+          </p>
+          
+          <div style="background-color: #f8fafc; padding: 25px; border-radius: 12px; margin: 25px 0; border-left: 4px solid #4f46e5;">
+            <h3 style="color: #374151; margin-top: 0; font-size: 18px;">📋 What's Next?</h3>
+            <ul style="color: #6b7280; line-height: 1.8; font-size: 15px;">
+              <li>Our expert team will review your application within <strong>3-5 business days</strong></li>
+              <li>We'll carefully evaluate your expertise, experience, and teaching motivation</li>
+              <li>You'll receive an email notification once a decision is made</li>
+              <li>If approved, you'll get immediate access to our instructor tools</li>
+            </ul>
+          </div>
+          
+          <div style="background-color: #eff6ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <p style="color: #1e40af; font-weight: 600; margin: 0;">💡 Pro Tip:</p>
+            <p style="color: #374151; margin: 10px 0 0 0;">While you wait, check out our <a href="${process.env.CLIENT_URL}/instructor-guidelines" style="color: #4f46e5;">Instructor Guidelines</a> to learn about best practices for creating engaging courses.</p>
+          </div>
+          
+          <p style="font-size: 16px; color: #374151;">If you have any questions, feel free to contact our support team at <a href="mailto:support@skillify.com" style="color: #4f46e5;">support@skillify.com</a></p>
+          
+          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+            <p style="color: #6b7280; font-size: 14px; margin: 0;">Best regards,<br><strong>The Skillify Team</strong></p>
+          </div>
+        </div>
+      </div>
+    `;
+  const textContent = `
+      Dear ${firstName} ${lastName},
+
+      We have received your instructor application and are excited to review your qualifications. 
+      Your passion for teaching and expertise will help create an amazing learning experience for our students.
+
+      What's Next?
+      - Our expert team will review your application within 3-5 business days
+      - We'll carefully evaluate your expertise, experience, and teaching motivation
+      - You'll receive an email notification once a decision is made
+      - If approved, you'll get immediate access to our instructor tools
+
+      Pro Tip:
+      While you wait, check out our Instructor Guidelines to learn about best practices for creating engaging courses: ${process.env.CLIENT_URL}/instructor-guidelines
+
+      If you have any questions, feel free to contact our support team at support@skillify.com
+      Best regards,
+      The Skillify Team
+    `;
 
   await sendEmail(email, subject, htmlContent, textContent);
 };

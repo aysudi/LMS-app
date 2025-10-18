@@ -4,10 +4,9 @@ import InstructorApplication, {
 import User from "../models/User";
 import { UserRole } from "../types/user.types";
 import mongoose from "mongoose";
-import { sendEmail } from "../utils/emailService";
-import { emailTemplates } from "../utils/emailTemplates";
 import {
   sendApplicationApprovedEmail,
+  sendApplicationReceivedEmail,
   sendApplicationRejectedEmail,
 } from "../utils/sendMail";
 
@@ -42,16 +41,11 @@ export const submitInstructorApplication = async (
 
     await application.save();
 
-    const emailTemplate = emailTemplates.instructorApplicationReceived(
-      application.firstName,
-      application.lastName
+    await sendApplicationReceivedEmail(
+      application.email,
+      user.firstName,
+      user.lastName
     );
-
-    await sendEmail({
-      to: application.email,
-      subject: emailTemplate.subject,
-      html: emailTemplate.html,
-    });
 
     return application;
   } catch (error: any) {
