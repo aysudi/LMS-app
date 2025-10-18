@@ -97,6 +97,43 @@ export const unbanUser = async (
 };
 
 // Admin Course Management
+export const getCourses = async (
+  params: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    search?: string;
+  } = {}
+) => {
+  const response = await api.get("/api/admin/courses", { params });
+  return response.data.data;
+};
+
+export const approveCourse = async (courseId: string, feedback?: string) => {
+  const response = await api.patch(`/api/admin/courses/${courseId}/approve`, {
+    adminFeedback: feedback,
+  });
+  return response.data;
+};
+
+export const rejectCourse = async (
+  courseId: string,
+  rejectionReason: string,
+  adminFeedback?: string
+) => {
+  const response = await api.patch(`/api/admin/courses/${courseId}/reject`, {
+    rejectionReason,
+    adminFeedback,
+  });
+  return response.data;
+};
+
+export const getCourseDetails = async (courseId: string) => {
+  const response = await api.get(`/api/admin/courses/${courseId}`);
+  return response.data.data;
+};
+
+// Legacy support
 export const getAdminCourses = async (
   params: {
     page?: number;
@@ -106,18 +143,6 @@ export const getAdminCourses = async (
   } = {}
 ) => {
   const response = await api.get("/api/admin/courses", { params });
-  return response.data;
-};
-
-export const approveCourse = async (courseId: string) => {
-  const response = await api.patch(`/api/admin/courses/${courseId}/approve`);
-  return response.data;
-};
-
-export const rejectCourse = async (courseId: string, reason: string) => {
-  const response = await api.patch(`/api/admin/courses/${courseId}/reject`, {
-    reason,
-  });
   return response.data;
 };
 
@@ -153,9 +178,11 @@ export default {
   deleteUser,
   banUser,
   unbanUser,
-  getAdminCourses,
+  getCourses,
+  getCourseDetails,
   approveCourse,
   rejectCourse,
+  getAdminCourses,
   getAdminAnalytics,
   getAdminCertificates,
 };

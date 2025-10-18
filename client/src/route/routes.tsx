@@ -43,6 +43,7 @@ import AdminDashboard from "../pages/Admin/AdminDashboard";
 import AdminUsers from "../pages/Admin/AdminUsers";
 import AdminInstructors from "../pages/Admin/AdminInstructors";
 import AdminCourses from "../pages/Admin/AdminCourses";
+import AdminCourseReview from "../pages/Admin/AdminCourseReview";
 import AdminAnalytics from "../pages/Admin/AdminAnalytics";
 import AdminCertificates from "../pages/Admin/AdminCertificates";
 
@@ -271,6 +272,10 @@ const ROUTES = [
       {
         path: "courses",
         element: <AdminCourses />,
+      },
+      {
+        path: "courses/:courseId/review",
+        element: <AdminCourseReview />,
       },
       {
         path: "analytics",

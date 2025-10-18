@@ -5,6 +5,11 @@ import Course from "../models/Course";
 import Enrollment from "../models/Enrollment";
 import { UserRole } from "../types/user.types";
 import formatMongoData from "../utils/formatMongoData";
+import mongoose from "mongoose";
+import {
+  sendCourseApprovedEmail,
+  sendCourseRejectedEmail,
+} from "../utils/sendMail";
 
 // Get admin dashboard statistics
 export const getAdminDashboardStats = async (
@@ -784,6 +789,382 @@ export const getAdminCertificates = async (req: AuthRequest, res: Response) => {
   }
 };
 
+// Get admin courses for moderation
+export const getAdminCourses = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
+
+    if (!userId || userRole !== UserRole.ADMIN) {
+      return res.status(403).json({
+        success: false,
+        message: "Admin access required",
+      });
+    }
+
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const status = req.query.status as string;
+    const search = req.query.search as string;
+    const skip = (page - 1) * limit;
+
+    // Build filter - exclude draft courses, only show courses that have been submitted
+    const filter: any = {
+      status: { $in: ["pending", "approved", "rejected"] },
+    };
+
+    if (status && status !== "all") {
+      filter.status = status;
+    }
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { category: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    const [courses, totalCount] = await Promise.all([
+      Course.find(filter)
+        .populate("instructor", "firstName lastName email avatar")
+        .populate("reviewedBy", "firstName lastName")
+        .sort({ submittedAt: -1, createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      Course.countDocuments(filter),
+    ]);
+
+    const formattedCourses = courses.map((course: any) => ({
+      id: course._id,
+      title: course.title,
+      description: course.description,
+      shortDescription: course.shortDescription,
+      category: course.category,
+      level: course.level,
+      originalPrice: course.originalPrice,
+      discountPrice: course.discountPrice,
+      isFree: course.isFree,
+      image: course.image,
+      instructor: {
+        id: course.instructor._id,
+        name: `${course.instructor.firstName} ${course.instructor.lastName}`,
+        email: course.instructor.email,
+        avatar: course.instructor.avatar,
+      },
+      status: course.status,
+      isPublished: course.isPublished,
+      submittedAt: course.submittedAt,
+      reviewedAt: course.reviewedAt,
+      reviewedBy: course.reviewedBy
+        ? {
+            name: `${course.reviewedBy.firstName} ${course.reviewedBy.lastName}`,
+          }
+        : null,
+      rejectionReason: course.rejectionReason,
+      adminFeedback: course.adminFeedback,
+      createdAt: course.createdAt,
+      updatedAt: course.updatedAt,
+      studentsCount: course.studentsEnrolled?.length || 0,
+      rating: course.rating,
+      ratingsCount: course.ratingsCount,
+      totalLessons: course.totalLessons,
+      totalDuration: course.totalDuration,
+    }));
+
+    const totalPages = Math.ceil(totalCount / limit);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        courses: formattedCourses,
+        pagination: {
+          currentPage: page,
+          totalPages,
+          totalCourses: totalCount,
+          hasNextPage: page < totalPages,
+          hasPreviousPage: page > 1,
+        },
+      },
+    });
+  } catch (error: any) {
+    console.error("Error fetching admin courses:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch courses data",
+      error: error.message,
+    });
+  }
+};
+
+// Approve course
+export const approveCourse = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
+
+    if (!userId || userRole !== UserRole.ADMIN) {
+      return res.status(403).json({
+        success: false,
+        message: "Admin access required",
+      });
+    }
+
+    const { courseId } = req.params;
+    const { adminFeedback } = req.body;
+
+    const course = await Course.findById(courseId).populate(
+      "instructor",
+      "firstName lastName email"
+    );
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found",
+      });
+    }
+
+    if (course.status !== "pending") {
+      return res.status(400).json({
+        success: false,
+        message: "Course is not pending approval",
+      });
+    }
+
+    // Update course status
+    course.status = "approved";
+    course.isPublished = true;
+    course.publishedAt = new Date();
+    course.reviewedAt = new Date();
+    course.reviewedBy = new mongoose.Types.ObjectId(userId);
+    if (adminFeedback) {
+      course.adminFeedback = adminFeedback;
+    }
+
+    await course.save();
+
+    // Send email notification to instructor about approval
+    try {
+      const instructor = course.instructor as any;
+      await sendCourseApprovedEmail(
+        instructor.email,
+        `${instructor.firstName} ${instructor.lastName}`,
+        course.title,
+        course._id.toString(),
+        adminFeedback
+      );
+    } catch (emailError) {
+      console.error("Failed to send approval email:", emailError);
+      // Continue with the response even if email fails
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Course approved successfully",
+      data: {
+        courseId: course._id,
+        status: course.status,
+        isPublished: course.isPublished,
+        publishedAt: course.publishedAt,
+      },
+    });
+  } catch (error: any) {
+    console.error("Error approving course:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to approve course",
+      error: error.message,
+    });
+  }
+};
+
+// Reject course
+export const rejectCourse = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
+
+    if (!userId || userRole !== UserRole.ADMIN) {
+      return res.status(403).json({
+        success: false,
+        message: "Admin access required",
+      });
+    }
+
+    const { courseId } = req.params;
+    const { rejectionReason, adminFeedback } = req.body;
+
+    if (!rejectionReason) {
+      return res.status(400).json({
+        success: false,
+        message: "Rejection reason is required",
+      });
+    }
+
+    const course = await Course.findById(courseId).populate(
+      "instructor",
+      "firstName lastName email"
+    );
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found",
+      });
+    }
+
+    if (course.status !== "pending") {
+      return res.status(400).json({
+        success: false,
+        message: "Course is not pending approval",
+      });
+    }
+
+    // Update course status
+    course.status = "rejected";
+    course.isPublished = false;
+    course.reviewedAt = new Date();
+    course.reviewedBy = new mongoose.Types.ObjectId(userId);
+    course.rejectionReason = rejectionReason;
+    if (adminFeedback) {
+      course.adminFeedback = adminFeedback;
+    }
+
+    await course.save();
+
+    // Send email notification to instructor about rejection
+    try {
+      const instructor = course.instructor as any;
+      await sendCourseRejectedEmail(
+        instructor.email,
+        `${instructor.firstName} ${instructor.lastName}`,
+        course.title,
+        course._id.toString(),
+        rejectionReason,
+        adminFeedback
+      );
+    } catch (emailError) {
+      console.error("Failed to send rejection email:", emailError);
+      // Continue with the response even if email fails
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Course rejected successfully",
+      data: {
+        courseId: course._id,
+        status: course.status,
+        rejectionReason: course.rejectionReason,
+      },
+    });
+  } catch (error: any) {
+    console.error("Error rejecting course:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to reject course",
+      error: error.message,
+    });
+  }
+};
+
+// Get detailed course information for admin review
+export const getAdminCourseDetails = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  try {
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
+
+    if (!userId || userRole !== UserRole.ADMIN) {
+      return res.status(403).json({
+        success: false,
+        message: "Admin access required",
+      });
+    }
+
+    const { courseId } = req.params;
+
+    const course = await Course.findById(courseId)
+      .populate("instructor", "firstName lastName email avatar bio")
+      .populate("reviewedBy", "firstName lastName")
+      .populate({
+        path: "sections",
+        populate: {
+          path: "lessons",
+          model: "Lesson",
+        },
+      });
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found",
+      });
+    }
+
+    const instructor = course.instructor as any;
+    const reviewedBy = course.reviewedBy as any;
+
+    const courseDetails = {
+      id: course._id,
+      title: course.title,
+      description: course.description,
+      shortDescription: course.shortDescription,
+      category: course.category,
+      subcategory: course.subcategory,
+      level: course.level,
+      originalPrice: course.originalPrice,
+      discountPrice: course.discountPrice,
+      isFree: course.isFree,
+      image: course.image,
+      videoPromo: course.videoPromo,
+      tags: course.tags,
+      language: course.language,
+      learningObjectives: course.learningObjectives,
+      requirements: course.requirements,
+      targetAudience: course.targetAudience,
+      certificateProvided: course.certificateProvided,
+      instructor: {
+        id: instructor._id,
+        name: `${instructor.firstName} ${instructor.lastName}`,
+        email: instructor.email,
+        avatar: instructor.avatar,
+        bio: instructor.bio,
+      },
+      status: course.status,
+      isPublished: course.isPublished,
+      submittedAt: course.submittedAt,
+      publishedAt: course.publishedAt,
+      reviewedAt: course.reviewedAt,
+      reviewedBy: reviewedBy
+        ? {
+            name: `${reviewedBy.firstName} ${reviewedBy.lastName}`,
+          }
+        : null,
+      rejectionReason: course.rejectionReason,
+      adminFeedback: course.adminFeedback,
+      createdAt: course.createdAt,
+      updatedAt: course.updatedAt,
+      totalDuration: course.totalDuration,
+      totalLessons: course.totalLessons,
+      studentsEnrolled: course.studentsEnrolled?.length || 0,
+      rating: course.rating,
+      ratingsCount: course.ratingsCount,
+      sections: (course as any).sections || [],
+    };
+
+    res.status(200).json({
+      success: true,
+      data: courseDetails,
+    });
+  } catch (error: any) {
+    console.error("Error fetching course details for admin:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch course details",
+      error: error.message,
+    });
+  }
+};
+
 export default {
   getAdminDashboardStats,
   getAdminUsers,
@@ -794,4 +1175,8 @@ export default {
   getRecentActivity,
   getAdminAnalytics,
   getAdminCertificates,
+  getAdminCourses,
+  getAdminCourseDetails,
+  approveCourse,
+  rejectCourse,
 };

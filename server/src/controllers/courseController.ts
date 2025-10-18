@@ -14,6 +14,7 @@ import {
   getUserCoursesService,
   updateCourseService,
   toggleCourseStatusService,
+  submitCourseForApprovalService,
 } from "../services/courseService";
 import formatMongoData from "../utils/formatMongoData";
 
@@ -173,6 +174,30 @@ export const getInstructorCourses = async (req: AuthRequest, res: Response) => {
   }
 };
 
+// Submit course for approval (instructor only)
+export const submitCourseForApproval = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  try {
+    const { id } = req.params;
+    const instructorId = req.user!.userId;
+
+    const course = await submitCourseForApprovalService(id, instructorId);
+
+    res.status(200).json({
+      success: true,
+      message: "Course submitted for approval successfully",
+      data: formatMongoData(course),
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 // Toggle course status (instructor only)
 export const toggleCourseStatus = async (req: AuthRequest, res: Response) => {
   try {
@@ -183,7 +208,9 @@ export const toggleCourseStatus = async (req: AuthRequest, res: Response) => {
 
     res.status(200).json({
       success: true,
-      message: `Course ${course.isPublished ? 'published' : 'unpublished'} successfully`,
+      message: `Course ${
+        course.isPublished ? "published" : "unpublished"
+      } successfully`,
       data: formatMongoData(course),
     });
   } catch (error: any) {

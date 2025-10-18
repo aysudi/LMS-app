@@ -201,3 +201,13 @@ export const toggleCourseStatus = async (
   const response = await api.patch(`/api/courses/${courseId}/toggle-status`);
   return response.data;
 };
+
+// Submit course for approval (instructor only)
+export const submitCourseForApproval = async (
+  courseId: string
+): Promise<{ success: boolean; message: string; data?: any }> => {
+  const response = await api.patch(
+    `/api/courses/${courseId}/submit-for-approval`
+  );
+  return response.data;
+};

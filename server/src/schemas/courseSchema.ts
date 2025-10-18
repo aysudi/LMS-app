@@ -135,6 +135,29 @@ const courseSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    status: {
+      type: String,
+      enum: ["draft", "pending", "approved", "rejected"],
+      default: "draft",
+    },
+    submittedAt: {
+      type: Date,
+    },
+    reviewedAt: {
+      type: Date,
+    },
+    reviewedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    rejectionReason: {
+      type: String,
+      trim: true,
+    },
+    adminFeedback: {
+      type: String,
+      trim: true,
+    },
     publishedAt: {
       type: Date,
     },

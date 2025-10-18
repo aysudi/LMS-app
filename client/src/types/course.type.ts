@@ -41,6 +41,15 @@ export interface Course {
   totalLessons: number;
   certificateProvided: boolean;
   isPublished: boolean;
+  status: "draft" | "pending" | "approved" | "rejected";
+  submittedAt?: string;
+  reviewedAt?: string;
+  reviewedBy?: {
+    firstName: string;
+    lastName: string;
+  };
+  rejectionReason?: string;
+  adminFeedback?: string;
   publishedAt?: string;
   lastUpdated: string;
   createdAt: string;
