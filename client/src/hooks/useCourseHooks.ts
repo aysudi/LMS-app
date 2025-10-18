@@ -11,6 +11,7 @@ import {
   deleteCourse,
   toggleCourseStatus,
   searchCourses,
+  submitCourseForApproval,
 } from "../services/course.service";
 
 import type {
@@ -403,4 +404,32 @@ export const useInvalidateCourses = () => {
     invalidateCourseLists,
     invalidateCourse,
   };
+};
+
+// Submit course for approval hook
+export const useSubmitCourseForApproval = (
+  options?: UseMutationOptions<
+    { success: boolean; message: string; data?: any },
+    Error,
+    string
+  >
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (courseId: string) => submitCourseForApproval(courseId),
+    onSuccess: (data) => {
+      // Invalidate instructor courses to reflect status change
+      queryClient.invalidateQueries({
+        queryKey: courseQueryKeys.instructorCourses(),
+      });
+
+      // Show success message
+      console.log(data.message);
+    },
+    onError: (error) => {
+      console.error("Failed to submit course for approval:", error);
+    },
+    ...options,
+  });
 };

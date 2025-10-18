@@ -15,6 +15,10 @@ import {
   getRecentActivity,
   getAdminAnalytics,
   getAdminCertificates,
+  getAdminCourses,
+  getAdminCourseDetails,
+  approveCourse,
+  rejectCourse,
 } from "../controllers/adminController";
 import { authenticateToken } from "../middlewares/auth.middleware";
 import { AuthRequest } from "../types/common.types";
@@ -54,6 +58,20 @@ adminRouter.get("/analytics", authenticateToken, (req, res) =>
 // Certificates routes
 adminRouter.get("/certificates", authenticateToken, (req, res) =>
   getAdminCertificates(req as AuthRequest, res)
+);
+
+// Course moderation routes
+adminRouter.get("/courses", authenticateToken, (req, res) =>
+  getAdminCourses(req as AuthRequest, res)
+);
+adminRouter.get("/courses/:courseId", authenticateToken, (req, res) =>
+  getAdminCourseDetails(req as AuthRequest, res)
+);
+adminRouter.patch("/courses/:courseId/approve", authenticateToken, (req, res) =>
+  approveCourse(req as AuthRequest, res)
+);
+adminRouter.patch("/courses/:courseId/reject", authenticateToken, (req, res) =>
+  rejectCourse(req as AuthRequest, res)
 );
 
 // Data migration routes (for development/maintenance)

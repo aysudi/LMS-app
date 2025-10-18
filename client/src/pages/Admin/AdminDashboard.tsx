@@ -110,13 +110,13 @@ const AdminDashboard: React.FC = () => {
     changeType?: "positive" | "negative" | "neutral";
     color: string;
   }> = ({ title, value, icon, change, changeType = "neutral", color }) => (
-    <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/30 hover:shadow-2xl hover:scale-105 transition-all duration-300 group">
+    <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-white/30 hover:shadow-xl transition-all duration-300 group">
       <div className="flex items-center justify-between">
         <div className="flex-1">
-          <p className="text-slate-600 text-sm font-semibold mb-3 tracking-wide uppercase">
+          <p className="text-slate-600 text-xs font-semibold mb-1 tracking-wide uppercase">
             {title}
           </p>
-          <p className="text-4xl font-bold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors duration-300">
+          <p className="text-2xl font-bold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors duration-300">
             {typeof value === "number" ? value.toLocaleString() : value}
           </p>
           {change && (
@@ -134,7 +134,7 @@ const AdminDashboard: React.FC = () => {
           )}
         </div>
         <div
-          className={`w-18 h-18 ${color} rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg group-hover:scale-110 transition-all duration-300`}
+          className={`w-12 h-12 ${color} rounded-xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-all duration-300`}
         >
           {icon}
         </div>
@@ -167,22 +167,22 @@ const AdminDashboard: React.FC = () => {
   return (
     <div className="space-y-8 p-8 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 min-h-screen">
       {/* Header */}
-      <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 rounded-3xl p-8 text-white shadow-2xl border border-white/20 relative overflow-hidden">
+      <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 rounded-2xl p-6 text-white shadow-lg border border-white/20 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none"></div>
         <div className="relative z-10">
-          <h1 className="text-5xl font-bold mb-4 tracking-tight">
+          <h1 className="text-2xl font-bold mb-2 tracking-tight">
             Welcome to Admin Portal
           </h1>
-          <p className="text-blue-100 text-xl font-medium leading-relaxed">
+          <p className="text-blue-100 font-medium leading-relaxed">
             Manage your learning platform with comprehensive insights and
             powerful tools
           </p>
-          <div className="mt-6 flex items-center space-x-4">
-            <div className="flex items-center space-x-2 bg-white/20 rounded-full px-4 py-2">
+          <div className="mt-4 flex items-center space-x-4">
+            <div className="flex items-center space-x-2 bg-white/20 rounded-full px-3 py-1">
               <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
               <span className="text-sm text-white">System Online</span>
             </div>
-            <div className="flex items-center space-x-2 bg-white/20 rounded-full px-4 py-2">
+            <div className="flex items-center space-x-2 bg-white/20 rounded-full px-3 py-1">
               <span className="text-sm text-white">
                 {new Date().toLocaleDateString()}
               </span>
@@ -300,7 +300,7 @@ const AdminDashboard: React.FC = () => {
             <div className="space-y-4">
               <button
                 onClick={() => navigate("/admin/courses")}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 px-4 rounded-2xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-between"
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-between"
               >
                 <span>Review Pending Courses</span>
                 <span className="bg-white/20 text-xs px-2 py-1 rounded-full">
@@ -309,7 +309,7 @@ const AdminDashboard: React.FC = () => {
               </button>
               <button
                 onClick={() => navigate("/admin/users")}
-                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-4 px-4 rounded-2xl font-semibold hover:from-green-700 hover:to-emerald-700 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-between"
+                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-green-700 hover:to-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-between"
               >
                 <span>Manage Users</span>
                 <span className="bg-white/20 text-xs px-2 py-1 rounded-full">
@@ -318,7 +318,7 @@ const AdminDashboard: React.FC = () => {
               </button>
               <button
                 onClick={() => navigate("/admin/instructors")}
-                className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-4 px-4 rounded-2xl font-semibold hover:from-orange-700 hover:to-red-700 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-between"
+                className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-orange-700 hover:to-red-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-between"
               >
                 <span>Instructor Applications</span>
                 <span className="bg-white/20 text-xs px-2 py-1 rounded-full">
@@ -327,7 +327,7 @@ const AdminDashboard: React.FC = () => {
               </button>
               <button
                 onClick={() => navigate("/admin/analytics")}
-                className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-4 px-4 rounded-2xl font-semibold hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
+                className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl"
               >
                 <span>Platform Analytics</span>
               </button>

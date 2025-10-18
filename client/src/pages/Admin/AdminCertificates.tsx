@@ -26,7 +26,7 @@ const AdminCertificates: React.FC = () => {
     const enrolled = new Date(enrolledAt);
     const completed = new Date(completedAt);
     const diffTime = Math.abs(completed.getTime() - enrolled.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24)); // Changed from Math.ceil to Math.round
 
     if (diffDays < 7) return `${diffDays} days`;
     if (diffDays < 14 && diffDays > 7) return `1 week`;

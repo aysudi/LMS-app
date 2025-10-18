@@ -1,113 +1,82 @@
 import React, { useState } from "react";
-import { FaCheck, FaTimes, FaEye, FaUser, FaPlay } from "react-icons/fa";
-
-interface CourseForReview {
-  id: string;
-  title: string;
-  description: string;
-  instructor: {
-    firstName: string;
-    lastName: string;
-    email: string;
-  };
-  category: string;
-  level: string;
-  duration: number;
-  price: number;
-  thumbnail: string;
-  status: "pending" | "approved" | "rejected" | "published";
-  submittedDate: string;
-  totalLessons: number;
-  sectionsCount: number;
-}
+import { useNavigate } from "react-router-dom";
+import {
+  FaEye,
+  FaCheck,
+  FaTimes,
+  FaUsers,
+  FaStar,
+  FaBookOpen,
+  FaClock,
+  FaDollarSign,
+  FaFilter,
+  FaSearch,
+  FaSpinner,
+  FaGraduationCap,
+  FaCalendar,
+  FaPlay,
+  FaFileAlt,
+} from "react-icons/fa";
+import {
+  useAdminCourses,
+  useApproveCourse,
+  useRejectCourse,
+} from "../../hooks/useAdminCourses";
+import { HTMLRenderer } from "../../utils/htmlRenderer";
 
 const AdminCourses: React.FC = () => {
-  const [courses] = useState<CourseForReview[]>([
-    {
-      id: "1",
-      title: "Advanced React Development with TypeScript",
-      description:
-        "Master modern React development with TypeScript, hooks, and advanced patterns",
-      instructor: {
-        firstName: "Sarah",
-        lastName: "Johnson",
-        email: "sarah.johnson@example.com",
-      },
-      category: "Programming",
-      level: "Advanced",
-      duration: 1200, // minutes
-      price: 149.99,
-      thumbnail: "/api/placeholder/400/225",
-      status: "pending",
-      submittedDate: "2024-01-15",
-      totalLessons: 45,
-      sectionsCount: 8,
-    },
-    {
-      id: "2",
-      title: "Machine Learning Fundamentals",
-      description:
-        "Learn the basics of machine learning with Python and scikit-learn",
-      instructor: {
-        firstName: "Michael",
-        lastName: "Chen",
-        email: "michael.chen@example.com",
-      },
-      category: "Data Science",
-      level: "Beginner",
-      duration: 900,
-      price: 99.99,
-      thumbnail: "/api/placeholder/400/225",
-      status: "approved",
-      submittedDate: "2024-01-12",
-      totalLessons: 32,
-      sectionsCount: 6,
-    },
-  ]);
+  const navigate = useNavigate();
+  const [filter, setFilter] = useState<
+    "all" | "pending" | "approved" | "rejected"
+  >("all");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
 
-  const [selectedCourse, setSelectedCourse] = useState<CourseForReview | null>(
-    null
+  const { data: coursesData, isLoading, error } = useAdminCourses();
+  const approveMutation = useApproveCourse();
+  const rejectMutation = useRejectCourse();
+
+  const courses = coursesData?.courses || [];
+
+  // Filter courses based on status and search term
+  const filteredCourses = courses.filter((course: any) => {
+    const matchesFilter = filter === "all" || course.status === filter;
+    const matchesSearch =
+      course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      course.instructor.name.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesFilter && matchesSearch;
+  });
+
+  // Pagination
+  const totalPages = Math.ceil(filteredCourses.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedCourses = filteredCourses.slice(
+    startIndex,
+    startIndex + itemsPerPage
   );
-  const [filterStatus, setFilterStatus] = useState<string>("all");
-
-  const filteredCourses = courses.filter(
-    (course) => filterStatus === "all" || course.status === filterStatus
-  );
-
-  const handleApproveCourse = (id: string) => {
-    console.log("Approve course:", id);
-    // TODO: Implement API call
-  };
-
-  const handleRejectCourse = (id: string) => {
-    console.log("Reject course:", id);
-    // TODO: Implement API call
-  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "approved":
         return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+          <span className="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+            <FaCheck className="w-3 h-3 mr-1" />
             Approved
           </span>
         );
       case "rejected":
         return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+          <span className="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+            <FaTimes className="w-3 h-3 mr-1" />
             Rejected
           </span>
         );
       case "pending":
         return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-            Pending Review
-          </span>
-        );
-      case "published":
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-            Published
+          <span className="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
+            <FaClock className="w-3 h-3 mr-1" />
+            Pending
           </span>
         );
       default:
@@ -115,171 +84,338 @@ const AdminCourses: React.FC = () => {
     }
   };
 
+  const handleQuickApprove = (courseId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    approveMutation.mutate({ courseId, feedback: "" });
+  };
+
+  const handleQuickReject = (courseId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const reason = prompt("Please provide a rejection reason:");
+    if (reason) {
+      rejectMutation.mutate({
+        courseId,
+        rejectionReason: reason,
+        adminFeedback: "",
+      });
+    }
+  };
+
   const formatDuration = (minutes: number) => {
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
-    return `${hours}h ${mins}m`;
+    return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-96 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+        <div className="text-center">
+          <FaSpinner className="animate-spin text-blue-600 text-4xl mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            Loading Courses...
+          </h2>
+          <p className="text-gray-600">Fetching course moderation data</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <div className="text-center bg-white rounded-2xl p-8 shadow-lg border border-red-200">
+          <FaTimes className="text-red-600 text-4xl mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-red-900 mb-2">
+            Error Loading Courses
+          </h2>
+          <p className="text-red-700 mb-4">
+            There was a problem loading the courses data.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const stats = {
+    total: courses.length,
+    pending: courses.filter((c: any) => c.status === "pending").length,
+    approved: courses.filter((c: any) => c.status === "approved").length,
+    rejected: courses.filter((c: any) => c.status === "rejected").length,
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 min-h-screen">
       {/* Header */}
-      <div className="bg-white rounded-2xl p-6 shadow-lg border border-slate-200/50">
-        <div className="flex items-center justify-between mb-6">
+      <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 rounded-2xl p-6 text-white shadow-lg border border-white/20">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">
+            <h1 className="text-2xl font-bold mb-2 tracking-tight">
               Course Moderation
             </h1>
-            <p className="text-slate-600">
-              Review and approve courses submitted by instructors
+            <p className="text-blue-100 font-medium">
+              Review and manage course submissions from instructors
             </p>
           </div>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-200/50">
-            <div className="text-2xl font-bold text-blue-700">
-              {courses.length}
+          <div className="mt-4 md:mt-0 flex items-center space-x-4">
+            <div className="bg-white/20 rounded-full px-3 py-1 flex items-center space-x-2">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <span className="text-sm">System Online</span>
             </div>
-            <div className="text-blue-600 text-sm font-medium">
-              Total Courses
-            </div>
-          </div>
-          <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-4 rounded-xl border border-yellow-200/50">
-            <div className="text-2xl font-bold text-yellow-700">
-              {courses.filter((c) => c.status === "pending").length}
-            </div>
-            <div className="text-yellow-600 text-sm font-medium">
-              Pending Review
-            </div>
-          </div>
-          <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-xl border border-green-200/50">
-            <div className="text-2xl font-bold text-green-700">
-              {courses.filter((c) => c.status === "approved").length}
-            </div>
-            <div className="text-green-600 text-sm font-medium">Approved</div>
-          </div>
-          <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-xl border border-purple-200/50">
-            <div className="text-2xl font-bold text-purple-700">
-              {courses.filter((c) => c.status === "published").length}
-            </div>
-            <div className="text-purple-600 text-sm font-medium">Published</div>
           </div>
         </div>
       </div>
 
-      {/* Filter */}
-      <div className="bg-white rounded-2xl p-6 shadow-lg border border-slate-200/50">
-        <select
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-          className="px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-        >
-          <option value="all">All Courses</option>
-          <option value="pending">Pending Review</option>
-          <option value="approved">Approved</option>
-          <option value="rejected">Rejected</option>
-          <option value="published">Published</option>
-        </select>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-white/30 hover:shadow-xl transition-all duration-300">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-slate-600 text-xs font-semibold mb-1 uppercase tracking-wide">
+                Total Courses
+              </p>
+              <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
+            </div>
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white">
+              <FaBookOpen />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-white/30 hover:shadow-xl transition-all duration-300">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-slate-600 text-xs font-semibold mb-1 uppercase tracking-wide">
+                Pending Review
+              </p>
+              <p className="text-2xl font-bold text-orange-600">
+                {stats.pending}
+              </p>
+            </div>
+            <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center text-white">
+              <FaClock />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-white/30 hover:shadow-xl transition-all duration-300">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-slate-600 text-xs font-semibold mb-1 uppercase tracking-wide">
+                Approved
+              </p>
+              <p className="text-2xl font-bold text-green-600">
+                {stats.approved}
+              </p>
+            </div>
+            <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center text-white">
+              <FaCheck />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-white/30 hover:shadow-xl transition-all duration-300">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-slate-600 text-xs font-semibold mb-1 uppercase tracking-wide">
+                Rejected
+              </p>
+              <p className="text-2xl font-bold text-red-600">
+                {stats.rejected}
+              </p>
+            </div>
+            <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center text-white">
+              <FaTimes />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Filters and Search */}
+      <div className="bg-white rounded-2xl p-6 shadow-lg border border-slate-200">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          {/* Search */}
+          <div className="relative flex-1 max-w-md">
+            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search courses or instructors..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300"
+            />
+          </div>
+
+          {/* Status Filter */}
+          <div className="flex items-center space-x-2">
+            <FaFilter className="text-slate-500" />
+            <select
+              value={filter}
+              onChange={(e) => setFilter(e.target.value as any)}
+              className="bg-white border border-slate-300 rounded-xl px-4 py-3 font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300"
+            >
+              <option value="all">All Courses</option>
+              <option value="pending">Pending Review</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       {/* Courses Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {filteredCourses.map((course) => (
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {paginatedCourses.map((course: any) => (
           <div
             key={course.id}
-            className="bg-white rounded-2xl shadow-lg border border-slate-200/50 overflow-hidden hover:shadow-xl transition-shadow"
+            onClick={() => navigate(`/admin/courses/${course.id}/review`)}
+            className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer group"
           >
-            {/* Thumbnail */}
-            <div className="relative h-48 bg-gradient-to-br from-blue-500 to-purple-600">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <FaPlay className="text-white text-4xl opacity-80" />
-              </div>
+            {/* Course Image */}
+            <div className="relative h-48 bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-700 overflow-hidden">
+              {course.image?.url ? (
+                <img
+                  src={course.image.url}
+                  alt={course.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <FaPlay className="text-white text-4xl opacity-80" />
+                </div>
+              )}
               <div className="absolute top-4 right-4">
                 {getStatusBadge(course.status)}
               </div>
-            </div>
-
-            {/* Content */}
-            <div className="p-6">
-              <h3 className="text-lg font-bold text-slate-900 mb-2 line-clamp-2">
-                {course.title}
-              </h3>
-
-              <p className="text-sm text-slate-600 mb-4 line-clamp-2">
-                {course.description}
-              </p>
-
-              {/* Instructor */}
-              <div className="flex items-center space-x-2 mb-3">
-                <FaUser className="text-slate-400 text-sm" />
-                <span className="text-sm text-slate-600">
-                  {course.instructor.firstName} {course.instructor.lastName}
+              <div className="absolute top-4 left-4 bg-black/50 backdrop-blur-sm rounded-lg px-2 py-1">
+                <span className="text-white text-xs font-medium">
+                  {course.category}
                 </span>
               </div>
+            </div>
 
-              {/* Course Details */}
-              <div className="space-y-2 mb-4">
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-500">Category:</span>
-                  <span className="text-slate-700 font-medium">
-                    {course.category}
-                  </span>
+            {/* Course Content */}
+            <div className="p-6">
+              <div className="flex items-start justify-between mb-3">
+                <h3 className="text-lg font-bold text-slate-900 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                  {course.title}
+                </h3>
+              </div>
+
+              <div className="text-slate-600 text-sm mb-4 line-clamp-2">
+                <HTMLRenderer content={course.description} maxLength={120} />
+              </div>
+
+              {/* Instructor Info */}
+              <div className="flex items-center space-x-3 mb-4 p-3 bg-slate-50 rounded-xl">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                  <FaGraduationCap className="text-white text-sm" />
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-500">Level:</span>
-                  <span className="text-slate-700 font-medium">
-                    {course.level}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-500">Duration:</span>
-                  <span className="text-slate-700 font-medium">
-                    {formatDuration(course.duration)}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-500">Lessons:</span>
-                  <span className="text-slate-700 font-medium">
-                    {course.totalLessons}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-500">Price:</span>
-                  <span className="text-green-600 font-bold">
-                    ${course.price}
-                  </span>
+                <div>
+                  <p className="text-sm font-medium text-slate-900">
+                    {course.instructor.name}
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    {course.instructor.email}
+                  </p>
                 </div>
               </div>
 
-              {/* Actions */}
-              <div className="flex space-x-2">
+              {/* Course Stats */}
+              <div className="grid grid-cols-3 gap-3 mb-4">
+                <div className="text-center p-2 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="flex items-center justify-center mb-1">
+                    <FaUsers className="text-blue-600 text-xs mr-1" />
+                    <span className="text-blue-600 text-xs font-medium">
+                      {course.studentsCount}
+                    </span>
+                  </div>
+                  <p className="text-blue-800 text-xs font-semibold">
+                    Students
+                  </p>
+                </div>
+                <div className="text-center p-2 bg-green-50 rounded-lg border border-green-200">
+                  <div className="flex items-center justify-center mb-1">
+                    <FaStar className="text-green-600 text-xs mr-1" />
+                    <span className="text-green-600 text-xs font-medium">
+                      {course.rating.toFixed(1)}
+                    </span>
+                  </div>
+                  <p className="text-green-800 text-xs font-semibold">Rating</p>
+                </div>
+                <div className="text-center p-2 bg-purple-50 rounded-lg border border-purple-200">
+                  <div className="flex items-center justify-center mb-1">
+                    <FaDollarSign className="text-purple-600 text-xs mr-1" />
+                    <span className="text-purple-600 text-xs font-medium">
+                      ${course.originalPrice}
+                    </span>
+                  </div>
+                  <p className="text-purple-800 text-xs font-semibold">Price</p>
+                </div>
+              </div>
+
+              {/* Meta Information */}
+              <div className="flex items-center justify-between text-xs text-slate-500 mb-4">
+                <div className="flex items-center space-x-1">
+                  <FaBookOpen />
+                  <span>{course.totalLessons} lessons</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <FaClock />
+                  <span>{formatDuration(course.totalDuration)}</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <FaCalendar />
+                  <span>{new Date(course.createdAt).toLocaleDateString()}</span>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-between">
                 <button
-                  onClick={() => setSelectedCourse(course)}
-                  className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 px-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-center"
+                  onClick={() => {
+                    // navigate(`/admin/courses/${course.id}/review`);
+                    window.location.href = `/admin/courses/${course.id}/review`;
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2"
                 >
-                  <FaEye className="mr-1" />
-                  Review
+                  <FaEye />
+                  <span>Review</span>
                 </button>
 
                 {course.status === "pending" && (
-                  <>
+                  <div className="flex items-center space-x-2">
                     <button
-                      onClick={() => handleApproveCourse(course.id)}
-                      className="bg-green-600 hover:bg-green-700 text-white py-2 px-3 rounded-lg text-sm font-medium transition-colors"
-                      title="Approve"
+                      onClick={(e) => handleQuickApprove(course.id, e)}
+                      disabled={approveMutation.isPending}
+                      className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-lg text-xs transition-colors disabled:opacity-50"
+                      title="Quick Approve"
                     >
-                      <FaCheck />
+                      {approveMutation.isPending ? (
+                        <FaSpinner className="animate-spin" />
+                      ) : (
+                        <FaCheck />
+                      )}
                     </button>
                     <button
-                      onClick={() => handleRejectCourse(course.id)}
-                      className="bg-red-600 hover:bg-red-700 text-white py-2 px-3 rounded-lg text-sm font-medium transition-colors"
-                      title="Reject"
+                      onClick={(e) => handleQuickReject(course.id, e)}
+                      disabled={rejectMutation.isPending}
+                      className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg text-xs transition-colors disabled:opacity-50"
+                      title="Quick Reject"
                     >
-                      <FaTimes />
+                      {rejectMutation.isPending ? (
+                        <FaSpinner className="animate-spin" />
+                      ) : (
+                        <FaTimes />
+                      )}
                     </button>
-                  </>
+                  </div>
                 )}
               </div>
             </div>
@@ -287,167 +423,67 @@ const AdminCourses: React.FC = () => {
         ))}
       </div>
 
-      {/* Course Details Modal */}
-      {selectedCourse && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-            <div className="p-6 border-b border-slate-200">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-slate-900">
-                  Course Review
-                </h2>
-                <button
-                  onClick={() => setSelectedCourse(null)}
-                  className="p-2 text-slate-400 hover:text-slate-600 rounded-lg transition-colors"
-                >
-                  <FaTimes />
-                </button>
-              </div>
+      {/* Empty State */}
+      {filteredCourses.length === 0 && (
+        <div className="text-center py-12">
+          <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-200 max-w-md mx-auto">
+            <FaFileAlt className="text-slate-400 text-4xl mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">
+              No Courses Found
+            </h3>
+            <p className="text-slate-600">
+              {searchTerm || filter !== "all"
+                ? "No courses match your current filters."
+                : "No courses have been submitted yet."}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="bg-white rounded-2xl p-4 shadow-lg border border-slate-200">
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-slate-600">
+              Showing {startIndex + 1} to{" "}
+              {Math.min(startIndex + itemsPerPage, filteredCourses.length)} of{" "}
+              {filteredCourses.length} courses
             </div>
-
-            <div className="p-6 overflow-y-auto max-h-96">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Course Thumbnail */}
-                <div className="lg:col-span-1">
-                  <div className="relative h-48 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <FaPlay className="text-white text-4xl opacity-80" />
-                    </div>
-                  </div>
-
-                  <div className="mt-4 space-y-3">
-                    <div>
-                      <span className="text-sm font-medium text-slate-600">
-                        Status:
-                      </span>
-                      <div className="mt-1">
-                        {getStatusBadge(selectedCourse.status)}
-                      </div>
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium text-slate-600">
-                        Submitted:
-                      </span>
-                      <p className="text-slate-900">
-                        {new Date(
-                          selectedCourse.submittedDate
-                        ).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Course Details */}
-                <div className="lg:col-span-2">
-                  <h3 className="text-xl font-bold text-slate-900 mb-4">
-                    {selectedCourse.title}
-                  </h3>
-
-                  <p className="text-slate-700 mb-6">
-                    {selectedCourse.description}
-                  </p>
-
-                  {/* Instructor Info */}
-                  <div className="bg-slate-50 rounded-xl p-4 mb-6">
-                    <h4 className="font-semibold text-slate-900 mb-2 flex items-center">
-                      <FaUser className="mr-2 text-blue-600" />
-                      Instructor Information
-                    </h4>
-                    <div className="space-y-1">
-                      <p className="text-slate-700">
-                        <strong>Name:</strong>{" "}
-                        {selectedCourse.instructor.firstName}{" "}
-                        {selectedCourse.instructor.lastName}
-                      </p>
-                      <p className="text-slate-700">
-                        <strong>Email:</strong>{" "}
-                        {selectedCourse.instructor.email}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Course Metrics */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-blue-50 p-3 rounded-xl">
-                      <div className="text-sm text-blue-600 font-medium">
-                        Category
-                      </div>
-                      <div className="text-lg font-bold text-blue-700">
-                        {selectedCourse.category}
-                      </div>
-                    </div>
-                    <div className="bg-purple-50 p-3 rounded-xl">
-                      <div className="text-sm text-purple-600 font-medium">
-                        Level
-                      </div>
-                      <div className="text-lg font-bold text-purple-700">
-                        {selectedCourse.level}
-                      </div>
-                    </div>
-                    <div className="bg-green-50 p-3 rounded-xl">
-                      <div className="text-sm text-green-600 font-medium">
-                        Duration
-                      </div>
-                      <div className="text-lg font-bold text-green-700">
-                        {formatDuration(selectedCourse.duration)}
-                      </div>
-                    </div>
-                    <div className="bg-orange-50 p-3 rounded-xl">
-                      <div className="text-sm text-orange-600 font-medium">
-                        Price
-                      </div>
-                      <div className="text-lg font-bold text-orange-700">
-                        ${selectedCourse.price}
-                      </div>
-                    </div>
-                    <div className="bg-indigo-50 p-3 rounded-xl">
-                      <div className="text-sm text-indigo-600 font-medium">
-                        Lessons
-                      </div>
-                      <div className="text-lg font-bold text-indigo-700">
-                        {selectedCourse.totalLessons}
-                      </div>
-                    </div>
-                    <div className="bg-pink-50 p-3 rounded-xl">
-                      <div className="text-sm text-pink-600 font-medium">
-                        Sections
-                      </div>
-                      <div className="text-lg font-bold text-pink-700">
-                        {selectedCourse.sectionsCount}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Previous
+              </button>
+              <div className="flex items-center space-x-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-2 rounded-lg font-medium transition-colors ${
+                        currentPage === page
+                          ? "bg-blue-600 text-white"
+                          : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  )
+                )}
               </div>
+              <button
+                onClick={() =>
+                  setCurrentPage(Math.min(totalPages, currentPage + 1))
+                }
+                disabled={currentPage === totalPages}
+                className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
             </div>
-
-            {/* Actions */}
-            {selectedCourse.status === "pending" && (
-              <div className="p-6 border-t border-slate-200 bg-slate-50">
-                <div className="flex space-x-3">
-                  <button
-                    onClick={() => {
-                      handleApproveCourse(selectedCourse.id);
-                      setSelectedCourse(null);
-                    }}
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-xl font-medium transition-colors flex items-center justify-center"
-                  >
-                    <FaCheck className="mr-2" />
-                    Approve Course
-                  </button>
-                  <button
-                    onClick={() => {
-                      handleRejectCourse(selectedCourse.id);
-                      setSelectedCourse(null);
-                    }}
-                    className="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 px-4 rounded-xl font-medium transition-colors flex items-center justify-center"
-                  >
-                    <FaTimes className="mr-2" />
-                    Reject Course
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       )}

@@ -13,6 +13,7 @@ import {
   getUserCourses,
   updateCourse,
   toggleCourseStatus,
+  submitCourseForApproval,
 } from "../controllers/courseController";
 import {
   courseUploadMiddleware,
@@ -59,6 +60,11 @@ courseRouter.patch(
   "/:id/toggle-status",
   authorizeRoles(UserRole.INSTRUCTOR),
   (req, res) => toggleCourseStatus(req as any, res)
+);
+courseRouter.patch(
+  "/:id/submit-for-approval",
+  authorizeRoles(UserRole.INSTRUCTOR),
+  (req, res) => submitCourseForApproval(req as any, res)
 );
 
 export default courseRouter;

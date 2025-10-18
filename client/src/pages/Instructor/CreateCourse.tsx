@@ -482,16 +482,25 @@ const CreateCourse = () => {
                 {createCourseMutation.isPending ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Creating...</span>
+                    <span>Submitting...</span>
                   </>
                 ) : (
                   <>
                     <FaCheck className="text-sm" />
-                    <span>Create Course</span>
+                    <span>Submit for Approval</span>
                   </>
                 )}
               </button>
             )}
+            {/* Approval Process Note */}
+            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800">
+                <strong>📋 Approval Process:</strong> Your course will be
+                reviewed by our admin team to ensure quality standards. You'll
+                be notified once the review is complete, typically within 24-48
+                hours.
+              </p>
+            </div>
           </div>
         </div>
       </div>

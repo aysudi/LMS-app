@@ -33,6 +33,12 @@ export interface ICourse extends Document {
   isPublished: boolean;
   publishedAt?: Date;
   lastUpdated: Date;
+  status: "draft" | "pending" | "approved" | "rejected";
+  submittedAt?: Date;
+  reviewedAt?: Date;
+  reviewedBy?: mongoose.Types.ObjectId;
+  rejectionReason?: string;
+  adminFeedback?: string;
   reviews: {
     user: mongoose.Types.ObjectId;
     rating: number;
@@ -82,6 +88,9 @@ export interface CreateCourseData {
   requirements?: string[];
   targetAudience?: string[];
   certificateProvided?: boolean;
+  isPublished?: boolean;
+  status?: "draft" | "pending" | "approved" | "rejected";
+  submittedAt?: Date;
   uploadedFiles?: {
     image?: { url: string; publicId: string };
     videoPromo?: { url: string; publicId: string };

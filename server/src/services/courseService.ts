@@ -136,6 +136,15 @@ export const createCourseService = async (
 
   delete coursePayload.uploadedFiles;
 
+  // If course is being published (not saved as draft), submit for approval
+  if (coursePayload.isPublished) {
+    coursePayload.status = "pending";
+    coursePayload.submittedAt = new Date();
+    coursePayload.isPublished = false; // Don't publish until approved
+  } else {
+    coursePayload.status = "draft";
+  }
+
   const course = new Course(coursePayload);
   await course.save();
   return course.populate("instructor", "firstName lastName email avatar");
@@ -188,6 +197,31 @@ export const updateCourseService = async (
   course.lastUpdated = new Date();
   await course.save();
 
+  return course.populate("instructor", "firstName lastName email avatar");
+};
+
+export const submitCourseForApprovalService = async (
+  id: string,
+  instructorId: string
+) => {
+  const course = await Course.findOne({
+    _id: id,
+    instructor: instructorId,
+  });
+
+  if (!course) {
+    throw new Error("Course not found or you are not authorized to submit it");
+  }
+
+  if (course.status !== "draft") {
+    throw new Error("Only draft courses can be submitted for approval");
+  }
+
+  course.status = "pending";
+  course.submittedAt = new Date();
+  course.lastUpdated = new Date();
+
+  await course.save();
   return course.populate("instructor", "firstName lastName email avatar");
 };
 
