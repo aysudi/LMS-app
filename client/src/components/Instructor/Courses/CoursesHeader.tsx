@@ -1,12 +1,10 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   FaPlus,
   FaTrash,
   FaPlay,
   FaPause,
-  FaEllipsisV,
   FaBook,
   FaStar,
 } from "react-icons/fa";
@@ -18,8 +16,6 @@ export interface CoursesHeaderProps {
   averageRating: number;
   selectedCourses: string[];
   onBulkDelete: () => void;
-  onBulkPublish: () => void;
-  onBulkUnpublish: () => void;
 }
 
 const CoursesHeader: React.FC<CoursesHeaderProps> = ({
@@ -29,10 +25,7 @@ const CoursesHeader: React.FC<CoursesHeaderProps> = ({
   averageRating,
   selectedCourses,
   onBulkDelete,
-  onBulkPublish,
-  onBulkUnpublish,
 }) => {
-  const [showBulkActions, setShowBulkActions] = useState(false);
   const navigate = useNavigate();
 
   const stats = [
@@ -88,57 +81,13 @@ const CoursesHeader: React.FC<CoursesHeaderProps> = ({
         <div className="flex items-center gap-3">
           {/* Bulk Actions */}
           {selectedCourses.length > 0 && (
-            <div className="relative">
-              <button
-                onClick={() => setShowBulkActions(!showBulkActions)}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200 flex items-center space-x-2"
-              >
-                <span>{selectedCourses.length} selected</span>
-                <FaEllipsisV className="text-sm" />
-              </button>
-
-              <AnimatePresence>
-                {showBulkActions && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                    className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20"
-                  >
-                    <button
-                      onClick={() => {
-                        onBulkPublish();
-                        setShowBulkActions(false);
-                      }}
-                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
-                    >
-                      <FaPlay className="text-xs" />
-                      <span>Publish Selected</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        onBulkUnpublish();
-                        setShowBulkActions(false);
-                      }}
-                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
-                    >
-                      <FaPause className="text-xs" />
-                      <span>Unpublish Selected</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        onBulkDelete();
-                        setShowBulkActions(false);
-                      }}
-                      className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
-                    >
-                      <FaTrash className="text-xs" />
-                      <span>Delete Selected</span>
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+            <button
+              onClick={() => onBulkDelete()}
+              className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200 flex items-center space-x-2 cursor-pointer"
+            >
+              <FaTrash className="text-sm" />
+              <span>Remove</span>
+            </button>
           )}
 
           {/* Create Course Button */}

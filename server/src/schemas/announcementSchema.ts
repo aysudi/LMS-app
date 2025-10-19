@@ -23,14 +23,6 @@ const announcementSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    isPublished: {
-      type: Boolean,
-      default: true,
-    },
-    publishedAt: {
-      type: Date,
-      default: Date.now,
-    },
     priority: {
       type: String,
       enum: ["low", "medium", "high", "urgent"],

@@ -1,9 +1,15 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FaArrowLeft, FaSave } from "react-icons/fa";
+import { FaArrowLeft } from "react-icons/fa";
 import type { Course } from "../../types/course.type";
-import { useCourse, useUpdateCourse } from "../../hooks/useCourseHooks";
+import {
+  useCourse,
+  useUpdateCourse,
+  useDeleteCourse,
+  useSubmitCourseForApproval,
+  useSaveAsDraft,
+} from "../../hooks/useCourseHooks";
 import LoadingSpinner from "../../components/UI/LoadingSpinner";
 import ErrorState from "../../components/UI/ErrorState";
 import BasicInfoPanel from "../../components/Instructor/EditCourse/BasicInfoPanel";
@@ -13,6 +19,7 @@ import AnnouncementsPanel from "../../components/Instructor/EditCourse/Announcem
 import SettingsPanel from "../../components/Instructor/EditCourse/SettingsPanel";
 import { useToast } from "../../components/UI/ToastProvider";
 import { courseToasts } from "../../utils/toastUtils";
+import Swal from "sweetalert2";
 
 const TABS = [
   { id: "basic-info", label: "Basic Information", icon: "📝" },
@@ -31,6 +38,9 @@ const EditCourse = () => {
   );
   const [unsavedChanges, setUnsavedChanges] = useState(false);
   const [formChanges, setFormChanges] = useState<Partial<Course>>({});
+  const [tabChanges, setTabChanges] = useState<Record<string, Partial<Course>>>(
+    {}
+  );
 
   const { data: courseData, isLoading, error, refetch } = useCourse(courseId!);
   const { showToast } = useToast();
@@ -40,9 +50,54 @@ const EditCourse = () => {
       const courseTitle = courseData?.data?.title || "Course";
       showToast(courseToasts.updated(courseTitle));
       setUnsavedChanges(false);
+      setTabChanges((prev) => ({ ...prev, [activeTab]: {} }));
     },
     onError: () => {
       showToast(courseToasts.updateError());
+    },
+  });
+
+  const deleteMutation = useDeleteCourse({
+    onSuccess: () => {
+      showToast(courseToasts.deleted());
+      navigate("/instructor/courses");
+    },
+    onError: () => {
+      showToast(courseToasts.deleteError());
+    },
+  });
+
+  const submitForApprovalMutation = useSubmitCourseForApproval({
+    onSuccess: () => {
+      showToast({
+        type: "success",
+        title: "Course Submitted",
+        message: "Your course has been submitted for admin approval.",
+      });
+    },
+    onError: () => {
+      showToast({
+        type: "error",
+        title: "Submission Failed",
+        message: "Failed to submit course for approval. Please try again.",
+      });
+    },
+  });
+
+  const saveAsDraftMutation = useSaveAsDraft({
+    onSuccess: () => {
+      showToast({
+        type: "success",
+        title: "Saved as Draft",
+        message: "Your course has been saved as draft.",
+      });
+    },
+    onError: () => {
+      showToast({
+        type: "error",
+        title: "Save Failed",
+        message: "Failed to save course as draft. Please try again.",
+      });
     },
   });
 
@@ -78,17 +133,25 @@ const EditCourse = () => {
       ...prev,
       ...changes,
     }));
+    setTabChanges((prev) => ({
+      ...prev,
+      [activeTab]: {
+        ...prev[activeTab],
+        ...changes,
+      },
+    }));
   };
 
-  const handleSave = async () => {
+  const handleTabSave = async () => {
     try {
-      if (!formChanges || Object.keys(formChanges).length === 0) {
+      const currentTabChanges = tabChanges[activeTab];
+      if (!currentTabChanges || Object.keys(currentTabChanges).length === 0) {
         return;
       }
 
-      // Convert formChanges to UpdateCourseData format
+      // Convert tab changes to UpdateCourseData format
       const updateData: any = {
-        ...formChanges,
+        ...currentTabChanges,
       };
 
       await updateCourseMutation.mutateAsync({
@@ -96,11 +159,69 @@ const EditCourse = () => {
         updateData,
       });
 
-      // Reset changes after successful save
+      // Reset tab-specific changes after successful save
+      setTabChanges((prev) => ({
+        ...prev,
+        [activeTab]: {},
+      }));
+
+      // Also update the global form changes
+      const remainingChanges = { ...formChanges };
+      Object.keys(currentTabChanges).forEach((key) => {
+        delete remainingChanges[key as keyof Course];
+      });
+      setFormChanges(remainingChanges);
+
+      if (Object.keys(remainingChanges).length === 0) {
+        setUnsavedChanges(false);
+      }
+    } catch (error) {
+      console.error("Failed to save tab changes:", error);
+    }
+  };
+
+  const handleDeleteCourse = async () => {
+    const courseTitle = courseData?.data?.title || "this course";
+
+    const result = await Swal.fire({
+      title: "Delete Course",
+      html: `Are you sure you want to delete <strong>"${courseTitle}"</strong>?<br><br>This action cannot be undone and will remove all associated lessons, sections, and student progress.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#EF4444",
+      cancelButtonColor: "#6B7280",
+      confirmButtonText: "Yes, Delete",
+      cancelButtonText: "Cancel",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await deleteMutation.mutateAsync(courseId!);
+      } catch (error) {
+        console.error("Failed to delete course:", error);
+      }
+    }
+  };
+
+  const handleSubmitForApproval = async () => {
+    try {
+      await submitForApprovalMutation.mutateAsync(courseId!);
+    } catch (error) {
+      console.error("Failed to submit course for approval:", error);
+    }
+  };
+
+  const handleSaveAsDraft = async () => {
+    try {
+      const updateData: any = formChanges || {};
+      await saveAsDraftMutation.mutateAsync({
+        courseId: courseId!,
+        updateData,
+      });
       setFormChanges({});
       setUnsavedChanges(false);
     } catch (error) {
-      console.error("Failed to save course changes:", error);
+      console.error("Failed to save course as draft:", error);
     }
   };
   return (
@@ -127,7 +248,7 @@ const EditCourse = () => {
               </div>
             </div>
 
-            <div className="flex items-center space-x-4">
+            {/* <div className="flex items-center space-x-4">
               {unsavedChanges && (
                 <span className="text-sm text-amber-600">Unsaved changes</span>
               )}
@@ -139,7 +260,7 @@ const EditCourse = () => {
                 <FaSave className="mr-2" />
                 {updateCourseMutation.isPending ? "Saving..." : "Save Changes"}
               </button>
-            </div>
+            </div> */}
           </div>
 
           {/* Tabs */}
@@ -175,12 +296,24 @@ const EditCourse = () => {
             <BasicInfoPanel
               course={courseData.data}
               onUpdate={handlePanelUpdate}
+              onSave={handleTabSave}
+              isSaving={updateCourseMutation.isPending}
+              hasChanges={
+                !!tabChanges[activeTab] &&
+                Object.keys(tabChanges[activeTab]).length > 0
+              }
             />
           )}
           {activeTab === "curriculum" && (
             <CurriculumPanel
               course={courseData.data}
               onUpdate={handlePanelUpdate}
+              onSave={handleTabSave}
+              isSaving={updateCourseMutation.isPending}
+              hasChanges={
+                !!tabChanges[activeTab] &&
+                Object.keys(tabChanges[activeTab]).length > 0
+              }
             />
           )}
           {activeTab === "media" && (
@@ -190,12 +323,27 @@ const EditCourse = () => {
             <AnnouncementsPanel
               course={courseData.data}
               onUpdate={handlePanelUpdate}
+              onSave={handleTabSave}
+              isSaving={updateCourseMutation.isPending}
+              hasChanges={
+                !!tabChanges[activeTab] &&
+                Object.keys(tabChanges[activeTab]).length > 0
+              }
             />
           )}
           {activeTab === "settings" && (
             <SettingsPanel
               course={courseData.data}
               onUpdate={handlePanelUpdate}
+              onSave={handleTabSave}
+              isSaving={updateCourseMutation.isPending}
+              hasChanges={
+                !!tabChanges[activeTab] &&
+                Object.keys(tabChanges[activeTab]).length > 0
+              }
+              onDelete={handleDeleteCourse}
+              onSubmitForApproval={handleSubmitForApproval}
+              onSaveAsDraft={handleSaveAsDraft}
             />
           )}
         </motion.div>

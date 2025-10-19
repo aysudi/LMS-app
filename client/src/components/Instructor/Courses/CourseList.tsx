@@ -7,7 +7,7 @@ interface CourseListProps {
   courses: any[];
   onEdit: (courseId: string) => void;
   onDelete: (courseId: string) => void;
-  onToggleStatus: (courseId: string) => void;
+  onSubmitForApproval?: (courseId: string) => void;
   selectedCourses: string[];
   onSelectCourse: (courseId: string) => void;
   onSelectAll: () => void;
@@ -21,7 +21,6 @@ const CourseList: React.FC<CourseListProps> = ({
   courses,
   onEdit,
   onDelete,
-  onToggleStatus,
   selectedCourses,
   onSelectCourse,
   onSelectAll,
@@ -36,10 +35,6 @@ const CourseList: React.FC<CourseListProps> = ({
 
   const handleDelete = (courseId: string) => {
     onDelete(courseId);
-  };
-
-  const handleToggleStatus = (courseId: string) => {
-    onToggleStatus(courseId);
   };
 
   const handleSelectCourse = (courseId: string) => {
@@ -137,7 +132,6 @@ const CourseList: React.FC<CourseListProps> = ({
                 course={course}
                 onEdit={() => handleEdit(course._id)}
                 onDelete={() => handleDelete(course._id)}
-                onToggleStatus={() => handleToggleStatus(course._id)}
                 onSelect={() => handleSelectCourse(course._id)}
                 isSelected={selectedCourses.includes(course._id)}
                 formatCurrency={formatCurrency}
@@ -210,10 +204,15 @@ const CourseList: React.FC<CourseListProps> = ({
                       Edit
                     </button>
                     <button
-                      onClick={() => handleToggleStatus(course._id)}
+                      onClick={() =>
+                        window.open(
+                          `/instructor/courses/${course._id}/preview`,
+                          "_blank"
+                        )
+                      }
                       className="px-4 py-2 border border-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-50 transition-colors duration-200"
                     >
-                      {course.isPublished ? "Unpublish" : "Publish"}
+                      Preview
                     </button>
                   </div>
                 </div>
@@ -317,10 +316,15 @@ const CourseList: React.FC<CourseListProps> = ({
                           Edit
                         </button>
                         <button
-                          onClick={() => handleToggleStatus(course._id)}
+                          onClick={() =>
+                            window.open(
+                              `/instructor/courses/${course._id}/preview`,
+                              "_blank"
+                            )
+                          }
                           className="text-gray-600 hover:text-gray-900"
                         >
-                          {course.isPublished ? "Unpublish" : "Publish"}
+                          Preview
                         </button>
                       </td>
                     </motion.tr>

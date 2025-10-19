@@ -174,6 +174,7 @@ export interface UpdateCourseData {
   targetAudience?: string[];
   certificateProvided?: boolean;
   isPublished?: boolean;
+  status?: "draft" | "pending" | "approved" | "rejected";
 }
 
 export interface CoursesResponse {

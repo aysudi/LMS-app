@@ -136,13 +136,24 @@ export const createCourseService = async (
 
   delete coursePayload.uploadedFiles;
 
-  // If course is being published (not saved as draft), submit for approval
-  if (coursePayload.isPublished) {
-    coursePayload.status = "pending";
-    coursePayload.submittedAt = new Date();
-    coursePayload.isPublished = false; // Don't publish until approved
+  // Set status based on what was explicitly provided, or use default logic
+  if (coursePayload.status) {
+    // If status is explicitly provided, use it
+    if (coursePayload.status === "draft") {
+      coursePayload.isPublished = false;
+    } else if (coursePayload.status === "pending") {
+      coursePayload.isPublished = false;
+      coursePayload.submittedAt = new Date();
+    }
   } else {
-    coursePayload.status = "draft";
+    // Fallback to original logic if no status provided
+    if (coursePayload.isPublished) {
+      coursePayload.status = "pending";
+      coursePayload.submittedAt = new Date();
+      coursePayload.isPublished = false; // Don't publish until approved
+    } else {
+      coursePayload.status = "draft";
+    }
   }
 
   const course = new Course(coursePayload);

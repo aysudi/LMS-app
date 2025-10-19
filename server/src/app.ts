@@ -26,6 +26,7 @@ import instructorApplicationRouter from "./routes/instructorApplicationRoutes.js
 import adminRouter from "./routes/adminRoutes.js";
 import qaRouter from "./routes/qaRoutes.js";
 import certificateRouter from "./routes/certificateRoutes.js";
+import announcementRouter from "./routes/announcementRoutes.js";
 
 const app = express();
 
@@ -82,6 +83,7 @@ app.use("/api/instructor-applications", instructorApplicationRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/qa", qaRouter);
 app.use("/api/certificates", certificateRouter);
+app.use("/api/announcements", announcementRouter);
 
 // 404 handler
 app.use(notFoundHandler);

@@ -14,6 +14,7 @@ import {
   FaListUl,
   FaQuoteRight,
   FaTimes,
+  FaSave,
 } from "react-icons/fa";
 import type { Course } from "../../../types/course.type";
 import {
@@ -27,6 +28,9 @@ import {
 interface BasicInfoPanelProps {
   course: Course;
   onUpdate: (changes: Partial<Course>) => void;
+  onSave?: () => void;
+  isSaving?: boolean;
+  hasChanges?: boolean;
 }
 
 interface FormState {
@@ -41,7 +45,13 @@ interface FormState {
   targetAudience: string[];
 }
 
-const BasicInfoPanel = ({ course, onUpdate }: BasicInfoPanelProps) => {
+const BasicInfoPanel = ({
+  course,
+  onUpdate,
+  onSave,
+  isSaving,
+  hasChanges,
+}: BasicInfoPanelProps) => {
   const [tagInput, setTagInput] = useState("");
   const [formData, setFormData] = useState<FormState>({
     title: course.title || "",
@@ -583,6 +593,28 @@ const BasicInfoPanel = ({ course, onUpdate }: BasicInfoPanelProps) => {
             </button>
           </div>
         </div>
+        {/* Save Button */}
+        {onSave && (
+          <div className="flex justify-end pt-6 border-t border-gray-200">
+            <button
+              onClick={onSave}
+              disabled={!hasChanges || isSaving}
+              className="inline-flex items-center px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+            >
+              {isSaving ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <FaSave className="mr-2" />
+                  Save Basic Information
+                </>
+              )}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
