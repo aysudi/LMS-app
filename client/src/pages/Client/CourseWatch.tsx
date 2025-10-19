@@ -48,6 +48,7 @@ import {
 } from "../../hooks/useCertificate";
 import QuizComponent from "../../components/CourseDetails/QuizComponent";
 import { File } from "lucide-react";
+import AnnouncementsSection from "../../components/Client/AnnouncementsSection";
 
 const AnswersSection: React.FC<{
   question: any;
@@ -708,30 +709,30 @@ const CourseWatch: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 text-white flex">
+    <div className="min-h-screen bg-slate-950 text-white flex">
       {/* Video Player */}
       <div className={`flex-1 relative ${showSidebar ? "mr-87" : ""}`}>
         {/* Top Navigation Bar */}
-        <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-slate-900/95 via-gray-900/95 to-slate-800/95 backdrop-blur-md z-30 border-b border-slate-700/50 shadow-lg shadow-black/10">
+        <div className="absolute top-0 left-0 right-0 bg-slate-900/95 backdrop-blur-xl z-30 border-b border-slate-800/50">
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => navigate("/my-learning")}
-                className="group flex items-center space-x-2 text-slate-300 hover:text-white transition-all duration-200 cursor-pointer hover:bg-slate-700/30 px-3 py-2 rounded-lg"
+                className="group flex items-center space-x-2 text-slate-400 hover:text-slate-200 transition-all duration-200 cursor-pointer hover:bg-slate-800/50 px-3 py-2 rounded-lg"
               >
                 <span className="text-lg group-hover:translate-x-[-2px] transition-transform duration-200">
                   ←
                 </span>
                 <span className="hidden sm:inline">Back to My Learning</span>
               </button>
-              <div className="h-4 w-px bg-gradient-to-b from-transparent via-slate-600 to-transparent"></div>
-              <h1 className="text-lg font-semibold truncate max-w-96 bg-gradient-to-r from-white to-slate-200 bg-clip-text text-transparent">
+              <div className="h-4 w-px bg-slate-700"></div>
+              <h1 className="text-lg font-semibold truncate max-w-96 text-slate-100">
                 {course.title}
               </h1>
             </div>
 
             <div className="flex items-center space-x-3">
-              <div className="px-3 py-1.5 bg-slate-800/60 rounded-lg border border-slate-700/50 text-sm text-slate-300 font-medium">
+              <div className="px-3 py-1.5 bg-slate-800/80 rounded-lg border border-slate-700/50 text-sm text-slate-300 font-medium">
                 {currentSection + 1}.{currentLesson + 1} /{" "}
                 {course.sections.reduce(
                   (total, section) => total + section.lessons.length,
@@ -740,7 +741,7 @@ const CourseWatch: React.FC = () => {
               </div>
               <button
                 onClick={() => setShowSidebar(!showSidebar)}
-                className="p-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all duration-200 border border-transparent hover:border-slate-600/30 cursor-pointer"
+                className="p-2.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 rounded-lg transition-all duration-200 cursor-pointer"
               >
                 <FaList className="text-sm" />
               </button>
@@ -991,28 +992,28 @@ const CourseWatch: React.FC = () => {
         </div>
 
         {/* Lesson Info Section Below Video */}
-        <div className="bg-gradient-to-r from-slate-900/95 via-gray-900/95 to-slate-800/95 backdrop-blur-md border-t border-slate-700/50 p-6 shadow-lg">
+        <div className="bg-slate-900/95 backdrop-blur-xl border-t border-slate-800/50 p-6">
           <div className="flex items-center justify-between">
             <div className="flex-1">
               <div className="flex items-center space-x-3 mb-2">
-                <div className="px-2 py-1 bg-slate-700/50 text-slate-300 text-xs font-medium rounded-md border border-slate-600/30">
+                <div className="px-2 py-1 bg-slate-800/60 text-slate-300 text-xs font-medium rounded-md border border-slate-700/50">
                   Section {currentSection + 1}
                 </div>
-                <div className="px-2 py-1 bg-blue-600/20 text-blue-300 text-xs font-medium rounded-md border border-blue-500/30">
+                <div className="px-2 py-1 bg-blue-500/20 text-blue-300 text-xs font-medium rounded-md border border-blue-400/30">
                   Lesson {currentLesson + 1} of{" "}
                   {course.sections[currentSection]?.lessons?.length || 0}
                 </div>
                 {currentLessonObj &&
                   getLessonProgress(currentLessonObj._id || currentLessonObj.id)
                     ?.completed && (
-                    <div className="flex items-center px-2 py-1 bg-green-600/20 text-green-300 text-xs font-medium rounded-md border border-green-500/30">
+                    <div className="flex items-center px-2 py-1 bg-emerald-500/20 text-emerald-300 text-xs font-medium rounded-md border border-emerald-400/30">
                       <FaCheck className="mr-1.5 text-xs" />
                       Completed
                     </div>
                   )}
               </div>
 
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-white via-slate-100 to-slate-200 bg-clip-text text-transparent mb-2 leading-tight">
+              <h1 className="text-2xl font-bold text-slate-100 mb-2 leading-tight">
                 {currentLessonObj?.title}
               </h1>
 
@@ -1033,19 +1034,19 @@ const CourseWatch: React.FC = () => {
                     <div
                       className={`w-2 h-2 rounded-full ${
                         quizPassed
-                          ? "bg-green-400"
+                          ? "bg-emerald-400"
                           : quizCompleted
-                          ? "bg-red-400"
-                          : "bg-orange-400"
+                          ? "bg-rose-400"
+                          : "bg-amber-400"
                       }`}
                     ></div>
                     <span
                       className={
                         quizPassed
-                          ? "text-green-300"
+                          ? "text-emerald-300"
                           : quizCompleted
-                          ? "text-red-300"
-                          : "text-orange-300"
+                          ? "text-rose-300"
+                          : "text-amber-300"
                       }
                     >
                       Quiz:{" "}
@@ -1061,8 +1062,8 @@ const CourseWatch: React.FC = () => {
                 {currentLessonObj?.resources &&
                   currentLessonObj.resources.length > 0 && (
                     <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                      <span className="text-purple-300">
+                      <div className="w-2 h-2 bg-violet-400 rounded-full"></div>
+                      <span className="text-violet-300">
                         {currentLessonObj.resources.length} Resource
                         {currentLessonObj.resources.length !== 1 ? "s" : ""}
                       </span>
@@ -1077,9 +1078,9 @@ const CourseWatch: React.FC = () => {
                 disabled={!canCompleteLesson() && !isLessonCompleted()}
                 className={`group px-6 py-3 rounded-xl flex items-center space-x-2 transition-all duration-300 font-medium ${
                   isLessonCompleted()
-                    ? "bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg shadow-green-500/25 cursor-default"
+                    ? "bg-emerald-600/90 text-white border border-emerald-500/30 cursor-default"
                     : canCompleteLesson()
-                    ? "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg shadow-green-500/25 hover:shadow-green-500/40 hover:scale-105 cursor-pointer"
+                    ? "bg-emerald-600/90 hover:bg-emerald-600 text-white border border-emerald-500/30 hover:border-emerald-400/50 hover:scale-105 cursor-pointer"
                     : "bg-slate-700/50 text-slate-400 cursor-not-allowed border border-slate-600/30"
                 }`}
                 title={
@@ -1108,7 +1109,7 @@ const CourseWatch: React.FC = () => {
 
               <button
                 onClick={() => setShowNotes(!showNotes)}
-                className="group p-3 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 rounded-xl transition-all duration-300 shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 hover:scale-105"
+                className="group p-3 bg-violet-600/80 hover:bg-violet-600 rounded-xl transition-all duration-300 border border-violet-500/30 hover:border-violet-400/50 hover:scale-105"
                 title="Notes"
               >
                 <FaNotesMedical className="group-hover:scale-110 transition-transform duration-300" />
@@ -1118,7 +1119,7 @@ const CourseWatch: React.FC = () => {
                 currentLessonObj.resources.length > 0 && (
                   <button
                     onClick={() => setActiveTab("resources")}
-                    className="group p-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 rounded-xl transition-all duration-300 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-105"
+                    className="group p-3 bg-blue-600/80 hover:bg-blue-600 rounded-xl transition-all duration-300 border border-blue-500/30 hover:border-blue-400/50 hover:scale-105"
                     title="Lesson Resources"
                   >
                     <svg
@@ -1134,12 +1135,12 @@ const CourseWatch: React.FC = () => {
               {currentLessonObj?.quiz && currentLessonObj.quiz.length > 0 && (
                 <button
                   onClick={() => setShowQuiz(!showQuiz)}
-                  className={`group p-3 rounded-xl transition-all duration-300 shadow-lg hover:scale-105 ${
+                  className={`group p-3 rounded-xl transition-all duration-300 hover:scale-105 border ${
                     quizPassed
-                      ? "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-green-500/25 hover:shadow-green-500/40"
+                      ? "bg-emerald-600/80 hover:bg-emerald-600 border-emerald-500/30 hover:border-emerald-400/50"
                       : quizCompleted && !quizPassed
-                      ? "bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 shadow-red-500/25 hover:shadow-red-500/40"
-                      : "bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 shadow-orange-500/25 hover:shadow-orange-500/40"
+                      ? "bg-rose-600/80 hover:bg-rose-600 border-rose-500/30 hover:border-rose-400/50"
+                      : "bg-amber-600/80 hover:bg-amber-600 border-amber-500/30 hover:border-amber-400/50"
                   }`}
                   title={
                     quizPassed
@@ -1157,9 +1158,9 @@ const CourseWatch: React.FC = () => {
         </div>
 
         {/* Tabs Section Below Video */}
-        <div className="bg-gradient-to-br from-slate-900/95 via-gray-900/95 to-slate-800/95 backdrop-blur-md border-t border-slate-700/30">
+        <div className="bg-slate-900/95 backdrop-blur-xl border-t border-slate-800/30">
           {/* Tab Headers */}
-          <div className="flex border-b border-slate-700/30 overflow-x-auto scrollbar-hide">
+          <div className="flex border-b border-slate-800/30 overflow-x-auto scrollbar-hide">
             {[
               "overview",
               "notes",
@@ -1175,8 +1176,8 @@ const CourseWatch: React.FC = () => {
                   onClick={() => setActiveTab(tab as typeof activeTab)}
                   className={`group relative px-8 py-5 text-sm font-medium capitalize transition-all duration-300 cursor-pointer min-w-fit whitespace-nowrap overflow-hidden ${
                     activeTab === tab
-                      ? "text-white bg-gradient-to-br from-blue-600/20 via-purple-600/15 to-violet-600/10 border-b-2 border-blue-400 shadow-lg shadow-blue-500/10"
-                      : "text-slate-300 hover:text-white hover:bg-gradient-to-br hover:from-slate-700/30 hover:to-slate-600/20 hover:shadow-md transition-all duration-300"
+                      ? "text-slate-100 bg-slate-800/50 border-b-2 border-blue-400"
+                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/30 transition-all duration-300"
                   }`}
                 >
                   <div className="flex items-center space-x-3">
@@ -1188,11 +1189,8 @@ const CourseWatch: React.FC = () => {
                       {tab === "qa" ? "Q&A" : tab}
                     </span>
                   </div>
-                  {activeTab === tab && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-400/0 via-blue-400/5 to-purple-400/0 animate-pulse"></div>
-                  )}
                   <div
-                    className={`absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-400 to-purple-400 transform origin-left transition-transform duration-300 ${
+                    className={`absolute bottom-0 left-0 right-0 h-0.5 bg-blue-400 transform origin-left transition-transform duration-300 ${
                       activeTab === tab
                         ? "scale-x-100"
                         : "scale-x-0 group-hover:scale-x-100"
@@ -1204,31 +1202,31 @@ const CourseWatch: React.FC = () => {
           </div>
 
           {/* Tab Content */}
-          <div className="p-8 min-h-96 bg-gradient-to-br from-slate-900/20 via-gray-900/10 to-slate-800/20">
+          <div className="p-8 min-h-96 bg-slate-900/20">
             {activeTab === "overview" && (
               <div>
-                <h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                <h3 className="text-2xl font-bold mb-6 text-slate-100">
                   Course Overview
                 </h3>
                 <div className="space-y-6">
-                  <div className="p-6 bg-gradient-to-br from-gray-800/50 to-gray-900/30 rounded-2xl border border-gray-700/50 backdrop-blur-sm">
-                    <h4 className="font-semibold mb-3 text-purple-300 flex items-center space-x-2">
+                  <div className="p-6 bg-slate-800/50 rounded-2xl border border-slate-700/50 backdrop-blur-sm">
+                    <h4 className="font-semibold mb-3 text-slate-200 flex items-center space-x-2">
                       <span>About This Course</span>
                     </h4>
-                    <div className="text-gray-300 leading-relaxed">
+                    <div className="text-slate-300 leading-relaxed">
                       <HTMLRenderer
                         content={course.description}
-                        className="text-gray-300 prose-invert prose-sm"
+                        className="text-slate-300 prose-invert prose-sm"
                       />
                     </div>
                   </div>
-                  <div className="p-6 bg-gradient-to-br from-gray-800/50 to-gray-900/30 rounded-2xl border border-gray-700/50 backdrop-blur-sm">
-                    <h4 className="font-semibold mb-3 text-blue-300 flex items-center space-x-2">
+                  <div className="p-6 bg-slate-800/50 rounded-2xl border border-slate-700/50 backdrop-blur-sm">
+                    <h4 className="font-semibold mb-3 text-slate-200 flex items-center space-x-2">
                       <span>What You'll Learn</span>
                     </h4>
-                    <ul className="space-y-2 text-gray-300">
+                    <ul className="space-y-2 text-slate-300">
                       <li className="flex items-center space-x-3">
-                        <span className="w-2 h-2 bg-purple-400 rounded-full"></span>
+                        <span className="w-2 h-2 bg-blue-400 rounded-full"></span>
                         <span>
                           Comprehensive understanding of the subject matter
                         </span>
@@ -1238,37 +1236,37 @@ const CourseWatch: React.FC = () => {
                         <span>Practical skills and knowledge application</span>
                       </li>
                       <li className="flex items-center space-x-3">
-                        <span className="w-2 h-2 bg-purple-400 rounded-full"></span>
+                        <span className="w-2 h-2 bg-blue-400 rounded-full"></span>
                         <span>Step-by-step learning progression</span>
                       </li>
                     </ul>
                   </div>
-                  <div className="p-6 bg-gradient-to-br from-gray-800/50 to-gray-900/30 rounded-2xl border border-gray-700/50 backdrop-blur-sm">
-                    <h4 className="font-semibold mb-4 text-green-300 flex items-center space-x-2">
+                  <div className="p-6 bg-slate-800/50 rounded-2xl border border-slate-700/50 backdrop-blur-sm">
+                    <h4 className="font-semibold mb-4 text-slate-200 flex items-center space-x-2">
                       <span>Course Info</span>
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="p-4 bg-purple-900/20 rounded-xl border border-purple-500/20">
-                        <div className="text-2xl text-purple-400 mb-2">👨‍🏫</div>
-                        <div className="text-sm text-gray-400">Instructor</div>
-                        <div className="font-medium text-white">
+                      <div className="p-4 bg-slate-700/30 rounded-xl border border-slate-600/30">
+                        <div className="text-2xl text-slate-300 mb-2">👨‍🏫</div>
+                        <div className="text-sm text-slate-400">Instructor</div>
+                        <div className="font-medium text-slate-200">
                           {course.instructor.firstName}{" "}
                           {course.instructor.lastName}
                         </div>
                       </div>
-                      <div className="p-4 bg-blue-900/20 rounded-xl border border-blue-500/20">
-                        <div className="text-2xl text-blue-400 mb-2">📖</div>
-                        <div className="text-sm text-gray-400">Sections</div>
-                        <div className="font-medium text-white">
+                      <div className="p-4 bg-slate-700/30 rounded-xl border border-slate-600/30">
+                        <div className="text-2xl text-slate-300 mb-2">📖</div>
+                        <div className="text-sm text-slate-400">Sections</div>
+                        <div className="font-medium text-slate-200">
                           {course.sections.length}
                         </div>
                       </div>
-                      <div className="p-4 bg-green-900/20 rounded-xl border border-green-500/20">
-                        <div className="text-2xl text-green-400 mb-2">🎓</div>
-                        <div className="text-sm text-gray-400">
+                      <div className="p-4 bg-slate-700/30 rounded-xl border border-slate-600/30">
+                        <div className="text-2xl text-slate-300 mb-2">🎓</div>
+                        <div className="text-sm text-slate-400">
                           Total Lessons
                         </div>
-                        <div className="font-medium text-white">
+                        <div className="font-medium text-slate-200">
                           {course.sections.reduce(
                             (total, section) => total + section.lessons.length,
                             0
@@ -1283,26 +1281,26 @@ const CourseWatch: React.FC = () => {
 
             {activeTab === "notes" && (
               <div>
-                <h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                <h3 className="text-2xl font-bold mb-6 text-slate-100">
                   My Notes
                 </h3>
 
                 {/* Add Note */}
-                <div className="bg-gradient-to-br from-purple-900/20 via-blue-900/10 to-purple-900/20 p-6 rounded-2xl mb-6 border border-purple-500/20 backdrop-blur-sm">
+                <div className="bg-slate-800/50 p-6 rounded-2xl mb-6 border border-slate-700/50 backdrop-blur-sm">
                   <div className="flex items-start space-x-3">
                     <div className="flex-1">
-                      <label className="flex items-center space-x-2 text-sm font-medium text-purple-300 mb-2">
+                      <label className="flex items-center space-x-2 text-sm font-medium text-slate-300 mb-2">
                         <span>Add a Note</span>
                       </label>
                       <textarea
                         value={newNote}
                         onChange={(e) => setNewNote(e.target.value)}
                         placeholder="Write your note here..."
-                        className="w-full bg-gray-800/50 text-white p-4 rounded-xl border border-gray-600/50 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 focus:outline-none resize-none transition-all"
+                        className="w-full bg-slate-700/50 text-slate-100 p-4 rounded-xl border border-slate-600/50 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 focus:outline-none resize-none transition-all"
                         rows={3}
                       />
                       <div className="flex justify-between items-center mt-4">
-                        <div className="flex items-center space-x-2 text-sm text-purple-300">
+                        <div className="flex items-center space-x-2 text-sm text-slate-400">
                           <span>🕐</span>
                           <span>
                             Note will be saved at {formatTime(currentTime)}
@@ -1311,7 +1309,7 @@ const CourseWatch: React.FC = () => {
                         <button
                           onClick={addNote}
                           disabled={!newNote.trim()}
-                          className="px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all font-medium"
+                          className="px-6 py-2 bg-blue-600/90 text-white rounded-xl hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all font-medium border border-blue-500/30"
                         >
                           Add Note
                         </button>
@@ -1382,7 +1380,7 @@ const CourseWatch: React.FC = () => {
                       return (
                         <div
                           key={note._id}
-                          className="bg-gradient-to-br from-gray-800/50 to-gray-900/30 p-5 rounded-2xl border border-gray-700/50 hover:border-purple-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10 backdrop-blur-sm"
+                          className="bg-slate-800/50 p-5 rounded-2xl border border-slate-700/50 hover:border-slate-600/50 transition-all duration-300 backdrop-blur-sm"
                         >
                           <div className="flex justify-between items-start mb-2">
                             <div className="flex flex-col">
@@ -1425,19 +1423,19 @@ const CourseWatch: React.FC = () => {
                                     }
                                   }
                                 }}
-                                className="text-purple-400 hover:text-purple-300 font-medium text-sm text-left"
+                                className="text-blue-400 hover:text-blue-300 font-medium text-sm text-left"
                               >
                                 {formatTime(note.timestamp)} - {lessonTitle}
                               </button>
-                              <p className="text-xs text-gray-500 mt-1">
+                              <p className="text-xs text-slate-500 mt-1">
                                 Section: {sectionTitle}
                               </p>
                             </div>
-                            <span className="text-gray-400 text-sm">
+                            <span className="text-slate-400 text-sm">
                               {new Date(note.createdAt).toLocaleDateString()}
                             </span>
                           </div>
-                          <p className="text-gray-200">{note.content}</p>
+                          <p className="text-slate-200">{note.content}</p>
                         </div>
                       );
                     })
@@ -1703,10 +1701,10 @@ const CourseWatch: React.FC = () => {
 
             {activeTab === "announcements" && (
               <div>
-                <h3 className="text-xl font-bold mb-4">Announcements</h3>
-                <p className="text-gray-400">
-                  Course announcements will be displayed here.
-                </p>
+                <h3 className="text-2xl font-bold mb-6 text-slate-100">
+                  📢 Course Announcements
+                </h3>
+                <AnnouncementsSection courseId={courseId!} />
               </div>
             )}
 
@@ -2474,19 +2472,19 @@ const CourseWatch: React.FC = () => {
 
       {/* Sidebar */}
       {showSidebar && (
-        <div className="w-89 bg-gradient-to-b from-slate-900/95 via-gray-900/95 to-slate-800/95 backdrop-blur-md h-screen overflow-y-auto fixed right-0 top-0 border-l border-slate-700/50 z-40 shadow-2xl shadow-black/20">
+        <div className="w-89 bg-slate-900/98 backdrop-blur-xl h-screen overflow-y-auto fixed right-0 top-0 border-l border-slate-800/50 z-40">
           <div className="px-6 py-4">
             {/* Header with course info */}
-            <div className="bg-gradient-to-r from-slate-800/50 to-gray-800/50 -m-6 p-6 mb-6 border-b border-slate-700/30 backdrop-blur-sm">
+            <div className="bg-slate-800/50 -m-6 p-6 mb-6 border-b border-slate-700/30 backdrop-blur-sm">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold bg-gradient-to-r from-white to-slate-200 bg-clip-text text-transparent">
+                <h2 className="text-xl font-bold text-slate-100">
                   Course Content
                 </h2>
                 <button
                   onClick={() => setShowSidebar(false)}
-                  className="group p-2 hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200 border border-transparent hover:border-slate-600/30"
+                  className="group p-2 hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
                 >
-                  <FaTimes className="text-slate-400 group-hover:text-white transition-colors duration-200" />
+                  <FaTimes className="text-slate-400 group-hover:text-slate-200 transition-colors duration-200" />
                 </button>
               </div>
               <h3 className="text-base font-semibold text-slate-200 truncate mb-1">
@@ -2504,7 +2502,7 @@ const CourseWatch: React.FC = () => {
                   </span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                  <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
                   <span>{course.sections.length} sections</span>
                 </div>
               </div>
@@ -2515,16 +2513,18 @@ const CourseWatch: React.FC = () => {
               {course.sections.map((section: any, sectionIndex: number) => (
                 <div
                   key={sectionIndex}
-                  className="border border-gray-700 rounded-lg"
+                  className="border border-slate-700/50 rounded-lg overflow-hidden"
                 >
-                  <div className="p-3 bg-gray-700">
-                    <h3 className="font-semibold text-sm">{section.title}</h3>
-                    <p className="text-xs text-gray-400 mt-1">
+                  <div className="p-3 bg-slate-800/50">
+                    <h3 className="font-semibold text-sm text-slate-200">
+                      {section.title}
+                    </h3>
+                    <p className="text-xs text-slate-400 mt-1">
                       {section.lessons.length} lessons
                     </p>
                   </div>
 
-                  <div className="divide-y divide-gray-700">
+                  <div className="divide-y divide-slate-700/50">
                     {section.lessons.map((lesson: any, lessonIndex: number) => {
                       const progress = getLessonProgress(
                         lesson._id || lesson.id
@@ -2537,16 +2537,16 @@ const CourseWatch: React.FC = () => {
                         <button
                           key={lessonIndex}
                           onClick={() => loadLesson(sectionIndex, lessonIndex)}
-                          className={`w-full text-left p-3 hover:bg-gray-700 transition-colors ${
-                            isCurrentLesson ? "bg-purple-600" : ""
+                          className={`w-full text-left p-3 hover:bg-slate-700/50 transition-colors ${
+                            isCurrentLesson ? "bg-blue-600/90" : ""
                           }`}
                         >
                           <div className="flex items-center space-x-3">
                             <div
                               className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${
                                 progress?.completed
-                                  ? "bg-green-500"
-                                  : "bg-gray-600"
+                                  ? "bg-emerald-500"
+                                  : "bg-slate-600"
                               }`}
                             >
                               {progress?.completed ? (
@@ -2556,10 +2556,10 @@ const CourseWatch: React.FC = () => {
                               )}
                             </div>
                             <div className="flex-1">
-                              <p className="text-sm font-medium">
+                              <p className="text-sm font-medium text-slate-200">
                                 {lesson.title}
                               </p>
-                              <p className="text-xs text-gray-400">
+                              <p className="text-xs text-slate-400">
                                 {formatTime(lesson.duration)}
                               </p>
                             </div>
@@ -2567,7 +2567,7 @@ const CourseWatch: React.FC = () => {
                               {lesson.resources &&
                                 lesson.resources.length > 0 && (
                                   <span
-                                    className=" bg-blue-600 px-1 py-1 rounded"
+                                    className="bg-blue-600/80 px-1 py-1 rounded"
                                     title="Has Resources"
                                   >
                                     <File size={16} />
@@ -2577,12 +2577,8 @@ const CourseWatch: React.FC = () => {
                                 <span
                                   className={`text-xs px-2 py-1 rounded ${
                                     progress?.completed
-                                      ? "bg-green-600 text-white"
-                                      : // lessonQuizStates[
-                                        //     lesson._id || lesson.id
-                                        //   ]?.completed
-                                        // ? "bg-red-600 text-white" :
-                                        "bg-orange-400 text-white"
+                                      ? "bg-emerald-600 text-white"
+                                      : "bg-amber-500 text-white"
                                   }`}
                                   title={
                                     lessonQuizStates[lesson._id || lesson.id]
@@ -2595,12 +2591,7 @@ const CourseWatch: React.FC = () => {
                                       : "Has Quiz"
                                   }
                                 >
-                                  {progress?.completed
-                                    ? "✓ Quiz"
-                                    : // : lessonQuizStates[lesson._id || lesson.id]
-                                      //     ?.completed
-                                      // ? "✗ Quiz"
-                                      "❓ Quiz"}
+                                  {progress?.completed ? "✓ Quiz" : "❓ Quiz"}
                                 </span>
                               )}
                             </div>
@@ -2614,8 +2605,8 @@ const CourseWatch: React.FC = () => {
             </div>
 
             {/* Footer-like section with course info */}
-            <div className="sticky bottom-0 bg-gray-900 -mx-4 px-4 py-3 border-t border-gray-700 mt-4">
-              <div className="text-xs text-gray-400 space-y-1">
+            <div className="sticky bottom-0 bg-slate-900/95 -mx-4 px-4 py-3 border-t border-slate-700/50 mt-4">
+              <div className="text-xs text-slate-400 space-y-1">
                 <div>
                   Instructor: {course.instructor.firstName}{" "}
                   {course.instructor.lastName}
@@ -2627,13 +2618,13 @@ const CourseWatch: React.FC = () => {
                 <div className="flex items-center space-x-4 pt-2">
                   <button
                     onClick={() => navigate("/my-learning")}
-                    className="text-purple-400 hover:text-purple-300 text-xs cursor-pointer"
+                    className="text-blue-400 hover:text-blue-300 text-xs cursor-pointer"
                   >
                     My Learning
                   </button>
                   <button
                     onClick={() => navigate(`/course/${courseId}`)}
-                    className="text-purple-400 hover:text-purple-300 text-xs cursor-pointer"
+                    className="text-blue-400 hover:text-blue-300 text-xs cursor-pointer"
                   >
                     Course Details
                   </button>

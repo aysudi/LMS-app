@@ -3,43 +3,45 @@ import { motion } from "framer-motion";
 import {
   FaPlus,
   FaBullhorn,
-  FaEdit,
   FaTrash,
-  FaEye,
-  FaEyeSlash,
   FaClock,
   FaUsers,
   FaExclamationTriangle,
   FaInfo,
   FaCheckCircle,
+  FaSpinner,
 } from "react-icons/fa";
-import { toast } from "react-hot-toast";
+import Swal from "sweetalert2";
 import type { Course } from "../../../types/course.type";
+import type {
+  Announcement,
+  CreateAnnouncementData,
+  UpdateAnnouncementData,
+} from "../../../types/announcement.type";
+import {
+  useInstructorAnnouncements,
+  useAnnouncementMutations,
+} from "../../../hooks/useAnnouncements";
 import RichTextEditor from "../../UI/RichTextEditor";
-
-interface Announcement {
-  id: string;
-  title: string;
-  content: string;
-  priority: "low" | "medium" | "high" | "urgent";
-  targetAudience: "all" | "enrolled" | "completed";
-  isPublished: boolean;
-  publishedAt: Date;
-  readBy: string[];
-}
+import { useToast } from "../../UI/ToastProvider";
+import { generalToasts } from "../../../utils/toastUtils";
 
 interface AnnouncementsPanelProps {
   course: Course;
   onUpdate: (changes: Partial<Course>) => void;
+  onSave?: () => void;
+  isSaving?: boolean;
+  hasChanges?: boolean;
 }
 
 interface AnnouncementModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (
-    announcement: Omit<Announcement, "id" | "publishedAt" | "readBy">
+    announcement: CreateAnnouncementData | UpdateAnnouncementData
   ) => void;
   announcement?: Announcement;
+  courseId: string;
 }
 
 const priorityConfig = {
@@ -62,6 +64,7 @@ const AnnouncementModal = ({
   onClose,
   onSave,
   announcement,
+  courseId,
 }: AnnouncementModalProps) => {
   const [title, setTitle] = useState(announcement?.title || "");
   const [content, setContent] = useState(announcement?.content || "");
@@ -69,26 +72,27 @@ const AnnouncementModal = ({
   const [targetAudience, setTargetAudience] = useState(
     announcement?.targetAudience || "enrolled"
   );
-  const [isPublished, setIsPublished] = useState(
-    announcement?.isPublished ?? true
-  );
+  const [isPublished, _] = useState(announcement?.isPublished ?? true);
+  const { showToast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!title.trim() || !content.trim()) {
-      toast.error("Title and content are required");
+      showToast(generalToasts.error("Error", "Title and content are required"));
       return;
     }
 
-    onSave({
+    const announcementData = {
       title: title.trim(),
       content: content.trim(),
-      priority: priority as any,
-      targetAudience: targetAudience as any,
+      priority: priority as "low" | "medium" | "high" | "urgent",
+      targetAudience: targetAudience as "all" | "enrolled" | "completed",
       isPublished,
-    });
+      course: courseId,
+    };
 
+    onSave(announcementData);
     onClose();
   };
 
@@ -187,34 +191,20 @@ const AnnouncementModal = ({
             </div>
 
             <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-              <div className="flex items-center space-x-3">
-                <input
-                  type="checkbox"
-                  id="publish"
-                  checked={isPublished}
-                  onChange={(e) => setIsPublished(e.target.checked)}
-                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                />
-                <label htmlFor="publish" className="text-sm text-gray-700">
-                  Publish immediately
-                </label>
-              </div>
-
-              <div className="flex items-center space-x-3">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="px-6 py-3 border border-gray-200 rounded-xl text-gray-700 font-medium hover:bg-gray-50 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-200"
-                >
-                  {announcement ? "Update" : "Create"} Announcement
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-6 py-3 border border-gray-200 rounded-xl text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-200"
+              >
+                {announcement ? "Update" : "Create"} Announcement
+              </button>
+              {/* </div> */}
             </div>
           </form>
         </motion.div>
@@ -223,73 +213,83 @@ const AnnouncementModal = ({
   );
 };
 
-const AnnouncementsPanel = ({}: AnnouncementsPanelProps) => {
-  // Mock announcements data - in real app, this would come from API
-  const [announcements, setAnnouncements] = useState<Announcement[]>([
-    {
-      id: "1",
-      title: "Welcome to the Course!",
-      content:
-        "<p>Welcome to this amazing course. We're excited to have you here!</p>",
-      priority: "medium",
-      targetAudience: "enrolled",
-      isPublished: true,
-      publishedAt: new Date(),
-      readBy: [],
-    },
-  ]);
-
+const AnnouncementsPanel = ({ course }: AnnouncementsPanelProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAnnouncement, setEditingAnnouncement] = useState<
     Announcement | undefined
   >();
+  const { showToast } = useToast();
+
+  // Fetch instructor's announcements for this course
+  const { announcements, isLoading } = useInstructorAnnouncements({
+    course: course.id,
+    limit: 20,
+  });
+
+  // Get mutation functions
+  const { createAnnouncement, updateAnnouncement, deleteAnnouncement } =
+    useAnnouncementMutations();
 
   const handleCreateAnnouncement = () => {
     setEditingAnnouncement(undefined);
     setIsModalOpen(true);
   };
 
-  const handleEditAnnouncement = (announcement: Announcement) => {
-    setEditingAnnouncement(announcement);
-    setIsModalOpen(true);
-  };
-
   const handleSaveAnnouncement = (
-    announcementData: Omit<Announcement, "id" | "publishedAt" | "readBy">
+    announcementData: CreateAnnouncementData | UpdateAnnouncementData
   ) => {
     if (editingAnnouncement) {
-      // Update existing
-      setAnnouncements(
-        announcements.map((a) =>
-          a.id === editingAnnouncement.id ? { ...a, ...announcementData } : a
-        )
-      );
-      toast.success("Announcement updated successfully!");
+      // Update existing announcement
+      updateAnnouncement.mutate({
+        id: editingAnnouncement._id,
+        data: announcementData as UpdateAnnouncementData,
+      });
     } else {
-      // Create new
-      const newAnnouncement: Announcement = {
-        ...announcementData,
-        id: Date.now().toString(),
-        publishedAt: new Date(),
-        readBy: [],
-      };
-      setAnnouncements([newAnnouncement, ...announcements]);
-      toast.success("Announcement created successfully!");
+      // Create new announcement
+      createAnnouncement.mutate(announcementData as CreateAnnouncementData);
+      showToast(generalToasts.success("Success", "Announcement created"));
     }
+    setIsModalOpen(false);
   };
 
   const handleDeleteAnnouncement = (id: string) => {
-    setAnnouncements(announcements.filter((a) => a.id !== id));
-    toast.success("Announcement deleted successfully!");
+    console.log("id", id);
+    Swal.fire({
+      title: "Delete Announcement",
+      text: "Are you sure you want to delete this announcement? This action cannot be undone.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
+      customClass: {
+        popup: "rounded-xl",
+        confirmButton: "rounded-lg px-6 py-2",
+        cancelButton: "rounded-lg px-6 py-2",
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deleteAnnouncement.mutate(id);
+      }
+    });
   };
 
-  const toggleAnnouncementStatus = (id: string) => {
-    setAnnouncements(
-      announcements.map((a) =>
-        a.id === id ? { ...a, isPublished: !a.isPublished } : a
-      )
+  if (isLoading) {
+    return (
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="flex items-center justify-center py-12">
+          <FaSpinner className="animate-spin h-8 w-8 text-indigo-600" />
+          <span className="ml-2 text-gray-600">Loading announcements...</span>
+        </div>
+      </div>
     );
-  };
+  }
+
+  // if (!announcementsData) return null;
+  // const announcements = announcementsData?.data || [];
+
+  // console.log("announcements", announcements);
 
   return (
     <div className="bg-white rounded-lg shadow-sm p-6">
@@ -313,12 +313,12 @@ const AnnouncementsPanel = ({}: AnnouncementsPanelProps) => {
       </div>
 
       <div className="space-y-4">
-        {announcements.map((announcement) => {
+        {announcements.map((announcement, index) => {
           const PriorityIcon = priorityConfig[announcement.priority].icon;
 
           return (
             <motion.div
-              key={announcement.id}
+              key={index}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className="border border-gray-200 rounded-xl p-6 hover:shadow-md transition-all duration-200"
@@ -359,7 +359,11 @@ const AnnouncementsPanel = ({}: AnnouncementsPanelProps) => {
                   <div className="flex items-center space-x-4 text-xs text-gray-500">
                     <div className="flex items-center">
                       <FaClock className="mr-1" />
-                      {announcement.publishedAt.toLocaleDateString()}
+                      {announcement.publishedAt
+                        ? new Date(
+                            announcement.publishedAt
+                          ).toLocaleDateString()
+                        : new Date(announcement.createdAt).toLocaleDateString()}
                     </div>
                     <div className="flex items-center">
                       <FaUsers className="mr-1" />
@@ -376,25 +380,6 @@ const AnnouncementsPanel = ({}: AnnouncementsPanelProps) => {
                 </div>
 
                 <div className="flex items-center space-x-2 ml-4">
-                  <button
-                    onClick={() => toggleAnnouncementStatus(announcement.id)}
-                    className={`p-2 rounded-lg transition-colors ${
-                      announcement.isPublished
-                        ? "text-green-600 hover:bg-green-50"
-                        : "text-gray-400 hover:bg-gray-50"
-                    }`}
-                    title={announcement.isPublished ? "Published" : "Draft"}
-                  >
-                    {announcement.isPublished ? <FaEye /> : <FaEyeSlash />}
-                  </button>
-
-                  <button
-                    onClick={() => handleEditAnnouncement(announcement)}
-                    className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-                  >
-                    <FaEdit />
-                  </button>
-
                   <button
                     onClick={() => handleDeleteAnnouncement(announcement.id)}
                     className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
@@ -433,6 +418,7 @@ const AnnouncementsPanel = ({}: AnnouncementsPanelProps) => {
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveAnnouncement}
         announcement={editingAnnouncement}
+        courseId={course.id}
       />
     </div>
   );

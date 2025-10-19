@@ -1,22 +1,12 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  FaEllipsisV,
-  FaPlay,
-  FaTrash,
-  FaUsers,
-  FaStar,
-  FaDollarSign,
-  FaClock,
-  FaBook,
-} from "react-icons/fa";
+import { motion } from "framer-motion";
+import { FaUsers, FaStar, FaDollarSign, FaClock, FaBook } from "react-icons/fa";
 
 interface CourseCardProps {
   course: any;
   onEdit: () => void;
   onDelete: () => void;
-  onToggleStatus: () => void;
+  onSubmitForApproval?: (courseId: string) => void;
   onSelect: () => void;
   isSelected: boolean;
   formatCurrency: (amount: number) => string;
@@ -26,14 +16,11 @@ interface CourseCardProps {
 const CourseCard: React.FC<CourseCardProps> = ({
   course,
   onEdit,
-  onDelete,
-  onToggleStatus,
   onSelect,
   isSelected,
   formatCurrency,
   delay = 0,
 }) => {
-  const [showMenu, setShowMenu] = useState(false);
   const navigate = useNavigate();
 
   return (
@@ -74,55 +61,17 @@ const CourseCard: React.FC<CourseCardProps> = ({
             className={`px-2 py-1 rounded-full text-xs font-medium ${
               course.isPublished
                 ? "bg-green-100 text-green-800"
-                : "bg-yellow-100 text-yellow-800"
+                : course.status === "pending"
+                ? "bg-yellow-100 text-yellow-800"
+                : "bg-gray-100 text-gray-800"
             }`}
           >
-            {course.isPublished ? "Published" : "Draft"}
+            {course.isPublished
+              ? "Published"
+              : course.status === "pending"
+              ? "Pending"
+              : "Draft"}
           </span>
-        </div>
-
-        {/* Menu */}
-        <div className="absolute bottom-3 right-3">
-          <div className="relative">
-            <button
-              onClick={() => setShowMenu(!showMenu)}
-              className="p-2 bg-black bg-opacity-50 text-white rounded-full hover:bg-opacity-70 transition-colors duration-200"
-            >
-              <FaEllipsisV className="text-sm" />
-            </button>
-
-            <AnimatePresence>
-              {showMenu && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                  className="absolute right-0 bottom-full mb-2 w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20"
-                >
-                  <button
-                    onClick={() => {
-                      onToggleStatus();
-                      setShowMenu(false);
-                    }}
-                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
-                  >
-                    <FaPlay className="text-xs" />
-                    <span>{course.isPublished ? "Unpublish" : "Publish"}</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      onDelete();
-                      setShowMenu(false);
-                    }}
-                    className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
-                  >
-                    <FaTrash className="text-xs" />
-                    <span>Delete</span>
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
         </div>
       </div>
 

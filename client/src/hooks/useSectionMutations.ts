@@ -43,11 +43,27 @@ export const useCreateSection = (
         queryKey: ["sections", courseId],
       });
 
+      // Improved cache invalidation for instructor courses
       queryClient.invalidateQueries({
         predicate: (query) => {
+          const key = query.queryKey;
           return (
-            query.queryKey[0] === "instructor" &&
-            query.queryKey[1] === "courses"
+            (key[0] === "instructor" && key[1] === "courses") ||
+            (key[0] === "instructor" &&
+              key[1] === "courses" &&
+              key[2] === "stats")
+          );
+        },
+      });
+
+      // Force refetch to ensure immediate update
+      queryClient.refetchQueries({
+        predicate: (query) => {
+          const key = query.queryKey;
+          return (
+            key[0] === "instructor" &&
+            key[1] === "courses" &&
+            key[2] === "stats"
           );
         },
       });
@@ -97,11 +113,27 @@ export const useUpdateSection = (
         queryKey: ["sections", courseId],
       });
 
+      // Improved cache invalidation for instructor courses
       queryClient.invalidateQueries({
         predicate: (query) => {
+          const key = query.queryKey;
           return (
-            query.queryKey[0] === "instructor" &&
-            query.queryKey[1] === "courses"
+            (key[0] === "instructor" && key[1] === "courses") ||
+            (key[0] === "instructor" &&
+              key[1] === "courses" &&
+              key[2] === "stats")
+          );
+        },
+      });
+
+      // Force refetch to ensure immediate update
+      queryClient.refetchQueries({
+        predicate: (query) => {
+          const key = query.queryKey;
+          return (
+            key[0] === "instructor" &&
+            key[1] === "courses" &&
+            key[2] === "stats"
           );
         },
       });
@@ -133,11 +165,27 @@ export const useDeleteSection = (
         queryKey: ["sections", courseId],
       });
 
+      // Improved cache invalidation for instructor courses
       queryClient.invalidateQueries({
         predicate: (query) => {
+          const key = query.queryKey;
           return (
-            query.queryKey[0] === "instructor" &&
-            query.queryKey[1] === "courses"
+            (key[0] === "instructor" && key[1] === "courses") ||
+            (key[0] === "instructor" &&
+              key[1] === "courses" &&
+              key[2] === "stats")
+          );
+        },
+      });
+
+      // Force refetch to ensure immediate update
+      queryClient.refetchQueries({
+        predicate: (query) => {
+          const key = query.queryKey;
+          return (
+            key[0] === "instructor" &&
+            key[1] === "courses" &&
+            key[2] === "stats"
           );
         },
       });

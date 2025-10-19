@@ -1,10 +1,26 @@
 import { useState } from "react";
-import { FaDollarSign, FaGlobe, FaCertificate } from "react-icons/fa";
+import {
+  FaDollarSign,
+  FaGlobe,
+  FaCertificate,
+  FaTrashAlt,
+  FaPaperPlane,
+  FaSave,
+  FaExclamationTriangle,
+  FaCheckCircle,
+  FaClock,
+} from "react-icons/fa";
 import type { Course } from "../../../types/course.type";
 
 interface SettingsPanelProps {
   course: Course;
   onUpdate: (changes: Partial<Course>) => void;
+  onSave?: () => void;
+  isSaving?: boolean;
+  hasChanges?: boolean;
+  onDelete?: () => void;
+  onSubmitForApproval?: () => void;
+  onSaveAsDraft?: () => void;
 }
 
 const LANGUAGES = [
@@ -24,7 +40,16 @@ const LANGUAGES = [
 
 const LEVELS = ["Beginner", "Intermediate", "Advanced", "All Levels"];
 
-const SettingsPanel = ({ course, onUpdate }: SettingsPanelProps) => {
+const SettingsPanel = ({
+  course,
+  onUpdate,
+  onSave,
+  isSaving,
+  hasChanges,
+  onDelete,
+  onSubmitForApproval,
+  onSaveAsDraft,
+}: SettingsPanelProps) => {
   const [formData, setFormData] = useState({
     isFree: course.isFree,
     originalPrice: course.originalPrice,
@@ -32,7 +57,6 @@ const SettingsPanel = ({ course, onUpdate }: SettingsPanelProps) => {
     language: course.language,
     level: course.level,
     certificateProvided: course.certificateProvided,
-    isPublished: course.isPublished,
   });
 
   const handleChange = (field: string, value: any) => {
@@ -96,13 +120,18 @@ const SettingsPanel = ({ course, onUpdate }: SettingsPanelProps) => {
                           type="number"
                           name="originalPrice"
                           id="originalPrice"
-                          value={formData.originalPrice}
-                          onChange={(e) =>
-                            handleChange(
-                              "originalPrice",
-                              parseFloat(e.target.value) || 0
-                            )
-                          }
+                          value={formData.originalPrice || ""}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (value === "") {
+                              handleChange("originalPrice", 0);
+                            } else {
+                              handleChange(
+                                "originalPrice",
+                                parseFloat(value) || 0
+                              );
+                            }
+                          }}
                           className="focus:ring-2 focus:ring-green-500 focus:border-green-500 block w-full pl-10 pr-4 py-3 text-lg border-gray-300 rounded-lg"
                           placeholder="99.00"
                           min="0"
@@ -131,13 +160,18 @@ const SettingsPanel = ({ course, onUpdate }: SettingsPanelProps) => {
                           type="number"
                           name="discountPrice"
                           id="discountPrice"
-                          value={formData.discountPrice}
-                          onChange={(e) =>
-                            handleChange(
-                              "discountPrice",
-                              parseFloat(e.target.value) || 0
-                            )
-                          }
+                          value={formData.discountPrice || ""}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (value === "") {
+                              handleChange("discountPrice", 0);
+                            } else {
+                              handleChange(
+                                "discountPrice",
+                                parseFloat(value) || 0
+                              );
+                            }
+                          }}
                           className="focus:ring-2 focus:ring-green-500 focus:border-green-500 block w-full pl-10 pr-4 py-3 text-lg border-gray-300 rounded-lg"
                           placeholder="49.00"
                           min="0"
@@ -262,55 +296,242 @@ const SettingsPanel = ({ course, onUpdate }: SettingsPanelProps) => {
             </div>
           </div>
 
-          {/* Publication Status */}
+          {/* Submission Status */}
           <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl p-6 border border-indigo-100">
             <h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
               <div className="p-2 bg-indigo-100 rounded-lg mr-3">
                 <FaGlobe className="text-indigo-600" />
               </div>
-              Publication Status
+              Course Submission
             </h3>
             <div className="bg-white rounded-lg p-6 border border-indigo-200">
-              <div className="flex items-start space-x-4">
-                <input
-                  type="checkbox"
-                  id="isPublished"
-                  checked={formData.isPublished}
-                  onChange={(e) =>
-                    handleChange("isPublished", e.target.checked)
-                  }
-                  className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded mt-1"
-                />
-                <div className="flex-1">
-                  <label
-                    htmlFor="isPublished"
-                    className="block text-base font-medium text-gray-900 mb-2"
-                  >
-                    Publish this course
-                  </label>
-                  <p className="text-sm text-gray-600 leading-relaxed mb-3">
-                    When published, your course will be visible to students and
-                    available for enrollment. Unpublished courses remain in
-                    draft mode and are only visible to you.
+              <div className="space-y-4">
+                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <h4 className="font-medium text-blue-900 mb-2">
+                    📋 Approval Process
+                  </h4>
+                  <p className="text-sm text-blue-800 leading-relaxed">
+                    All courses must be reviewed and approved by our admin team
+                    before they can be published to students. This ensures
+                    quality standards and helps maintain the integrity of our
+                    platform.
                   </p>
-                  {formData.isPublished ? (
-                    <div className="p-3 bg-green-50 rounded-lg border border-green-200">
-                      <p className="text-sm text-green-700 font-medium">
-                        ✓ Course is published and available to students
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
-                      <p className="text-sm text-amber-700 font-medium">
-                        ⚠ Course is in draft mode - not visible to students
-                      </p>
+                </div>
+
+                {course.status === "draft" && (
+                  <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <p className="text-sm text-gray-700 font-medium mb-2">
+                      📝 Course Status: Draft
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Your course is in draft mode. Complete all sections and
+                      submit for admin review when ready.
+                    </p>
+                  </div>
+                )}
+
+                {course.status === "pending" && (
+                  <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                    <p className="text-sm text-yellow-800 font-medium mb-2">
+                      ⏳ Course Status: Pending Review
+                    </p>
+                    <p className="text-sm text-yellow-700">
+                      Your course has been submitted and is awaiting admin
+                      approval. You'll be notified once the review is complete.
+                    </p>
+                  </div>
+                )}
+
+                {course.status === "approved" && (
+                  <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                    <p className="text-sm text-green-800 font-medium mb-2">
+                      ✅ Course Status: Approved
+                    </p>
+                    <p className="text-sm text-green-700">
+                      Congratulations! Your course has been approved and is now
+                      available to students.
+                    </p>
+                  </div>
+                )}
+
+                {course.status === "rejected" && (
+                  <div className="p-4 bg-red-50 rounded-lg border border-red-200">
+                    <p className="text-sm text-red-800 font-medium mb-2">
+                      ❌ Course Status: Rejected
+                    </p>
+                    <p className="text-sm text-red-700">
+                      Your course needs revisions before it can be approved.
+                      Please check the feedback and resubmit when ready.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Course Actions */}
+          <div className="space-y-6">
+            {/* Course Status Actions */}
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
+              <h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                <div className="p-2 bg-blue-100 rounded-lg mr-3">
+                  <FaPaperPlane className="text-blue-600" />
+                </div>
+                Course Status Actions
+              </h3>
+              <div className="bg-white rounded-lg p-6 border border-blue-200">
+                {/* Status Info */}
+                <div className=" p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="flex items-center">
+                    {course.status === "draft" && (
+                      <>
+                        <FaSave className="text-blue-600 mr-2" />
+                        <span className="text-sm text-blue-800">
+                          <strong>Draft Status:</strong> Complete your course
+                          content and submit when ready.
+                        </span>
+                      </>
+                    )}
+                    {course.status === "pending" && (
+                      <>
+                        <FaClock className="text-yellow-600 mr-2" />
+                        <span className="text-sm text-yellow-800">
+                          <strong>Pending Review:</strong> Your course is being
+                          reviewed by our admin team.
+                        </span>
+                      </>
+                    )}
+                    {course.status === "approved" && (
+                      <>
+                        <FaCheckCircle className="text-green-600 mr-2" />
+                        <span className="text-sm text-green-800">
+                          <strong>Approved:</strong> Your course is live and
+                          available to students.
+                        </span>
+                      </>
+                    )}
+                    {course.status === "rejected" && (
+                      <>
+                        <FaExclamationTriangle className="text-red-600 mr-2" />
+                        <span className="text-sm text-red-800">
+                          <strong>Rejected:</strong> Please review feedback and
+                          resubmit.
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-5">
+                  {/* Save as Draft */}
+                  {course.status === "pending" && onSaveAsDraft && (
+                    <div className="flex flex-col">
+                      <button
+                        onClick={onSaveAsDraft}
+                        className="flex items-center justify-center px-1 py-1 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 rounded-xl hover:from-gray-200 hover:to-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105 shadow-md cursor-pointer"
+                      >
+                        <FaSave className="mr-3 text-lg" />
+                        <div className="text-left">
+                          <div className="font-semibold">Save as Draft</div>
+                          <div className="text-sm opacity-75">
+                            Return to draft mode
+                          </div>
+                        </div>
+                      </button>
                     </div>
                   )}
+
+                  {/* Submit for Approval */}
+                  {(course.status === "draft" ||
+                    course.status === "rejected") &&
+                    onSubmitForApproval && (
+                      <div className="flex flex-col">
+                        <button
+                          onClick={onSubmitForApproval}
+                          className="flex items-center justify-center px-3 py-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105 shadow-lg cursor-pointer"
+                        >
+                          <FaPaperPlane className="mr-3 text-lg" />
+                          <div className="text-left">
+                            <div className="font-semibold">
+                              Submit for Approval
+                            </div>
+                            <div className="text-sm opacity-90">
+                              Send to admin review
+                            </div>
+                          </div>
+                        </button>
+                      </div>
+                    )}
                 </div>
+              </div>
+            </div>
+
+            {/* Danger Zone - Delete Course */}
+            <div className="bg-gradient-to-br from-red-50 to-pink-50 rounded-xl p-6 border border-red-100">
+              <h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                <div className="p-2 bg-red-100 rounded-lg mr-3">
+                  <FaExclamationTriangle className="text-red-600" />
+                </div>
+                Danger Zone
+              </h3>
+              <div className="bg-white rounded-lg p-6 border border-red-200">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                      Delete Course
+                    </h4>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Permanently delete this course and all its content. This
+                      action cannot be undone. All student progress,
+                      enrollments, and course data will be lost forever.
+                    </p>
+                    <div className="flex items-center p-3 bg-red-50 rounded-lg border border-red-200">
+                      <FaExclamationTriangle className="text-red-600 mr-2 flex-shrink-0" />
+                      <span className="text-sm text-red-800">
+                        <strong>Warning:</strong> This action is irreversible
+                        and will affect all enrolled students.
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                {onDelete && (
+                  <div className="mt-4 flex-shrink-0">
+                    <button
+                      onClick={onDelete}
+                      className="flex items-center px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105 shadow-lg cursor-pointer"
+                    >
+                      <FaTrashAlt className="mr-2" />
+                      Delete Course
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
+
+        {/* Save Settings Button */}
+        {onSave && (
+          <div className="flex justify-end pt-6 border-t border-gray-200">
+            <button
+              onClick={onSave}
+              disabled={!hasChanges || isSaving}
+              className="inline-flex items-center px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+            >
+              {isSaving ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <FaSave className="mr-2" />
+                  Save Settings
+                </>
+              )}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

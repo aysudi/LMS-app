@@ -23,6 +23,9 @@ import { enqueueSnackbar } from "notistack";
 interface CurriculumPanelProps {
   course: Course;
   onUpdate: (changes: Partial<Course>) => void;
+  onSave?: () => void;
+  isSaving?: boolean;
+  hasChanges?: boolean;
 }
 
 const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {

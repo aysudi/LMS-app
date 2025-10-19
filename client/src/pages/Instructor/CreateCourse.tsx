@@ -244,7 +244,8 @@ const CreateCourse = () => {
       }
     });
 
-    formDataToSend.append("isPublished", "true");
+    formDataToSend.append("isPublished", "false");
+    formDataToSend.append("status", "pending");
     createCourseMutation.mutate(formDataToSend);
   };
 
@@ -330,6 +331,7 @@ const CreateCourse = () => {
               });
 
               formDataToSend.append("isPublished", "false");
+              formDataToSend.append("status", "draft");
               createCourseMutation.mutate(formDataToSend);
             }}
             className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200 flex items-center space-x-2"
@@ -493,14 +495,13 @@ const CreateCourse = () => {
               </button>
             )}
             {/* Approval Process Note */}
-            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-sm text-blue-800">
-                <strong>📋 Approval Process:</strong> Your course will be
-                reviewed by our admin team to ensure quality standards. You'll
-                be notified once the review is complete, typically within 24-48
-                hours.
-              </p>
-            </div>
+          </div>
+          <div className="m-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-800">
+              <strong>📋 Approval Process:</strong> Your course will be reviewed
+              by our admin team to ensure quality standards. You'll be notified
+              once the review is complete, typically within 24-48 hours.
+            </p>
           </div>
         </div>
       </div>

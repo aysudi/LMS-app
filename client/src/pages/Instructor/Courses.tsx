@@ -5,10 +5,7 @@ import {
   useInstructorAnalytics,
   useInstructorCoursesWithStats,
 } from "../../hooks/useInstructor";
-import {
-  useDeleteCourse,
-  useToggleCourseStatus,
-} from "../../hooks/useCourseHooks";
+import { useDeleteCourse } from "../../hooks/useCourseHooks";
 import Loading from "../../components/Common/Loading";
 import { useToast } from "../../components/UI/ToastProvider";
 import { courseToasts } from "../../utils/toastUtils";
@@ -75,12 +72,6 @@ const InstructorCourses = () => {
     },
     onError: () => {
       showToast(courseToasts.deleteError());
-    },
-  });
-
-  const toggleStatusMutation = useToggleCourseStatus({
-    onError: () => {
-      showToast(courseToasts.statusToggleError());
     },
   });
 
@@ -176,40 +167,6 @@ const InstructorCourses = () => {
     }
   };
 
-  const handleToggleStatus = async (courseId: string) => {
-    const course = courses.find((c: any) => c._id === courseId);
-    const courseTitle = course?.title || "this course";
-    const currentStatus = course?.isPublished;
-    const action = currentStatus ? "unpublish" : "publish";
-
-    const result = await Swal.fire({
-      title: `${action.charAt(0).toUpperCase() + action.slice(1)} Course`,
-      html: `Are you sure you want to ${action} <strong>"${courseTitle}"</strong>?`,
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonColor: currentStatus ? "#F59E0B" : "#10B981",
-      cancelButtonColor: "#6B7280",
-      confirmButtonText: `Yes, ${
-        action.charAt(0).toUpperCase() + action.slice(1)
-      }`,
-      cancelButtonText: "Cancel",
-    });
-
-    if (result.isConfirmed) {
-      try {
-        await toggleStatusMutation.mutateAsync(courseId);
-
-        if (action === "publish") {
-          showToast(courseToasts.published(courseTitle));
-        } else {
-          showToast(courseToasts.unpublished(courseTitle));
-        }
-      } catch (error) {
-        console.error("Failed to toggle course status:", error);
-      }
-    }
-  };
-
   const handleSelectCourse = (courseId: string) => {
     setSelectedCourses((prev) =>
       prev.includes(courseId)
@@ -248,66 +205,6 @@ const InstructorCourses = () => {
         setSelectedCourses([]);
       } catch (error) {
         console.error("Failed to delete selected courses:", error);
-      }
-    }
-  };
-
-  const handleBulkPublish = async () => {
-    if (selectedCourses.length === 0) return;
-
-    const result = await Swal.fire({
-      title: "Publish Selected Courses",
-      html: `Are you sure you want to publish <strong>${selectedCourses.length} selected course(s)</strong>?`,
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonColor: "#10B981",
-      cancelButtonColor: "#6B7280",
-      confirmButtonText: `Yes, Publish ${selectedCourses.length} Course(s)`,
-      cancelButtonText: "Cancel",
-    });
-
-    if (result.isConfirmed) {
-      try {
-        for (const courseId of selectedCourses) {
-          const course = courses.find((c: any) => c._id === courseId);
-          if (course && !course.isPublished) {
-            await toggleStatusMutation.mutateAsync(courseId);
-          }
-        }
-        setSelectedCourses([]);
-        showToast(courseToasts.bulkPublished(selectedCourses.length));
-      } catch (error) {
-        console.error("Failed to publish selected courses:", error);
-      }
-    }
-  };
-
-  const handleBulkUnpublish = async () => {
-    if (selectedCourses.length === 0) return;
-
-    const result = await Swal.fire({
-      title: "Unpublish Selected Courses",
-      html: `Are you sure you want to unpublish <strong>${selectedCourses.length} selected course(s)</strong>?`,
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonColor: "#F59E0B",
-      cancelButtonColor: "#6B7280",
-      confirmButtonText: `Yes, Unpublish ${selectedCourses.length} Course(s)`,
-      cancelButtonText: "Cancel",
-    });
-
-    if (result.isConfirmed) {
-      try {
-        for (const courseId of selectedCourses) {
-          const course = courses.find((c: any) => c._id === courseId);
-          if (course && course.isPublished) {
-            await toggleStatusMutation.mutateAsync(courseId);
-          }
-        }
-        setSelectedCourses([]);
-        showToast(courseToasts.bulkUnpublished(selectedCourses.length));
-      } catch (error) {
-        console.error("Failed to unpublish selected courses:", error);
       }
     }
   };
@@ -371,8 +268,6 @@ const InstructorCourses = () => {
             averageRating={averageRating}
             selectedCourses={selectedCourses}
             onBulkDelete={handleBulkDelete}
-            onBulkPublish={handleBulkPublish}
-            onBulkUnpublish={handleBulkUnpublish}
           />
 
           {/* Filters */}
@@ -413,7 +308,6 @@ const InstructorCourses = () => {
               courses={courses}
               onEdit={handleEditCourse}
               onDelete={handleDeleteCourse}
-              onToggleStatus={handleToggleStatus}
               selectedCourses={selectedCourses}
               onSelectCourse={handleSelectCourse}
               onSelectAll={handleSelectAll}
