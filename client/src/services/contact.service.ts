@@ -11,7 +11,8 @@ import type {
 class ContactService {
   // Create a new contact message (public)
   async createContact(contactData: CreateContactData): Promise<ContactMessage> {
-    const response = await api.post("/contact", contactData);
+    const response = await api.post("/api/contact", contactData);
+    console.log("response data: ", response);
     return response.data;
   }
 
