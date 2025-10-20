@@ -1,4 +1,4 @@
-import sendEmail from "./sendMail";
+import { sendEmail } from "./sendMail";
 
 interface ContactNotificationData {
   adminEmail: string;
@@ -103,12 +103,7 @@ export const sendContactNotificationEmail = async (
     Phone: ${contactData.phone || "N/A"}    
     `;
 
-    await sendEmail.sendNotificationEmail(
-      adminEmail,
-      subject,
-      html,
-      textContext
-    );
+    await sendEmail(adminEmail, subject, html, textContext);
   } catch (error) {
     console.error("Failed to send contact notification email:", error);
     throw error;
@@ -180,8 +175,7 @@ export const sendContactReplyEmail = async (
         </body>
       </html>
     `;
-
-    await sendEmail.sendNotificationEmail(contactEmail, subject, html, subject);
+    await sendEmail(contactEmail, subject, html, subject);
   } catch (error) {
     console.error("Failed to send contact reply email:", error);
     throw error;

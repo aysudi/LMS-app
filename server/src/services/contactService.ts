@@ -48,7 +48,7 @@ export const getContacts = async (
   query: GetContactsQuery
 ): Promise<ContactsPaginationData> => {
   try {
-    const {
+    let {
       page = 1,
       limit = 10,
       search,
@@ -69,8 +69,14 @@ export const getContacts = async (
       ];
     }
 
-    if (typeof isReplied === "boolean") {
-      filter.isReplied = isReplied;
+    // Handle isReplied filter properly
+    if (isReplied !== undefined && isReplied !== null) {
+      // Convert string "true"/"false" to boolean, or keep boolean as is
+      if (typeof isReplied === "string") {
+        filter.isReplied = isReplied === "true";
+      } else if (typeof isReplied === "boolean") {
+        filter.isReplied = isReplied;
+      }
     }
 
     // Build sort object
@@ -85,6 +91,7 @@ export const getContacts = async (
       Contact.find(filter).sort(sort).skip(skip).limit(limit).lean(),
       Contact.countDocuments(filter),
     ]);
+    console.log("Retrieved contacts count:", contacts.length);
 
     const totalPages = Math.ceil(totalContacts / limit);
 
@@ -142,7 +149,7 @@ export const replyToContact = async (
     const updatedContact = await contact.save();
 
     // Send reply email to the contact person (non-blocking)
-    sendContactReplyEmail({
+    await sendContactReplyEmail({
       contactEmail: contact.email,
       contactName: contact.name,
       originalSubject: contact.subject,

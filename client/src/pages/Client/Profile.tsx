@@ -27,7 +27,9 @@ import {
   useUserEnrollments,
   useLearningStats,
 } from "../../hooks/useEnrollment";
+import { useLearningAnalytics } from "../../hooks/useUserProgress";
 import { toast } from "react-hot-toast";
+import { formatDistanceToNow } from "date-fns";
 
 const Profile: React.FC = () => {
   const { user } = useAuthContext();
@@ -38,10 +40,10 @@ const Profile: React.FC = () => {
 
   // Profile form state
   const [profileForm, setProfileForm] = useState({
-    firstName: "",
-    lastName: "",
-    username: "",
-    bio: "",
+    firstName: user?.firstName || "",
+    lastName: user?.lastName || "",
+    username: user?.username || "",
+    bio: user?.bio || "",
   });
 
   // Update form when user data changes
@@ -76,9 +78,266 @@ const Profile: React.FC = () => {
     limit: 50,
   });
   const { data: statsData } = useLearningStats();
+  const { data: analyticsData } = useLearningAnalytics();
 
   const enrolledCourses = enrollmentsData?.data?.enrollments || [];
   const stats = statsData?.data;
+  const analytics = analyticsData?.data;
+
+  // Create dynamic achievements based on user data
+  const achievements = React.useMemo(() => {
+    if (!stats || !analytics) return [];
+
+    const userAchievements = [];
+
+    // Course completion achievements
+    if (stats.totalCompletedCourses >= 1) {
+      userAchievements.push({
+        name: "First Steps",
+        description: "Complete your first course",
+        icon: "🎯",
+        rarity: "bronze" as const,
+        earned: "Course completed",
+        unlocked: true,
+      });
+    }
+
+    if (stats.totalCompletedCourses >= 5) {
+      userAchievements.push({
+        name: "Learning Enthusiast",
+        description: "Complete 5 courses",
+        icon: "📚",
+        rarity: "silver" as const,
+        earned: "5 courses completed",
+        unlocked: true,
+      });
+    }
+
+    if (stats.totalCompletedCourses >= 10) {
+      userAchievements.push({
+        name: "Course Master",
+        description: "Complete 10+ courses",
+        icon: "🏆",
+        rarity: "gold" as const,
+        earned: `${stats.totalCompletedCourses} courses completed`,
+        unlocked: true,
+      });
+    }
+
+    // Learning streak achievements
+    if (analytics.learningStreak >= 3) {
+      userAchievements.push({
+        name: "Consistent Learner",
+        description: "3-day learning streak",
+        icon: "🔥",
+        rarity: "bronze" as const,
+        earned: `${analytics.learningStreak} days streak`,
+        unlocked: true,
+      });
+    }
+
+    if (analytics.learningStreak >= 7) {
+      userAchievements.push({
+        name: "Week Warrior",
+        description: "7-day learning streak",
+        icon: "⚡",
+        rarity: "silver" as const,
+        earned: `${analytics.learningStreak} days streak`,
+        unlocked: true,
+      });
+    }
+
+    if (analytics.learningStreak >= 30) {
+      userAchievements.push({
+        name: "Monthly Master",
+        description: "30-day learning streak",
+        icon: "👑",
+        rarity: "gold" as const,
+        earned: `${analytics.learningStreak} days streak`,
+        unlocked: true,
+      });
+    }
+
+    // Watch time achievements
+    const totalHours = Math.floor(analytics.totalWatchTime / 3600);
+    if (totalHours >= 10) {
+      userAchievements.push({
+        name: "Dedicated Student",
+        description: "10+ hours of learning",
+        icon: "⏱️",
+        rarity: "bronze" as const,
+        earned: `${totalHours} hours watched`,
+        unlocked: true,
+      });
+    }
+
+    if (totalHours >= 50) {
+      userAchievements.push({
+        name: "Time Investor",
+        description: "50+ hours of learning",
+        icon: "⏰",
+        rarity: "silver" as const,
+        earned: `${totalHours} hours watched`,
+        unlocked: true,
+      });
+    }
+
+    if (totalHours >= 100) {
+      userAchievements.push({
+        name: "Learning Machine",
+        description: "100+ hours of learning",
+        icon: "🤖",
+        rarity: "gold" as const,
+        earned: `${totalHours} hours watched`,
+        unlocked: true,
+      });
+    }
+
+    // Certificate achievements
+    if (stats.certificatesEarned >= 1) {
+      userAchievements.push({
+        name: "Certified",
+        description: "Earn your first certificate",
+        icon: "📜",
+        rarity: "silver" as const,
+        earned: `${stats.certificatesEarned} certificates earned`,
+        unlocked: true,
+      });
+    }
+
+    if (stats.certificatesEarned >= 5) {
+      userAchievements.push({
+        name: "Certificate Collector",
+        description: "Earn 5 certificates",
+        icon: "🏅",
+        rarity: "gold" as const,
+        earned: `${stats.certificatesEarned} certificates earned`,
+        unlocked: true,
+      });
+    }
+
+    // Lessons completion achievements
+    if (analytics.totalLessonsCompleted >= 50) {
+      userAchievements.push({
+        name: "Lesson Master",
+        description: "Complete 50+ lessons",
+        icon: "🎓",
+        rarity: "silver" as const,
+        earned: `${analytics.totalLessonsCompleted} lessons completed`,
+        unlocked: true,
+      });
+    }
+
+    if (analytics.totalLessonsCompleted >= 100) {
+      userAchievements.push({
+        name: "Knowledge Seeker",
+        description: "Complete 100+ lessons",
+        icon: "🧠",
+        rarity: "gold" as const,
+        earned: `${analytics.totalLessonsCompleted} lessons completed`,
+        unlocked: true,
+      });
+    }
+
+    return userAchievements.sort((a, b) => {
+      const rarityOrder = { gold: 3, silver: 2, bronze: 1 };
+      return rarityOrder[b.rarity] - rarityOrder[a.rarity];
+    });
+  }, [stats, analytics]);
+
+  // Calculate next achievement progress
+  const nextAchievement = React.useMemo(() => {
+    if (!stats || !analytics) return null;
+
+    const currentCourses = stats.totalCompletedCourses;
+    const currentStreak = analytics.learningStreak;
+
+    // Course completion milestones
+    if (currentCourses < 1) {
+      return {
+        name: "First Steps",
+        description: "Complete your first course",
+        icon: "🎯",
+        progress: 0,
+        target: 1,
+        type: "courses",
+      };
+    } else if (currentCourses < 5) {
+      return {
+        name: "Learning Enthusiast",
+        description: "Complete 5 courses",
+        icon: "📚",
+        progress: currentCourses,
+        target: 5,
+        type: "courses",
+      };
+    } else if (currentCourses < 10) {
+      return {
+        name: "Course Master",
+        description: "Complete 10 courses",
+        icon: "🏆",
+        progress: currentCourses,
+        target: 10,
+        type: "courses",
+      };
+    } else if (currentCourses < 20) {
+      return {
+        name: "Marathon Learner",
+        description: "Complete 20 courses",
+        icon: "🏃",
+        progress: currentCourses,
+        target: 20,
+        type: "courses",
+      };
+    }
+
+    // Streak milestones if courses are maxed
+    if (currentStreak < 7) {
+      return {
+        name: "Week Warrior",
+        description: "Achieve 7-day learning streak",
+        icon: "⚡",
+        progress: currentStreak,
+        target: 7,
+        type: "streak",
+      };
+    } else if (currentStreak < 30) {
+      return {
+        name: "Monthly Master",
+        description: "Achieve 30-day learning streak",
+        icon: "👑",
+        progress: currentStreak,
+        target: 30,
+        type: "streak",
+      };
+    }
+
+    return null;
+  }, [stats, analytics]);
+
+  // Calculate user rank based on achievements and progress
+  const userRank = React.useMemo(() => {
+    if (!stats || !analytics) return "New Learner";
+
+    const totalCourses = stats.totalCompletedCourses;
+    const streak = analytics.learningStreak;
+    const certificates = stats.certificatesEarned;
+    const totalHours = Math.floor(analytics.totalWatchTime / 3600);
+
+    if (totalCourses >= 20 && streak >= 30 && certificates >= 10) {
+      return "Master Learner";
+    } else if (totalCourses >= 10 && (streak >= 14 || certificates >= 5)) {
+      return "Expert Learner";
+    } else if (totalCourses >= 5 && (streak >= 7 || certificates >= 2)) {
+      return "Advanced Learner";
+    } else if (totalCourses >= 2 || streak >= 3 || totalHours >= 10) {
+      return "Active Learner";
+    } else if (totalCourses >= 1 || analytics.totalLessonsCompleted >= 10) {
+      return "Beginner Learner";
+    }
+
+    return "New Learner";
+  }, [stats, analytics]);
 
   // Handle profile form changes
   const handleProfileChange = (
@@ -156,13 +415,21 @@ const Profile: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Hero Section - Professional & Elegant Design */}
-      <div className="relative bg-white border-b border-gray-200 overflow-hidden">
-        {/* Subtle Background Pattern */}
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-50/50 via-white to-indigo-50/30"></div>
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-purple-100/20 to-transparent rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-indigo-100/20 to-transparent rounded-full blur-3xl"></div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-purple-50/30">
+      {/* Hero Section - Enhanced Elegant Design */}
+      <div className="relative bg-gradient-to-r from-white via-purple-50/30 to-indigo-50/40 border-b border-gray-100 overflow-hidden">
+        {/* Enhanced Background Pattern */}
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(147,51,234,0.1),transparent_70%)] opacity-60"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(79,70,229,0.08),transparent_70%)]"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/40 to-transparent"></div>
+        </div>
+        <div className="absolute top-0 right-0 w-[600px] h-[400px] bg-gradient-to-bl from-purple-200/30 via-indigo-100/20 to-transparent rounded-full blur-3xl transform rotate-12"></div>
+        <div className="absolute bottom-0 left-0 w-[500px] h-[350px] bg-gradient-to-tr from-blue-200/25 via-purple-100/15 to-transparent rounded-full blur-3xl transform -rotate-12"></div>
+
+        {/* Decorative Elements */}
+        <div className="absolute top-10 left-10 w-32 h-32 bg-gradient-to-br from-purple-200/20 to-indigo-300/10 rounded-full blur-2xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-20 w-24 h-24 bg-gradient-to-br from-blue-200/15 to-purple-200/20 rounded-full blur-xl animate-pulse delay-1000"></div>
 
         {/* Main Content */}
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -174,27 +441,35 @@ const Profile: React.FC = () => {
               transition={{ duration: 0.6 }}
               className="flex-shrink-0 text-center lg:text-left"
             >
-              {/* Avatar */}
-              <div className="relative inline-block mb-4">
-                <div className="w-32 h-32 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 p-1 shadow-xl">
-                  <div className="w-full h-full rounded-xl bg-white flex items-center justify-center text-purple-600 text-4xl font-bold overflow-hidden">
+              {/* Enhanced Avatar */}
+              <div className="relative inline-block mb-6">
+                {/* Avatar Ring */}
+                <div className="w-36 h-36 rounded-3xl bg-gradient-to-br from-purple-400 via-purple-500 to-indigo-600 p-1 shadow-2xl ring-4 ring-white/50">
+                  <div className="w-full h-full rounded-[22px] bg-white flex items-center justify-center text-purple-600 text-4xl font-bold overflow-hidden relative">
                     {user.avatar ? (
                       <img
                         src={user.avatar}
                         alt={`${user.firstName} ${user.lastName}`}
-                        className="w-full h-full object-cover rounded-xl"
+                        className="w-full h-full object-cover rounded-[22px]"
                       />
                     ) : (
-                      user.avatarOrInitials
+                      <div className="w-full h-full bg-gradient-to-br from-purple-100 to-indigo-100 flex items-center justify-center text-purple-600">
+                        {user.avatarOrInitials}
+                      </div>
                     )}
                   </div>
                 </div>
 
-                {/* Camera Button */}
+                {/* Status Indicator */}
+                <div className="absolute -top-1 -right-1 w-8 h-8 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full border-4 border-white shadow-lg flex items-center justify-center">
+                  <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
+                </div>
+
+                {/* Enhanced Camera Button */}
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   disabled={updateAvatarMutation.isPending}
-                  className="absolute -bottom-2 -right-2 w-10 h-10 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white rounded-xl flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 cursor-pointer disabled:cursor-not-allowed"
+                  className="absolute -bottom-2 -right-2 w-12 h-12 bg-gradient-to-br from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 text-white rounded-2xl flex items-center justify-center shadow-xl transition-all duration-300 hover:scale-110 cursor-pointer disabled:cursor-not-allowed ring-4 ring-white/30"
                 >
                   <FaCamera className="text-sm" />
                 </button>
@@ -209,22 +484,38 @@ const Profile: React.FC = () => {
                 />
               </div>
 
-              {/* Basic User Info */}
-              <div className="mb-6">
-                <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
+              {/* Enhanced User Info */}
+              <div className="mb-8">
+                <h1 className="text-3xl lg:text-5xl font-bold bg-gradient-to-r from-gray-900 via-purple-900 to-indigo-900 bg-clip-text text-transparent mb-3 leading-tight">
                   {user.firstName} {user.lastName}
                 </h1>
-                <p className="text-lg text-gray-600 mb-3">@{user.username}</p>
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                  {user.role === "instructor" ? "Instructor" : "Student"}
+                <p className="text-xl text-gray-600 mb-4 font-medium">
+                  @{user.username}
+                </p>
+
+                {/* Enhanced Role Badge */}
+                <div className="inline-flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-purple-100 via-purple-50 to-indigo-100 border border-purple-200/50 text-purple-800 rounded-2xl text-sm font-semibold shadow-lg backdrop-blur-sm">
+                  <div className="w-3 h-3 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full animate-pulse shadow-md"></div>
+                  <span className="text-purple-700">
+                    {user.role === "instructor"
+                      ? "🎓 Instructor"
+                      : "📚 Student"}
+                  </span>
+                  {userRank && (
+                    <>
+                      <div className="w-1 h-4 bg-purple-300 rounded-full"></div>
+                      <span className="text-indigo-700 text-xs font-medium">
+                        {userRank}
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
 
-              {/* Edit Button */}
+              {/* Enhanced Edit Button */}
               <button
                 onClick={() => setIsEditing(!isEditing)}
-                className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl flex items-center gap-2 shadow-lg transition-all duration-300 hover:shadow-xl cursor-pointer mx-auto lg:mx-0"
+                className="px-8 py-4 bg-gradient-to-r from-purple-600 via-purple-700 to-indigo-600 hover:from-purple-700 hover:via-purple-800 hover:to-indigo-700 text-white font-semibold rounded-2xl flex items-center gap-3 shadow-xl transition-all duration-300 hover:shadow-2xl transform hover:scale-105 cursor-pointer mx-auto lg:mx-0 ring-2 ring-purple-200/50"
               >
                 <FaEdit className="text-sm" />
                 {isEditing ? "Cancel" : "Edit Profile"}
@@ -238,40 +529,63 @@ const Profile: React.FC = () => {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="flex-1 w-full"
             >
-              {/* Stats Cards */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200 hover:shadow-md transition-all duration-300 text-center">
-                  <div className="text-2xl font-bold text-purple-600 mb-1">
+              {/* Enhanced Stats Cards */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
+                  className="group bg-gradient-to-br from-white/90 via-white/80 to-purple-50/80 backdrop-blur-sm rounded-2xl p-5 border border-purple-100 hover:border-purple-200 hover:shadow-xl transition-all duration-500 text-center transform hover:scale-105 cursor-pointer"
+                >
+                  <div className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform duration-300">
                     {stats?.totalEnrolledCourses || 0}
                   </div>
-                  <div className="text-gray-600 text-sm font-medium">
+                  <div className="text-gray-600 text-sm font-semibold uppercase tracking-wide">
                     Courses
                   </div>
-                </div>
-                <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200 hover:shadow-md transition-all duration-300 text-center">
-                  <div className="text-2xl font-bold text-indigo-600 mb-1">
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.4 }}
+                  className="group bg-gradient-to-br from-white/90 via-white/80 to-indigo-50/80 backdrop-blur-sm rounded-2xl p-5 border border-indigo-100 hover:border-indigo-200 hover:shadow-xl transition-all duration-500 text-center transform hover:scale-105 cursor-pointer"
+                >
+                  <div className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform duration-300">
                     {stats?.averageProgress || 0}%
                   </div>
-                  <div className="text-gray-600 text-sm font-medium">
+                  <div className="text-gray-600 text-sm font-semibold uppercase tracking-wide">
                     Progress
                   </div>
-                </div>
-                <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200 hover:shadow-md transition-all duration-300 text-center">
-                  <div className="text-2xl font-bold text-emerald-600 mb-1">
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.5 }}
+                  className="group bg-gradient-to-br from-white/90 via-white/80 to-emerald-50/80 backdrop-blur-sm rounded-2xl p-5 border border-emerald-100 hover:border-emerald-200 hover:shadow-xl transition-all duration-500 text-center transform hover:scale-105 cursor-pointer"
+                >
+                  <div className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform duration-300">
                     {stats?.certificatesEarned || 0}
                   </div>
-                  <div className="text-gray-600 text-sm font-medium">
+                  <div className="text-gray-600 text-sm font-semibold uppercase tracking-wide">
                     Certificates
                   </div>
-                </div>
-                <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200 hover:shadow-md transition-all duration-300 text-center">
-                  <div className="text-2xl font-bold text-amber-600 mb-1">
-                    {Math.floor((stats?.totalWatchTime || 0) / 86400) || 0}d
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.6 }}
+                  className="group bg-gradient-to-br from-white/90 via-white/80 to-amber-50/80 backdrop-blur-sm rounded-2xl p-5 border border-amber-100 hover:border-amber-200 hover:shadow-xl transition-all duration-500 text-center transform hover:scale-105 cursor-pointer"
+                >
+                  <div className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform duration-300">
+                    {Math.floor((analytics?.totalWatchTime || 0) / 3600) || 0}h
                   </div>
-                  <div className="text-gray-600 text-sm font-medium">
-                    Watch Time
+                  <div className="text-gray-600 text-sm font-semibold uppercase tracking-wide">
+                    Hours
                   </div>
-                </div>
+                </motion.div>
               </div>
 
               {/* Meta Information */}
@@ -320,7 +634,7 @@ const Profile: React.FC = () => {
                     <div>
                       <div className="text-sm text-gray-500">Rank</div>
                       <div className="font-medium text-gray-900">
-                        Advanced Learner
+                        {userRank}
                       </div>
                     </div>
                   </div>
@@ -443,45 +757,69 @@ const Profile: React.FC = () => {
                             Recent Activity
                           </h3>
                           <div className="space-y-3">
-                            <div className="flex items-center justify-between p-3 bg-white rounded-lg">
-                              <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                                  <FaCheck className="text-green-600 text-sm" />
-                                </div>
-                                <span className="text-sm text-gray-900">
-                                  Course Completed
-                                </span>
+                            {stats?.recentActivity &&
+                            stats.recentActivity.length > 0 ? (
+                              stats.recentActivity
+                                .slice(0, 3)
+                                .map((enrollment: any, index: number) => (
+                                  <div
+                                    key={index}
+                                    className="flex items-center justify-between p-3 bg-white rounded-lg"
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <div
+                                        className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                                          enrollment.status === "completed"
+                                            ? "bg-green-100"
+                                            : enrollment.progressPercentage > 0
+                                            ? "bg-blue-100"
+                                            : "bg-purple-100"
+                                        }`}
+                                      >
+                                        {enrollment.status === "completed" ? (
+                                          <FaCheck className="text-green-600 text-sm" />
+                                        ) : enrollment.progressPercentage >
+                                          0 ? (
+                                          <FaChartLine className="text-blue-600 text-sm" />
+                                        ) : (
+                                          <FaGraduationCap className="text-purple-600 text-sm" />
+                                        )}
+                                      </div>
+                                      <div>
+                                        <span className="text-sm text-gray-900 block">
+                                          {enrollment.status === "completed"
+                                            ? "Course Completed"
+                                            : enrollment.progressPercentage > 0
+                                            ? "Course In Progress"
+                                            : "Course Started"}
+                                        </span>
+                                        <span className="text-xs text-gray-500">
+                                          {enrollment.course?.title || "Course"}
+                                        </span>
+                                      </div>
+                                    </div>
+                                    <span className="text-xs text-gray-500">
+                                      {formatDistanceToNow(
+                                        new Date(
+                                          enrollment.lastAccessedAt ||
+                                            enrollment.enrolledAt
+                                        ),
+                                        { addSuffix: true }
+                                      )}
+                                    </span>
+                                  </div>
+                                ))
+                            ) : (
+                              <div className="text-center py-4">
+                                <FaChartLine className="text-2xl text-gray-300 mx-auto mb-2" />
+                                <p className="text-sm text-gray-500">
+                                  No recent activity
+                                </p>
+                                <p className="text-xs text-gray-400">
+                                  Start learning to see your activity here!
+                                </p>
                               </div>
-                              <span className="text-xs text-gray-500">
-                                2 days ago
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between p-3 bg-white rounded-lg">
-                              <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
-                                  <FaTrophy className="text-indigo-600 text-sm" />
-                                </div>
-                                <span className="text-sm text-gray-900">
-                                  Achievement Earned
-                                </span>
-                              </div>
-                              <span className="text-xs text-gray-500">
-                                1 week ago
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between p-3 bg-white rounded-lg">
-                              <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                                  <FaGraduationCap className="text-purple-600 text-sm" />
-                                </div>
-                                <span className="text-sm text-gray-900">
-                                  New Course Started
-                                </span>
-                              </div>
-                              <span className="text-xs text-gray-500">
-                                2 weeks ago
-                              </span>
-                            </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -493,8 +831,8 @@ const Profile: React.FC = () => {
                           About Me
                         </h3>
                         <p className="text-gray-700 leading-relaxed">
-                          Welcome to my learning journey! I'm passionate about
-                          technology and continuous learning.
+                          {user.bio ||
+                            "Welcome to my learning journey! Add a bio to tell others about yourself, your interests, and your learning goals."}
                         </p>
                       </div>
                     </motion.div>
@@ -720,19 +1058,18 @@ const Profile: React.FC = () => {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                           <div className="text-center">
                             <div className="text-2xl font-bold text-yellow-600 mb-1">
-                              {(stats?.certificatesEarned || 0) +
-                                (stats?.totalCompletedCourses || 0)}
+                              {achievements.length}
                             </div>
                             <div className="text-gray-600 text-sm">
-                              Total Badges
+                              Achievements Unlocked
                             </div>
                           </div>
                           <div className="text-center">
                             <div className="text-2xl font-bold text-orange-600 mb-1">
-                              {stats?.totalInProgressCourses || 0}
+                              {analytics?.learningStreak || 0}
                             </div>
                             <div className="text-gray-600 text-sm">
-                              In Progress
+                              Day Streak
                             </div>
                           </div>
                           <div className="text-center">
@@ -745,10 +1082,13 @@ const Profile: React.FC = () => {
                           </div>
                           <div className="text-center">
                             <div className="text-2xl font-bold text-purple-600 mb-1">
-                              {stats?.averageProgress || 0}%
+                              {Math.floor(
+                                (analytics?.totalWatchTime || 0) / 3600
+                              )}
+                              h
                             </div>
                             <div className="text-gray-600 text-sm">
-                              Avg Progress
+                              Total Hours
                             </div>
                           </div>
                         </div>
@@ -760,123 +1100,110 @@ const Profile: React.FC = () => {
                           Recent Achievements
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {[
-                            {
-                              name: "Course Master",
-                              description: "Complete 10+ courses",
-                              icon: "🏆",
-                              rarity: "gold",
-                              earned: "2 days ago",
-                            },
-                            {
-                              name: "Week Warrior",
-                              description: "7-day learning streak",
-                              icon: "🔥",
-                              rarity: "silver",
-                              earned: "1 week ago",
-                            },
-                            {
-                              name: "Speed Learner",
-                              description: "Complete course in under 24h",
-                              icon: "⚡",
-                              rarity: "bronze",
-                              earned: "2 weeks ago",
-                            },
-                            {
-                              name: "Perfect Score",
-                              description: "100% on all quizzes",
-                              icon: "💯",
-                              rarity: "gold",
-                              earned: "3 weeks ago",
-                            },
-                            {
-                              name: "Early Bird",
-                              description: "Study before 8 AM",
-                              icon: "🌅",
-                              rarity: "bronze",
-                              earned: "1 month ago",
-                            },
-                            {
-                              name: "Knowledge Seeker",
-                              description: "Take 50+ quizzes",
-                              icon: "🧠",
-                              rarity: "silver",
-                              earned: "1 month ago",
-                            },
-                          ].map((achievement, index) => (
-                            <div
-                              key={index}
-                              className={`p-4 rounded-lg border-2 ${
-                                achievement.rarity === "gold"
-                                  ? "bg-yellow-50 border-yellow-300"
-                                  : achievement.rarity === "silver"
-                                  ? "bg-gray-50 border-gray-300"
-                                  : "bg-orange-50 border-orange-300"
-                              } hover:shadow-md transition-shadow`}
-                            >
-                              <div className="text-center">
-                                <div className="text-3xl mb-2">
-                                  {achievement.icon}
-                                </div>
-                                <h4 className="font-semibold text-gray-900 mb-1">
-                                  {achievement.name}
-                                </h4>
-                                <p className="text-sm text-gray-600 mb-2">
-                                  {achievement.description}
-                                </p>
-                                <span
-                                  className={`inline-block px-2 py-1 text-xs rounded-full ${
-                                    achievement.rarity === "gold"
-                                      ? "bg-yellow-200 text-yellow-800"
-                                      : achievement.rarity === "silver"
-                                      ? "bg-gray-200 text-gray-800"
-                                      : "bg-orange-200 text-orange-800"
-                                  }`}
-                                >
-                                  {achievement.rarity.toUpperCase()}
-                                </span>
-                                <div className="text-xs text-gray-500 mt-2">
-                                  Earned {achievement.earned}
+                          {achievements.length > 0 ? (
+                            achievements.map((achievement, index) => (
+                              <div
+                                key={index}
+                                className={`p-4 rounded-lg border-2 ${
+                                  achievement.rarity === "gold"
+                                    ? "bg-yellow-50 border-yellow-300"
+                                    : achievement.rarity === "silver"
+                                    ? "bg-gray-50 border-gray-300"
+                                    : "bg-orange-50 border-orange-300"
+                                } hover:shadow-md transition-shadow`}
+                              >
+                                <div className="text-center">
+                                  <div className="text-3xl mb-2">
+                                    {achievement.icon}
+                                  </div>
+                                  <h4 className="font-semibold text-gray-900 mb-1">
+                                    {achievement.name}
+                                  </h4>
+                                  <p className="text-sm text-gray-600 mb-2">
+                                    {achievement.description}
+                                  </p>
+                                  <span
+                                    className={`inline-block px-2 py-1 text-xs rounded-full ${
+                                      achievement.rarity === "gold"
+                                        ? "bg-yellow-200 text-yellow-800"
+                                        : achievement.rarity === "silver"
+                                        ? "bg-gray-200 text-gray-800"
+                                        : "bg-orange-200 text-orange-800"
+                                    }`}
+                                  >
+                                    {achievement.rarity.toUpperCase()}
+                                  </span>
+                                  <div className="text-xs text-gray-500 mt-2">
+                                    Earned {achievement.earned}
+                                  </div>
                                 </div>
                               </div>
+                            ))
+                          ) : (
+                            <div className="col-span-full text-center py-12">
+                              <FaTrophy className="text-4xl text-gray-300 mx-auto mb-4" />
+                              <p className="text-gray-500 mb-2">
+                                No achievements yet
+                              </p>
+                              <p className="text-sm text-gray-400">
+                                Complete courses and maintain learning streaks
+                                to unlock achievements!
+                              </p>
                             </div>
-                          ))}
+                          )}
                         </div>
                       </div>
 
                       {/* Progress Towards Next Achievement */}
-                      <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                          Next Achievement
-                        </h3>
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="text-2xl">🎯</div>
-                              <div>
-                                <h4 className="font-semibold text-gray-900">
-                                  Marathon Learner
-                                </h4>
-                                <p className="text-sm text-gray-600">
-                                  Complete 20 courses
-                                </p>
+                      {nextAchievement && (
+                        <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
+                          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                            Next Achievement
+                          </h3>
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className="text-2xl">
+                                  {nextAchievement.icon}
+                                </div>
+                                <div>
+                                  <h4 className="font-semibold text-gray-900">
+                                    {nextAchievement.name}
+                                  </h4>
+                                  <p className="text-sm text-gray-600">
+                                    {nextAchievement.description}
+                                  </p>
+                                </div>
                               </div>
+                              <span className="text-sm font-medium text-purple-600">
+                                {nextAchievement.progress}/
+                                {nextAchievement.target}
+                              </span>
                             </div>
-                            <span className="text-sm font-medium text-purple-600">
-                              12/20
-                            </span>
+                            <div className="w-full bg-purple-200 rounded-full h-3">
+                              <div
+                                className="bg-purple-600 h-3 rounded-full transition-all duration-300"
+                                style={{
+                                  width: `${Math.round(
+                                    (nextAchievement.progress /
+                                      nextAchievement.target) *
+                                      100
+                                  )}%`,
+                                }}
+                              ></div>
+                            </div>
+                            <p className="text-sm text-gray-600">
+                              {nextAchievement.target -
+                                nextAchievement.progress}{" "}
+                              more{" "}
+                              {nextAchievement.type === "courses"
+                                ? "courses"
+                                : "days"}{" "}
+                              to unlock this achievement!
+                            </p>
                           </div>
-                          <div className="w-full bg-purple-200 rounded-full h-3">
-                            <div
-                              className="bg-purple-600 h-3 rounded-full transition-all duration-300"
-                              style={{ width: "60%" }}
-                            ></div>
-                          </div>
-                          <p className="text-sm text-gray-600">
-                            8 more courses to unlock this achievement!
-                          </p>
                         </div>
-                      </div>
+                      )}
                     </motion.div>
                   )}
 
@@ -1264,11 +1591,15 @@ const Profile: React.FC = () => {
                 Learning Streak
               </h3>
               <div className="text-center">
-                <div className="text-3xl font-bold text-orange-500 mb-2">7</div>
+                <div className="text-3xl font-bold text-orange-500 mb-2">
+                  {analytics?.learningStreak || 0}
+                </div>
                 <p className="text-gray-600 text-sm">Days in a row</p>
                 <div className="mt-4 bg-orange-50 rounded-xl p-3">
                   <p className="text-orange-700 text-xs font-medium">
-                    Keep it up! You're on fire! 🔥
+                    {(analytics?.learningStreak || 0) > 0
+                      ? "Keep it up! You're on fire! 🔥"
+                      : "Start your learning streak today! 📚"}
                   </p>
                 </div>
               </div>
@@ -1281,32 +1612,48 @@ const Profile: React.FC = () => {
                 Recent Achievements
               </h3>
               <div className="space-y-3">
-                <div className="flex items-center gap-3 p-3 bg-yellow-50 rounded-xl">
-                  <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                    <FaTrophy className="text-yellow-600 text-sm" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      Course Master
+                {achievements.length > 0 ? (
+                  achievements.slice(0, 2).map((achievement, index) => (
+                    <div
+                      key={index}
+                      className={`flex items-center gap-3 p-3 rounded-xl ${
+                        achievement.rarity === "gold"
+                          ? "bg-yellow-50"
+                          : achievement.rarity === "silver"
+                          ? "bg-gray-50"
+                          : "bg-orange-50"
+                      }`}
+                    >
+                      <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                          achievement.rarity === "gold"
+                            ? "bg-yellow-100"
+                            : achievement.rarity === "silver"
+                            ? "bg-gray-100"
+                            : "bg-orange-100"
+                        }`}
+                      >
+                        <span className="text-sm">{achievement.icon}</span>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">
+                          {achievement.name}
+                        </p>
+                        <p className="text-xs text-gray-600">
+                          {achievement.description}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-4">
+                    <FaTrophy className="text-2xl text-gray-300 mx-auto mb-2" />
+                    <p className="text-sm text-gray-500">No achievements yet</p>
+                    <p className="text-xs text-gray-400">
+                      Complete courses to unlock achievements!
                     </p>
-                    <p className="text-xs text-gray-600">
-                      Completed 10 courses
-                    </p>
                   </div>
-                </div>
-                <div className="flex items-center gap-3 p-3 bg-indigo-50 rounded-xl">
-                  <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
-                    <FaFire className="text-indigo-600 text-sm" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      Week Warrior
-                    </p>
-                    <p className="text-xs text-gray-600">
-                      7-day learning streak
-                    </p>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           </div>

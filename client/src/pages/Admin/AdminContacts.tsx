@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FaEnvelope,
@@ -27,6 +27,7 @@ const AdminContacts: React.FC = () => {
   );
   const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
   const [replyMessage, setReplyMessage] = useState("");
+  const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<
     "all" | "replied" | "unreplied"
@@ -35,6 +36,16 @@ const AdminContacts: React.FC = () => {
 
   const { showToast } = useToast();
 
+  // Debounce search input
+  useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      setSearchTerm(searchInput);
+      setCurrentPage(1); // Reset to first page when searching
+    }, 500);
+
+    return () => clearTimeout(debounceTimer);
+  }, [searchInput]);
+
   const {
     data: contactsData,
     isLoading,
@@ -42,8 +53,13 @@ const AdminContacts: React.FC = () => {
   } = useContacts({
     page: currentPage,
     limit: 10,
-    search: searchTerm,
-    isReplied: filterStatus === "all" ? undefined : filterStatus === "replied",
+    search: searchTerm || undefined,
+    isReplied:
+      filterStatus === "replied"
+        ? true
+        : filterStatus === "unreplied"
+        ? false
+        : undefined,
   });
 
   const { replyToContact } = useContactMutations();
@@ -219,8 +235,8 @@ const AdminContacts: React.FC = () => {
             <input
               type="text"
               placeholder="Search contacts by name, email, or subject..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
@@ -228,7 +244,11 @@ const AdminContacts: React.FC = () => {
             <FaFilter className="text-gray-400" />
             <select
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value as any)}
+              onChange={(e) => {
+                setFilterStatus(() => {
+                  return e.target.value as any;
+                });
+              }}
               className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">All Messages</option>
