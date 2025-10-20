@@ -42,7 +42,6 @@ export const createMessage = async (messageData: CreateMessageData) => {
       messageType = "text",
     } = messageData;
 
-    // Verify enrollment: Check if the student is enrolled in the instructor's course
     const enrollment = await Enrollment.findOne({
       userId: senderId,
       courseId: courseId,
@@ -55,7 +54,6 @@ export const createMessage = async (messageData: CreateMessageData) => {
       throw new Error("Course not found");
     }
 
-    // Check if either sender or receiver is the course instructor
     const isValidConversation =
       senderId === receiverId
         ? false // Can't message yourself
@@ -66,7 +64,6 @@ export const createMessage = async (messageData: CreateMessageData) => {
       throw new Error("Invalid conversation participants");
     }
 
-    // If sender is student, check enrollment
     if (senderId !== course.instructor.toString()) {
       if (!enrollment) {
         throw new Error(
@@ -75,7 +72,6 @@ export const createMessage = async (messageData: CreateMessageData) => {
       }
     }
 
-    // Find or create conversation
     let conversation = await Conversation.findOne({
       $or: [
         {
@@ -102,7 +98,6 @@ export const createMessage = async (messageData: CreateMessageData) => {
       await conversation.save({ session });
     }
 
-    // Create the message
     const message = new Message({
       senderId,
       receiverId,
@@ -121,7 +116,6 @@ export const createMessage = async (messageData: CreateMessageData) => {
 
     await session.commitTransaction();
 
-    // Populate the message with sender details
     await message.populate([
       {
         path: "senderId",
@@ -147,7 +141,6 @@ export const getConversations = async (query: GetConversationsQuery) => {
   try {
     const { userId, page = 1, limit = 20, search, courseId } = query;
 
-    // Build filter
     const filter: any = {
       $or: [
         { "participants.student": userId },
@@ -160,7 +153,6 @@ export const getConversations = async (query: GetConversationsQuery) => {
       filter.courseId = courseId;
     }
 
-    // Build aggregation pipeline
     const pipeline: any[] = [
       { $match: filter },
       {
@@ -234,7 +226,6 @@ export const getConversations = async (query: GetConversationsQuery) => {
       },
     ];
 
-    // Add search filter if provided
     if (search) {
       pipeline.push({
         $match: {
@@ -269,21 +260,17 @@ export const getConversations = async (query: GetConversationsQuery) => {
       });
     }
 
-    // Add sorting
     pipeline.push({ $sort: { updatedAt: -1 } });
 
-    // Get total count
     const totalPipeline = [...pipeline, { $count: "total" }];
     const totalResult = await Conversation.aggregate(totalPipeline);
     const totalConversations = totalResult[0]?.total || 0;
 
-    // Add pagination
     const skip = (page - 1) * limit;
     pipeline.push({ $skip: skip }, { $limit: limit });
 
     const conversations = await Conversation.aggregate(pipeline);
 
-    // Calculate unread count for each conversation
     const conversationsWithUnread = await Promise.all(
       conversations.map(async (conv) => {
         const unreadCount = await Message.countDocuments({
@@ -337,7 +324,6 @@ export const getMessages = async (query: GetMessagesQuery) => {
 
     const skip = (page - 1) * limit;
 
-    // Get messages with pagination
     const [messages, totalMessages] = await Promise.all([
       Message.find({ conversationId })
         .populate("senderId", "firstName lastName email profilePicture")
