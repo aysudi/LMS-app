@@ -28,15 +28,15 @@ class ContactService {
     if (query?.sortOrder) params.append("sortOrder", query.sortOrder);
 
     const queryString = params.toString();
-    const url = queryString ? `/contact?${queryString}` : "/contact";
+    const url = queryString ? `/api/contact?${queryString}` : "/api/contact";
 
     const response = await api.get(url);
-    return response.data;
+    return response.data.data;
   }
 
   // Get a single contact message by ID (admin only)
   async getContactById(contactId: string): Promise<ContactMessage> {
-    const response = await api.get(`/contact/${contactId}`);
+    const response = await api.get(`/api/contact/${contactId}`);
     return response.data;
   }
 
@@ -45,18 +45,21 @@ class ContactService {
     contactId: string,
     replyData: ReplyContactData
   ): Promise<ContactMessage> {
-    const response = await api.post(`/contact/${contactId}/reply`, replyData);
+    const response = await api.post(
+      `/api/contact/${contactId}/reply`,
+      replyData
+    );
     return response.data;
   }
 
   // Delete a contact message (admin only)
   async deleteContact(contactId: string): Promise<void> {
-    await api.delete(`/contact/${contactId}`);
+    await api.delete(`/api/contact/${contactId}`);
   }
 
   // Get contact statistics (admin only)
   async getContactStats(): Promise<ContactStats> {
-    const response = await api.get("/contact/stats");
+    const response = await api.get("/api/contact/stats");
     return response.data;
   }
 }
