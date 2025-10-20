@@ -20,17 +20,20 @@ import {
   FaCheckCircle,
 } from "react-icons/fa";
 import Loading from "../../components/Common/Loading";
+import { useCreateContact } from "../../hooks/useContact";
+import type { CreateContactData } from "../../types/contact.type";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     subject: "",
-    category: "",
+    phone: "",
     message: "",
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const { createContact, isLoading: isSubmitting } = useCreateContact();
 
   const handleInputChange = (
     e: React.ChangeEvent<
@@ -43,23 +46,53 @@ const Contact = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
 
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    // Basic validation
+    if (
+      !formData.name.trim() ||
+      !formData.email.trim() ||
+      !formData.subject.trim() ||
+      !formData.message.trim()
+    ) {
+      alert("Please fill in all required fields.");
+      return;
+    }
 
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    setFormData({
-      name: "",
-      email: "",
-      subject: "",
-      category: "",
-      message: "",
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      alert("Please enter a valid email address.");
+      return;
+    }
+
+    // Prepare data for API
+    const contactData: CreateContactData = {
+      name: formData.name.trim(),
+      email: formData.email.trim().toLowerCase(),
+      subject: formData.subject.trim(),
+      message: formData.message.trim(),
+      phone: formData.phone.trim() || undefined,
+    };
+
+    createContact(contactData, {
+      onSuccess: () => {
+        setIsSubmitted(true);
+        setFormData({
+          name: "",
+          email: "",
+          subject: "",
+          phone: "",
+          message: "",
+        });
+
+        // Reset success message after 5 seconds
+        setTimeout(() => setIsSubmitted(false), 5000);
+      },
+      onError: (error) => {
+        console.error("Contact form submission error:", error);
+        alert("Failed to send message. Please try again.");
+      },
     });
-
-    // Reset success message after 5 seconds
-    setTimeout(() => setIsSubmitted(false), 5000);
   };
 
   const contactMethods = [
@@ -350,27 +383,20 @@ const Contact = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label
-                        htmlFor="category"
+                        htmlFor="phone"
                         className="block text-sm font-semibold text-gray-700 mb-2"
                       >
-                        Category *
+                        Phone Number (Optional)
                       </label>
-                      <select
-                        id="category"
-                        name="category"
-                        value={formData.category}
+                      <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        value={formData.phone}
                         onChange={handleInputChange}
-                        required
                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-300 bg-gray-50 focus:bg-white"
-                      >
-                        <option value="">Select a category</option>
-                        <option value="general">General Questions</option>
-                        <option value="course">Course Support</option>
-                        <option value="account">Account Issues</option>
-                        <option value="instructor">Become an Instructor</option>
-                        <option value="technical">Technical Support</option>
-                        <option value="billing">Billing & Payments</option>
-                      </select>
+                        placeholder="Your phone number"
+                      />
                     </div>
                     <div>
                       <label
