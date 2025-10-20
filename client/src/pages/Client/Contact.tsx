@@ -76,6 +76,7 @@ const Contact = () => {
 
     createContact(contactData, {
       onSuccess: () => {
+        console.log("contact data: ", contactData);
         setIsSubmitted(true);
         setFormData({
           name: "",
