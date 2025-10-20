@@ -59,17 +59,14 @@ export const useMessageMutations = () => {
     onSuccess: (data) => {
       toast.success("Message sent successfully!");
 
-      // Invalidate conversations to update last message
       queryClient.invalidateQueries({
         queryKey: messageKeys.conversations(),
       });
 
-      // Invalidate messages for this conversation
       queryClient.invalidateQueries({
         queryKey: messageKeys.conversationMessages(data.conversationId),
       });
 
-      // Update conversation detail if cached
       queryClient.invalidateQueries({
         queryKey: messageKeys.conversationDetail(data.conversationId),
       });
@@ -85,12 +82,10 @@ export const useMessageMutations = () => {
   const markAsRead = useMutation({
     mutationFn: messageService.markMessagesAsRead,
     onSuccess: (_, conversationId) => {
-      // Update the conversations list to reflect read status
       queryClient.invalidateQueries({
         queryKey: messageKeys.conversations(),
       });
 
-      // Update messages for this conversation
       queryClient.invalidateQueries({
         queryKey: messageKeys.conversationMessages(conversationId),
       });
@@ -105,7 +100,6 @@ export const useMessageMutations = () => {
     onSuccess: () => {
       toast.success("Conversation deleted successfully");
 
-      // Invalidate all conversation-related queries
       queryClient.invalidateQueries({ queryKey: messageKeys.conversations() });
     },
     onError: (error: any) => {

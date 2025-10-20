@@ -1,7 +1,6 @@
 import Message from "../models/Message";
 import Conversation from "../models/Conversation";
 import Enrollment from "../models/Enrollment";
-import User from "../models/User";
 import Course from "../models/Course";
 import mongoose from "mongoose";
 
