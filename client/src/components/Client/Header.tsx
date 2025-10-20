@@ -25,6 +25,7 @@ import {
   FaTrash,
   FaBookmark,
   FaStar,
+  FaComments,
 } from "react-icons/fa";
 import { useAuthContext } from "../../context/AuthContext";
 import { useLogout } from "../../hooks/useAuth";
@@ -591,6 +592,23 @@ const Header: React.FC = () => {
                         {cartCount > 9 ? "9+" : cartCount}
                       </span>
                     )}
+                  </motion.button>
+
+                  {/* Messages */}
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => navigate("/messages")}
+                    className="relative p-2 text-gray-700 hover:text-blue-600 transition-colors duration-200 group cursor-pointer"
+                    title="Messages"
+                  >
+                    <FaComments className="text-lg" />
+                    {/* Unread messages count - you can add this later */}
+                    {/* {unreadMessagesCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
+                        {unreadMessagesCount > 9 ? "9+" : unreadMessagesCount}
+                      </span>
+                    )} */}
                   </motion.button>
 
                   {/* My Learnings - Hidden on lg, shown on xl */}

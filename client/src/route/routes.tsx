@@ -47,6 +47,7 @@ import AdminAnalytics from "../pages/Admin/AdminAnalytics";
 import AdminCertificates from "../pages/Admin/AdminCertificates";
 import AdminContacts from "../pages/Admin/AdminContacts";
 import Contact from "../pages/Client/Contact";
+import Messages from "../pages/Client/Messages";
 
 const ROUTES = [
   //client routes
@@ -121,6 +122,14 @@ const ROUTES = [
       {
         path: "contact",
         element: <Contact />,
+      },
+      {
+        path: "messages",
+        element: (
+          <ProtectedRoute>
+            <Messages />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "become-instructor",
