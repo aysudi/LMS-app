@@ -6,7 +6,6 @@ import {
   FaSearch,
   FaFilter,
   FaReply,
-  FaTrash,
   FaEye,
   FaTimes,
   FaUser,
@@ -19,6 +18,7 @@ import {
 import { useContacts, useContactMutations } from "../../hooks/useContact";
 import Loading from "../../components/Common/Loading";
 import { formatDistanceToNow } from "date-fns";
+import { useToast } from "../../components/UI/ToastProvider";
 import type { ContactMessage } from "../../types/contact.type";
 
 const AdminContacts: React.FC = () => {
@@ -33,6 +33,8 @@ const AdminContacts: React.FC = () => {
   >("all");
   const [currentPage, setCurrentPage] = useState(1);
 
+  const { showToast } = useToast();
+
   const {
     data: contactsData,
     isLoading,
@@ -44,8 +46,9 @@ const AdminContacts: React.FC = () => {
     isReplied: filterStatus === "all" ? undefined : filterStatus === "replied",
   });
 
-  const { replyToContact, deleteContact } = useContactMutations();
+  const { replyToContact } = useContactMutations();
 
+  if (!contactsData) return null;
   const contacts = contactsData?.contacts || [];
   const pagination = contactsData?.pagination;
 
@@ -59,25 +62,36 @@ const AdminContacts: React.FC = () => {
       },
       {
         onSuccess: () => {
-          setIsReplyModalOpen(false);
-          setReplyMessage("");
-          setSelectedContact(null);
+          showToast({
+            title: "Reply Sent Successfully!",
+            message: `Your reply has been sent to ${selectedContact.name} at ${selectedContact.email}`,
+            type: "success",
+          });
+          closeReplyModal();
+        },
+        onError: (error: any) => {
+          showToast({
+            title: "Failed to Send Reply",
+            message: error.message || "Please try again later.",
+            type: "error",
+          });
         },
       }
     );
   };
 
-  const handleDeleteContact = (contactId: string) => {
-    if (
-      window.confirm("Are you sure you want to delete this contact message?")
-    ) {
-      deleteContact.mutate(contactId);
-    }
-  };
-
   const openReplyModal = (contact: ContactMessage) => {
     setSelectedContact(contact);
     setIsReplyModalOpen(true);
+  };
+
+  const closeReplyModal = () => {
+    setIsReplyModalOpen(false);
+    setReplyMessage("");
+  };
+
+  const closeDetailsModal = () => {
+    setSelectedContact(null);
   };
 
   const getStatusColor = (isReplied: boolean) => {
@@ -104,13 +118,29 @@ const AdminContacts: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Contact Messages</h1>
-          <p className="text-gray-600 mt-1">
-            Manage and respond to user inquiries
-          </p>
+      <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 rounded-3xl p-8 text-white shadow-2xl">
+        <div className="absolute inset-0 bg-black/20"></div>
+        <div className="relative z-10">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
+                Contact Messages
+              </h1>
+              <p className="text-blue-200 mt-2 text-lg">
+                Manage and respond to user inquiries with elegance
+              </p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="p-3 bg-white/10 backdrop-blur-sm rounded-full">
+                <FaEnvelope className="text-2xl text-white" />
+              </div>
+            </div>
+          </div>
         </div>
+
+        {/* Decorative elements */}
+        <div className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-blue-400/20 to-indigo-500/20 rounded-full blur-xl"></div>
+        <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-gradient-to-br from-indigo-400/20 to-purple-500/20 rounded-full blur-xl"></div>
       </div>
 
       {/* Stats Cards */}
@@ -118,19 +148,20 @@ const AdminContacts: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
+          className="relative overflow-hidden bg-white rounded-2xl p-6 shadow-xl border border-gray-100/50 backdrop-blur-sm"
         >
-          <div className="flex items-center justify-between">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-indigo-50/50"></div>
+          <div className="relative z-10 flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">
+              <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">
                 Total Messages
               </p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-3xl font-bold text-gray-900 mt-2">
                 {pagination?.totalContacts || 0}
               </p>
             </div>
-            <div className="p-3 bg-blue-100 rounded-xl">
-              <FaEnvelope className="text-blue-600 text-xl" />
+            <div className="p-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg">
+              <FaEnvelope className="text-white text-2xl" />
             </div>
           </div>
         </motion.div>
@@ -139,17 +170,20 @@ const AdminContacts: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
+          className="relative overflow-hidden bg-white rounded-2xl p-6 shadow-xl border border-gray-100/50 backdrop-blur-sm"
         >
-          <div className="flex items-center justify-between">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/50 to-green-50/50"></div>
+          <div className="relative z-10 flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Replied</p>
-              <p className="text-2xl font-bold text-emerald-600">
+              <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">
+                Replied
+              </p>
+              <p className="text-3xl font-bold text-emerald-600 mt-2">
                 {contacts.filter((c) => c.isReplied).length}
               </p>
             </div>
-            <div className="p-3 bg-emerald-100 rounded-xl">
-              <FaCheck className="text-emerald-600 text-xl" />
+            <div className="p-4 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl shadow-lg">
+              <FaCheck className="text-white text-2xl" />
             </div>
           </div>
         </motion.div>
@@ -158,17 +192,20 @@ const AdminContacts: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
+          className="relative overflow-hidden bg-white rounded-2xl p-6 shadow-xl border border-gray-100/50 backdrop-blur-sm"
         >
-          <div className="flex items-center justify-between">
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-50/50 to-orange-50/50"></div>
+          <div className="relative z-10 flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Pending</p>
-              <p className="text-2xl font-bold text-amber-600">
+              <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">
+                Pending
+              </p>
+              <p className="text-3xl font-bold text-amber-600 mt-2">
                 {contacts.filter((c) => !c.isReplied).length}
               </p>
             </div>
-            <div className="p-3 bg-amber-100 rounded-xl">
-              <FaClock className="text-amber-600 text-xl" />
+            <div className="p-4 bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl shadow-lg">
+              <FaClock className="text-white text-2xl" />
             </div>
           </div>
         </motion.div>
@@ -302,7 +339,7 @@ const AdminContacts: React.FC = () => {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => setSelectedContact(contact)}
-                        className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-colors duration-200"
+                        className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-colors duration-200 cursor-pointer"
                         title="View Details"
                       >
                         <FaEye />
@@ -313,23 +350,12 @@ const AdminContacts: React.FC = () => {
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                           onClick={() => openReplyModal(contact)}
-                          className="p-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-600 rounded-lg transition-colors duration-200"
+                          className="p-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-600 rounded-lg transition-colors duration-200 cursor-pointer"
                           title="Reply"
                         >
                           <FaReply />
                         </motion.button>
                       )}
-
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => handleDeleteContact(contact._id)}
-                        className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-colors duration-200"
-                        title="Delete"
-                        disabled={deleteContact.isLoading}
-                      >
-                        <FaTrash />
-                      </motion.button>
                     </div>
                   </div>
                 </motion.div>
@@ -370,8 +396,8 @@ const AdminContacts: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-            onClick={() => setSelectedContact(null)}
+            className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+            onClick={closeDetailsModal}
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
@@ -385,8 +411,8 @@ const AdminContacts: React.FC = () => {
                   Contact Details
                 </h2>
                 <button
-                  onClick={() => setSelectedContact(null)}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+                  onClick={closeDetailsModal}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200 cursor-pointer"
                 >
                   <FaTimes className="text-gray-500" />
                 </button>
@@ -474,20 +500,12 @@ const AdminContacts: React.FC = () => {
                   {!selectedContact.isReplied && (
                     <button
                       onClick={() => openReplyModal(selectedContact)}
-                      className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors duration-200"
+                      className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors duration-200 cursor-pointer"
                     >
                       <FaReply />
                       Reply
                     </button>
                   )}
-                  <button
-                    onClick={() => handleDeleteContact(selectedContact._id)}
-                    className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200"
-                    disabled={deleteContact.isLoading}
-                  >
-                    <FaTrash />
-                    Delete
-                  </button>
                 </div>
               </div>
             </motion.div>
@@ -502,8 +520,8 @@ const AdminContacts: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-            onClick={() => setIsReplyModalOpen(false)}
+            className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+            onClick={closeReplyModal}
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
@@ -517,8 +535,8 @@ const AdminContacts: React.FC = () => {
                   Reply to {selectedContact.name}
                 </h2>
                 <button
-                  onClick={() => setIsReplyModalOpen(false)}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+                  onClick={closeReplyModal}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200 cursor-pointer"
                 >
                   <FaTimes className="text-gray-500" />
                 </button>
@@ -552,7 +570,7 @@ const AdminContacts: React.FC = () => {
                   <button
                     onClick={handleReplySubmit}
                     disabled={!replyMessage.trim() || replyToContact.isLoading}
-                    className="flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-400 text-white rounded-lg transition-colors duration-200"
+                    className="flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-400 text-white rounded-lg transition-colors duration-200 cursor-pointer disabled:cursor-not-allowed"
                   >
                     {replyToContact.isLoading ? (
                       <>
@@ -567,8 +585,8 @@ const AdminContacts: React.FC = () => {
                     )}
                   </button>
                   <button
-                    onClick={() => setIsReplyModalOpen(false)}
-                    className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+                    onClick={closeReplyModal}
+                    className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
                   >
                     Cancel
                   </button>
