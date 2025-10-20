@@ -9,7 +9,6 @@ import Register from "../pages/Auth/Register";
 import ResetPassword from "../pages/Auth/ResetPassword";
 import VerifyEmail from "../pages/Auth/VerifyEmail";
 import About from "../pages/Client/About";
-import Contact from "../pages/Client/Contact";
 import BecomeInstructor from "../pages/Client/BecomeInstructor";
 import InstructorApplicationForm from "../pages/Client/InstructorApplicationForm";
 import InstructorApplicationSuccess from "../pages/Client/InstructorApplicationSuccess";
@@ -46,6 +45,7 @@ import AdminCourses from "../pages/Admin/AdminCourses";
 import AdminCourseReview from "../pages/Admin/AdminCourseReview";
 import AdminAnalytics from "../pages/Admin/AdminAnalytics";
 import AdminCertificates from "../pages/Admin/AdminCertificates";
+import Contact from "../pages/Client/Contact";
 
 const ROUTES = [
   //client routes
