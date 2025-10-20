@@ -38,7 +38,6 @@ const messageSchema = new mongoose.Schema(
   }
 );
 
-// Indexes for performance
 messageSchema.index({ conversationId: 1, createdAt: -1 });
 messageSchema.index({ senderId: 1 });
 messageSchema.index({ receiverId: 1 });
