@@ -16,8 +16,8 @@ export const createContact = async (contactData: CreateContactData) => {
     const contact = new Contact(contactData);
     const savedContact = await contact.save();
 
-    // Send notification email to admin
-    await sendContactNotificationEmail({
+    // Send notification email to admin (non-blocking)
+    sendContactNotificationEmail({
       adminEmail: process.env.GMAIL_USER!,
       contactData: {
         name: contactData.name,
@@ -26,6 +26,11 @@ export const createContact = async (contactData: CreateContactData) => {
         message: contactData.message,
         phone: contactData.phone,
       },
+    }).catch((error) => {
+      console.error(
+        "Failed to send contact notification email:",
+        error.message
+      );
     });
 
     return savedContact;
@@ -136,13 +141,15 @@ export const replyToContact = async (
 
     const updatedContact = await contact.save();
 
-    // Send reply email to the contact person
-    await sendContactReplyEmail({
+    // Send reply email to the contact person (non-blocking)
+    sendContactReplyEmail({
       contactEmail: contact.email,
       contactName: contact.name,
       originalSubject: contact.subject,
       originalMessage: contact.message,
       replyMessage: replyData.replyMessage,
+    }).catch((error) => {
+      console.error("Failed to send contact reply email:", error.message);
     });
 
     return updatedContact;
