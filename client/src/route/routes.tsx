@@ -45,6 +45,7 @@ import AdminCourses from "../pages/Admin/AdminCourses";
 import AdminCourseReview from "../pages/Admin/AdminCourseReview";
 import AdminAnalytics from "../pages/Admin/AdminAnalytics";
 import AdminCertificates from "../pages/Admin/AdminCertificates";
+import AdminContacts from "../pages/Admin/AdminContacts";
 import Contact from "../pages/Client/Contact";
 
 const ROUTES = [
@@ -284,6 +285,10 @@ const ROUTES = [
       {
         path: "certificates",
         element: <AdminCertificates />,
+      },
+      {
+        path: "contacts",
+        element: <AdminContacts />,
       },
     ],
   },

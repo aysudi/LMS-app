@@ -54,10 +54,10 @@ const sidebarItems = [
     path: "/admin/certificates",
   },
   {
-    id: "communications",
-    label: "Communications",
+    id: "contacts",
+    label: "Contact Messages",
     icon: FaEnvelope,
-    path: "/admin/communications",
+    path: "/admin/contacts",
   },
   {
     id: "settings",

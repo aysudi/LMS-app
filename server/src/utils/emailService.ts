@@ -93,7 +93,22 @@ export const sendContactNotificationEmail = async (
       </html>
     `;
 
-    await sendEmail.sendNotificationEmail(adminEmail, subject, html, subject);
+    const textContext = `
+    New contact message received:
+    
+    Name: ${contactData.name}
+    Email: ${contactData.email}
+    Subject: ${contactData.subject}
+    Message: ${contactData.message}
+    Phone: ${contactData.phone || "N/A"}    
+    `;
+
+    await sendEmail.sendNotificationEmail(
+      adminEmail,
+      subject,
+      html,
+      textContext
+    );
   } catch (error) {
     console.error("Failed to send contact notification email:", error);
     throw error;

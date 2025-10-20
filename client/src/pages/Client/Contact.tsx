@@ -76,7 +76,6 @@ const Contact = () => {
 
     createContact(contactData, {
       onSuccess: () => {
-        console.log("contact data: ", contactData);
         setIsSubmitted(true);
         setFormData({
           name: "",
@@ -91,7 +90,7 @@ const Contact = () => {
       },
       onError: (error) => {
         console.error("Contact form submission error:", error);
-        alert("Failed to send message. Please try again.");
+        // alert("Failed to send message. Please try again.");
       },
     });
   };
