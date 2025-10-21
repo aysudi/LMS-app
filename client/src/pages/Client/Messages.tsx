@@ -24,20 +24,26 @@ import {
   useConversations,
   useMessages,
   useMessageMutations,
+  useConversationMutations,
 } from "../../hooks/useMessages";
 import { useUserEnrollments } from "../../hooks/useEnrollment";
+import { useSocket } from "../../hooks/useSocket";
 import Loading from "../../components/Common/Loading";
 import { format, isToday, isYesterday } from "date-fns";
-import type {
-  Conversation,
-  Message,
-  CreateMessageData,
-} from "../../types/message.type";
+import type { Message, CreateMessageData } from "../../types/message.type";
 
 const Messages: React.FC = () => {
   const { user } = useAuthContext();
-  const [selectedConversation, setSelectedConversation] =
-    useState<Conversation | null>(null);
+  const {
+    joinConversation,
+    leaveConversation,
+    startTyping,
+    stopTyping,
+    getTypingUsers,
+    isUserOnline,
+  } = useSocket();
+
+  const [selectedConversation, setSelectedConversation] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [messageInput, setMessageInput] = useState("");
   const [showNewMessageModal, setShowNewMessageModal] = useState(false);
@@ -51,7 +57,7 @@ const Messages: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout>();
+  const typingTimeoutRef = useRef<NodeJS.Timeout>(null);
 
   // Fetch conversations and messages
   const {
@@ -71,10 +77,30 @@ const Messages: React.FC = () => {
   });
 
   const { data: enrollments } = useUserEnrollments();
-  const { sendMessage, markAsRead, deleteConversation } = useMessageMutations();
+  const { sendMessage } = useMessageMutations();
+  const { markAsRead, deleteConversation } = useConversationMutations();
 
-  const conversations = conversationsData?.conversations || [];
-  const messages = messagesData?.messages || [];
+  const conversations = conversationsData?.data?.conversations || [];
+  const messages = messagesData?.data?.messages || [];
+
+  // Socket.IO conversation management
+  useEffect(() => {
+    if (conversations.length > 0) {
+      const conversationIds = conversations.map((conv: any) => conv._id);
+      joinConversation(conversationIds.join(","));
+    }
+  }, [conversations, joinConversation]);
+
+  // Join/leave conversation on selection
+  useEffect(() => {
+    if (selectedConversation) {
+      joinConversation(selectedConversation._id);
+
+      return () => {
+        leaveConversation(selectedConversation._id);
+      };
+    }
+  }, [selectedConversation, joinConversation, leaveConversation]);
 
   // Check for mobile view
   useEffect(() => {
@@ -126,7 +152,7 @@ const Messages: React.FC = () => {
   }, [refetchConversations, refetchMessages, selectedConversation]);
 
   const handleSendMessage = useCallback(() => {
-    if (!messageInput.trim() || !selectedConversation || sendMessage.isLoading)
+    if (!messageInput.trim() || !selectedConversation || sendMessage.isPending)
       return;
 
     const otherParticipant =
@@ -165,26 +191,35 @@ const Messages: React.FC = () => {
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       setMessageInput(e.target.value);
 
-      // Show typing indicator
-      if (!isTyping) {
-        setIsTyping(true);
-      }
+      // Start typing indicator via socket
+      if (selectedConversation && e.target.value.trim()) {
+        if (!isTyping) {
+          setIsTyping(true);
+          startTyping(selectedConversation._id);
+        }
 
-      // Clear existing timeout
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
-      }
+        // Clear existing timeout
+        if (typingTimeoutRef.current) {
+          clearTimeout(typingTimeoutRef.current);
+        }
 
-      // Set new timeout to hide typing indicator
-      typingTimeoutRef.current = setTimeout(() => {
+        // Set new timeout to stop typing indicator
+        typingTimeoutRef.current = setTimeout(() => {
+          setIsTyping(false);
+          stopTyping(selectedConversation._id);
+        }, 2000);
+      } else if (isTyping) {
         setIsTyping(false);
-      }, 2000);
+        if (selectedConversation) {
+          stopTyping(selectedConversation._id);
+        }
+      }
     },
-    [isTyping]
+    [isTyping, selectedConversation, startTyping, stopTyping]
   );
 
   const getOtherParticipant = useCallback(
-    (conversation: Conversation) => {
+    (conversation: any) => {
       return conversation.participants.student._id === user?.id
         ? conversation.participants.instructor
         : conversation.participants.student;
@@ -211,7 +246,7 @@ const Messages: React.FC = () => {
   }, []);
 
   const handleConversationSelect = useCallback(
-    (conversation: Conversation) => {
+    (conversation: any) => {
       setSelectedConversation(conversation);
       setShowConversationMenu(null);
       if (isMobileView) {
@@ -351,8 +386,10 @@ const Messages: React.FC = () => {
                           <FaUser className="text-lg" />
                         )}
                       </div>
-                      {/* Online indicator */}
-                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
+                      {/* Online indicator - use Socket.IO data */}
+                      {isUserOnline(otherParticipant._id) && (
+                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
+                      )}
                     </div>
 
                     <div className="flex-1 min-w-0">
@@ -505,7 +542,12 @@ const Messages: React.FC = () => {
                       <FaUser />
                     )}
                   </div>
-                  <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+                  {/* Online indicator with Socket.IO data */}
+                  {isUserOnline(
+                    getOtherParticipant(selectedConversation)._id
+                  ) && (
+                    <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+                  )}
                 </div>
 
                 <div>
@@ -612,7 +654,40 @@ const Messages: React.FC = () => {
                   );
                 })}
 
-                {/* Typing indicator */}
+                {/* Real-time typing indicator from Socket.IO */}
+                {selectedConversation &&
+                  getTypingUsers(selectedConversation._id).length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex justify-start"
+                    >
+                      <div className="bg-gray-200 rounded-2xl rounded-bl-md px-4 py-3">
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <div className="flex space-x-1">
+                            <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
+                            <div
+                              className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"
+                              style={{ animationDelay: "0.1s" }}
+                            ></div>
+                            <div
+                              className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"
+                              style={{ animationDelay: "0.2s" }}
+                            ></div>
+                          </div>
+                          <span>
+                            {
+                              getTypingUsers(selectedConversation._id)[0]
+                                ?.username
+                            }{" "}
+                            is typing...
+                          </span>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                {/* Local typing indicator */}
                 {isTyping && (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
@@ -675,11 +750,11 @@ const Messages: React.FC = () => {
               {/* Send button */}
               <button
                 onClick={handleSendMessage}
-                disabled={!messageInput.trim() || sendMessage.isLoading}
+                disabled={!messageInput.trim() || sendMessage.isPending}
                 className="p-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-xl transition-all duration-200 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
                 title="Send message"
               >
-                {sendMessage.isLoading ? (
+                {sendMessage.isPending ? (
                   <FaSpinner className="animate-spin" />
                 ) : (
                   <FaPaperPlane />

@@ -29,6 +29,7 @@ import certificateRouter from "./routes/certificateRoutes.js";
 import announcementRouter from "./routes/announcementRoutes.js";
 import contactRouter from "./routes/contactRoutes.js";
 import messageRouter from "./routes/messageRoutes.js";
+import conversationRouter from "./routes/conversationRoutes.js";
 
 const app = express();
 
@@ -88,6 +89,7 @@ app.use("/api/certificates", certificateRouter);
 app.use("/api/announcements", announcementRouter);
 app.use("/api/contact", contactRouter);
 app.use("/api/messages", messageRouter);
+app.use("/api/conversations", conversationRouter);
 
 // 404 handler
 app.use(notFoundHandler);

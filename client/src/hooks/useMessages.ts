@@ -1,129 +1,251 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
+import { conversationService } from "../services/conversation.service";
 import { messageService } from "../services/message.service";
 import type {
-  GetConversationsQuery,
+  Message,
+  CreateMessageData,
   GetMessagesQuery,
 } from "../types/message.type";
 
-// Query keys for caching
-export const messageKeys = {
-  all: ["messages"] as const,
-  conversations: () => [...messageKeys.all, "conversations"] as const,
-  conversation: (params: GetConversationsQuery) =>
-    [...messageKeys.conversations(), params] as const,
-  messages: () => [...messageKeys.all, "messages"] as const,
-  conversationMessages: (
+// Query keys
+export const messageQueryKeys = {
+  conversations: (params?: {
+    search?: string;
+    page?: number;
+    limit?: number;
+  }) => ["conversations", params] as const,
+  conversation: (id: string) => ["conversation", id] as const,
+  messages: (
     conversationId: string,
-    params?: Omit<GetMessagesQuery, "conversationId">
-  ) => [...messageKeys.messages(), conversationId, params] as const,
-  conversationDetail: (id: string) =>
-    [...messageKeys.conversations(), "detail", id] as const,
+    params?: { page?: number; limit?: number }
+  ) => ["messages", conversationId, params] as const,
 };
 
-// Hook to get user's conversations
-export const useConversations = (params?: GetConversationsQuery) => {
+// Conversations hooks - Use conversation service
+export const useConversations = (params?: {
+  search?: string;
+  page?: number;
+  limit?: number;
+}) => {
   return useQuery({
-    queryKey: messageKeys.conversation(params || {}),
-    queryFn: () => messageService.getConversations(params),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    queryKey: messageQueryKeys.conversations(params),
+    queryFn: () => conversationService.getConversations(params),
+    staleTime: 30000, // 30 seconds
+    refetchInterval: 30000, // Auto-refetch every 30 seconds for real-time feel
+    refetchIntervalInBackground: false,
   });
 };
 
-// Hook to get messages for a conversation
-export const useMessages = (params: GetMessagesQuery) => {
-  return useQuery({
-    queryKey: messageKeys.conversationMessages(params.conversationId, params),
-    queryFn: () => messageService.getMessages(params),
-    enabled: !!params.conversationId,
-    staleTime: 30 * 1000, // 30 seconds
-  });
-};
-
-// Hook to get a single conversation
 export const useConversation = (conversationId: string) => {
   return useQuery({
-    queryKey: messageKeys.conversationDetail(conversationId),
-    queryFn: () => messageService.getConversationById(conversationId),
+    queryKey: messageQueryKeys.conversation(conversationId),
+    queryFn: () => conversationService.getConversationById(conversationId),
     enabled: !!conversationId,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30000,
   });
 };
 
-// Hook for message mutations
-export const useMessageMutations = () => {
+// Messages hooks
+export const useMessages = (params: {
+  conversationId: string;
+  page?: number;
+  limit?: number;
+}) => {
+  return useQuery({
+    queryKey: messageQueryKeys.messages(params.conversationId, {
+      page: params.page,
+      limit: params.limit,
+    }),
+    queryFn: async () => {
+      const query: GetMessagesQuery = {
+        conversationId: params.conversationId,
+        page: params.page,
+        limit: params.limit,
+      };
+      const result = await messageService.getMessages(query);
+      return {
+        success: true,
+        data: result,
+      };
+    },
+    enabled: !!params.conversationId,
+    staleTime: 10000, // 10 seconds for messages
+    refetchInterval: 15000, // Refetch every 15 seconds
+    refetchIntervalInBackground: false,
+  });
+};
+
+// Conversation mutations
+export const useConversationMutations = () => {
   const queryClient = useQueryClient();
 
-  const sendMessage = useMutation({
-    mutationFn: messageService.createMessage,
-    onSuccess: (data) => {
-      toast.success("Message sent successfully!");
-
+  const createConversation = useMutation({
+    mutationFn: conversationService.createConversation,
+    onSuccess: () => {
+      // Invalidate conversations list
       queryClient.invalidateQueries({
-        queryKey: messageKeys.conversations(),
+        queryKey: ["conversations"],
       });
 
-      queryClient.invalidateQueries({
-        queryKey: messageKeys.conversationMessages(data.conversationId),
-      });
+      toast.success("Conversation created successfully");
+    },
+    onError: (error: any) => {
+      toast.error(
+        error.response?.data?.message || "Failed to create conversation"
+      );
+    },
+  });
 
+  const getOrCreateConversation = useMutation({
+    mutationFn: conversationService.getOrCreateConversation,
+    onSuccess: () => {
+      // Invalidate conversations list
       queryClient.invalidateQueries({
-        queryKey: messageKeys.conversationDetail(data.conversationId),
+        queryKey: ["conversations"],
       });
     },
     onError: (error: any) => {
       toast.error(
-        error.response?.data?.message ||
-          "Failed to send message. Please try again."
+        error.response?.data?.message || "Failed to get conversation"
       );
     },
   });
 
   const markAsRead = useMutation({
-    mutationFn: messageService.markMessagesAsRead,
+    mutationFn: (conversationId: string) =>
+      conversationService.markConversationAsRead(conversationId),
     onSuccess: (_, conversationId) => {
+      // Update conversation cache
       queryClient.invalidateQueries({
-        queryKey: messageKeys.conversations(),
+        queryKey: messageQueryKeys.conversation(conversationId),
       });
 
+      // Update conversations list cache
       queryClient.invalidateQueries({
-        queryKey: messageKeys.conversationMessages(conversationId),
+        queryKey: ["conversations"],
+      });
+
+      // Update messages cache
+      queryClient.invalidateQueries({
+        queryKey: ["messages", conversationId],
       });
     },
     onError: (error: any) => {
-      console.error("Failed to mark messages as read:", error);
+      console.error("Failed to mark conversation as read:", error);
     },
   });
 
   const deleteConversation = useMutation({
-    mutationFn: messageService.deleteConversation,
+    mutationFn: (conversationId: string) =>
+      conversationService.deleteConversation(conversationId),
     onSuccess: () => {
-      toast.success("Conversation deleted successfully");
-
-      queryClient.invalidateQueries({ queryKey: messageKeys.conversations() });
+      queryClient.invalidateQueries({
+        queryKey: ["conversations"],
+      });
     },
     onError: (error: any) => {
-      toast.error(
-        error.response?.data?.message || "Failed to delete conversation"
-      );
+      console.error("Failed to delete conversation:", error);
     },
   });
 
   return {
-    sendMessage: {
-      mutate: sendMessage.mutate,
-      isLoading: sendMessage.isPending,
-      error: sendMessage.error,
+    createConversation,
+    getOrCreateConversation,
+    markAsRead,
+    deleteConversation,
+  };
+};
+
+// Message mutations
+export const useMessageMutations = () => {
+  const queryClient = useQueryClient();
+
+  const sendMessage = useMutation({
+    mutationFn: messageService.createMessage,
+    onMutate: async (messageData: CreateMessageData) => {
+      // Optimistic update - add temporary message
+      const tempMessage: Partial<Message> = {
+        _id: `temp-${Date.now()}`,
+        content: messageData.content,
+        senderId: "current-user", // This should be set from auth context
+        receiverId: messageData.receiverId,
+        conversationId: "",
+        messageType: messageData.messageType || "text",
+        isRead: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({
+        queryKey: ["messages"],
+      });
+
+      return { tempMessage };
     },
-    markAsRead: {
-      mutate: markAsRead.mutate,
-      isLoading: markAsRead.isPending,
-      error: markAsRead.error,
+    onSuccess: () => {
+      // Invalidate and refetch messages and conversations
+      queryClient.invalidateQueries({
+        queryKey: ["messages"],
+      });
+
+      // Invalidate conversations to update last message
+      queryClient.invalidateQueries({
+        queryKey: ["conversations"],
+      });
     },
-    deleteConversation: {
-      mutate: deleteConversation.mutate,
-      isLoading: deleteConversation.isPending,
-      error: deleteConversation.error,
+    onError: () => {
+      // Revert optimistic update on error - just invalidate to refresh
+      queryClient.invalidateQueries({
+        queryKey: ["messages"],
+      });
+
+      toast.error("Failed to send message");
     },
+  });
+
+  return {
+    sendMessage,
+  };
+};
+
+// Combined hook for convenience
+export const useMessaging = () => {
+  const conversationMutations = useConversationMutations();
+  const messageMutations = useMessageMutations();
+
+  return {
+    conversations: conversationMutations,
+    messages: messageMutations,
+  };
+};
+
+// Real-time message helpers
+export const useMessageInvalidation = () => {
+  const queryClient = useQueryClient();
+
+  const invalidateConversations = () => {
+    queryClient.invalidateQueries({
+      queryKey: ["conversations"],
+    });
+  };
+
+  const invalidateMessages = (conversationId: string) => {
+    queryClient.invalidateQueries({
+      queryKey: ["messages", conversationId],
+    });
+  };
+
+  const invalidateConversation = (conversationId: string) => {
+    queryClient.invalidateQueries({
+      queryKey: messageQueryKeys.conversation(conversationId),
+    });
+  };
+
+  return {
+    invalidateConversations,
+    invalidateMessages,
+    invalidateConversation,
   };
 };
