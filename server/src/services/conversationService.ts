@@ -27,7 +27,6 @@ export const createConversation = async (data: CreateConversationData) => {
   try {
     const { studentId, instructorId, courseId } = data;
 
-    // Verify enrollment
     const enrollment = await EnrollmentModel.findOne({
       user: studentId,
       course: courseId,
@@ -41,7 +40,6 @@ export const createConversation = async (data: CreateConversationData) => {
       };
     }
 
-    // Verify the instructor teaches this course
     const course = await CourseModel.findOne({
       _id: courseId,
       instructor: instructorId,
@@ -54,7 +52,6 @@ export const createConversation = async (data: CreateConversationData) => {
       };
     }
 
-    // Check if conversation already exists
     const existingConversation = await ConversationModel.findOne({
       course: courseId,
       "participants.student": studentId,
@@ -69,7 +66,6 @@ export const createConversation = async (data: CreateConversationData) => {
       };
     }
 
-    // Create new conversation
     const conversation = new ConversationModel({
       participants: {
         student: studentId,
@@ -80,7 +76,6 @@ export const createConversation = async (data: CreateConversationData) => {
 
     await conversation.save();
 
-    // Populate the conversation
     const populatedConversation = await ConversationModel.findById(
       conversation._id
     )
