@@ -115,7 +115,6 @@ export const getConversations = async (params: GetConversationsParams) => {
   try {
     const { userId, search, page = 1, limit = 50 } = params;
 
-    // Build query to find conversations where user is either student or instructor
     const query: any = {
       $or: [
         { "participants.student": userId },
@@ -123,7 +122,6 @@ export const getConversations = async (params: GetConversationsParams) => {
       ],
     };
 
-    // Add search functionality
     if (search) {
       const searchUsers = await UserModel.find({
         $or: [
@@ -173,7 +171,6 @@ export const getConversations = async (params: GetConversationsParams) => {
       .limit(limit * 1)
       .skip((page - 1) * limit);
 
-    // Calculate unread count for each conversation
     const conversationsWithUnread = await Promise.all(
       conversations.map(async (conversation) => {
         const unreadCount = await MessageModel.countDocuments({
@@ -277,7 +274,6 @@ export const deleteConversation = async (
   userId: string
 ) => {
   try {
-    // Verify user is participant in the conversation
     const conversation = await ConversationModel.findOne({
       _id: conversationId,
       $or: [
@@ -293,10 +289,8 @@ export const deleteConversation = async (
       };
     }
 
-    // Delete all messages in the conversation
     await MessageModel.deleteMany({ conversationId });
 
-    // Delete the conversation
     await ConversationModel.findByIdAndDelete(conversationId);
 
     return {
@@ -318,7 +312,6 @@ export const markConversationAsRead = async (
   userId: string
 ) => {
   try {
-    // Mark all unread messages in the conversation as read
     const result = await MessageModel.updateMany(
       {
         conversationId,
@@ -351,7 +344,6 @@ export const findOrCreateConversation = async (
   try {
     const { studentId, instructorId, courseId } = data;
 
-    // First try to find existing conversation
     const existingConversation = await ConversationModel.findOne({
       course: courseId,
       "participants.student": studentId,
@@ -382,7 +374,6 @@ export const findOrCreateConversation = async (
       };
     }
 
-    // Create new conversation if not exists
     const createResult = await createConversation(data);
     if (!createResult.success) {
       return createResult;
