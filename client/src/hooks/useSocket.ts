@@ -35,12 +35,10 @@ export const useSocket = () => {
     if (!socket) return;
 
     const handleConnect = () => {
-      console.log("Socket connected successfully");
       setIsConnected(true);
     };
 
     const handleDisconnect = () => {
-      console.log("Socket disconnected");
       setIsConnected(false);
     };
 

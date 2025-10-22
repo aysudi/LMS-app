@@ -10,6 +10,7 @@ const connectedUsers = new Map<string, AuthenticatedSocket>();
 const authenticateSocket = async (socket: any, next: any) => {
   try {
     const token = socket.handshake.auth.token;
+    console.log("token: ", token);
     if (!token) {
       return next(new Error("Authentication error"));
     }
@@ -46,7 +47,6 @@ export const initializeSocket = (server: http.Server) => {
 
   io.on("connection", (socket: any) => {
     const authSocket = socket as AuthenticatedSocket;
-    console.log(`User ${authSocket.user.username} connected`);
 
     connectedUsers.set(authSocket.user.id, authSocket);
 
@@ -59,9 +59,6 @@ export const initializeSocket = (server: http.Server) => {
         conversationIds.forEach((conversationId) => {
           authSocket.join(`conversation:${conversationId}`);
         });
-        console.log(
-          `User ${authSocket.user.username} joined ${conversationIds.length} conversations`
-        );
       } catch (error) {
         console.error("Error joining conversations:", error);
       }
@@ -80,7 +77,6 @@ export const initializeSocket = (server: http.Server) => {
 
     // Handle disconnect
     authSocket.on("disconnect", () => {
-      console.log(`User ${authSocket.user.username} disconnected`);
       connectedUsers.delete(authSocket.user.id);
 
       authSocket.broadcast.emit("user:offline", {

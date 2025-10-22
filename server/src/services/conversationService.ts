@@ -53,7 +53,7 @@ export const createConversation = async (data: CreateConversationData) => {
     }
 
     const existingConversation = await ConversationModel.findOne({
-      course: courseId,
+      courseId: courseId,
       "participants.student": studentId,
       "participants.instructor": instructorId,
     });
@@ -144,7 +144,7 @@ export const getConversations = async (params: GetConversationsParams) => {
           $or: [
             { "participants.student": { $in: userIds } },
             { "participants.instructor": { $in: userIds } },
-            { course: { $in: courseIds } },
+            { courseId: { $in: courseIds } },
           ],
         },
       ];
@@ -160,7 +160,7 @@ export const getConversations = async (params: GetConversationsParams) => {
         select: "firstName lastName email profilePicture",
       })
       .populate({
-        path: "course",
+        path: "courseId",
         select: "title thumbnail",
       })
       .populate({
@@ -230,7 +230,7 @@ export const getConversationById = async (params: GetConversationParams) => {
         select: "firstName lastName email profilePicture",
       })
       .populate({
-        path: "course",
+        path: "courseId",
         select: "title thumbnail",
       })
       .populate({
@@ -343,9 +343,12 @@ export const findOrCreateConversation = async (
 ) => {
   try {
     const { studentId, instructorId, courseId } = data;
+    console.log("studentId:", studentId);
+    console.log("instructorId:", instructorId);
+    console.log("courseId:", courseId);
 
     const existingConversation = await ConversationModel.findOne({
-      course: courseId,
+      courseId: courseId,
       "participants.student": studentId,
       "participants.instructor": instructorId,
     })
@@ -358,7 +361,7 @@ export const findOrCreateConversation = async (
         select: "firstName lastName email profilePicture",
       })
       .populate({
-        path: "course",
+        path: "courseId",
         select: "title thumbnail",
       })
       .populate({
@@ -373,6 +376,7 @@ export const findOrCreateConversation = async (
         isNew: false,
       };
     }
+    console.log("data to create conversation:", data);
 
     const createResult = await createConversation(data);
     if (!createResult.success) {

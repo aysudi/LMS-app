@@ -7,18 +7,20 @@ class SocketService {
 
   connect(token: string) {
     if (this.socket?.connected || this.isConnecting) {
-      console.log("Socket already connected or connecting");
       return this.socket;
     }
 
     this.isConnecting = true;
 
     try {
-      const serverUrl = "http://localhost:4040/api";
+      const serverUrl = "http://localhost:4040";
 
       this.socket = io(serverUrl, {
         auth: {
           token,
+        },
+        query: {
+          token, // Fallback in query params
         },
         autoConnect: true,
         reconnection: true,
@@ -30,7 +32,6 @@ class SocketService {
       this.setupEventListeners();
       this.isConnecting = false;
 
-      console.log("Socket connection initiated");
       return this.socket;
     } catch (error) {
       console.error("Failed to connect socket:", error);
@@ -43,7 +44,6 @@ class SocketService {
     if (!this.socket) return;
 
     this.socket.on("connect", () => {
-      console.log("Socket connected:", this.socket?.id);
       this.isConnecting = false;
 
       // Clear any reconnection timers
@@ -56,18 +56,25 @@ class SocketService {
       this.socket?.emit("status:online");
     });
 
-    this.socket.on("disconnect", (reason) => {
-      console.log("Socket disconnected:", reason);
+    this.socket.on("disconnect", (_) => {
       this.isConnecting = false;
     });
 
     this.socket.on("connect_error", (error) => {
-      console.error("Socket connection error:", error);
+      console.error("❌ Socket connection error:", error);
       this.isConnecting = false;
+
+      // Check if it's an authentication error
+      if (
+        error.message.includes("Authentication") ||
+        error.message.includes("Invalid token")
+      ) {
+        console.error("🔐 Authentication failed - check token validity");
+      }
     });
 
     this.socket.on("error", (error) => {
-      console.error("Socket error:", error);
+      console.error("❌ Socket error:", error);
     });
   }
 
@@ -83,28 +90,26 @@ class SocketService {
     }
 
     this.isConnecting = false;
-    console.log("Socket disconnected");
   }
 
   // Join conversation rooms
   joinConversations(conversationIds: string[]) {
     if (this.socket?.connected) {
       this.socket.emit("join:conversations", conversationIds);
-      console.log("Joined conversations:", conversationIds);
     }
   }
 
   // Join specific conversation
   joinConversation(conversationId: string) {
     if (this.socket?.connected) {
-      this.socket.emit("conversation:join", { conversationId });
+      this.socket.emit("conversation:join", conversationId);
     }
   }
 
   // Leave specific conversation
   leaveConversation(conversationId: string) {
     if (this.socket?.connected) {
-      this.socket.emit("conversation:leave", { conversationId });
+      this.socket.emit("conversation:leave", conversationId);
     }
   }
 
@@ -138,26 +143,26 @@ class SocketService {
   // Typing indicators
   startTyping(conversationId: string) {
     if (this.socket?.connected) {
-      this.socket.emit("message:typing", { conversationId });
+      this.socket.emit("typing:start", { conversationId });
     }
   }
 
   stopTyping(conversationId: string) {
     if (this.socket?.connected) {
-      this.socket.emit("message:stopTyping", { conversationId });
+      this.socket.emit("typing:stop", { conversationId });
     }
   }
 
   // Mark message as read
   markMessageAsRead(messageId: string, conversationId: string) {
     if (this.socket?.connected) {
-      this.socket.emit("message:markAsRead", { messageId, conversationId });
+      this.socket.emit("message:read", { messageId, conversationId });
     }
   }
 
   // Event listeners
   onMessageReceived(callback: (message: any) => void) {
-    this.socket?.on("message:new", callback);
+    this.socket?.on("message:received", callback);
   }
 
   onMessageUpdated(callback: (message: any) => void) {
@@ -187,7 +192,7 @@ class SocketService {
       conversationId: string;
     }) => void
   ) {
-    this.socket?.on("message:typing", callback);
+    this.socket?.on("typing:started", callback);
   }
 
   onStopTyping(
@@ -197,7 +202,7 @@ class SocketService {
       conversationId: string;
     }) => void
   ) {
-    this.socket?.on("message:stopTyping", callback);
+    this.socket?.on("typing:stopped", callback);
   }
 
   onUserOnline(callback: (data: { userId: string; username: string }) => void) {
@@ -216,7 +221,7 @@ class SocketService {
 
   // Remove event listeners
   offMessageReceived(callback?: (message: any) => void) {
-    this.socket?.off("message:new", callback);
+    this.socket?.off("message:received", callback);
   }
 
   offMessageUpdated(callback?: (message: any) => void) {
@@ -246,7 +251,7 @@ class SocketService {
       conversationId: string;
     }) => void
   ) {
-    this.socket?.off("message:typing", callback);
+    this.socket?.off("typing:started", callback);
   }
 
   offStopTyping(
@@ -256,7 +261,7 @@ class SocketService {
       conversationId: string;
     }) => void
   ) {
-    this.socket?.off("message:stopTyping", callback);
+    this.socket?.off("typing:stopped", callback);
   }
 
   offUserOnline(

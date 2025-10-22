@@ -48,6 +48,7 @@ import AdminCertificates from "../pages/Admin/AdminCertificates";
 import AdminContacts from "../pages/Admin/AdminContacts";
 import Contact from "../pages/Client/Contact";
 import Messages from "../pages/Client/Messages";
+import ChatLayout from "../layout/ChatLayout";
 
 const ROUTES = [
   //client routes
@@ -298,6 +299,25 @@ const ROUTES = [
       {
         path: "contacts",
         element: <AdminContacts />,
+      },
+    ],
+  },
+  //chat layout
+  {
+    path: "/messages",
+    element: (
+      <ProtectedRoute>
+        <ChatLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        index: true,
+        element: (
+          <ProtectedRoute>
+            <Messages />
+          </ProtectedRoute>
+        ),
       },
     ],
   },
