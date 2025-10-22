@@ -94,7 +94,8 @@ export const createConversation = async (data: CreateConversationData) => {
       .populate({
         path: "lastMessage",
         select: "content senderId isRead createdAt",
-      });
+      })
+      .lean(); // Add lean() to prevent circular reference issues
 
     return {
       success: true,
@@ -129,11 +130,15 @@ export const getConversations = async (params: GetConversationsParams) => {
           { lastName: { $regex: search, $options: "i" } },
           { email: { $regex: search, $options: "i" } },
         ],
-      }).select("_id");
+      })
+        .select("_id")
+        .lean();
 
       const searchCourses = await CourseModel.find({
         title: { $regex: search, $options: "i" },
-      }).select("_id");
+      })
+        .select("_id")
+        .lean();
 
       const userIds = searchUsers.map((user) => user._id);
       const courseIds = searchCourses.map((course) => course._id);
@@ -169,7 +174,8 @@ export const getConversations = async (params: GetConversationsParams) => {
       })
       .sort({ updatedAt: -1 })
       .limit(limit * 1)
-      .skip((page - 1) * limit);
+      .skip((page - 1) * limit)
+      .lean(); // Add lean() to prevent circular reference issues
 
     const conversationsWithUnread = await Promise.all(
       conversations.map(async (conversation) => {
@@ -180,7 +186,7 @@ export const getConversations = async (params: GetConversationsParams) => {
         });
 
         return {
-          ...conversation.toObject(),
+          ...conversation,
           unreadCount,
         };
       })
@@ -236,7 +242,8 @@ export const getConversationById = async (params: GetConversationParams) => {
       .populate({
         path: "lastMessage",
         select: "content senderId isRead createdAt",
-      });
+      })
+      .lean(); // Add lean() to prevent circular reference issues
 
     if (!conversation) {
       return {
@@ -255,7 +262,7 @@ export const getConversationById = async (params: GetConversationParams) => {
     return {
       success: true,
       data: {
-        ...conversation.toObject(),
+        ...conversation,
         unreadCount,
       },
     };
@@ -367,7 +374,8 @@ export const findOrCreateConversation = async (
       .populate({
         path: "lastMessage",
         select: "content senderId isRead createdAt",
-      });
+      })
+      .lean(); // Add lean() to prevent circular reference issues
 
     if (existingConversation) {
       return {

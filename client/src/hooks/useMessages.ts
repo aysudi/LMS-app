@@ -31,9 +31,11 @@ export const useConversations = (params?: {
   return useQuery({
     queryKey: messageQueryKeys.conversations(params),
     queryFn: () => conversationService.getConversations(params),
-    staleTime: 30000, // 30 seconds
-    refetchInterval: 30000, // Auto-refetch every 30 seconds for real-time feel
+    staleTime: 5 * 60 * 1000, // 5 minutes - much longer stale time
+    refetchInterval: false, // Disable automatic refetching
     refetchIntervalInBackground: false,
+    refetchOnWindowFocus: true, // Only refetch on window focus
+    refetchOnMount: true,
   });
 };
 
@@ -42,7 +44,9 @@ export const useConversation = (conversationId: string) => {
     queryKey: messageQueryKeys.conversation(conversationId),
     queryFn: () => conversationService.getConversationById(conversationId),
     enabled: !!conversationId,
-    staleTime: 30000,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchInterval: false,
+    refetchIntervalInBackground: false,
   });
 };
 
@@ -70,9 +74,10 @@ export const useMessages = (params: {
       };
     },
     enabled: !!params.conversationId,
-    staleTime: 10000, // 10 seconds for messages
-    refetchInterval: 15000, // Refetch every 15 seconds
+    staleTime: 2 * 60 * 1000, // 2 minutes for messages
+    refetchInterval: false, // Disable automatic refetching - rely on Socket.IO for real-time updates
     refetchIntervalInBackground: false,
+    refetchOnWindowFocus: true,
   });
 };
 
