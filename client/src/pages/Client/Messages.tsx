@@ -1,4 +1,3 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FaComments,
@@ -32,6 +31,7 @@ import Loading from "../../components/Common/Loading";
 import NoConversationsState from "../../components/Common/NoConversationsState";
 import { format, isToday, isYesterday } from "date-fns";
 import type { Message, CreateMessageData } from "../../types/message.type";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 const Messages: React.FC = () => {
   const { user } = useAuthContext();
@@ -46,6 +46,7 @@ const Messages: React.FC = () => {
 
   const [selectedConversation, setSelectedConversation] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [messageInput, setMessageInput] = useState("");
   const [showNewMessageModal, setShowNewMessageModal] = useState(false);
   const [showConversationMenu, setShowConversationMenu] = useState<
@@ -59,22 +60,37 @@ const Messages: React.FC = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>(null);
+  const searchTimeoutRef = useRef<NodeJS.Timeout>(null);
 
-  // Fetch conversations and messages
+  // Debounce search term to prevent constant API calls
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    searchTimeoutRef.current = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500);
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [searchTerm]);
+
+  // Fetch conversations and messages with stable dependencies
   const {
     data: conversationsData,
     isLoading: loadingConversations,
     refetch: refetchConversations,
   } = useConversations({
-    search: searchTerm || undefined,
+    search: debouncedSearchTerm.trim() || undefined,
   });
 
-  const {
-    data: messagesData,
-    isLoading: loadingMessages,
-    refetch: refetchMessages,
-  } = useMessages({
-    conversationId: selectedConversation?._id || "",
+  const selectedConversationId = selectedConversation?._id || "";
+  const { data: messagesData, isLoading: loadingMessages } = useMessages({
+    conversationId: selectedConversationId,
   });
 
   const { data: enrollments } = useUserEnrollments();
@@ -84,24 +100,23 @@ const Messages: React.FC = () => {
   const conversations = conversationsData?.data?.conversations || [];
   const messages = messagesData?.data?.data?.messages || [];
 
-  // Socket.IO conversation management
+  // Socket.IO conversation management (prevent infinite loops)
   useEffect(() => {
     if (conversations.length > 0) {
       const conversationIds = conversations.map((conv: any) => conv._id);
       joinConversation(conversationIds.join(","));
     }
-  }, [conversations, joinConversation]);
+  }, [conversations.length, joinConversation]);
 
-  // Join/leave conversation on selection
   useEffect(() => {
-    if (selectedConversation) {
-      joinConversation(selectedConversation._id);
+    if (selectedConversationId) {
+      joinConversation(selectedConversationId);
 
       return () => {
-        leaveConversation(selectedConversation._id);
+        leaveConversation(selectedConversationId);
       };
     }
-  }, [selectedConversation, joinConversation, leaveConversation]);
+  }, [selectedConversationId, joinConversation, leaveConversation]);
 
   // Check for mobile view
   useEffect(() => {
@@ -120,14 +135,14 @@ const Messages: React.FC = () => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages]);
+  }, [messages.length]);
 
   // Mark messages as read when conversation is selected
   useEffect(() => {
     if (selectedConversation && selectedConversation.unreadCount > 0) {
       markAsRead.mutate(selectedConversation._id);
     }
-  }, [selectedConversation, markAsRead]);
+  }, [selectedConversation?._id, markAsRead]);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -140,18 +155,6 @@ const Messages: React.FC = () => {
     }
   }, [messageInput]);
 
-  // Refresh conversations periodically
-  useEffect(() => {
-    const interval = setInterval(() => {
-      refetchConversations();
-      if (selectedConversation) {
-        refetchMessages();
-      }
-    }, 30000); // Refresh every 30 seconds
-
-    return () => clearInterval(interval);
-  }, [refetchConversations, refetchMessages, selectedConversation]);
-
   const handleSendMessage = useCallback(() => {
     if (!messageInput.trim() || !selectedConversation || sendMessage.isPending)
       return;
@@ -160,8 +163,6 @@ const Messages: React.FC = () => {
       selectedConversation.participants.student._id === user?.id
         ? selectedConversation.participants.instructor
         : selectedConversation.participants.student;
-
-    console.log("selected conversation:", selectedConversation);
 
     const messageData: CreateMessageData = {
       receiverId: otherParticipant._id,
@@ -192,13 +193,14 @@ const Messages: React.FC = () => {
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setMessageInput(e.target.value);
+      const newValue = e.target.value;
+      setMessageInput(newValue);
 
-      // Start typing indicator via socket
-      if (selectedConversation && e.target.value.trim()) {
-        if (!isTyping) {
+      // Start typing indicator via socket (debounced)
+      if (selectedConversationId) {
+        if (newValue.trim() && !isTyping) {
           setIsTyping(true);
-          startTyping(selectedConversation._id);
+          startTyping(selectedConversationId);
         }
 
         // Clear existing timeout
@@ -209,16 +211,20 @@ const Messages: React.FC = () => {
         // Set new timeout to stop typing indicator
         typingTimeoutRef.current = setTimeout(() => {
           setIsTyping(false);
-          stopTyping(selectedConversation._id);
-        }, 2000);
-      } else if (isTyping) {
-        setIsTyping(false);
-        if (selectedConversation) {
-          stopTyping(selectedConversation._id);
-        }
+          if (selectedConversationId) {
+            stopTyping(selectedConversationId);
+          }
+        }, 1500);
       }
     },
-    [isTyping, selectedConversation, startTyping, stopTyping]
+    [selectedConversationId, isTyping, startTyping, stopTyping]
+  );
+
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setSearchTerm(e.target.value);
+    },
+    []
   );
 
   const getOtherParticipant = useCallback(
@@ -232,7 +238,7 @@ const Messages: React.FC = () => {
 
   const isMessageFromMe = useCallback(
     (message: Message) => {
-      return message.senderId === user?.id;
+      return String(message.senderId) === String(user?.id || "");
     },
     [user?.id]
   );
@@ -281,7 +287,6 @@ const Messages: React.FC = () => {
 
           // The conversation will be created automatically by the server
           // when the first message is sent
-          console.log("New conversation created with first message");
         },
         onError: (error) => {
           console.error("Failed to create conversation:", error);
@@ -312,7 +317,7 @@ const Messages: React.FC = () => {
     [deleteConversation, selectedConversation?._id, isMobileView]
   );
 
-  const ConversationsList = () => (
+  const ConversationsList = React.memo(() => (
     <div className="h-full bg-white border-r border-gray-200 flex flex-col">
       {/* Header */}
       <div className="p-6 border-b border-gray-200">
@@ -337,8 +342,9 @@ const Messages: React.FC = () => {
             type="text"
             placeholder="Search conversations..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={handleSearchChange}
             className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+            autoComplete="off"
           />
         </div>
       </div>
@@ -417,12 +423,14 @@ const Messages: React.FC = () => {
                       {conversation.lastMessage && (
                         <div className="flex items-center gap-2">
                           <p className="text-sm text-gray-600 truncate flex-1">
-                            {conversation.lastMessage.senderId === user?.id && (
+                            {String(conversation.lastMessage.senderId) ===
+                              String(user?.id || "") && (
                               <span className="text-gray-500">You: </span>
                             )}
                             {conversation.lastMessage.content}
                           </p>
-                          {conversation.lastMessage.senderId === user?.id && (
+                          {String(conversation.lastMessage.senderId) ===
+                            String(user?.id || "") && (
                             <div className="flex-shrink-0">
                               {conversation.lastMessage.isRead ? (
                                 <FaCheckDouble className="text-xs text-blue-500" />
@@ -493,7 +501,7 @@ const Messages: React.FC = () => {
         )}
       </div>
     </div>
-  );
+  ));
 
   const ChatArea = () => (
     <div className="flex-1 flex flex-col bg-white">
@@ -717,6 +725,7 @@ const Messages: React.FC = () => {
                   rows={1}
                   className="w-full resize-none border border-gray-300 rounded-xl px-4 py-3 pr-12 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 max-h-32"
                   style={{ minHeight: "48px" }}
+                  autoComplete="off"
                 />
 
                 {/* Emoji button */}
