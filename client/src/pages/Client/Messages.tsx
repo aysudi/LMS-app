@@ -29,6 +29,7 @@ import {
 import { useUserEnrollments } from "../../hooks/useEnrollment";
 import { useSocket } from "../../hooks/useSocket";
 import Loading from "../../components/Common/Loading";
+import NoConversationsState from "../../components/Common/NoConversationsState";
 import { format, isToday, isYesterday } from "date-fns";
 import type { Message, CreateMessageData } from "../../types/message.type";
 
@@ -81,7 +82,7 @@ const Messages: React.FC = () => {
   const { markAsRead, deleteConversation } = useConversationMutations();
 
   const conversations = conversationsData?.data?.conversations || [];
-  const messages = messagesData?.data?.messages || [];
+  const messages = messagesData?.data?.data?.messages || [];
 
   // Socket.IO conversation management
   useEffect(() => {
@@ -160,9 +161,11 @@ const Messages: React.FC = () => {
         ? selectedConversation.participants.instructor
         : selectedConversation.participants.student;
 
+    console.log("selected conversation:", selectedConversation);
+
     const messageData: CreateMessageData = {
       receiverId: otherParticipant._id,
-      courseId: selectedConversation.course._id,
+      courseId: selectedConversation.courseId._id,
       content: messageInput.trim(),
     };
 
@@ -275,6 +278,13 @@ const Messages: React.FC = () => {
           setShowNewMessageModal(false);
           // Refresh conversations to show the new one
           refetchConversations();
+
+          // The conversation will be created automatically by the server
+          // when the first message is sent
+          console.log("New conversation created with first message");
+        },
+        onError: (error) => {
+          console.error("Failed to create conversation:", error);
         },
       });
     },
@@ -340,22 +350,10 @@ const Messages: React.FC = () => {
             <Loading variant="default" size="sm" />
           </div>
         ) : conversations.length === 0 ? (
-          <div className="text-center py-12 px-6">
-            <FaComments className="mx-auto text-4xl text-gray-400 mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              No conversations yet
-            </h3>
-            <p className="text-gray-600 mb-4">
-              Start a conversation with your instructors or students
-            </p>
-            <button
-              onClick={() => setShowNewMessageModal(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
-            >
-              <FaPlus className="text-sm" />
-              Start conversation
-            </button>
-          </div>
+          <NoConversationsState
+            onStartConversation={() => setShowNewMessageModal(true)}
+            hasEnrollments={!!enrollments?.enrollments?.length}
+          />
         ) : (
           <div className="divide-y divide-gray-100">
             {conversations.map((conversation) => {
@@ -413,14 +411,6 @@ const Messages: React.FC = () => {
                             </span>
                           )}
                         </div>
-                      </div>
-
-                      {/* Course info */}
-                      <div className="flex items-center gap-1 mb-2">
-                        <FaGraduationCap className="text-xs text-gray-500" />
-                        <p className="text-xs text-gray-600 truncate">
-                          {conversation.course.title}
-                        </p>
                       </div>
 
                       {/* Last Message */}
@@ -558,7 +548,7 @@ const Messages: React.FC = () => {
                   <div className="flex items-center gap-1 text-sm text-gray-600">
                     <FaGraduationCap className="text-xs" />
                     <span className="truncate">
-                      {selectedConversation.course.title}
+                      {selectedConversation.courseId.title}
                     </span>
                   </div>
                 </div>
@@ -793,13 +783,6 @@ const Messages: React.FC = () => {
               Select a conversation from the sidebar to start messaging, or
               create a new conversation with your instructors.
             </p>
-            <button
-              onClick={() => setShowNewMessageModal(true)}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors duration-200 shadow-lg hover:shadow-xl"
-            >
-              <FaPlus />
-              Start new conversation
-            </button>
           </div>
         </div>
       )}
@@ -807,7 +790,7 @@ const Messages: React.FC = () => {
   );
 
   return (
-    <div className="h-screen bg-gray-50 flex">
+    <div className="h-[91vh] bg-gray-50 flex">
       {/* Desktop: Always show both panels */}
       {!isMobileView && (
         <>

@@ -62,14 +62,16 @@ export interface GetMessagesQuery {
 }
 
 export interface MessagesPaginationData {
-  messages: Message[];
-  pagination: {
-    currentPage: number;
-    totalPages: number;
-    totalMessages: number;
-    limit: number;
-    hasNextPage: boolean;
-    hasPreviousPage: boolean;
+  data: {
+    messages: Message[];
+    pagination: {
+      currentPage: number;
+      totalPages: number;
+      totalMessages: number;
+      limit: number;
+      hasNextPage: boolean;
+      hasPreviousPage: boolean;
+    };
   };
 }
 

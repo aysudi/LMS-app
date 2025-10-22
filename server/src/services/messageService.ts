@@ -41,12 +41,9 @@ export const createMessage = async (messageData: CreateMessageData) => {
       content,
       messageType = "text",
     } = messageData;
-
-    // Verify enrollment - student must be enrolled in course
     const enrollment = await EnrollmentModel.findOne({
-      student: senderId,
+      user: senderId,
       course: courseId,
-      status: "active",
     }).session(session);
 
     const course = await CourseModel.findById(courseId).session(session);
@@ -55,7 +52,6 @@ export const createMessage = async (messageData: CreateMessageData) => {
       throw new Error("Course not found");
     }
 
-    // Check if conversation is valid (student <-> instructor for the same course)
     const isStudentToInstructor =
       senderId !== course.instructor.toString() &&
       receiverId === course.instructor.toString();
@@ -68,19 +64,18 @@ export const createMessage = async (messageData: CreateMessageData) => {
       throw new Error("Invalid conversation participants");
     }
 
-    // If student is sending message, they must be enrolled
     if (isStudentToInstructor && !enrollment) {
       throw new Error(
         "You must be enrolled in this course to message the instructor"
       );
     }
 
-    // Find or create conversation
-    const conversationResult = await findOrCreateConversation({
+    const conversationData = {
       studentId: isStudentToInstructor ? senderId : receiverId,
       instructorId: isStudentToInstructor ? receiverId : senderId,
       courseId: courseId,
-    });
+    };
+    const conversationResult = await findOrCreateConversation(conversationData);
 
     if (!conversationResult.success || !conversationResult.data) {
       throw new Error("Failed to create conversation");
@@ -88,7 +83,6 @@ export const createMessage = async (messageData: CreateMessageData) => {
 
     const conversation = conversationResult.data;
 
-    // Create the message
     const message = new MessageModel({
       senderId,
       receiverId,
