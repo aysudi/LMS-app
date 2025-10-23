@@ -116,26 +116,42 @@ export const getConversations = async (params: GetConversationsParams) => {
   try {
     const { userId, search, page = 1, limit = 50 } = params;
 
-    const query: any = {
+    // Base query - user must be participant
+    const baseQuery: any = {
       $or: [
         { "participants.student": userId },
         { "participants.instructor": userId },
       ],
     };
 
-    if (search) {
+    let finalQuery = baseQuery;
+
+    if (search && search.trim()) {
+      const searchRegex = { $regex: search.trim(), $options: "i" };
+
+      // Find users matching the search term
       const searchUsers = await UserModel.find({
         $or: [
-          { firstName: { $regex: search, $options: "i" } },
-          { lastName: { $regex: search, $options: "i" } },
-          { email: { $regex: search, $options: "i" } },
+          { firstName: searchRegex },
+          { lastName: searchRegex },
+          { email: searchRegex },
+          {
+            $expr: {
+              $regexMatch: {
+                input: { $concat: ["$firstName", " ", "$lastName"] },
+                regex: search.trim(),
+                options: "i",
+              },
+            },
+          },
         ],
       })
         .select("_id")
         .lean();
 
+      // Find courses matching the search term
       const searchCourses = await CourseModel.find({
-        title: { $regex: search, $options: "i" },
+        title: searchRegex,
       })
         .select("_id")
         .lean();
@@ -143,19 +159,22 @@ export const getConversations = async (params: GetConversationsParams) => {
       const userIds = searchUsers.map((user) => user._id);
       const courseIds = searchCourses.map((course) => course._id);
 
-      query.$and = [
-        query,
-        {
-          $or: [
-            { "participants.student": { $in: userIds } },
-            { "participants.instructor": { $in: userIds } },
-            { courseId: { $in: courseIds } },
-          ],
-        },
-      ];
+      // Combine base query with search conditions
+      finalQuery = {
+        $and: [
+          baseQuery,
+          {
+            $or: [
+              { "participants.student": { $in: userIds } },
+              { "participants.instructor": { $in: userIds } },
+              { courseId: { $in: courseIds } },
+            ],
+          },
+        ],
+      };
     }
 
-    const conversations = await ConversationModel.find(query)
+    const conversations = await ConversationModel.find(finalQuery)
       .populate({
         path: "participants.student",
         select: "firstName lastName email profilePicture",
@@ -192,7 +211,7 @@ export const getConversations = async (params: GetConversationsParams) => {
       })
     );
 
-    const total = await ConversationModel.countDocuments(query);
+    const total = await ConversationModel.countDocuments(finalQuery);
 
     return {
       success: true,
@@ -350,9 +369,6 @@ export const findOrCreateConversation = async (
 ) => {
   try {
     const { studentId, instructorId, courseId } = data;
-    console.log("studentId:", studentId);
-    console.log("instructorId:", instructorId);
-    console.log("courseId:", courseId);
 
     const existingConversation = await ConversationModel.findOne({
       courseId: courseId,
@@ -384,7 +400,6 @@ export const findOrCreateConversation = async (
         isNew: false,
       };
     }
-    console.log("data to create conversation:", data);
 
     const createResult = await createConversation(data);
     if (!createResult.success) {

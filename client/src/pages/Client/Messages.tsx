@@ -70,7 +70,7 @@ const Messages: React.FC = () => {
 
     searchTimeoutRef.current = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
-    }, 500);
+    }, 800); // Increased debounce delay
 
     return () => {
       if (searchTimeoutRef.current) {
@@ -84,9 +84,16 @@ const Messages: React.FC = () => {
     data: conversationsData,
     isLoading: loadingConversations,
     refetch: refetchConversations,
-  } = useConversations({
-    search: debouncedSearchTerm.trim() || undefined,
-  });
+  } = useConversations(
+    {
+      search: debouncedSearchTerm || undefined, // Only pass search if it has value
+    },
+    {
+      enabled: !!user?.id,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      refetchOnWindowFocus: false, // Disable refetch on window focus for better UX
+    }
+  );
 
   const selectedConversationId = selectedConversation?._id || "";
   const { data: messagesData, isLoading: loadingMessages } = useMessages({
@@ -196,14 +203,15 @@ const Messages: React.FC = () => {
       const newValue = e.target.value;
       setMessageInput(newValue);
 
-      // Start typing indicator via socket (debounced)
-      if (selectedConversationId) {
-        if (newValue.trim() && !isTyping) {
+      // Optimized typing indicator logic
+      if (selectedConversationId && newValue.trim()) {
+        // Only start typing indicator if not already typing
+        if (!isTyping) {
           setIsTyping(true);
           startTyping(selectedConversationId);
         }
 
-        // Clear existing timeout
+        // Clear existing timeout to prevent multiple calls
         if (typingTimeoutRef.current) {
           clearTimeout(typingTimeoutRef.current);
         }
@@ -211,10 +219,17 @@ const Messages: React.FC = () => {
         // Set new timeout to stop typing indicator
         typingTimeoutRef.current = setTimeout(() => {
           setIsTyping(false);
-          if (selectedConversationId) {
-            stopTyping(selectedConversationId);
-          }
-        }, 1500);
+          stopTyping(selectedConversationId);
+        }, 2000); // Increased timeout to reduce frequency
+      } else if (!newValue.trim() && isTyping) {
+        // Stop typing immediately if input is empty
+        setIsTyping(false);
+        if (selectedConversationId) {
+          stopTyping(selectedConversationId);
+        }
+        if (typingTimeoutRef.current) {
+          clearTimeout(typingTimeoutRef.current);
+        }
       }
     },
     [selectedConversationId, isTyping, startTyping, stopTyping]
@@ -222,7 +237,16 @@ const Messages: React.FC = () => {
 
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      setSearchTerm(e.target.value);
+      const value = e.target.value;
+      setSearchTerm(value);
+
+      // If search is cleared, immediately update debounced term
+      if (!value.trim()) {
+        setDebouncedSearchTerm("");
+        if (searchTimeoutRef.current) {
+          clearTimeout(searchTimeoutRef.current);
+        }
+      }
     },
     []
   );
@@ -238,7 +262,12 @@ const Messages: React.FC = () => {
 
   const isMessageFromMe = useCallback(
     (message: Message) => {
-      return String(message.senderId) === String(user?.id || "");
+      // Handle both old and new message structure
+      const senderId =
+        typeof message.senderId === "string"
+          ? message.senderId
+          : message.senderId?._id;
+      return String(senderId) === String(user?.id || "");
     },
     [user?.id]
   );
@@ -343,9 +372,15 @@ const Messages: React.FC = () => {
             placeholder="Search conversations..."
             value={searchTerm}
             onChange={handleSearchChange}
-            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+            className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
             autoComplete="off"
           />
+          {/* Search loading indicator */}
+          {searchTerm !== debouncedSearchTerm && (
+            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+              <FaSpinner className="text-gray-400 text-sm animate-spin" />
+            </div>
+          )}
         </div>
       </div>
 
@@ -423,14 +458,12 @@ const Messages: React.FC = () => {
                       {conversation.lastMessage && (
                         <div className="flex items-center gap-2">
                           <p className="text-sm text-gray-600 truncate flex-1">
-                            {String(conversation.lastMessage.senderId) ===
-                              String(user?.id || "") && (
+                            {conversation.lastMessage.senderId === user?.id && (
                               <span className="text-gray-500">You: </span>
                             )}
                             {conversation.lastMessage.content}
                           </p>
-                          {String(conversation.lastMessage.senderId) ===
-                            String(user?.id || "") && (
+                          {conversation.lastMessage.senderId === user?.id && (
                             <div className="flex-shrink-0">
                               {conversation.lastMessage.isRead ? (
                                 <FaCheckDouble className="text-xs text-blue-500" />
@@ -593,6 +626,7 @@ const Messages: React.FC = () => {
               <>
                 {messages.map((message, index) => {
                   const fromMe = isMessageFromMe(message);
+                  // console.log("from me:", fromMe);
                   const showDateSeparator =
                     index === 0 ||
                     (!isToday(new Date(message.createdAt)) &&

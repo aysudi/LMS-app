@@ -103,14 +103,6 @@ export const createNewConversation = async (req: Request, res: Response) => {
         message: "Instructor ID and Course ID are required",
       });
     }
-    console.log(
-      "user id:",
-      userId,
-      "instructorId:",
-      instructorId,
-      "courseId:",
-      courseId
-    );
 
     const result = await findOrCreateConversation({
       studentId: userId,

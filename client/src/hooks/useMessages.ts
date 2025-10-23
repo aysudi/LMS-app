@@ -1,4 +1,9 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  type UseQueryOptions,
+} from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import { conversationService } from "../services/conversation.service";
 import { messageService } from "../services/message.service";
@@ -7,6 +12,7 @@ import type {
   CreateMessageData,
   GetMessagesQuery,
 } from "../types/message.type";
+import type { ConversationsResponse } from "../types/conversation.type";
 
 // Query keys
 export const messageQueryKeys = {
@@ -23,19 +29,26 @@ export const messageQueryKeys = {
 };
 
 // Conversations hooks - Use conversation service
-export const useConversations = (params?: {
-  search?: string;
-  page?: number;
-  limit?: number;
-}) => {
+export const useConversations = (
+  params?: {
+    search?: string;
+    page?: number;
+    limit?: number;
+  },
+  options?: Omit<UseQueryOptions<ConversationsResponse>, "queryKey" | "queryFn">
+) => {
   return useQuery({
     queryKey: messageQueryKeys.conversations(params),
     queryFn: () => conversationService.getConversations(params),
-    staleTime: 5 * 60 * 1000, // 5 minutes - much longer stale time
+    staleTime: 10 * 60 * 1000, // 10 minutes - longer stale time for conversations
+    gcTime: 15 * 60 * 1000, // 15 minutes cache time
     refetchInterval: false, // Disable automatic refetching
     refetchIntervalInBackground: false,
-    refetchOnWindowFocus: true, // Only refetch on window focus
-    refetchOnMount: true,
+    refetchOnWindowFocus: false, // Disable refetch on window focus for better UX
+    refetchOnMount: false, // Only refetch on mount if data is stale
+    retry: 2, // Reduce retry attempts
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    ...options,
   });
 };
 
@@ -44,9 +57,12 @@ export const useConversation = (conversationId: string) => {
     queryKey: messageQueryKeys.conversation(conversationId),
     queryFn: () => conversationService.getConversationById(conversationId),
     enabled: !!conversationId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes cache time
     refetchInterval: false,
     refetchIntervalInBackground: false,
+    refetchOnWindowFocus: false,
+    retry: 2,
   });
 };
 
@@ -74,10 +90,14 @@ export const useMessages = (params: {
       };
     },
     enabled: !!params.conversationId,
-    staleTime: 2 * 60 * 1000, // 2 minutes for messages
+    staleTime: 5 * 60 * 1000, // 5 minutes for messages (shorter than conversations)
+    gcTime: 10 * 60 * 1000, // 10 minutes cache time
     refetchInterval: false, // Disable automatic refetching - rely on Socket.IO for real-time updates
     refetchIntervalInBackground: false,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false, // Disable to prevent constant refetching
+    refetchOnMount: false, // Only refetch if stale
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 };
 
@@ -173,7 +193,9 @@ export const useMessageMutations = () => {
       const tempMessage: Partial<Message> = {
         _id: `temp-${Date.now()}`,
         content: messageData.content,
-        senderId: "current-user", // This should be set from auth context
+        senderId: {
+          _id: "current-user-id",
+        }, // This should be set from auth context
         receiverId: messageData.receiverId,
         conversationId: "",
         messageType: messageData.messageType || "text",
