@@ -17,7 +17,6 @@ import {
 import { useAuthContext } from "../../context/AuthContext";
 import { usePersonalization } from "../../hooks/usePersonalization";
 import { useToggleWishlist, useWishlistHelpers } from "../../hooks/useWishlist";
-import { useSnackbar } from "notistack";
 import {
   useCourses,
   useFeaturedCourses,
@@ -34,12 +33,12 @@ import { useAddToCart, useCartHelpers } from "../../hooks/useCart";
 import AddToCartModal from "../../components/Common/AddToCartModal";
 import { useAddToCartModal } from "../../hooks/useAddToCartModal";
 import { useToast } from "../../components/UI/ToastProvider";
+import { generalToasts } from "../../utils/toastUtils";
 
 const Home = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthContext();
   const { recommendations, addViewedCourse } = usePersonalization();
-  const { enqueueSnackbar } = useSnackbar();
   const { toggleWishlist } = useToggleWishlist();
   const { checkIfInWishlist } = useWishlistHelpers();
   const { showToast } = useToast();
@@ -176,17 +175,16 @@ const Home = () => {
       const wasInWishlist = checkIfInWishlist(course.id);
       await toggleWishlist(course.id, wasInWishlist);
 
-      enqueueSnackbar(
-        wasInWishlist
-          ? `"${course.title}" removed from wishlist`
-          : `"${course.title}" added to wishlist`,
-        { variant: "success", autoHideDuration: 3000 }
+      showToast(
+        generalToasts.success(
+          "🎉 Congratulations!",
+          wasInWishlist
+            ? `"${course.title}" removed from wishlist`
+            : `"${course.title}" added to wishlist`
+        )
       );
     } catch (error) {
-      enqueueSnackbar("Failed to update wishlist", {
-        variant: "error",
-        autoHideDuration: 3000,
-      });
+      showToast(generalToasts.error("Fail", "Failed to update wishlist"));
     } finally {
       // Remove course from processing state
       setTimeout(() => {

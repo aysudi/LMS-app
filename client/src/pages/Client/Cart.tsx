@@ -15,7 +15,6 @@ import {
   FaCheckCircle,
   FaExclamationTriangle,
 } from "react-icons/fa";
-import { useSnackbar } from "notistack";
 import {
   useCartHelpers,
   useRemoveFromCart,
@@ -27,10 +26,12 @@ import EmptyCartAnimation from "../../components/Client/EmptyCartAnimation";
 import CartLoadingAnimation from "../../components/Client/CartLoadingAnimation";
 import CartStats from "../../components/Client/CartStats";
 import type { Course } from "../../types/course.type";
+import { useToast } from "../../components/UI/ToastProvider";
+import { cartToasts, generalToasts } from "../../utils/toastUtils";
 
 const Cart = () => {
   const navigate = useNavigate();
-  const { enqueueSnackbar } = useSnackbar();
+  const { showToast } = useToast();
   const { isAuthenticated } = useAuthContext();
 
   const { cartItems, cartCount, isLoadingCart, cartError } = useCartHelpers();
@@ -89,15 +90,11 @@ const Cart = () => {
         newSet.delete(courseId);
         return newSet;
       });
-      enqueueSnackbar(`"${courseTitle}" removed from cart! 🗑️`, {
-        variant: "success",
-        autoHideDuration: 3000,
-      });
+      showToast(cartToasts.removed(courseTitle));
     } catch (error) {
-      enqueueSnackbar("Failed to remove item from cart", {
-        variant: "error",
-        autoHideDuration: 3000,
-      });
+      showToast(
+        generalToasts.error("Error", "Failed to remove item from cart")
+      );
     }
   };
 
@@ -105,15 +102,14 @@ const Cart = () => {
     try {
       await clearCart();
       setSelectedItems(new Set());
-      enqueueSnackbar("Cart cleared successfully! 🧹", {
-        variant: "success",
-        autoHideDuration: 3000,
-      });
+      showToast(
+        generalToasts.success(
+          "🎉 Congratulations!",
+          "Cart cleared successfully! "
+        )
+      );
     } catch (error) {
-      enqueueSnackbar("Failed to clear cart", {
-        variant: "error",
-        autoHideDuration: 3000,
-      });
+      showToast(generalToasts.error("Error", "Failed to clear cart"));
     }
   };
 
@@ -131,15 +127,11 @@ const Cart = () => {
         newSet.delete(courseId);
         return newSet;
       });
-      enqueueSnackbar(`"${courseTitle}" moved to wishlist! ❤️`, {
-        variant: "success",
-        autoHideDuration: 3000,
-      });
+      showToast(cartToasts.wishlistAdded(courseTitle));
     } catch (error) {
-      enqueueSnackbar("Failed to move item to wishlist", {
-        variant: "error",
-        autoHideDuration: 3000,
-      });
+      showToast(
+        generalToasts.error("Error", "Failed to move item to wishlist")
+      );
     }
   };
 
@@ -154,24 +146,22 @@ const Cart = () => {
     const discountPercent = promoCodes[promoCode.toUpperCase()];
     if (discountPercent) {
       setDiscount(discountPercent);
-      enqueueSnackbar(`Promo code applied! ${discountPercent}% discount 🎉`, {
-        variant: "success",
-        autoHideDuration: 3000,
-      });
+      showToast(
+        generalToasts.success(
+          "🎉 Congratulations!",
+          `Promo code applied! ${discountPercent}% discount 🎉`
+        )
+      );
     } else {
-      enqueueSnackbar("Invalid promo code", {
-        variant: "error",
-        autoHideDuration: 3000,
-      });
+      showToast(generalToasts.error("Error", "Invalid promo code"));
     }
   };
 
   const handleCheckout = () => {
     if (selectedItems.size === 0) {
-      enqueueSnackbar("Please select items to checkout", {
-        variant: "warning",
-        autoHideDuration: 3000,
-      });
+      showToast(
+        generalToasts.warning("Warning", "Please select items to checkout")
+      );
       return;
     }
     navigate("/checkout", {

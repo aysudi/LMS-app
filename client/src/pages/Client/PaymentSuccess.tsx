@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
-import { useSnackbar } from "notistack";
+import { useToast } from "../../components/UI/ToastProvider";
+import { paymentToasts } from "../../utils/toastUtils";
 
 const PaymentSuccess = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { enqueueSnackbar } = useSnackbar();
+  const { showToast } = useToast();
 
   const [status, setStatus] = useState<"verifying" | "success" | "error">(
     "verifying"
@@ -19,20 +20,14 @@ const PaymentSuccess = () => {
 
     if (redirectStatus === "succeeded" && paymentIntent) {
       setStatus("success");
-      enqueueSnackbar("Payment successful! Welcome to your courses!", {
-        variant: "success",
-        autoHideDuration: 5000,
-      });
+      showToast(paymentToasts.success());
 
       setTimeout(() => {
         navigate("/my-learning");
       }, 3000);
     } else if (redirectStatus === "failed") {
       setStatus("error");
-      enqueueSnackbar("Payment failed. Please try again.", {
-        variant: "error",
-        autoHideDuration: 5000,
-      });
+      showToast(paymentToasts.failed());
 
       // Redirect to cart after 3 seconds
       setTimeout(() => {
@@ -43,16 +38,11 @@ const PaymentSuccess = () => {
       setTimeout(() => {
         if (status === "verifying") {
           setStatus("error");
-          enqueueSnackbar(
-            "Payment verification failed. Please contact support.",
-            {
-              variant: "error",
-            }
-          );
+          showToast(paymentToasts.failed());
         }
       }, 10000); // 10 second timeout
     }
-  }, [searchParams, navigate, enqueueSnackbar, status]);
+  }, [searchParams, navigate, status]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">

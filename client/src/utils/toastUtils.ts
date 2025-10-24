@@ -296,9 +296,9 @@ export const cartToasts = {
 
 // Payment toasts
 export const paymentToasts = {
-  success: (amount: string): ToastConfig => ({
+  success: (): ToastConfig => ({
     title: "🎉 Payment Successful",
-    message: `Your payment of ${amount} has been processed successfully`,
+    message: `Your payment has been processed successfully`,
     type: "success",
     duration: 4000,
   }),
