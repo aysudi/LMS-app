@@ -10,7 +10,6 @@ const connectedUsers = new Map<string, AuthenticatedSocket>();
 const authenticateSocket = async (socket: any, next: any) => {
   try {
     const token = socket.handshake.auth.token;
-    console.log("token: ", token);
     if (!token) {
       return next(new Error("Authentication error"));
     }
