@@ -24,8 +24,6 @@ const connectedUsers = new Map<string, SocketUser>();
 const userSockets = new Map<string, string>(); // userId -> socketId
 
 export const initializeSocket = (io: Server) => {
-  console.log("🚀 Initializing Socket.IO...");
-
   // Middleware for authentication
   io.use(async (socket, next) => {
     try {
@@ -33,14 +31,6 @@ export const initializeSocket = (io: Server) => {
         socket.handshake.auth.token ||
         socket.handshake.headers.authorization ||
         socket.handshake.query.token;
-
-      console.log("🔐 Socket auth attempt - Token present:", !!token);
-      console.log("🔐 Auth object:", socket.handshake.auth);
-      console.log("🔐 Query object:", socket.handshake.query);
-      console.log(
-        "🔐 Headers authorization:",
-        socket.handshake.headers.authorization
-      );
 
       if (!token) {
         console.error("❌ No authentication token provided");
@@ -50,19 +40,7 @@ export const initializeSocket = (io: Server) => {
       // Remove 'Bearer ' prefix if present
       const cleanToken = token.replace("Bearer ", "");
 
-      console.log(
-        "🔐 Attempting JWT verification with token length:",
-        cleanToken.length
-      );
-      console.log("🔐 Using JWTUtils for verification");
-
       const decoded = JWTUtils.verifyAccessToken(cleanToken);
-
-      console.log("✅ JWT verification successful:", {
-        userId: decoded.userId,
-        email: decoded.email,
-        role: decoded.role,
-      });
 
       if (!decoded || !decoded.userId) {
         console.error("❌ Invalid token structure:", decoded);
@@ -103,9 +81,6 @@ export const initializeSocket = (io: Server) => {
 
   io.on("connection", (socket) => {
     const authSocket = socket as AuthenticatedSocket;
-    console.log(
-      `🔌 User connected: ${authSocket.userId} (${authSocket.userEmail})`
-    );
 
     // Store user connection
     const user: SocketUser = {
@@ -131,16 +106,10 @@ export const initializeSocket = (io: Server) => {
     // Handle joining conversation rooms
     authSocket.on("conversation:join", (conversationId: string) => {
       authSocket.join(`conversation:${conversationId}`);
-      console.log(
-        `👥 User ${authSocket.userId} joined conversation: ${conversationId}`
-      );
     });
 
     authSocket.on("conversation:leave", (conversationId: string) => {
       authSocket.leave(`conversation:${conversationId}`);
-      console.log(
-        `👋 User ${authSocket.userId} left conversation: ${conversationId}`
-      );
     });
 
     // Handle bulk conversation joining
@@ -148,15 +117,10 @@ export const initializeSocket = (io: Server) => {
       conversationIds.forEach((id) => {
         authSocket.join(`conversation:${id}`);
       });
-      console.log(
-        `👥 User ${authSocket.userId} joined ${conversationIds.length} conversations`
-      );
     });
 
     // Handle disconnect
     authSocket.on("disconnect", (reason) => {
-      console.log(`🔌 User disconnected: ${authSocket.userId} (${reason})`);
-
       // Remove user from connected users
       connectedUsers.delete(authSocket.id);
       userSockets.delete(authSocket.userId);
@@ -178,8 +142,6 @@ export const initializeSocket = (io: Server) => {
   io.engine.on("connection_error", (err) => {
     console.error("Socket.IO connection error:", err);
   });
-
-  console.log("✅ Socket.IO initialized successfully");
 };
 
 // Helper functions to get user info

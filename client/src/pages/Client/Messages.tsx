@@ -35,14 +35,8 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 
 const Messages: React.FC = () => {
   const { user } = useAuthContext();
-  const {
-    joinConversation,
-    leaveConversation,
-    startTyping,
-    stopTyping,
-    getTypingUsers,
-    isUserOnline,
-  } = useSocket();
+  const { joinConversation, leaveConversation, getTypingUsers, isUserOnline } =
+    useSocket();
 
   const [selectedConversation, setSelectedConversation] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -60,23 +54,14 @@ const Messages: React.FC = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>(null);
-  const searchTimeoutRef = useRef<NodeJS.Timeout>(null);
 
   // Debounce search term to prevent constant API calls
   useEffect(() => {
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current);
-    }
-
-    searchTimeoutRef.current = setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
-    }, 800); // Increased debounce delay
+    }, 500);
 
-    return () => {
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
-      }
-    };
+    return () => clearTimeout(timeoutId);
   }, [searchTerm]);
 
   // Fetch conversations and messages with stable dependencies
@@ -90,8 +75,10 @@ const Messages: React.FC = () => {
     },
     {
       enabled: !!user?.id,
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      refetchOnWindowFocus: false, // Disable refetch on window focus for better UX
+      staleTime: 10 * 60 * 1000, // 10 minutes - longer stale time
+      refetchOnWindowFocus: false,
+      refetchOnMount: false, // Prevent refetch on component mount
+      refetchInterval: false, // Disable interval refetching
     }
   );
 
@@ -151,14 +138,12 @@ const Messages: React.FC = () => {
     }
   }, [selectedConversation?._id, markAsRead]);
 
-  // Auto-resize textarea
+  // Auto-resize textarea with throttling
   useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = `${Math.min(
-        textareaRef.current.scrollHeight,
-        120
-      )}px`;
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = "auto";
+      textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
     }
   }, [messageInput]);
 
@@ -203,50 +188,33 @@ const Messages: React.FC = () => {
       const newValue = e.target.value;
       setMessageInput(newValue);
 
-      // Optimized typing indicator logic
+      // Simplified typing indicator - no socket calls to prevent lag
       if (selectedConversationId && newValue.trim()) {
-        // Only start typing indicator if not already typing
         if (!isTyping) {
           setIsTyping(true);
-          startTyping(selectedConversationId);
         }
 
-        // Clear existing timeout to prevent multiple calls
         if (typingTimeoutRef.current) {
           clearTimeout(typingTimeoutRef.current);
         }
 
-        // Set new timeout to stop typing indicator
         typingTimeoutRef.current = setTimeout(() => {
           setIsTyping(false);
-          stopTyping(selectedConversationId);
-        }, 2000); // Increased timeout to reduce frequency
+        }, 1000);
       } else if (!newValue.trim() && isTyping) {
-        // Stop typing immediately if input is empty
         setIsTyping(false);
-        if (selectedConversationId) {
-          stopTyping(selectedConversationId);
-        }
         if (typingTimeoutRef.current) {
           clearTimeout(typingTimeoutRef.current);
         }
       }
     },
-    [selectedConversationId, isTyping, startTyping, stopTyping]
+    [selectedConversationId, isTyping]
   );
 
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
       setSearchTerm(value);
-
-      // If search is cleared, immediately update debounced term
-      if (!value.trim()) {
-        setDebouncedSearchTerm("");
-        if (searchTimeoutRef.current) {
-          clearTimeout(searchTimeoutRef.current);
-        }
-      }
     },
     []
   );
@@ -262,7 +230,6 @@ const Messages: React.FC = () => {
 
   const isMessageFromMe = useCallback(
     (message: Message) => {
-      // Handle both old and new message structure
       const senderId =
         typeof message.senderId === "string"
           ? message.senderId
@@ -301,7 +268,6 @@ const Messages: React.FC = () => {
 
   const handleNewMessage = useCallback(
     (_: string, instructorId: string, courseId: string) => {
-      // Create a new conversation by sending the first message
       const messageData: CreateMessageData = {
         receiverId: instructorId,
         courseId: courseId,
@@ -311,11 +277,7 @@ const Messages: React.FC = () => {
       sendMessage.mutate(messageData, {
         onSuccess: () => {
           setShowNewMessageModal(false);
-          // Refresh conversations to show the new one
           refetchConversations();
-
-          // The conversation will be created automatically by the server
-          // when the first message is sent
         },
         onError: (error) => {
           console.error("Failed to create conversation:", error);
@@ -626,7 +588,6 @@ const Messages: React.FC = () => {
               <>
                 {messages.map((message, index) => {
                   const fromMe = isMessageFromMe(message);
-                  // console.log("from me:", fromMe);
                   const showDateSeparator =
                     index === 0 ||
                     (!isToday(new Date(message.createdAt)) &&
