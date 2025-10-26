@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   useInstructorAnalytics,
   useInstructorCoursesWithStats,
@@ -21,8 +21,13 @@ import CourseList from "../../components/Instructor/Courses/CourseList";
 
 const InstructorCourses = () => {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [searchParams, _] = useSearchParams();
+  const [searchTerm, setSearchTerm] = useState(
+    searchParams.get("search") || ""
+  );
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(
+    searchParams.get("search") || ""
+  );
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
@@ -30,6 +35,16 @@ const InstructorCourses = () => {
   const [priceFilter, setPriceFilter] = useState<PriceFilter>("all");
   const [ratingFilter, setRatingFilter] = useState<RatingFilter>("all");
   const [page, setPage] = useState(1);
+
+  // Handle URL search parameters
+  useEffect(() => {
+    const urlSearchTerm = searchParams.get("search") || "";
+    if (urlSearchTerm !== searchTerm) {
+      setSearchTerm(urlSearchTerm);
+      setDebouncedSearchTerm(urlSearchTerm);
+      setPage(1);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -58,7 +73,7 @@ const InstructorCourses = () => {
     },
     {
       placeholderData: (previousData) => previousData,
-      staleTime: 5 * 60 * 1000,
+      staleTime: 1 * 60 * 1000, // Reduced stale time for faster updates
     }
   );
 

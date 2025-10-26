@@ -422,7 +422,13 @@ const SettingsPanel = ({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mt-5">
+                <div
+                  className={`grid grid-cols-1 ${
+                    course.status === "pending"
+                      ? "md:grid-cols-5"
+                      : "md:grid-cols-4"
+                  } gap-4 mt-5`}
+                >
                   {/* Save as Draft */}
                   {course.status === "pending" && onSaveAsDraft && (
                     <div className="flex flex-col">
@@ -442,26 +448,24 @@ const SettingsPanel = ({
                   )}
 
                   {/* Submit for Approval */}
-                  {(course.status === "draft" ||
-                    course.status === "rejected") &&
-                    onSubmitForApproval && (
-                      <div className="flex flex-col">
-                        <button
-                          onClick={onSubmitForApproval}
-                          className="flex items-center justify-center px-3 py-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105 shadow-lg cursor-pointer"
-                        >
-                          <FaPaperPlane className="mr-3 text-lg" />
-                          <div className="text-left">
-                            <div className="font-semibold">
-                              Submit for Approval
-                            </div>
-                            <div className="text-sm opacity-90">
-                              Send to admin review
-                            </div>
+                  {course.status === "draft" && onSubmitForApproval && (
+                    <div className="flex flex-col">
+                      <button
+                        onClick={onSubmitForApproval}
+                        className="flex items-center justify-center px-1 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105 shadow-lg cursor-pointer"
+                      >
+                        <FaPaperPlane className="mr-3 text-lg" />
+                        <div className="text-left">
+                          <div className="font-semibold">
+                            Submit for Approval
                           </div>
-                        </button>
-                      </div>
-                    )}
+                          <div className="text-sm opacity-90">
+                            Send to admin review
+                          </div>
+                        </div>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

@@ -20,7 +20,12 @@ export type SortOption =
   | "rating-desc"
   | "rating-asc";
 
-export type StatusFilter = "all" | "published" | "draft";
+export type StatusFilter =
+  | "all"
+  | "published"
+  | "draft"
+  | "pending"
+  | "rejected";
 
 export type PriceFilter =
   | "all"
@@ -84,6 +89,8 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
     { value: "all", label: "All Courses" },
     { value: "published", label: "Published" },
     { value: "draft", label: "Draft" },
+    { value: "pending", label: "Pending" },
+    { value: "rejected", label: "Rejected" },
   ];
 
   const priceOptions = [

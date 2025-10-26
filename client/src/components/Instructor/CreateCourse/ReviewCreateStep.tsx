@@ -11,7 +11,6 @@ import {
   FaList,
   FaCheckCircle,
   FaImage,
-  FaEdit,
 } from "react-icons/fa";
 
 interface ReviewCreateStepProps {
@@ -273,9 +272,7 @@ const ReviewCreateStep: React.FC<ReviewCreateStepProps> = ({
                   <button
                     type="button"
                     className="text-gray-400 hover:text-gray-600 transition-colors duration-200 cursor-pointer"
-                  >
-                    <FaEdit className="text-sm" />
-                  </button>
+                  ></button>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -414,7 +411,6 @@ const ReviewCreateStep: React.FC<ReviewCreateStepProps> = ({
                   <span>Preview available after creation</span>
                 </span>
                 <span className="flex items-center space-x-1">
-                  <FaEdit />
                   <span>All details can be edited later</span>
                 </span>
               </div>
