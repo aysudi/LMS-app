@@ -55,6 +55,42 @@ const InstructorCourses = () => {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
+  // Convert filters to server-compatible format
+  const getServerPriceFilter = (priceFilter: PriceFilter) => {
+    switch (priceFilter) {
+      case "free":
+        return { minPrice: 0, maxPrice: 0 };
+      case "paid":
+        return { minPrice: 1 };
+      case "under-50":
+        return { minPrice: 1, maxPrice: 49.99 };
+      case "50-100":
+        return { minPrice: 50, maxPrice: 100 };
+      case "over-100":
+        return { minPrice: 100.01 };
+      default:
+        return {};
+    }
+  };
+
+  const getServerRatingFilter = (ratingFilter: RatingFilter) => {
+    switch (ratingFilter) {
+      case "4-plus":
+        return 4;
+      case "3-plus":
+        return 3;
+      case "2-plus":
+        return 2;
+      case "1-plus":
+        return 1;
+      default:
+        return undefined;
+    }
+  };
+
+  const priceParams = getServerPriceFilter(priceFilter);
+  const minRating = getServerRatingFilter(ratingFilter);
+
   const {
     data: coursesData,
     isLoading,
@@ -70,10 +106,12 @@ const InstructorCourses = () => {
       category: selectedCategory !== "all" ? selectedCategory : undefined,
       sortBy: getSortByValue(sortBy),
       sortOrder: getSortOrder(sortBy),
+      ...priceParams,
+      ...(minRating && { minRating }),
     },
     {
       placeholderData: (previousData) => previousData,
-      staleTime: 1 * 60 * 1000, // Reduced stale time for faster updates
+      staleTime: 1 * 60 * 1000,
     }
   );
 
@@ -215,7 +253,8 @@ const InstructorCourses = () => {
     if (result.isConfirmed) {
       try {
         for (const courseId of selectedCourses) {
-          await deleteMutation.mutateAsync(courseId);
+          await deleteMutation.mutateAsync(courseId!);
+          // window.location.reload();
         }
         setSelectedCourses([]);
       } catch (error) {

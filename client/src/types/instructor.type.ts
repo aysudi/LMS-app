@@ -76,6 +76,7 @@ export interface InstructorCoursesQuery {
   level?: string;
   minPrice?: number;
   maxPrice?: number;
+  minRating?: number;
   sortBy?: "rating" | "originalPrice" | "createdAt" | "studentsCount" | "title";
   sortOrder?: "asc" | "desc";
 }

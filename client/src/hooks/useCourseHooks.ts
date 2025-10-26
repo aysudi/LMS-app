@@ -197,35 +197,24 @@ export const useCreateCourse = (
   return useMutation({
     mutationFn: (courseData: FormData) => createCourse(courseData),
     onSuccess: () => {
-      // Invalidate all instructor course queries with precise targeting
       queryClient.invalidateQueries({
         predicate: (query) => {
           const key = query.queryKey;
           return (
-            // Target: ["instructor", "courses", ...] patterns
-            (key[0] === "instructor" && key[1] === "courses") ||
-            // Target: ["instructor", "courses", "stats", ...] patterns specifically
-            (key[0] === "instructor" &&
-              key[1] === "courses" &&
-              key[2] === "stats")
+            (Array.isArray(key) && key[0] === "instructor") ||
+            (Array.isArray(key) && key[0] === "courses")
           );
         },
       });
 
-      // Invalidate general course lists
       queryClient.invalidateQueries({
-        queryKey: courseQueryKeys.lists(),
+        queryKey: courseQueryKeys.all,
       });
 
-      // Force refetch of instructor courses to ensure immediate update
       queryClient.refetchQueries({
         predicate: (query) => {
           const key = query.queryKey;
-          return (
-            key[0] === "instructor" &&
-            key[1] === "courses" &&
-            key[2] === "stats"
-          );
+          return Array.isArray(key) && key[0] === "instructor";
         },
       });
     },
@@ -252,35 +241,27 @@ export const useUpdateCourse = (
         data
       );
 
-      // Invalidate all instructor course queries with precise targeting
+      // Invalidate ALL instructor-related queries - comprehensive approach
       queryClient.invalidateQueries({
         predicate: (query) => {
           const key = query.queryKey;
           return (
-            // Target: ["instructor", "courses", ...] patterns
-            (key[0] === "instructor" && key[1] === "courses") ||
-            // Target: ["instructor", "courses", "stats", ...] patterns specifically
-            (key[0] === "instructor" &&
-              key[1] === "courses" &&
-              key[2] === "stats")
+            (Array.isArray(key) && key[0] === "instructor") ||
+            (Array.isArray(key) && key[0] === "courses")
           );
         },
       });
 
-      // Invalidate general course lists
+      // Also invalidate course lists
       queryClient.invalidateQueries({
-        queryKey: courseQueryKeys.lists(),
+        queryKey: courseQueryKeys.all,
       });
 
-      // Force refetch of instructor courses to ensure immediate update
+      // Refetch all instructor queries immediately
       queryClient.refetchQueries({
         predicate: (query) => {
           const key = query.queryKey;
-          return (
-            key[0] === "instructor" &&
-            key[1] === "courses" &&
-            key[2] === "stats"
-          );
+          return Array.isArray(key) && key[0] === "instructor";
         },
       });
     },
@@ -300,39 +281,31 @@ export const useDeleteCourse = (
   return useMutation({
     mutationFn: deleteCourse,
     onSuccess: (_, courseId) => {
-      // Remove the specific course from cache
       queryClient.removeQueries({
         queryKey: courseQueryKeys.detail(courseId),
       });
 
-      // Invalidate all instructor course queries with precise targeting
       queryClient.invalidateQueries({
         predicate: (query) => {
           const key = query.queryKey;
           return (
-            // Target: ["instructor", "courses", ...] patterns
-            (key[0] === "instructor" && key[1] === "courses") ||
-            // Target: ["instructor", "courses", "stats", ...] patterns specifically
-            (key[0] === "instructor" &&
-              key[1] === "courses" &&
-              key[2] === "stats")
+            (Array.isArray(key) && key[0] === "instructor") ||
+            (Array.isArray(key) && key[0] === "courses")
           );
         },
       });
 
-      // Invalidate general course lists
       queryClient.invalidateQueries({
-        queryKey: courseQueryKeys.lists(),
+        queryKey: courseQueryKeys.all,
       });
 
-      // Force refetch of instructor courses to ensure immediate update
       queryClient.refetchQueries({
         predicate: (query) => {
           const key = query.queryKey;
           return (
-            key[0] === "instructor" &&
-            key[1] === "courses" &&
-            key[2] === "stats"
+            (Array.isArray(key) && key[0] === "instructor") ||
+            (Array.isArray(key) && key[0] === "courses") ||
+            (Array.isArray(key) && key[0] === "course")
           );
         },
       });

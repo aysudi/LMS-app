@@ -133,6 +133,7 @@ export const getInstructorCoursesWithStatsService = async (
     level?: string;
     minPrice?: number;
     maxPrice?: number;
+    minRating?: number;
     sortBy?: string;
     sortOrder?: "asc" | "desc";
   } = {}
@@ -146,6 +147,7 @@ export const getInstructorCoursesWithStatsService = async (
     level,
     minPrice,
     maxPrice,
+    minRating,
     sortBy = "createdAt",
     sortOrder = "desc",
   } = queryParams;
@@ -190,6 +192,10 @@ export const getInstructorCoursesWithStatsService = async (
     filter.originalPrice = {};
     if (minPrice !== undefined) filter.originalPrice.$gte = minPrice;
     if (maxPrice !== undefined) filter.originalPrice.$lte = maxPrice;
+  }
+
+  if (minRating !== undefined) {
+    filter.rating = { $gte: minRating };
   }
 
   let sort: any = {};

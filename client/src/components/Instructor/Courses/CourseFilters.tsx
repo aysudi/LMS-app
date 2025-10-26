@@ -282,39 +282,70 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
                 </div>
               )}
 
-              {/* Sort Order */}
+              {/* Sort Order Toggle */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Sort Order
+                  Sort Direction
                 </label>
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => {
                       const currentSort = sortBy;
-                      if (currentSort.includes("asc")) {
-                        onSortChange(
-                          currentSort.replace("asc", "desc") as SortOption
-                        );
-                      } else if (currentSort.includes("desc")) {
-                        onSortChange(
-                          currentSort.replace("desc", "asc") as SortOption
-                        );
+                      let newSort: SortOption;
+
+                      // Handle specific cases
+                      switch (currentSort) {
+                        case "newest":
+                          newSort = "oldest";
+                          break;
+                        case "oldest":
+                          newSort = "newest";
+                          break;
+                        case "title-asc":
+                          newSort = "title-desc";
+                          break;
+                        case "title-desc":
+                          newSort = "title-asc";
+                          break;
+                        case "students-desc":
+                          newSort = "students-asc";
+                          break;
+                        case "students-asc":
+                          newSort = "students-desc";
+                          break;
+                        case "price-desc":
+                          newSort = "price-asc";
+                          break;
+                        case "price-asc":
+                          newSort = "price-desc";
+                          break;
+                        case "rating-desc":
+                          newSort = "rating-asc";
+                          break;
+                        case "rating-asc":
+                          newSort = "rating-desc";
+                          break;
+                        default:
+                          newSort = "oldest";
                       }
+                      onSortChange(newSort);
                     }}
-                    className="flex-1 p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200 flex items-center justify-center"
-                    title="Toggle sort order"
+                    className="flex-1 p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200 flex items-center justify-center"
+                    title="Toggle sort direction"
                   >
-                    {sortBy.includes("desc") ? (
+                    {sortBy.includes("desc") || sortBy === "newest" ? (
                       <>
                         <FaSortAmountDown className="text-sm text-gray-600 mr-2" />
                         <span className="text-sm text-gray-700">
-                          Descending
+                          High to Low
                         </span>
                       </>
                     ) : (
                       <>
                         <FaSortAmountUp className="text-sm text-gray-600 mr-2" />
-                        <span className="text-sm text-gray-700">Ascending</span>
+                        <span className="text-sm text-gray-700">
+                          Low to High
+                        </span>
                       </>
                     )}
                   </button>
