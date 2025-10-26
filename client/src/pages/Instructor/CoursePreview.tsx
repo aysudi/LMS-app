@@ -119,7 +119,7 @@ const InstructorCoursePreview = () => {
             </div>
             <button
               onClick={() => navigate(`/instructor/courses/${courseId}/edit`)}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center space-x-2"
+              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center space-x-2 cursor-pointer"
             >
               <FaEdit className="text-sm" />
               <span>Edit Course</span>
@@ -187,7 +187,7 @@ const InstructorCoursePreview = () => {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id as any)}
-                      className={`py-4 border-b-2 font-medium text-sm transition-colors ${
+                      className={`py-4 border-b-2 font-medium text-sm transition-colors cursor-pointer ${
                         activeTab === tab.id
                           ? "border-indigo-500 text-indigo-600"
                           : "border-transparent text-gray-500 hover:text-gray-700"

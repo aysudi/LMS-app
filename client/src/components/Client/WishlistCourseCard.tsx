@@ -4,8 +4,9 @@ import { FaStar, FaUsers, FaArrowRight, FaHeart } from "react-icons/fa";
 import { useAuthContext } from "../../context/AuthContext";
 import { usePersonalization } from "../../hooks/usePersonalization";
 import { useToggleWishlist, useWishlistHelpers } from "../../hooks/useWishlist";
-import { useSnackbar } from "notistack";
 import type { Course } from "../../types/course.type";
+import { useToast } from "../UI/ToastProvider";
+import { generalToasts } from "../../utils/toastUtils";
 
 interface CourseCardProps {
   course: Course;
@@ -23,7 +24,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
   onRemoveFromWishlist,
 }) => {
   const navigate = useNavigate();
-  const { enqueueSnackbar } = useSnackbar();
+  const { showToast } = useToast();
   const { isAuthenticated } = useAuthContext();
   const { addViewedCourse } = usePersonalization();
   const { toggleWishlist, isLoading: isToggling } = useToggleWishlist();
@@ -48,17 +49,18 @@ const CourseCard: React.FC<CourseCardProps> = ({
       const wasInWishlist = checkIfInWishlist(course.id);
       await toggleWishlist(course.id, wasInWishlist);
 
-      enqueueSnackbar(
-        wasInWishlist
-          ? `"${course.title}" removed from wishlist`
-          : `"${course.title}" added to wishlist`,
-        { variant: "success", autoHideDuration: 3000 }
+      showToast(
+        generalToasts.success(
+          wasInWishlist ? "Removed from wishlist" : "Added to wishlist",
+          wasInWishlist
+            ? `"${course.title}" removed from wishlist`
+            : `"${course.title}" added to wishlist`
+        )
       );
     } catch (error) {
-      enqueueSnackbar("Failed to update wishlist", {
-        variant: "error",
-        autoHideDuration: 3000,
-      });
+      showToast(
+        generalToasts.error("Failed to update wishlist", `"${course.title}"`)
+      );
     }
   };
 

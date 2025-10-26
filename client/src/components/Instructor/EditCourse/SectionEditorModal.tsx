@@ -138,7 +138,7 @@ const SectionEditorModal = ({
             </div>
             <button
               onClick={onClose}
-              className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+              className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 cursor-pointer"
             >
               <FaTimes className="h-5 w-5" />
             </button>
@@ -263,7 +263,7 @@ const SectionEditorModal = ({
               <button
                 type="submit"
                 disabled={isLoading || !title.trim()}
-                className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center cursor-pointer"
               >
                 {isLoading ? (
                   <FaSpinner className="animate-spin mr-2" />

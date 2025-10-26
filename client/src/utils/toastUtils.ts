@@ -97,23 +97,23 @@ export const courseToasts = {
 
 // Section-related toasts
 export const sectionToasts = {
-  created: (sectionTitle: string): ToastConfig => ({
+  created: (): ToastConfig => ({
     title: "✅ Section Added",
-    message: `"${sectionTitle}" has been added to the course`,
+    message: `Section has been added to the course`,
     type: "success",
     duration: 3000,
   }),
 
-  updated: (sectionTitle: string): ToastConfig => ({
+  updated: (): ToastConfig => ({
     title: "✅ Section Updated",
-    message: `"${sectionTitle}" has been updated successfully`,
+    message: `Section has been updated successfully`,
     type: "success",
     duration: 3000,
   }),
 
-  deleted: (sectionTitle: string): ToastConfig => ({
+  deleted: (): ToastConfig => ({
     title: "✅ Section Deleted",
-    message: `"${sectionTitle}" has been removed from the course`,
+    message: `Section has been removed from the course`,
     type: "success",
     duration: 3000,
   }),
@@ -128,23 +128,23 @@ export const sectionToasts = {
 
 // Lesson-related toasts
 export const lessonToasts = {
-  created: (lessonTitle: string): ToastConfig => ({
+  created: (): ToastConfig => ({
     title: "✅ Lesson Added",
-    message: `"${lessonTitle}" has been added to the section`,
+    message: `Lesson has been added to the section`,
     type: "success",
     duration: 3000,
   }),
 
-  updated: (lessonTitle: string): ToastConfig => ({
+  updated: (): ToastConfig => ({
     title: "✅ Lesson Updated",
-    message: `"${lessonTitle}" has been updated successfully`,
+    message: `Lesson has been updated successfully`,
     type: "success",
     duration: 3000,
   }),
 
-  deleted: (lessonTitle: string): ToastConfig => ({
+  deleted: (): ToastConfig => ({
     title: "✅ Lesson Deleted",
-    message: `"${lessonTitle}" has been removed from the section`,
+    message: `Lesson has been removed from the section`,
     type: "success",
     duration: 3000,
   }),

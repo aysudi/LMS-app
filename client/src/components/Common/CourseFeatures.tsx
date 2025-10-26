@@ -10,7 +10,7 @@ const CourseFeatures: React.FC<CourseFeaturesProps> = ({ course }) => {
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
     if (hours > 0) {
-      return `${hours}h ${mins}m`;
+      return `${hours}h ${mins.toFixed(0)}m`;
     }
     return `${mins}m`;
   };
@@ -18,9 +18,9 @@ const CourseFeatures: React.FC<CourseFeaturesProps> = ({ course }) => {
   const courseFeatures = [
     {
       icon: FaClock,
-      text: `${formatDuration(course.totalDuration / 60 || 120)} total`,
+      text: `${formatDuration(course.totalDuration / 60 || 0)} total`,
     },
-    { icon: FaPlayCircle, text: `${course.totalLessons || 15} lectures` },
+    { icon: FaPlayCircle, text: `${course.totalLessons || 0} lectures` },
     { icon: FaCheckCircle, text: "Lifetime access" },
     { icon: FaMobile, text: "Mobile & TV access" },
   ];

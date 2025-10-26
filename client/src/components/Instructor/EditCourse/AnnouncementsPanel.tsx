@@ -117,7 +117,7 @@ const AnnouncementModal = ({
             </h2>
             <button
               onClick={onClose}
-              className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100"
+              className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 cursor-pointer"
             >
               ✕
             </button>
@@ -194,13 +194,13 @@ const AnnouncementModal = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-6 py-3 border border-gray-200 rounded-xl text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+                className="px-6 py-3 border border-gray-200 rounded-xl text-gray-700 font-medium hover:bg-gray-50 transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-200"
+                className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 cursor-pointer"
               >
                 {announcement ? "Update" : "Create"} Announcement
               </button>
@@ -305,7 +305,7 @@ const AnnouncementsPanel = ({ course }: AnnouncementsPanelProps) => {
         </div>
         <button
           onClick={handleCreateAnnouncement}
-          className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-200"
+          className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 cursor-pointer"
         >
           <FaPlus className="mr-2" />
           New Announcement
@@ -382,7 +382,7 @@ const AnnouncementsPanel = ({ course }: AnnouncementsPanelProps) => {
                 <div className="flex items-center space-x-2 ml-4">
                   <button
                     onClick={() => handleDeleteAnnouncement(announcement.id)}
-                    className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                    className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
                   >
                     <FaTrash />
                   </button>
@@ -404,7 +404,7 @@ const AnnouncementsPanel = ({ course }: AnnouncementsPanelProps) => {
             </p>
             <button
               onClick={handleCreateAnnouncement}
-              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-200"
+              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 cursor-pointer"
             >
               <FaPlus className="mr-2" />
               Create First Announcement

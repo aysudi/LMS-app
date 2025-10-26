@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { FaStar, FaHeart, FaShoppingCart } from "react-icons/fa";
+import { FaStar, FaShoppingCart } from "react-icons/fa";
 import type { Course } from "../../types/course.type";
 import { useCardHover } from "../../hooks/useCardHover";
 import { getImageUrl } from "../../utils/mediaHelpers";
@@ -67,48 +67,6 @@ const FreeCourseCard: React.FC<FreeCourseCardProps> = ({
 
           {/* Action Buttons */}
           <div className="absolute top-2 right-2 flex space-x-2">
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={(e) => {
-                e.stopPropagation();
-                onWishlistToggle(e, course);
-              }}
-              disabled={processingWishlist.has(course.id)}
-              className={`p-3 bg-white/90 rounded-full custom-icon-shadow transition-all duration-200 cursor-pointer ${
-                processingWishlist.has(course.id)
-                  ? "text-purple-500 opacity-70"
-                  : checkIfInWishlist(course.id)
-                  ? "text-red-500 hover:bg-red-50"
-                  : "text-gray-500 hover:bg-gray-50 hover:text-red-500"
-              }`}
-              title={
-                processingWishlist.has(course.id)
-                  ? "Processing..."
-                  : checkIfInWishlist(course.id)
-                  ? "Remove from wishlist"
-                  : "Add to wishlist"
-              }
-              animate={
-                processingWishlist.has(course.id) ? { scale: [1, 1.1, 1] } : {}
-              }
-              transition={
-                processingWishlist.has(course.id)
-                  ? {
-                      duration: 0.8,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }
-                  : {}
-              }
-            >
-              <FaHeart
-                className={`text-lg ${
-                  checkIfInWishlist(course.id) ? "fill-current" : ""
-                }`}
-              />
-            </motion.button>
-
             {!course.isFree &&
               onCartToggle &&
               checkIfInCart &&

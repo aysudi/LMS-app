@@ -1,6 +1,7 @@
 // Base announcement interface
 export interface Announcement {
   _id: string;
+  id: string;
   title: string;
   content: string;
   course: {

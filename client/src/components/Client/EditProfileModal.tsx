@@ -2,10 +2,11 @@ import { useFormik } from "formik";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import profileValidationSchema from "../../validations/profileValidation";
-import { enqueueSnackbar } from "notistack";
 import { FaPlus, FaSave, FaTimes } from "react-icons/fa";
 import type { User } from "../../types/user.type";
 import type { EditProfileFormData } from "../../types/forms";
+import { useToast } from "../UI/ToastProvider";
+import { generalToasts } from "../../utils/toastUtils";
 
 type Props = {
   isEditing: boolean;
@@ -15,6 +16,7 @@ type Props = {
 const EditProfileModal = ({ isEditing, setIsEditing }: Props) => {
   const [user, setUser] = useState<User | null>(null);
   const [newSkill, setNewSkill] = useState("");
+  const { showToast } = useToast();
 
   const editProfileFormik = useFormik<EditProfileFormData>({
     initialValues: {
@@ -37,9 +39,12 @@ const EditProfileModal = ({ isEditing, setIsEditing }: Props) => {
       try {
         console.log("Updating profile:", values);
         await new Promise((resolve) => setTimeout(resolve, 1000));
-        enqueueSnackbar("Profile updated successfully!", {
-          variant: "success",
-        });
+        showToast(
+          generalToasts.success(
+            "Profile updated successfully!",
+            `"${user?.firstName}"`
+          )
+        );
         setIsEditing(false);
 
         if (user) {
@@ -55,7 +60,12 @@ const EditProfileModal = ({ isEditing, setIsEditing }: Props) => {
           setUser(updatedUser as User);
         }
       } catch (error) {
-        enqueueSnackbar("Failed to update profile", { variant: "error" });
+        showToast(
+          generalToasts.error(
+            "Failed to update profile",
+            `"${user?.firstName}"`
+          )
+        );
       }
     },
   });

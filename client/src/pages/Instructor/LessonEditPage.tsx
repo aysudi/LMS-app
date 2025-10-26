@@ -16,8 +16,9 @@ import {
 import type { Lesson, Section } from "../../types/course.type";
 import RichTextEditor from "../../components/UI/RichTextEditor";
 import { useCourse } from "../../hooks/useCourseHooks";
-import { enqueueSnackbar } from "notistack";
 import { useUpdateLesson } from "../../hooks/useLessonMutations";
+import { useToast } from "../../components/UI/ToastProvider";
+import { generalToasts } from "../../utils/toastUtils";
 
 interface QuizQuestion {
   id: string;
@@ -40,6 +41,7 @@ const LessonEditPage = () => {
   const [searchParams] = useSearchParams();
   const sectionId = searchParams.get("sectionId");
   const { lessonId } = useParams();
+  const { showToast } = useToast();
 
   const { data: courseData, isLoading: courseLoading } = useCourse(courseId!);
 
@@ -109,23 +111,30 @@ const LessonEditPage = () => {
     if (!file) return;
 
     if (!file.type.startsWith("video/")) {
-      enqueueSnackbar("Please select a video file", { variant: "error" });
+      showToast(
+        generalToasts.error("Invalid file type", "Please select a video file")
+      );
       return;
     }
 
     if (file.size > 500 * 1024 * 1024) {
-      enqueueSnackbar("Video size should be less than 500MB", {
-        variant: "error",
-      });
+      showToast(
+        generalToasts.error(
+          "File too large",
+          "Video size should be less than 500MB"
+        )
+      );
       return;
     }
 
     setVideoFile(file);
 
-    enqueueSnackbar(`📹 Video "${file.name}" uploaded successfully!`, {
-      variant: "success",
-      autoHideDuration: 3000,
-    });
+    showToast(
+      generalToasts.success(
+        "Video Uploaded",
+        `Video "${file.name}" uploaded successfully!`
+      )
+    );
 
     const videoElement = document.createElement("video");
     videoElement.preload = "metadata";
@@ -160,9 +169,12 @@ const LessonEditPage = () => {
 
   const handleResourceFileChange = (id: string, file: File) => {
     if (file.size > 50 * 1024 * 1024) {
-      enqueueSnackbar("File size should be less than 50MB", {
-        variant: "error",
-      });
+      showToast(
+        generalToasts.error(
+          "File too large",
+          "File size should be less than 50MB"
+        )
+      );
       return;
     }
 
@@ -202,12 +214,19 @@ const LessonEditPage = () => {
 
   const handleSave = async () => {
     if (!title.trim()) {
-      enqueueSnackbar("Lesson title is required", { variant: "error" });
+      showToast(
+        generalToasts.error("Title is required", "Please enter a lesson title")
+      );
       return;
     }
 
     if (!lessonId) {
-      enqueueSnackbar("Lesson ID is missing", { variant: "error" });
+      showToast(
+        generalToasts.error(
+          "Lesson ID is missing",
+          "Please provide a lesson ID"
+        )
+      );
       return;
     }
 
@@ -257,23 +276,24 @@ const LessonEditPage = () => {
         updateData,
       });
 
-      enqueueSnackbar("✨ Lesson updated successfully! what??", {
-        variant: "success",
-        autoHideDuration: 4000,
-      });
+      showToast(
+        generalToasts.success(
+          "Lesson updated",
+          "✨ Lesson updated successfully!"
+        )
+      );
 
       setTimeout(() => {
         navigate(`/instructor/courses/${courseId}/edit?tab=curriculum`);
       }, 1000);
     } catch (error) {
       console.error("Error updating lesson:", error);
-      enqueueSnackbar(
-        (error as any)?.response?.data?.message ||
-          "❌ Failed to update lesson. Please try again.",
-        {
-          variant: "error",
-          autoHideDuration: 6000,
-        }
+      showToast(
+        generalToasts.error(
+          "Update failed",
+          (error as any)?.response?.data?.message ||
+            "❌ Failed to update lesson. Please try again."
+        )
       );
     }
   };

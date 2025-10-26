@@ -71,7 +71,6 @@ const InstructorDashboard = () => {
   }
 
   const { overview: stats, performance } = overview.data;
-  console.log("overview: ", overview);
 
   const revenueGrowth = calculateGrowthRate(
     stats.monthlyRevenue,

@@ -18,7 +18,12 @@ import {
 } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Section, Lesson, Course } from "../../../types/course.type";
-import { enqueueSnackbar } from "notistack";
+import { useToast } from "../../UI/ToastProvider";
+import {
+  generalToasts,
+  lessonToasts,
+  sectionToasts,
+} from "../../../utils/toastUtils";
 
 interface CurriculumPanelProps {
   course: Course;
@@ -44,6 +49,7 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
 
   const deleteSectionMutation = useDeleteSection(course.id);
   const deleteLessonMutation = useDeleteLesson(course.id, "");
+  const { showToast } = useToast();
 
   const toggleSection = (sectionId: string) => {
     setExpandedSections((prev) => {
@@ -161,40 +167,22 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
       if (deleteConfirmation.type === "section") {
         await deleteSectionMutation.mutateAsync(deleteConfirmation.sectionId);
 
-        enqueueSnackbar("🗑️ Section deleted successfully", {
-          autoHideDuration: 3000,
-          style: {
-            background: "#10B981",
-            color: "#ffffff",
-            fontWeight: "500",
-            borderRadius: "12px",
-            padding: "16px 24px",
-            fontSize: "14px",
-          },
-        });
+        showToast(sectionToasts.deleted());
       } else if (
         deleteConfirmation.type === "lesson" &&
         deleteConfirmation.lessonId
       ) {
         await deleteLessonMutation.mutateAsync(deleteConfirmation.lessonId);
 
-        enqueueSnackbar("🗑️ Lesson deleted successfully", {
-          autoHideDuration: 3000,
-          style: {
-            background: "#10B981",
-            color: "#ffffff",
-            fontWeight: "500",
-            borderRadius: "12px",
-            padding: "16px 24px",
-            fontSize: "14px",
-          },
-        });
+        showToast(lessonToasts.deleted());
       }
     } catch (error) {
       console.error("Error deleting:", error);
-      enqueueSnackbar(`Failed to delete ${deleteConfirmation.type}`, {
-        variant: "error",
-      });
+      showToast(
+        deleteConfirmation.type === "section"
+          ? sectionToasts.error("delete")
+          : lessonToasts.error("delete")
+      );
     } finally {
       setDeleteConfirmation(null);
     }
@@ -212,9 +200,7 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
   }) => {
     try {
       if (!formData.title.trim()) {
-        enqueueSnackbar("Title is required", {
-          variant: "error",
-        });
+        showToast(generalToasts.error("Error", "Title is required"));
         return;
       }
 
@@ -245,9 +231,7 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
         );
 
         if (sectionIndex === -1) {
-          enqueueSnackbar("Section not found", {
-            variant: "error",
-          });
+          showToast(generalToasts.error("Error", "Section not found"));
           return;
         }
 
@@ -299,37 +283,23 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
       const isUpdate = editModal?.data;
       const isSection = editModal?.type === "section";
 
-      enqueueSnackbar(
+      showToast(
         isUpdate
-          ? `✨ ${isSection ? "Section" : "Lesson"} updated successfully!`
-          : `🎉 ${isSection ? "Section" : "Lesson"} created successfully!`,
-        {
-          variant: "success",
-          autoHideDuration: 4000,
-          style: {
-            background: "#10B981",
-            color: "#ffffff",
-            fontWeight: "500",
-            borderRadius: "12px",
-            padding: "16px 24px",
-            fontSize: "14px",
-          },
-        }
+          ? isSection
+            ? sectionToasts.updated()
+            : lessonToasts.updated()
+          : isSection
+          ? sectionToasts.created()
+          : lessonToasts.created()
       );
     } catch (error) {
       console.error("Error in handleSave:", error);
-      enqueueSnackbar("❌ Something went wrong. Please try again.", {
-        variant: "error",
-        autoHideDuration: 6000,
-        style: {
-          background: "#EF4444",
-          color: "#ffffff",
-          fontWeight: "500",
-          borderRadius: "12px",
-          padding: "16px 24px",
-          fontSize: "14px",
-        },
-      });
+      showToast(
+        generalToasts.error(
+          "Error",
+          "❌ Something went wrong. Please try again."
+        )
+      );
     }
   };
 

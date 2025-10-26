@@ -85,7 +85,7 @@ const SettingsPanel = ({
                     id="isFree"
                     checked={formData.isFree}
                     onChange={(e) => handleChange("isFree", e.target.checked)}
-                    className="h-5 w-5 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                    className="h-5 w-5 text-green-600 focus:ring-green-500 border-gray-300 rounded cursor-pointer"
                   />
                   <label
                     htmlFor="isFree"
@@ -422,13 +422,13 @@ const SettingsPanel = ({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-5">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mt-5">
                   {/* Save as Draft */}
                   {course.status === "pending" && onSaveAsDraft && (
                     <div className="flex flex-col">
                       <button
                         onClick={onSaveAsDraft}
-                        className="flex items-center justify-center px-1 py-1 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 rounded-xl hover:from-gray-200 hover:to-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105 shadow-md cursor-pointer"
+                        className="flex items-center text-[0.94rem] justify-center px-1 py-1.5 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 rounded-xl hover:from-gray-200 hover:to-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105 shadow-md cursor-pointer"
                       >
                         <FaSave className="mr-3 text-lg" />
                         <div className="text-left">
@@ -498,7 +498,7 @@ const SettingsPanel = ({
                   <div className="mt-4 flex-shrink-0">
                     <button
                       onClick={onDelete}
-                      className="flex items-center px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105 shadow-lg cursor-pointer"
+                      className="flex items-center text-[0.94rem] px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105 shadow-lg cursor-pointer"
                     >
                       <FaTrashAlt className="mr-2" />
                       Delete Course
@@ -516,7 +516,7 @@ const SettingsPanel = ({
             <button
               onClick={onSave}
               disabled={!hasChanges || isSaving}
-              className="inline-flex items-center px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+              className="inline-flex items-center px-6 py-2 border border-transparent rounded-md shadow-sm text-md font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer"
             >
               {isSaving ? (
                 <>

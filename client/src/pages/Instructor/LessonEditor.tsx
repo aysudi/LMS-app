@@ -16,8 +16,9 @@ import {
 import type { Section } from "../../types/course.type";
 import RichTextEditor from "../../components/UI/RichTextEditor";
 import { useCourse } from "../../hooks/useCourseHooks";
-import { enqueueSnackbar } from "notistack";
 import { useCreateLesson } from "../../hooks/useLessonMutations";
+import { useToast } from "../../components/UI/ToastProvider";
+import { generalToasts } from "../../utils/toastUtils";
 
 interface QuizQuestion {
   id: string;
@@ -39,6 +40,7 @@ const LessonEditor = () => {
   const { courseId } = useParams();
   const [searchParams] = useSearchParams();
   const sectionId = searchParams.get("sectionId");
+  const { showToast } = useToast();
 
   const { data: courseData, isLoading: courseLoading } = useCourse(courseId!);
 
@@ -76,31 +78,30 @@ const LessonEditor = () => {
     if (!file) return;
 
     if (!file.type.startsWith("video/")) {
-      enqueueSnackbar("Please select a video file", { variant: "error" });
+      showToast(
+        generalToasts.warning("Select a video", "Please select a video file")
+      );
       return;
     }
 
     if (file.size > 500 * 1024 * 1024) {
-      enqueueSnackbar("Video size should be less than 500MB", {
-        variant: "error",
-      });
+      showToast(
+        generalToasts.error(
+          "File too large",
+          "Video size should be less than 500MB"
+        )
+      );
       return;
     }
 
     setVideoFile(file);
 
-    enqueueSnackbar(`📹 Video "${file.name}" uploaded successfully!`, {
-      variant: "success",
-      autoHideDuration: 3000,
-      style: {
-        background: "#8B5CF6",
-        color: "#ffffff",
-        fontWeight: "500",
-        borderRadius: "12px",
-        padding: "16px 24px",
-        fontSize: "14px",
-      },
-    });
+    showToast(
+      generalToasts.success(
+        "Video Uploaded",
+        `Video "${file.name}" uploaded successfully!`
+      )
+    );
 
     const videoElement = document.createElement("video");
     videoElement.preload = "metadata";
@@ -134,9 +135,12 @@ const LessonEditor = () => {
   const handleResourceFileChange = (id: string, file: File) => {
     if (file.size > 50 * 1024 * 1024) {
       // 50MB
-      enqueueSnackbar("File size should be less than 50MB", {
-        variant: "error",
-      });
+      showToast(
+        generalToasts.error(
+          "File too large",
+          "File size should be less than 50MB"
+        )
+      );
       return;
     }
 
@@ -176,14 +180,19 @@ const LessonEditor = () => {
 
   const handleSave = async () => {
     if (!title.trim()) {
-      enqueueSnackbar("Lesson title is required", { variant: "error" });
+      showToast(
+        generalToasts.error("Title is required", "Please enter a lesson title")
+      );
       return;
     }
 
     if (!videoFile && !videoPreview) {
-      enqueueSnackbar("Please upload a video for this lesson", {
-        variant: "error",
-      });
+      showToast(
+        generalToasts.error(
+          "Video is required",
+          "Please upload a video for this lesson"
+        )
+      );
       return;
     }
 
@@ -212,38 +221,21 @@ const LessonEditor = () => {
 
       await createLessonMutation.mutateAsync(lessonDataForAPI as any);
 
-      // Course data will be automatically updated via query invalidation
-
-      enqueueSnackbar("🎉 Lesson created successfully!", {
-        variant: "success",
-        autoHideDuration: 4000,
-        style: {
-          background: "#10B981",
-          color: "#ffffff",
-          fontWeight: "500",
-          borderRadius: "12px",
-          padding: "16px 24px",
-          fontSize: "14px",
-        },
-      });
+      showToast(
+        generalToasts.success(
+          "Lesson created",
+          "🎉 Lesson created successfully!"
+        )
+      );
       navigate(`/instructor/courses/${courseId}/edit?tab=curriculum`);
     } catch (error) {
       console.error("Error creating lesson:", error);
-      enqueueSnackbar(
-        (error as any)?.response?.data?.message ||
-          "❌ Failed to create lesson. Please try again.",
-        {
-          variant: "error",
-          autoHideDuration: 6000,
-          style: {
-            background: "#EF4444",
-            color: "#ffffff",
-            fontWeight: "500",
-            borderRadius: "12px",
-            padding: "16px 24px",
-            fontSize: "14px",
-          },
-        }
+      showToast(
+        generalToasts.error(
+          "Creation failed",
+          (error as any)?.response?.data?.message ||
+            "❌ Failed to create lesson. Please try again."
+        )
       );
     }
   };

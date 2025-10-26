@@ -177,7 +177,7 @@ const Home = () => {
 
       showToast(
         generalToasts.success(
-          "🎉 Congratulations!",
+          wasInWishlist ? "Removed from wishlist!" : "Added to wishlist!",
           wasInWishlist
             ? `"${course.title}" removed from wishlist`
             : `"${course.title}" added to wishlist`
