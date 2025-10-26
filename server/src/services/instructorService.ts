@@ -154,8 +154,21 @@ export const getInstructorCoursesWithStatsService = async (
 
   let filter: any = { instructor: instructorId };
 
-  if (status === "published") filter.isPublished = true;
-  if (status === "draft") filter.isPublished = false;
+  // Handle status filtering with proper logic
+  if (status === "published") {
+    filter.isPublished = true;
+    filter.status = { $ne: "rejected" }; // Published courses should not be rejected
+  } else if (status === "draft") {
+    filter.$and = [
+      { isPublished: false },
+      { $or: [{ status: { $exists: false } }, { status: "draft" }] },
+    ];
+  } else if (status === "pending") {
+    filter.status = "pending";
+  } else if (status === "rejected") {
+    filter.status = "rejected";
+  }
+  // If status is "all", no additional filtering needed
 
   if (search) {
     filter.$or = [

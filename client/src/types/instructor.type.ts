@@ -41,6 +41,7 @@ export interface InstructorCourseWithStats {
   description: string;
   image: string;
   isPublished: boolean;
+  status?: "draft" | "pending" | "approved" | "rejected";
   createdAt: string;
   studentsEnrolled: string[];
   originalPrice: number;
@@ -69,7 +70,7 @@ export interface InstructorCoursesResponse {
 export interface InstructorCoursesQuery {
   page?: number;
   limit?: number;
-  status?: "all" | "published" | "draft";
+  status?: "all" | "published" | "draft" | "pending" | "rejected";
   search?: string;
   category?: string;
   level?: string;
