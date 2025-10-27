@@ -8,7 +8,6 @@ import {
   FaBook,
   FaStar,
 } from "react-icons/fa";
-// @ts-ignore
 import { useTranslation } from "react-i18next";
 
 export interface CoursesHeaderProps {

@@ -1,4 +1,3 @@
-// @ts-ignore
 import { useTranslation } from "react-i18next";
 import { Globe } from "lucide-react";
 
