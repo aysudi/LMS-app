@@ -7,7 +7,6 @@ import {
   FaSortAmountUp,
   FaTimes,
 } from "react-icons/fa";
-// @ts-ignore
 import { useTranslation } from "react-i18next";
 
 export type SortOption =

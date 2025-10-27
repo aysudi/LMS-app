@@ -12,7 +12,6 @@ import {
   FaHome,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-// @ts-ignore
 import { useTranslation } from "react-i18next";
 import { useLogout } from "../../hooks/useAuth";
 import LanguageSwitcher from "../Common/LanguageSwitcher";
