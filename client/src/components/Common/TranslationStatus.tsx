@@ -1,5 +1,4 @@
 import React from "react";
-// @ts-ignore
 import { useTranslation } from "react-i18next";
 
 interface TranslationStatusProps {

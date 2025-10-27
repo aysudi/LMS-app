@@ -29,7 +29,6 @@ import {
 } from "react-icons/fa";
 import { useAuthContext } from "../../context/AuthContext";
 import { useLogout } from "../../hooks/useAuth";
-// @ts-ignore
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "../Common/LanguageSwitcher";
 import { useWishlistHelpers } from "../../hooks/useWishlist";
