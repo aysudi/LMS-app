@@ -8,6 +8,8 @@ import {
   FaBook,
   FaStar,
 } from "react-icons/fa";
+// @ts-ignore
+import { useTranslation } from "react-i18next";
 
 export interface CoursesHeaderProps {
   totalCourses: number;
@@ -27,29 +29,30 @@ const CoursesHeader: React.FC<CoursesHeaderProps> = ({
   onBulkDelete,
 }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const stats = [
     {
-      label: "Total Courses",
+      label: t("instructor.totalCourses"),
       value: totalCourses,
       icon: FaBook,
       color: "indigo",
     },
     {
-      label: "Published",
+      label: t("common.published"),
       value: publishedCourses,
       icon: FaPlay,
       color: "green",
     },
     {
-      label: "Drafts",
+      label: t("common.draft"),
       value: draftCourses,
       icon: FaPause,
       color: "yellow",
     },
     {
-      label: "Average Rating",
-      value: averageRating ? averageRating.toFixed(1) : "No ratings",
+      label: t("instructor.averageRating"),
+      value: averageRating ? averageRating.toFixed(1) : t("common.rating"),
       icon: FaStar,
       color: "amber",
     },
@@ -72,9 +75,11 @@ const CoursesHeader: React.FC<CoursesHeaderProps> = ({
       {/* Header with Title and Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">My Courses</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            {t("navigation.myCourses")}
+          </h1>
           <p className="mt-1 text-gray-600">
-            Manage and track your course performance
+            {t("instructor.courseDashboard")}
           </p>
         </div>
 
@@ -86,7 +91,7 @@ const CoursesHeader: React.FC<CoursesHeaderProps> = ({
               className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200 flex items-center space-x-2 cursor-pointer"
             >
               <FaTrash className="text-sm" />
-              <span>Remove</span>
+              <span>{t("common.delete")}</span>
             </button>
           )}
 
@@ -96,7 +101,7 @@ const CoursesHeader: React.FC<CoursesHeaderProps> = ({
             className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200 flex items-center space-x-2 cursor-pointer"
           >
             <FaPlus className="text-sm" />
-            <span>Create Course</span>
+            <span>{t("instructor.createNewCourse")}</span>
           </button>
         </div>
       </div>
