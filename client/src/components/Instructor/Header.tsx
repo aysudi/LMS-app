@@ -12,7 +12,10 @@ import {
   FaHome,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+// @ts-ignore
+import { useTranslation } from "react-i18next";
 import { useLogout } from "../../hooks/useAuth";
+import LanguageSwitcher from "../Common/LanguageSwitcher";
 
 type Props = {
   sidebarOpen: boolean;
@@ -32,6 +35,7 @@ const Header = ({
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const { mutate: logout } = useLogout();
 
@@ -84,7 +88,7 @@ const Header = ({
             className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
           >
             <FaHome className="text-gray-600" />
-            <span className="text-sm text-gray-600">Back to Site</span>
+            <span className="text-sm text-gray-600">{t("common.home")}</span>
           </button>
         </div>
       </div>
@@ -98,12 +102,15 @@ const Header = ({
           <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           <input
             type="text"
-            placeholder="Search courses, students..."
+            placeholder={t("common.search")}
             value={searchTerm}
             onChange={handleSearchChange}
             className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent w-80"
           />
         </form>
+
+        {/* Language Switcher */}
+        <LanguageSwitcher />
 
         {/* Notifications */}
         <button className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200">
@@ -133,7 +140,7 @@ const Header = ({
               <p className="text-sm font-medium text-gray-900">
                 {user?.firstName} {user?.lastName}
               </p>
-              <p className="text-xs text-gray-500">Instructor</p>
+              <p className="text-xs text-gray-500">{t("common.instructor")}</p>
             </div>
             <FaChevronDown
               className={`text-gray-400 transition-transform duration-200 ${
@@ -168,7 +175,7 @@ const Header = ({
                 >
                   <FaUser className="text-gray-400" />
                   <span className="text-sm text-gray-700">
-                    Profile Settings
+                    {t("common.profile")}
                   </span>
                 </button>
 
@@ -180,7 +187,9 @@ const Header = ({
                   className="w-full flex items-center space-x-3 px-4 py-2 text-left hover:bg-gray-50 transition-colors duration-200"
                 >
                   <FaCog className="text-gray-400" />
-                  <span className="text-sm text-gray-700">Settings</span>
+                  <span className="text-sm text-gray-700">
+                    {t("common.settings")}
+                  </span>
                 </button>
 
                 <div className="border-t border-gray-200 mt-2"></div>
@@ -190,7 +199,7 @@ const Header = ({
                   className="w-full flex items-center space-x-3 px-4 py-2 text-left hover:bg-red-50 transition-colors duration-200 text-red-600"
                 >
                   <FaSignOutAlt className="text-red-500" />
-                  <span className="text-sm">Sign Out</span>
+                  <span className="text-sm">{t("auth.signOut")}</span>
                 </button>
               </motion.div>
             )}

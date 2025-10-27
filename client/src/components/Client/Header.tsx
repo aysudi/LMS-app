@@ -29,6 +29,9 @@ import {
 } from "react-icons/fa";
 import { useAuthContext } from "../../context/AuthContext";
 import { useLogout } from "../../hooks/useAuth";
+// @ts-ignore
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "../Common/LanguageSwitcher";
 import { useWishlistHelpers } from "../../hooks/useWishlist";
 import { useCartHelpers } from "../../hooks/useCart";
 import {
@@ -46,6 +49,7 @@ const Header: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [notifications] = useState(3);
+  const { t } = useTranslation();
 
   const { wishlistCount } = useWishlistHelpers();
 
@@ -617,10 +621,12 @@ const Header: React.FC = () => {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => navigate("/my-learning")}
                     className="hidden xl:flex items-center space-x-2 px-3 py-2 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-200 cursor-pointer"
-                    title="My Learning"
+                    title={t("student.myLearning")}
                   >
                     <FaBookOpen className="text-sm" />
-                    <span className="font-medium">My Learning</span>
+                    <span className="font-medium">
+                      {t("student.myLearning")}
+                    </span>
                   </motion.button>
 
                   {/* Become Instructor - Only for students */}
@@ -636,6 +642,9 @@ const Header: React.FC = () => {
                       <span className="font-medium">Teach</span>
                     </motion.button>
                   )}
+
+                  {/* Language Switcher */}
+                  <LanguageSwitcher />
 
                   {/* Notifications */}
                   <motion.button

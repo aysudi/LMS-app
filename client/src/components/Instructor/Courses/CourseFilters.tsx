@@ -7,6 +7,8 @@ import {
   FaSortAmountUp,
   FaTimes,
 } from "react-icons/fa";
+// @ts-ignore
+import { useTranslation } from "react-i18next";
 
 export type SortOption =
   | "newest"
@@ -71,43 +73,44 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
   courseCount,
 }) => {
   const [showFilters, setShowFilters] = useState(false);
+  const { t } = useTranslation();
 
   const sortOptions = [
-    { value: "newest", label: "Newest First" },
-    { value: "oldest", label: "Oldest First" },
-    { value: "title-asc", label: "Title A-Z" },
-    { value: "title-desc", label: "Title Z-A" },
-    { value: "students-desc", label: "Most Students" },
-    { value: "students-asc", label: "Least Students" },
-    { value: "price-desc", label: "Highest Price" },
-    { value: "price-asc", label: "Lowest Price" },
-    { value: "rating-desc", label: "Highest Rating" },
-    { value: "rating-asc", label: "Lowest Rating" },
+    { value: "newest", label: t("filters.newest") },
+    { value: "oldest", label: t("filters.newest") },
+    { value: "title-asc", label: t("filters.relevance") },
+    { value: "title-desc", label: t("filters.relevance") },
+    { value: "students-desc", label: t("filters.mostPopular") },
+    { value: "students-asc", label: t("filters.mostPopular") },
+    { value: "price-desc", label: t("filters.priceHighToLow") },
+    { value: "price-asc", label: t("filters.priceLowToHigh") },
+    { value: "rating-desc", label: t("filters.highestRated") },
+    { value: "rating-asc", label: t("filters.highestRated") },
   ];
 
   const statusOptions = [
-    { value: "all", label: "All Courses" },
-    { value: "published", label: "Published" },
-    { value: "draft", label: "Draft" },
-    { value: "pending", label: "Pending" },
-    { value: "rejected", label: "Rejected" },
+    { value: "all", label: t("common.all") + " " + t("common.courses") },
+    { value: "published", label: t("common.published") },
+    { value: "draft", label: t("common.draft") },
+    { value: "pending", label: t("common.pending") },
+    { value: "rejected", label: t("common.rejected") },
   ];
 
   const priceOptions = [
-    { value: "all", label: "All Prices" },
-    { value: "free", label: "Free" },
-    { value: "paid", label: "Paid" },
-    { value: "under-50", label: "Under $50" },
+    { value: "all", label: t("filters.priceRange") },
+    { value: "free", label: t("common.free") },
+    { value: "paid", label: t("common.paid") },
+    { value: "under-50", label: "< $50" },
     { value: "50-100", label: "$50 - $100" },
-    { value: "over-100", label: "Over $100" },
+    { value: "over-100", label: "> $100" },
   ];
 
   const ratingOptions = [
-    { value: "all", label: "All Ratings" },
-    { value: "4-plus", label: "4+ Stars" },
-    { value: "3-plus", label: "3+ Stars" },
-    { value: "2-plus", label: "2+ Stars" },
-    { value: "1-plus", label: "1+ Stars" },
+    { value: "all", label: t("common.all") + " " + t("common.rating") },
+    { value: "4-plus", label: "4+ " + t("common.rating") },
+    { value: "3-plus", label: "3+ " + t("common.rating") },
+    { value: "2-plus", label: "2+ " + t("common.rating") },
+    { value: "1-plus", label: "1+ " + t("common.rating") },
   ];
 
   const hasActiveFilters =
@@ -134,7 +137,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
           <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm" />
           <input
             type="text"
-            placeholder="Search courses..."
+            placeholder={t("common.search") + " " + t("common.courses") + "..."}
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
@@ -186,7 +189,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
             }`}
           >
             <FaFilter className="text-sm" />
-            <span className="hidden sm:inline">Filters</span>
+            <span className="hidden sm:inline">{t("common.filter")}</span>
           </button>
         </div>
       </div>
@@ -221,14 +224,16 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
               {categories.length > 0 && onCategoryChange && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Category
+                    {t("common.category")}
                   </label>
                   <select
                     value={selectedCategory}
                     onChange={(e) => onCategoryChange(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   >
-                    <option value="all">All Categories</option>
+                    <option value="all">
+                      {t("common.all")} {t("common.categories")}
+                    </option>
                     {categories.map((category) => (
                       <option key={category} value={category}>
                         {category}
@@ -242,7 +247,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
               {onPriceFilterChange && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Price Range
+                    {t("filters.priceRange")}
                   </label>
                   <select
                     value={priceFilter}
@@ -264,7 +269,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
               {onRatingFilterChange && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Minimum Rating
+                    {t("filters.courseRating")}
                   </label>
                   <select
                     value={ratingFilter}
@@ -285,7 +290,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
               {/* Sort Order Toggle */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Sort Direction
+                  {t("common.sort")}
                 </label>
                 <div className="flex items-center space-x-2">
                   <button
@@ -337,14 +342,14 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
                       <>
                         <FaSortAmountDown className="text-sm text-gray-600 mr-2" />
                         <span className="text-sm text-gray-700">
-                          High to Low
+                          {t("common.descending")}
                         </span>
                       </>
                     ) : (
                       <>
                         <FaSortAmountUp className="text-sm text-gray-600 mr-2" />
                         <span className="text-sm text-gray-700">
-                          Low to High
+                          {t("common.ascending")}
                         </span>
                       </>
                     )}
@@ -359,7 +364,9 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
       {/* Results Summary & Clear Filters */}
       <div className="flex items-center justify-between text-sm">
         <span className="text-gray-600">
-          {courseCount} {courseCount === 1 ? "course" : "courses"} found
+          {courseCount}{" "}
+          {courseCount === 1 ? t("common.course") : t("common.courses")}{" "}
+          {t("common.search").toLowerCase()}
         </span>
 
         {hasActiveFilters && (
@@ -368,7 +375,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
             className="text-indigo-600 hover:text-indigo-800 font-medium flex items-center space-x-1"
           >
             <FaTimes className="text-xs" />
-            <span>Clear all filters</span>
+            <span>{t("filters.clearFilters")}</span>
           </button>
         )}
       </div>
@@ -382,7 +389,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
               animate={{ opacity: 1, scale: 1 }}
               className="inline-flex items-center px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm"
             >
-              Search: "{searchTerm}"
+              {t("common.search")}: "{searchTerm}"
               <button
                 onClick={() => onSearchChange("")}
                 className="ml-2 text-indigo-600 hover:text-indigo-800"
@@ -398,7 +405,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
               animate={{ opacity: 1, scale: 1 }}
               className="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm"
             >
-              Status: {statusFilter}
+              {t("common.status")}: {statusFilter}
               <button
                 onClick={() => onStatusFilterChange("all")}
                 className="ml-2 text-green-600 hover:text-green-800"
@@ -414,7 +421,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
               animate={{ opacity: 1, scale: 1 }}
               className="inline-flex items-center px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm"
             >
-              Category: {selectedCategory}
+              {t("common.category")}: {selectedCategory}
               <button
                 onClick={() => onCategoryChange?.("all")}
                 className="ml-2 text-purple-600 hover:text-purple-800"
@@ -430,7 +437,8 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
               animate={{ opacity: 1, scale: 1 }}
               className="inline-flex items-center px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm"
             >
-              Price: {priceOptions.find((p) => p.value === priceFilter)?.label}
+              {t("common.price")}:{" "}
+              {priceOptions.find((p) => p.value === priceFilter)?.label}
               <button
                 onClick={() => onPriceFilterChange?.("all")}
                 className="ml-2 text-orange-600 hover:text-orange-800"
@@ -446,7 +454,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
               animate={{ opacity: 1, scale: 1 }}
               className="inline-flex items-center px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm"
             >
-              Rating:{" "}
+              {t("common.rating")}:{" "}
               {ratingOptions.find((r) => r.value === ratingFilter)?.label}
               <button
                 onClick={() => onRatingFilterChange?.("all")}

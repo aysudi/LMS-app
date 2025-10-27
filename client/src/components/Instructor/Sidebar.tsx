@@ -9,6 +9,8 @@ import {
   FaCog,
 } from "react-icons/fa";
 import { useLocation, useNavigate } from "react-router-dom";
+// @ts-ignore
+import { useTranslation } from "react-i18next";
 
 interface SidebarItem {
   id: string;
@@ -27,48 +29,49 @@ type Props = {
 const Sidebar = ({ sidebarOpen, user }: Props) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const sidebarItems: SidebarItem[] = [
     {
       id: "dashboard",
-      label: "Dashboard",
+      label: t("navigation.dashboard"),
       icon: FaTachometerAlt,
       path: "/instructor/dashboard",
     },
     {
       id: "courses",
-      label: "My Courses",
+      label: t("navigation.myCourses"),
       icon: FaBook,
       path: "/instructor/courses",
     },
     {
       id: "students",
-      label: "Students",
+      label: t("navigation.students"),
       icon: FaUsers,
       path: "/instructor/students",
     },
     {
       id: "messages",
-      label: "Messages",
+      label: t("navigation.messages"),
       icon: FaEnvelope,
       path: "/instructor/messages",
       // badge: messageStats?.data?.byStatus?.unread || 0,
     },
     {
       id: "earnings",
-      label: "Earnings",
+      label: t("navigation.earnings"),
       icon: FaDollarSign,
       path: "/instructor/earnings",
     },
     {
       id: "analytics",
-      label: "Analytics",
+      label: t("navigation.analytics"),
       icon: FaChartBar,
       path: "/instructor/analytics",
     },
     {
       id: "settings",
-      label: "Settings",
+      label: t("common.settings"),
       icon: FaCog,
       path: "/instructor/settings",
     },
@@ -106,7 +109,9 @@ const Sidebar = ({ sidebarOpen, user }: Props) => {
                 exit={{ opacity: 0, x: -20 }}
               >
                 <h1 className="text-xl font-bold text-gray-800">Skillify</h1>
-                <p className="text-xs text-gray-500">Instructor Portal</p>
+                <p className="text-xs text-gray-500">
+                  {t("common.instructor")} Portal
+                </p>
               </motion.div>
             )}
           </motion.div>
@@ -189,7 +194,9 @@ const Sidebar = ({ sidebarOpen, user }: Props) => {
                 <p className="text-sm font-medium text-gray-900 truncate">
                   {user?.firstName} {user?.lastName}
                 </p>
-                <p className="text-xs text-gray-500 truncate">Instructor</p>
+                <p className="text-xs text-gray-500 truncate">
+                  {t("common.instructor")}
+                </p>
               </motion.div>
             )}
           </div>

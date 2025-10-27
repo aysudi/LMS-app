@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate, useSearchParams } from "react-router-dom";
+// @ts-ignore
+import { useTranslation } from "react-i18next";
 import {
   useInstructorAnalytics,
   useInstructorCoursesWithStats,
@@ -22,6 +24,7 @@ import CourseList from "../../components/Instructor/Courses/CourseList";
 const InstructorCourses = () => {
   const navigate = useNavigate();
   const [searchParams, _] = useSearchParams();
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState(
     searchParams.get("search") || ""
   );
