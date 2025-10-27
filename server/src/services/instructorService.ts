@@ -156,10 +156,9 @@ export const getInstructorCoursesWithStatsService = async (
 
   let filter: any = { instructor: instructorId };
 
-  // Handle status filtering with proper logic
   if (status === "published") {
     filter.isPublished = true;
-    filter.status = { $ne: "rejected" }; // Published courses should not be rejected
+    filter.status = { $ne: "rejected" };
   } else if (status === "draft") {
     filter.$and = [
       { isPublished: false },
