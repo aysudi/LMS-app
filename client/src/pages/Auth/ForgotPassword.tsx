@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useFormik } from "formik";
-import { useSnackbar } from "notistack";
 import {
   FaEnvelope,
   FaArrowLeft,
@@ -18,6 +17,8 @@ import { useForgotPassword } from "../../hooks/useAuth";
 import { forgotPasswordValidationSchema } from "../../validations/authValidation";
 import { getErrorMessage } from "../../utils/errorUtils";
 import Loading from "../../components/Common/Loading";
+import { useToast } from "../../components/UI/ToastProvider";
+import { generalToasts } from "../../utils/toastUtils";
 // @ts-ignore
 import { useTranslation } from "react-i18next";
 
@@ -28,7 +29,7 @@ const ForgotPassword = () => {
     useState<ForgotPasswordStatus>("idle");
   const [submittedEmail, setSubmittedEmail] = useState("");
 
-  const { enqueueSnackbar } = useSnackbar();
+  const { showToast } = useToast();
   const forgotPasswordMutation = useForgotPassword();
   const { t } = useTranslation();
 
@@ -46,18 +47,22 @@ const ForgotPassword = () => {
         setForgotPasswordStatus("success");
         setSubmittedEmail(values.email);
 
-        enqueueSnackbar("📧 Password reset email sent successfully!", {
-          variant: "success",
-          autoHideDuration: 6000,
-        });
+        showToast(
+          generalToasts.success(
+            t("auth.passwordResetEmailSent"),
+            `📧 ${t("auth.passwordResetEmailSentDesc")}`
+          )
+        );
       } catch (error) {
         setForgotPasswordStatus("error");
         const errorMessage = getErrorMessage(error);
 
-        enqueueSnackbar(`❌ Failed to send reset email: ${errorMessage}`, {
-          variant: "error",
-          autoHideDuration: 8000,
-        });
+        showToast(
+          generalToasts.error(
+            t("auth.failedToSendReset"),
+            `❌ ${t("auth.failedToSendResetDesc")}: ${errorMessage}`
+          )
+        );
 
         setTimeout(() => {
           setForgotPasswordStatus("idle");
@@ -329,10 +334,10 @@ const ForgotPassword = () => {
                             </div>
                             <div>
                               <h4 className="text-sm font-medium text-red-800">
-                                Failed to Send Reset Email
+                                {t("auth.failedToSendReset")}
                               </h4>
                               <p className="text-xs text-red-600 mt-1">
-                                Please check your email address and try again.
+                                {t("auth.checkEmailTryAgain")}
                               </p>
                             </div>
                           </div>
@@ -366,7 +371,7 @@ const ForgotPassword = () => {
 
                   <div>
                     <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                      {t("auth.checkYourEmail")}
+                      {t("auth.checkYourEmailExclamation")}
                     </h3>
                     <p className="text-gray-600 mb-4">
                       {t("auth.resetLinkSent")}

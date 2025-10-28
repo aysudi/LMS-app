@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useFormik } from "formik";
-import { useSnackbar } from "notistack";
 import {
   FaLock,
   FaEye,
@@ -19,6 +18,10 @@ import { useResetPassword } from "../../hooks/useAuth";
 import { resetPasswordValidationSchema } from "../../validations/authValidation";
 import { getErrorMessage } from "../../utils/errorUtils";
 import Loading from "../../components/Common/Loading";
+import { useToast } from "../../components/UI/ToastProvider";
+import { generalToasts } from "../../utils/toastUtils";
+// @ts-ignore
+import { useTranslation } from "react-i18next";
 
 type ResetPasswordStatus =
   | "idle"
@@ -35,8 +38,9 @@ const ResetPassword = () => {
 
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { enqueueSnackbar } = useSnackbar();
+  const { showToast } = useToast();
   const resetPasswordMutation = useResetPassword();
+  const { t } = useTranslation();
 
   const token = searchParams.get("token");
 
@@ -54,7 +58,12 @@ const ResetPassword = () => {
     validationSchema: resetPasswordValidationSchema,
     onSubmit: async (values, { setSubmitting }) => {
       if (!token) {
-        enqueueSnackbar("❌ Invalid reset token", { variant: "error" });
+        showToast(
+          generalToasts.error(
+            t("auth.invalidResetToken"),
+            `❌ ${t("auth.invalidResetToken")}`
+          )
+        );
         return;
       }
 
@@ -68,10 +77,12 @@ const ResetPassword = () => {
 
         setResetStatus("success");
 
-        enqueueSnackbar("🎉 Password reset successfully!", {
-          variant: "success",
-          autoHideDuration: 6000,
-        });
+        showToast(
+          generalToasts.success(
+            t("auth.passwordResetSuccess"),
+            `🎉 ${t("auth.passwordResetSuccessDesc")}`
+          )
+        );
 
         setTimeout(() => {
           navigate("/auth/login");
@@ -80,10 +91,12 @@ const ResetPassword = () => {
         setResetStatus("error");
         const errorMessage = getErrorMessage(error);
 
-        enqueueSnackbar(`❌ Failed to reset password: ${errorMessage}`, {
-          variant: "error",
-          autoHideDuration: 8000,
-        });
+        showToast(
+          generalToasts.error(
+            t("auth.failedPasswordReset"),
+            `❌ ${t("auth.failedPasswordResetDesc")}: ${errorMessage}`
+          )
+        );
 
         setTimeout(() => {
           setResetStatus("idle");
@@ -116,10 +129,10 @@ const ResetPassword = () => {
   };
 
   const getPasswordStrengthText = () => {
-    if (passwordStrength < 25) return "Weak";
-    if (passwordStrength < 50) return "Fair";
-    if (passwordStrength < 75) return "Good";
-    return "Strong";
+    if (passwordStrength < 25) return t("auth.weak");
+    if (passwordStrength < 50) return t("auth.fair");
+    if (passwordStrength < 75) return t("auth.good");
+    return t("auth.strong");
   };
 
   const getSubmitButtonContent = () => {
@@ -128,28 +141,28 @@ const ResetPassword = () => {
         return (
           <>
             <Loading variant="default" size="sm" message="" />
-            <span>Resetting Password...</span>
+            <span>{t("auth.resettingPassword")}</span>
           </>
         );
       case "success":
         return (
           <>
             <FaCheckCircle className="text-sm" />
-            <span>Password Reset!</span>
+            <span>{t("auth.passwordResetSuccess")}!</span>
           </>
         );
       case "error":
         return (
           <>
             <FaExclamationTriangle className="text-sm" />
-            <span>Try Again</span>
+            <span>{t("auth.tryAgain")}</span>
           </>
         );
       default:
         return (
           <>
             <FaKey className="text-sm" />
-            <span>Reset Password</span>
+            <span>{t("auth.resetPassword")}</span>
           </>
         );
     }
@@ -171,20 +184,20 @@ const ResetPassword = () => {
   const securityFeatures = [
     {
       icon: FaShieldAlt,
-      title: "Secure Reset",
-      description: "Your password is encrypted and stored securely",
+      title: t("auth.secureReset"),
+      description: t("auth.secureResetDesc"),
       color: "text-green-500",
     },
     {
       icon: FaKey,
-      title: "One-time Token",
-      description: "Reset links can only be used once for security",
+      title: t("auth.oneTimeToken"),
+      description: t("auth.oneTimeTokenDesc"),
       color: "text-blue-500",
     },
     {
       icon: FaCheckCircle,
-      title: "Instant Access",
-      description: "Login immediately after successful reset",
+      title: t("auth.instantAccess"),
+      description: t("auth.instantAccessDesc"),
       color: "text-purple-500",
     },
   ];
@@ -201,24 +214,21 @@ const ResetPassword = () => {
             <FaExclamationTriangle className="text-3xl text-white" />
           </div>
           <h2 className="text-2xl font-bold text-gray-800">
-            Invalid Reset Link
+            {t("auth.invalidResetLink")}
           </h2>
-          <p className="text-gray-600">
-            This password reset link is invalid or has expired. Please request a
-            new one.
-          </p>
+          <p className="text-gray-600">{t("auth.invalidResetLinkDesc")}</p>
           <div className="space-y-3">
             <Link
               to="/auth/forgot-password"
               className="block w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl"
             >
-              Request New Reset Link
+              {t("auth.requestNewResetLink")}
             </Link>
             <Link
               to="/auth/login"
               className="block w-full text-center py-3 px-6 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-all duration-200"
             >
-              Back to Login
+              {t("auth.backToLogin")}
             </Link>
           </div>
         </motion.div>
@@ -260,18 +270,17 @@ const ResetPassword = () => {
               </div>
 
               <h2 className="text-3xl font-bold text-gray-800 leading-tight">
-                Create Your New Password
+                {t("auth.createNewPassword")}
               </h2>
 
               <p className="text-lg text-gray-600 leading-relaxed">
-                Choose a strong password to keep your account secure and
-                continue your learning journey.
+                {t("auth.chooseStrongPassword")}
               </p>
 
               {/* Security Features */}
               <div className="space-y-6 mt-8">
                 <h3 className="text-xl font-semibold text-gray-800 mb-4">
-                  Security Features:
+                  {t("auth.securityFeatures")}:
                 </h3>
                 {securityFeatures.map((feature, index) => {
                   const IconComponent = feature.icon;
@@ -302,13 +311,13 @@ const ResetPassword = () => {
               {/* Password Tips */}
               <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 mt-8">
                 <h4 className="font-semibold text-blue-800 mb-2">
-                  Password Tips:
+                  {t("auth.passwordTips")}:
                 </h4>
                 <ul className="text-sm text-blue-600 space-y-1 text-left">
-                  <li>• Use at least 8 characters</li>
-                  <li>• Include uppercase and lowercase letters</li>
-                  <li>• Add numbers and special characters</li>
-                  <li>• Avoid common words or personal info</li>
+                  <li>• {t("auth.useAtLeast8Chars")}</li>
+                  <li>• {t("auth.includeUpperLower")}</li>
+                  <li>• {t("auth.addNumbersSpecialChars")}</li>
+                  <li>• {t("auth.avoidCommonWords")}</li>
                 </ul>
               </div>
             </div>
@@ -329,10 +338,10 @@ const ResetPassword = () => {
                       <FaKey className="text-2xl text-white" />
                     </div>
                     <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                      Reset Your Password
+                      {t("auth.resetYourPassword")}
                     </h3>
                     <p className="text-gray-600">
-                      Enter your new password below to secure your account.
+                      {t("auth.enterNewPasswordDesc")}
                     </p>
                   </div>
 
@@ -340,7 +349,7 @@ const ResetPassword = () => {
                     {/* New Password */}
                     <div className="relative">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        New Password
+                        {t("auth.newPassword")}
                       </label>
                       <div className="relative">
                         <input
@@ -354,7 +363,7 @@ const ResetPassword = () => {
                               ? "border-red-300 focus:ring-red-500"
                               : "border-gray-300"
                           }`}
-                          placeholder="Enter your new password"
+                          placeholder={t("auth.enterNewPasswordPlaceholder")}
                         />
                         <FaLock
                           className={`absolute left-3 top-1/2 transform -translate-y-1/2 text-sm ${
@@ -392,7 +401,7 @@ const ResetPassword = () => {
                         >
                           <div className="flex items-center justify-between text-xs">
                             <span className="text-gray-600">
-                              Password Strength:
+                              {t("auth.passwordStrength")}:
                             </span>
                             <span
                               className={`font-medium ${
@@ -419,7 +428,7 @@ const ResetPassword = () => {
                     {/* Confirm Password */}
                     <div className="relative">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Confirm New Password
+                        {t("auth.confirmNewPassword")}
                       </label>
                       <div className="relative">
                         <input
@@ -434,7 +443,7 @@ const ResetPassword = () => {
                               ? "border-red-300 focus:ring-red-500"
                               : "border-gray-300"
                           }`}
-                          placeholder="Confirm your new password"
+                          placeholder={t("auth.confirmNewPasswordPlaceholder")}
                         />
                         <FaLock
                           className={`absolute left-3 top-1/2 transform -translate-y-1/2 text-sm ${
@@ -480,14 +489,14 @@ const ResetPassword = () => {
                               <>
                                 <FaCheckCircle className="text-green-500" />
                                 <span className="text-green-600">
-                                  Passwords match
+                                  {t("auth.passwordsMatch")}
                                 </span>
                               </>
                             ) : (
                               <>
                                 <FaExclamationTriangle className="text-red-500" />
                                 <span className="text-red-600">
-                                  Passwords don't match
+                                  {t("auth.passwordsDontMatch")}
                                 </span>
                               </>
                             )}
@@ -527,10 +536,10 @@ const ResetPassword = () => {
                             </div>
                             <div>
                               <h4 className="text-sm font-medium text-red-800">
-                                Failed to Reset Password
+                                {t("auth.failedToResetPassword")}
                               </h4>
                               <p className="text-xs text-red-600 mt-1">
-                                Please check your password and try again.
+                                {t("auth.checkPasswordTryAgain")}
                               </p>
                             </div>
                           </div>
@@ -545,7 +554,7 @@ const ResetPassword = () => {
                         className="inline-flex items-center space-x-2 text-gray-600 hover:text-indigo-600 transition-colors duration-200"
                       >
                         <FaArrowLeft className="text-sm" />
-                        <span>Back to Login</span>
+                        <span>{t("auth.backToLogin")}</span>
                       </Link>
                     </div>
                   </form>
@@ -564,11 +573,10 @@ const ResetPassword = () => {
 
                   <div>
                     <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                      Password Reset Successfully! 🎉
+                      {t("auth.passwordResetSuccessfully")} 🎉
                     </h3>
                     <p className="text-gray-600 mb-4">
-                      Your password has been updated. You can now login with
-                      your new password.
+                      {t("auth.passwordUpdatedLoginDesc")}
                     </p>
                   </div>
 
@@ -577,10 +585,10 @@ const ResetPassword = () => {
                       <FaShieldAlt className="text-green-500 text-lg" />
                       <div className="text-left">
                         <h4 className="text-sm font-medium text-green-800">
-                          Your Account is Secure
+                          {t("auth.yourAccountSecure")}
                         </h4>
                         <p className="text-xs text-green-600 mt-1">
-                          You'll be redirected to login in a few seconds...
+                          {t("auth.redirectingToLogin")}
                         </p>
                       </div>
                     </div>
@@ -593,7 +601,7 @@ const ResetPassword = () => {
                       onClick={() => navigate("/auth/login")}
                       className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 cursor-pointer"
                     >
-                      <span>Login Now</span>
+                      <span>{t("auth.loginNow")}</span>
                       <FaArrowRight className="text-sm" />
                     </motion.button>
                   </div>
@@ -603,12 +611,14 @@ const ResetPassword = () => {
               {/* Help Section */}
               {resetStatus !== "success" && (
                 <div className="text-center mt-8 pt-6 border-t border-gray-200">
-                  <p className="text-sm text-gray-500 mb-2">Having trouble?</p>
+                  <p className="text-sm text-gray-500 mb-2">
+                    {t("auth.havingTrouble")}?
+                  </p>
                   <Link
                     to="/support"
                     className="text-indigo-600 hover:text-indigo-700 font-medium transition-colors duration-200"
                   >
-                    Contact Support
+                    {t("auth.contactSupport")}
                   </Link>
                 </div>
               )}
