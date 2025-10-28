@@ -18,6 +18,8 @@ import { useForgotPassword } from "../../hooks/useAuth";
 import { forgotPasswordValidationSchema } from "../../validations/authValidation";
 import { getErrorMessage } from "../../utils/errorUtils";
 import Loading from "../../components/Common/Loading";
+// @ts-ignore
+import { useTranslation } from "react-i18next";
 
 type ForgotPasswordStatus = "idle" | "loading" | "success" | "error";
 
@@ -28,6 +30,7 @@ const ForgotPassword = () => {
 
   const { enqueueSnackbar } = useSnackbar();
   const forgotPasswordMutation = useForgotPassword();
+  const { t } = useTranslation();
 
   const formik = useFormik({
     initialValues: {
@@ -77,21 +80,21 @@ const ForgotPassword = () => {
         return (
           <>
             <Loading variant="default" size="sm" message="" />
-            <span>Sending...</span>
+            <span>{t("auth.sending")}</span>
           </>
         );
       case "error":
         return (
           <>
             <FaExclamationTriangle className="text-sm" />
-            <span>Try Again</span>
+            <span>{t("auth.tryAgain")}</span>
           </>
         );
       default:
         return (
           <>
             <FaPaperPlane className="text-sm" />
-            <span>Send Reset Link</span>
+            <span>{t("auth.sendResetLink")}</span>
           </>
         );
     }
@@ -111,20 +114,20 @@ const ForgotPassword = () => {
   const resetSteps = [
     {
       icon: FaEnvelope,
-      title: "Enter Email",
-      description: "Provide your registered email address",
+      title: t("auth.enterEmailStep"),
+      description: t("auth.enterEmailDesc"),
       color: "from-blue-500 to-cyan-500",
     },
     {
       icon: FaPaperPlane,
-      title: "Check Inbox",
-      description: "We'll send you a secure reset link",
+      title: t("auth.checkInboxStep"),
+      description: t("auth.checkInboxDesc"),
       color: "from-purple-500 to-pink-500",
     },
     {
       icon: FaLockOpen,
-      title: "Reset Password",
-      description: "Create a new strong password",
+      title: t("auth.resetPasswordStep"),
+      description: t("auth.resetPasswordDesc"),
       color: "from-green-500 to-emerald-500",
     },
   ];
@@ -163,18 +166,17 @@ const ForgotPassword = () => {
               </div>
 
               <h2 className="text-3xl font-bold text-gray-800 leading-tight">
-                Forgot Your Password?
+                {t("auth.forgotYourPassword")}
               </h2>
 
               <p className="text-lg text-gray-600 leading-relaxed">
-                No worries! It happens to the best of us. We'll help you get
-                back to learning in no time.
+                {t("auth.noWorries")}
               </p>
 
               {/* Reset Process Steps */}
               <div className="space-y-6 mt-8">
                 <h3 className="text-xl font-semibold text-gray-800 mb-4">
-                  How it works:
+                  {t("auth.howItWorks")}
                 </h3>
                 {resetSteps.map((step, index) => {
                   const IconComponent = step.icon;
@@ -210,10 +212,10 @@ const ForgotPassword = () => {
                   <FaShieldAlt className="text-green-600 text-lg" />
                   <div className="text-left">
                     <h4 className="font-semibold text-green-800">
-                      Secure Process
+                      {t("auth.secureProcess")}
                     </h4>
                     <p className="text-sm text-green-600">
-                      Reset links expire in 1 hour for your security
+                      {t("auth.resetLinksExpire")}
                     </p>
                   </div>
                 </div>
@@ -237,11 +239,10 @@ const ForgotPassword = () => {
                       <FaLockOpen className="text-2xl text-white" />
                     </div>
                     <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                      Reset Password
+                      {t("auth.resetPassword")}
                     </h3>
                     <p className="text-gray-600">
-                      Enter your email address and we'll send you a link to
-                      reset your password.
+                      {t("auth.enterRegisteredEmail")}
                     </p>
                   </div>
 
@@ -249,7 +250,7 @@ const ForgotPassword = () => {
                     {/* Email Input */}
                     <div className="relative">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Email Address
+                        {t("common.email")}
                       </label>
                       <div className="relative">
                         <input
@@ -263,7 +264,9 @@ const ForgotPassword = () => {
                               ? "border-red-300 focus:ring-red-500"
                               : "border-gray-300"
                           }`}
-                          placeholder="Enter your registered email"
+                          placeholder={t(
+                            "auth.enterRegisteredEmailPlaceholder"
+                          )}
                         />
                         <FaEnvelope
                           className={`absolute left-3 top-1/2 transform -translate-y-1/2 text-sm ${
@@ -287,7 +290,7 @@ const ForgotPassword = () => {
 
                       {!formik.errors.email && (
                         <p className="text-xs text-gray-500 mt-2">
-                          We'll send reset instructions to this email address
+                          {t("auth.resetInstructions")}
                         </p>
                       )}
                     </div>
@@ -344,7 +347,7 @@ const ForgotPassword = () => {
                         className="inline-flex items-center space-x-2 text-gray-600 hover:text-indigo-600 transition-colors duration-200"
                       >
                         <FaArrowLeft className="text-sm" />
-                        <span>Back to Login</span>
+                        <span>{t("auth.backToLogin")}</span>
                       </Link>
                     </div>
                   </form>
@@ -363,10 +366,10 @@ const ForgotPassword = () => {
 
                   <div>
                     <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                      Check Your Email!
+                      {t("auth.checkYourEmail")}
                     </h3>
                     <p className="text-gray-600 mb-4">
-                      We've sent a password reset link to:
+                      {t("auth.resetLinkSent")}
                     </p>
                     <p className="font-semibold text-indigo-600 text-lg">
                       {submittedEmail}
@@ -378,15 +381,12 @@ const ForgotPassword = () => {
                       <FaClock className="text-blue-500 mt-1" />
                       <div className="text-left">
                         <h4 className="font-semibold text-blue-800 text-sm">
-                          Important Notes:
+                          {t("auth.importantNotes")}
                         </h4>
                         <ul className="text-xs text-blue-600 mt-2 space-y-1">
-                          <li>
-                            • Check your spam/junk folder if you don't see the
-                            email
-                          </li>
-                          <li>• The reset link will expire in 1 hour</li>
-                          <li>• Click the link to create a new password</li>
+                          <li>{t("auth.checkSpamFolder")}</li>
+                          <li>{t("auth.linkExpires")}</li>
+                          <li>{t("auth.clickToReset")}</li>
                         </ul>
                       </div>
                     </div>
@@ -399,14 +399,14 @@ const ForgotPassword = () => {
                       onClick={handleSendAnother}
                       className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer"
                     >
-                      Send Another Email
+                      {t("auth.sendAnotherEmail")}
                     </motion.button>
 
                     <Link
                       to="/auth/login"
                       className="block w-full text-center py-3 px-6 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-all duration-200"
                     >
-                      Back to Login
+                      {t("auth.backToLogin")}
                     </Link>
                   </div>
                 </motion.div>
@@ -416,13 +416,13 @@ const ForgotPassword = () => {
               {forgotPasswordStatus !== "success" && (
                 <div className="text-center mt-8 pt-6 border-t border-gray-200">
                   <p className="text-sm text-gray-500 mb-2">
-                    Still having trouble?
+                    {t("auth.stillHavingTrouble")}
                   </p>
                   <Link
                     to="/support"
                     className="text-indigo-600 hover:text-indigo-700 font-medium transition-colors duration-200"
                   >
-                    Contact Support
+                    {t("auth.contactSupport")}
                   </Link>
                 </div>
               )}
@@ -431,12 +431,12 @@ const ForgotPassword = () => {
               {forgotPasswordStatus !== "success" && (
                 <div className="text-center mt-6">
                   <p className="text-gray-600">
-                    Don't have an account?{" "}
+                    {t("auth.dontHaveAccountCreate")}{" "}
                     <Link
                       to="/auth/register"
                       className="text-indigo-600 hover:text-indigo-700 font-semibold transition-colors duration-200"
                     >
-                      Create one here
+                      {t("auth.createOneHere")}
                     </Link>
                   </p>
                 </div>

@@ -152,33 +152,37 @@ const Register = () => {
               </div>
 
               <h2 className="text-3xl font-bold text-gray-800 leading-tight">
-                Start Your Learning Journey Today
+                {t("auth.startLearningJourney")}
               </h2>
 
               <p className="text-lg text-gray-600 leading-relaxed">
-                Join thousands of learners and instructors in our vibrant
-                community. Build skills, share knowledge, and achieve your
-                goals.
+                {t("auth.joinCommunity")}
               </p>
 
               <div className="grid grid-cols-2 gap-4 mt-8">
                 <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-sm border border-gray-100">
                   <div className="text-2xl font-bold text-indigo-600">10k+</div>
-                  <div className="text-sm text-gray-600">Active Students</div>
+                  <div className="text-sm text-gray-600">
+                    {t("auth.activeStudents")}
+                  </div>
                 </div>
                 <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-sm border border-gray-100">
                   <div className="text-2xl font-bold text-purple-600">500+</div>
                   <div className="text-sm text-gray-600">
-                    Expert Instructors
+                    {t("auth.expertInstructors")}
                   </div>
                 </div>
                 <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-sm border border-gray-100">
                   <div className="text-2xl font-bold text-green-600">1000+</div>
-                  <div className="text-sm text-gray-600">Courses Available</div>
+                  <div className="text-sm text-gray-600">
+                    {t("auth.coursesAvailable")}
+                  </div>
                 </div>
                 <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-sm border border-gray-100">
                   <div className="text-2xl font-bold text-orange-600">95%</div>
-                  <div className="text-sm text-gray-600">Success Rate</div>
+                  <div className="text-sm text-gray-600">
+                    {t("auth.successRate")}
+                  </div>
                 </div>
               </div>
             </div>
@@ -196,9 +200,7 @@ const Register = () => {
                 <h3 className="text-2xl font-bold text-gray-800 mb-2">
                   {t("auth.createAccount")}
                 </h3>
-                <p className="text-gray-600">
-                  {t("auth.enterFirstName")} {t("auth.enterLastName")}
-                </p>
+                <p className="text-gray-600">{t("auth.enterDetails")}</p>
               </div>
 
               {/* Status Indicators */}
@@ -239,7 +241,7 @@ const Register = () => {
                       </div>
                       <div>
                         <h4 className="text-sm font-semibold text-red-800">
-                          Registration Failed
+                          {t("auth.registrationFailed")}
                         </h4>
                         <p className="text-sm text-red-600 mt-1">
                           {errorMessage}
@@ -292,7 +294,7 @@ const Register = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="relative">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      First Name
+                      {t("common.firstName")}
                     </label>
                     <div className="relative">
                       <input
@@ -306,7 +308,7 @@ const Register = () => {
                             ? "border-red-500"
                             : "border-gray-300"
                         }`}
-                        placeholder="John"
+                        placeholder={t("auth.firstNamePlaceholder")}
                       />
                       <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm" />
                     </div>
@@ -319,7 +321,7 @@ const Register = () => {
 
                   <div className="relative">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Last Name
+                      {t("common.lastName")}
                     </label>
                     <div className="relative">
                       <input
@@ -333,7 +335,7 @@ const Register = () => {
                             ? "border-red-500"
                             : "border-gray-300"
                         }`}
-                        placeholder="Doe"
+                        placeholder={t("auth.lastNamePlaceholder")}
                       />
                       <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm" />
                     </div>
@@ -348,7 +350,7 @@ const Register = () => {
                 {/* Username */}
                 <div className="relative">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Username
+                    {t("common.username")}
                   </label>
                   <div className="relative">
                     <input
@@ -362,7 +364,7 @@ const Register = () => {
                           ? "border-red-500"
                           : "border-gray-300"
                       }`}
-                      placeholder="johndoe123"
+                      placeholder={t("auth.usernamePlaceholder")}
                     />
                     <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm" />
                   </div>
@@ -376,7 +378,7 @@ const Register = () => {
                 {/* Email */}
                 <div className="relative">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address
+                    {t("common.email")}
                   </label>
                   <div className="relative">
                     <input
@@ -390,7 +392,7 @@ const Register = () => {
                           ? "border-red-500"
                           : "border-gray-300"
                       }`}
-                      placeholder="john@example.com"
+                      placeholder={t("auth.emailPlaceholder")}
                     />
                     <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm" />
                   </div>
@@ -404,7 +406,7 @@ const Register = () => {
                 {/* Password */}
                 <div className="relative">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Password
+                    {t("common.password")}
                   </label>
                   <div className="relative">
                     <input
@@ -418,7 +420,7 @@ const Register = () => {
                           ? "border-red-500"
                           : "border-gray-300"
                       }`}
-                      placeholder="••••••••"
+                      placeholder={t("auth.passwordPlaceholder")}
                     />
                     <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm" />
                     <button
@@ -435,7 +437,7 @@ const Register = () => {
                     </div>
                   )}
                   <div className="mt-2 text-xs text-gray-500">
-                    Password must be at least 6 characters long
+                    {t("auth.passwordRequirement")}
                   </div>
                 </div>
 
@@ -451,19 +453,19 @@ const Register = () => {
                     className="mt-1 w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 focus:ring-2"
                   />
                   <label htmlFor="terms" className="text-sm text-gray-600">
-                    I agree to the{" "}
+                    {t("auth.agreeToTerms")}{" "}
                     <Link
                       to="/terms"
                       className="text-indigo-600 hover:text-indigo-700 font-medium"
                     >
-                      Terms of Service
+                      {t("auth.termsOfService")}
                     </Link>{" "}
-                    and{" "}
+                    {t("common.and")}{" "}
                     <Link
                       to="/privacy"
                       className="text-indigo-600 hover:text-indigo-700 font-medium"
                     >
-                      Privacy Policy
+                      {t("auth.privacyPolicy")}
                     </Link>
                   </label>
                 </div>
@@ -512,10 +514,10 @@ const Register = () => {
                   )}
                   <span>
                     {registrationStatus === "loading"
-                      ? "Creating Account..."
+                      ? t("auth.creatingAccount")
                       : registrationStatus === "success"
-                      ? "Account Created! Redirecting..."
-                      : "Create Account"}
+                      ? t("auth.accountCreatedRedirecting")
+                      : t("auth.createAccount")}
                   </span>
                 </motion.button>
 
@@ -526,7 +528,7 @@ const Register = () => {
                   </div>
                   <div className="relative flex justify-center text-sm">
                     <span className="px-4 bg-white text-gray-500">
-                      Or continue with
+                      {t("auth.orContinueWith")}
                     </span>
                   </div>
                 </div>
@@ -566,12 +568,12 @@ const Register = () => {
               {/* Login Link */}
               <div className="text-center mt-8">
                 <p className="text-gray-600">
-                  Already have an account?{" "}
+                  {t("auth.alreadyHaveAccount")}{" "}
                   <Link
                     to="/auth/login"
                     className="text-indigo-600 hover:text-indigo-700 font-semibold transition-colors duration-200"
                   >
-                    Sign in here
+                    {t("auth.signInHere")}
                   </Link>
                 </p>
               </div>
