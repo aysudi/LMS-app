@@ -205,7 +205,7 @@ const Login = () => {
         >
           <FaArrowLeft className="text-sm group-hover:transform group-hover:-translate-x-1 transition-transform duration-200" />
           <FaHome className="text-sm" />
-          <span className="text-sm font-medium">Back to Home</span>
+          <span className="text-sm font-medium">{t("auth.backToHome")}</span>
         </Link>
       </motion.div>
       {/* Background Decorations */}
@@ -240,11 +240,11 @@ const Login = () => {
               </div>
 
               <h2 className="text-3xl font-bold text-gray-800 leading-tight">
-                {t("auth.welcomeBack")} {t("student.myLearning")}
+                {t("auth.welcomeBack")} {t("common.myLearning")}
               </h2>
 
               <p className="text-lg text-gray-600 leading-relaxed">
-                {t("student.continueLearning")}
+                {t("auth.continueLearning")}
               </p>
 
               {/* Features List */}
@@ -270,15 +270,23 @@ const Login = () => {
               <div className="grid grid-cols-3 gap-4 mt-8">
                 <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-sm border border-gray-100">
                   <div className="text-2xl font-bold text-indigo-600">98%</div>
-                  <div className="text-sm text-gray-600">Success Rate</div>
+                  <div className="text-sm text-gray-600">
+                    {t("auth.successRate")}
+                  </div>
                 </div>
                 <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-sm border border-gray-100">
                   <div className="text-2xl font-bold text-purple-600">24/7</div>
-                  <div className="text-sm text-gray-600">Support</div>
+                  <div className="text-sm text-gray-600">
+                    {t("common.support")}
+                  </div>
                 </div>
                 <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-sm border border-gray-100">
-                  <div className="text-2xl font-bold text-green-600">Free</div>
-                  <div className="text-sm text-gray-600">Certificates</div>
+                  <div className="text-2xl font-bold text-green-600">
+                    {t("common.free")}
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    {t("navigation.certificates")}
+                  </div>
                 </div>
               </div>
             </div>
@@ -297,8 +305,7 @@ const Login = () => {
                   {t("auth.welcomeBack")}!
                 </h3>
                 <p className="text-gray-600">
-                  {t("auth.signIn")}{" "}
-                  {t("student.continueLearning").toLowerCase()}
+                  {t("auth.signIn")} {t("auth.continueToLearning")}
                 </p>
               </div>
 
@@ -437,10 +444,10 @@ const Login = () => {
                         </div>
                         <div>
                           <h4 className="text-sm font-medium text-green-800">
-                            Login Successful! 🎉
+                            {t("auth.loginSuccess")}! 🎉
                           </h4>
                           <p className="text-xs text-green-600 mt-1">
-                            Redirecting you to your dashboard...
+                            {t("auth.redirectingToDashboard")}
                           </p>
                         </div>
                       </div>
@@ -460,10 +467,10 @@ const Login = () => {
                         </div>
                         <div>
                           <h4 className="text-sm font-medium text-red-800">
-                            Login Failed
+                            {t("auth.loginFailed")}
                           </h4>
                           <p className="text-xs text-red-600 mt-1">
-                            Please check your credentials and try again.
+                            {t("auth.checkCredentialsTryAgain")}
                           </p>
                         </div>
                       </div>
@@ -478,7 +485,7 @@ const Login = () => {
                   </div>
                   <div className="relative flex justify-center text-sm">
                     <span className="px-4 bg-white text-gray-500">
-                      {t("auth.signIn")}
+                      {t("auth.orContinueWith")}
                     </span>
                   </div>
                 </div>
@@ -523,11 +530,10 @@ const Login = () => {
                       </div>
                       <div>
                         <h4 className="text-sm font-medium text-blue-800">
-                          Email Verification Required
+                          {t("auth.emailVerificationRequired")}
                         </h4>
                         <p className="text-xs text-blue-600 mt-1">
-                          If you haven't verified your email yet, check your
-                          inbox for a verification link.
+                          {t("auth.emailVerificationNotice")}
                         </p>
                       </div>
                     </div>
@@ -551,12 +557,12 @@ const Login = () => {
               {/* Help Section */}
               <div className="text-center mt-6 pt-6 border-t border-gray-200">
                 <p className="text-sm text-gray-500">
-                  Need help? Contact our{" "}
+                  {t("auth.needHelpContact")}{" "}
                   <Link
                     to="/support"
                     className="text-indigo-600 hover:text-indigo-700 font-medium transition-colors duration-200"
                   >
-                    support team
+                    {t("auth.supportTeam")}
                   </Link>
                 </p>
               </div>
