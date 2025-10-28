@@ -25,12 +25,15 @@ import StatCard from "../../components/Instructor/Dashboard/StatCard";
 import QuickAction from "../../components/Instructor/Dashboard/QuickAction";
 import TopCourses from "../../components/Instructor/Dashboard/TopCourses";
 import RecentMessages from "../../components/Instructor/Dashboard/RecentMessages";
+// @ts-ignore
+import { useTranslation } from "react-i18next";
 
 const InstructorDashboard = () => {
   const navigate = useNavigate();
   const [selectedPeriod, setSelectedPeriod] = useState<"7d" | "30d" | "90d">(
     "30d"
   );
+  const { t } = useTranslation();
 
   const { data: overview, isLoading: overviewLoading } =
     useInstructorOverview();
@@ -62,9 +65,9 @@ const InstructorDashboard = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl font-semibold text-gray-900">
-            No data available
+            {t("errors.pageNotFound")}
           </h2>
-          <p className="text-gray-600 mt-2">Unable to load dashboard data</p>
+          <p className="text-gray-600 mt-2">{t("errors.somethingWentWrong")}</p>
         </div>
       </div>
     );

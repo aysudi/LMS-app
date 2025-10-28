@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+// @ts-ignore
+import { useTranslation } from "react-i18next";
 import {
   FaDollarSign,
   FaDownload,
@@ -20,6 +22,7 @@ import {
 } from "../../hooks/useInstructor";
 
 const InstructorEarnings = () => {
+  const { t } = useTranslation();
   const [selectedPeriod, setSelectedPeriod] = useState<"30d" | "90d" | "1y">(
     "30d"
   );
@@ -71,9 +74,11 @@ const InstructorEarnings = () => {
           className="flex items-center justify-between mb-8"
         >
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Earnings</h1>
+            <h1 className="text-3xl font-bold text-gray-900">
+              {t("navigation.earnings")}
+            </h1>
             <p className="text-gray-600 mt-2">
-              Track your revenue and manage payouts
+              {t("instructor.trackRevenueManagePayouts")}
             </p>
           </div>
           <div className="flex items-center space-x-4">
@@ -83,9 +88,9 @@ const InstructorEarnings = () => {
               onChange={(e) => setSelectedPeriod(e.target.value as any)}
               className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             >
-              <option value="30d">Last 30 days</option>
-              <option value="90d">Last 90 days</option>
-              <option value="1y">Last year</option>
+              <option value="30d">{t("filters.last30Days")}</option>
+              <option value="90d">{t("filters.last90Days")}</option>
+              <option value="1y">{t("filters.lastYear")}</option>
             </select>
 
             <motion.button
@@ -95,7 +100,7 @@ const InstructorEarnings = () => {
               className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium flex items-center space-x-2"
             >
               <FaDownload className="text-sm" />
-              <span>Export</span>
+              <span>{t("common.export")}</span>
             </motion.button>
 
             <motion.button
@@ -105,7 +110,7 @@ const InstructorEarnings = () => {
               className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200 font-medium flex items-center space-x-2"
             >
               <FaCreditCard className="text-sm" />
-              <span>Request Payout</span>
+              <span>{t("instructor.requestPayout")}</span>
             </motion.button>
           </div>
         </motion.div>

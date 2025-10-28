@@ -13,9 +13,12 @@ import {
   useUserEnrollments,
   useLearningStats,
 } from "../../hooks/useEnrollment";
+// @ts-ignore
+import { useTranslation } from "react-i18next";
 
 const MyLearning = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const {
     data: enrollmentsData,
@@ -46,18 +49,18 @@ const MyLearning = () => {
             <div>
               <h1 className="text-3xl font-bold text-gray-800 flex items-center space-x-3">
                 <FaBook className="text-blue-600" />
-                <span>My Learning</span>
+                <span>{t("student.myLearning")}</span>
               </h1>
               <p className="text-gray-600 mt-1">
-                Continue your learning journey with {enrolledCourses.length}{" "}
-                enrolled courses
+                {t("student.continueLearning")} {enrolledCourses.length}{" "}
+                {t("common.courses")}
               </p>
             </div>
             <button
               onClick={() => navigate("/courses")}
               className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg cursor-pointer"
             >
-              Browse More Courses
+              {t("student.browseCategories")}
             </button>
           </div>
         </motion.div>
@@ -75,7 +78,9 @@ const MyLearning = () => {
                   <FaBook className="text-blue-600 text-xl" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Total Courses</p>
+                  <p className="text-sm text-gray-600">
+                    {t("instructor.totalCourses")}
+                  </p>
                   <p className="text-2xl font-bold text-gray-800">
                     {stats.totalEnrolledCourses}
                   </p>
