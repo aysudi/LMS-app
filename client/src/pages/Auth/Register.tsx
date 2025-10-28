@@ -23,6 +23,8 @@ import { User } from "../../classes/User";
 import { getErrorMessage } from "../../utils/errorUtils";
 import { useToast } from "../../components/UI/ToastProvider";
 import { generalToasts } from "../../utils/toastUtils";
+// @ts-ignore
+import { useTranslation } from "react-i18next";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -34,6 +36,7 @@ const Register = () => {
   const navigate = useNavigate();
   const registerMutation = useRegister();
   const { showToast } = useToast();
+  const { t } = useTranslation();
 
   const formik = useFormik({
     initialValues: {
@@ -114,7 +117,7 @@ const Register = () => {
         >
           <FaArrowLeft className="text-sm group-hover:transform group-hover:-translate-x-1 transition-transform duration-200" />
           <FaHome className="text-sm" />
-          <span className="text-sm font-medium">Back to Home</span>
+          <span className="text-sm font-medium">{t("common.home")}</span>
         </Link>
       </motion.div>
       {/* Background Decorations */}
@@ -191,11 +194,10 @@ const Register = () => {
             <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-8">
               <div className="text-center mb-8">
                 <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                  Create Your Account
+                  {t("auth.createAccount")}
                 </h3>
                 <p className="text-gray-600">
-                  Get started with your basic information. You can complete your
-                  profile later.
+                  {t("auth.enterFirstName")} {t("auth.enterLastName")}
                 </p>
               </div>
 
@@ -214,7 +216,7 @@ const Register = () => {
                       </div>
                       <div>
                         <h4 className="text-sm font-semibold text-green-800">
-                          Registration Successful! 🎉
+                          {t("auth.registerSuccess")} 🎉
                         </h4>
                         <p className="text-sm text-green-600 mt-1">
                           {successMessage}

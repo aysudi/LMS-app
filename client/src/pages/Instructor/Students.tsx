@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+// @ts-ignore
+import { useTranslation } from "react-i18next";
 import {
   FaUsers,
   FaSearch,
@@ -17,6 +19,7 @@ import {
 import Loading from "../../components/Common/Loading";
 
 const InstructorStudents = () => {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCourse, setSelectedCourse] = useState("all");
   const [sortBy, setSortBy] = useState<
@@ -118,9 +121,11 @@ const InstructorStudents = () => {
           className="flex items-center justify-between mb-8"
         >
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Students</h1>
+            <h1 className="text-3xl font-bold text-gray-900">
+              {t("navigation.students")}
+            </h1>
             <p className="text-gray-600 mt-2">
-              Manage and track your students' progress
+              {t("instructor.manageTrackStudentsProgress")}
             </p>
           </div>
           <motion.button

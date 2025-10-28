@@ -23,6 +23,8 @@ import loginValidationSchema from "../../validations/loginValidation";
 import Loading from "../../components/Common/Loading";
 import { useToast } from "../../components/UI/ToastProvider";
 import { generalToasts } from "../../utils/toastUtils";
+// @ts-ignore
+import { useTranslation } from "react-i18next";
 
 type LoginStatus = "idle" | "loading" | "success" | "error";
 
@@ -36,6 +38,7 @@ const Login = () => {
   const { showToast } = useToast();
   const { refetchUser } = useAuthContext();
   const loginMutation = useLogin();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const { fromVerification, message } = location.state || {};
@@ -65,8 +68,8 @@ const Login = () => {
 
         showToast(
           generalToasts.success(
-            "Welcome back!",
-            `🎉 Welcome back, ${result.data.user.firstName}!`
+            t("auth.welcomeBack"),
+            `🎉 ${t("auth.welcomeBack")}, ${result.data.user.firstName}!`
           )
         );
 
@@ -124,27 +127,27 @@ const Login = () => {
       case "loading":
         return (
           <>
-            <Loading message="Signing In..." />
+            <Loading message={t("auth.signIn") + "..."} />
           </>
         );
       case "success":
         return (
           <>
             <FaCheckCircle className="text-sm" />
-            <span>Welcome Back!</span>
+            <span>{t("auth.welcomeBack")}!</span>
           </>
         );
       case "error":
         return (
           <>
             <FaExclamationTriangle className="text-sm" />
-            <span>Try Again</span>
+            <span>{t("errors.tryAgain")}</span>
           </>
         );
       default:
         return (
           <>
-            <span>Sign In</span>
+            <span>{t("auth.signIn")}</span>
             <FaArrowRight className="text-sm" />
           </>
         );
@@ -167,22 +170,22 @@ const Login = () => {
   const features = [
     {
       icon: FaCheckCircle,
-      text: "Access to 1000+ premium courses",
+      text: t("course.fullVideoLectures", { count: "1000+" }),
       color: "text-green-500",
     },
     {
       icon: FaCheckCircle,
-      text: "Learn from expert instructors",
+      text: t("course.aboutInstructor"),
       color: "text-blue-500",
     },
     {
       icon: FaCheckCircle,
-      text: "Get certificates upon completion",
+      text: t("course.certificateCompletion"),
       color: "text-purple-500",
     },
     {
       icon: FaCheckCircle,
-      text: "Join a community of learners",
+      text: t("common.students"),
       color: "text-orange-500",
     },
   ];
@@ -237,12 +240,11 @@ const Login = () => {
               </div>
 
               <h2 className="text-3xl font-bold text-gray-800 leading-tight">
-                Welcome Back to Your Learning Journey
+                {t("auth.welcomeBack")} {t("student.myLearning")}
               </h2>
 
               <p className="text-lg text-gray-600 leading-relaxed">
-                Continue where you left off and explore new skills. Your
-                personalized learning experience awaits.
+                {t("student.continueLearning")}
               </p>
 
               {/* Features List */}
@@ -292,10 +294,11 @@ const Login = () => {
             <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-8">
               <div className="text-center mb-8">
                 <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                  Welcome Back!
+                  {t("auth.welcomeBack")}!
                 </h3>
                 <p className="text-gray-600">
-                  Sign in to continue your learning journey
+                  {t("auth.signIn")}{" "}
+                  {t("student.continueLearning").toLowerCase()}
                 </p>
               </div>
 
@@ -303,7 +306,7 @@ const Login = () => {
                 {/* Email */}
                 <div className="relative">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address
+                    {t("common.email")}
                   </label>
                   <div className="relative">
                     <input
@@ -317,7 +320,7 @@ const Login = () => {
                           ? "border-red-300 focus:ring-red-500"
                           : "border-gray-300"
                       }`}
-                      placeholder="Enter your email"
+                      placeholder={t("auth.enterEmail")}
                     />
                     <FaEnvelope
                       className={`absolute left-3 top-1/2 transform -translate-y-1/2 text-sm ${
@@ -342,7 +345,7 @@ const Login = () => {
                 {/* Password */}
                 <div className="relative">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Password
+                    {t("common.password")}
                   </label>
                   <div className="relative">
                     <input
@@ -356,7 +359,7 @@ const Login = () => {
                           ? "border-red-300 focus:ring-red-500"
                           : "border-gray-300"
                       }`}
-                      placeholder="Enter your password"
+                      placeholder={t("auth.enterPassword")}
                     />
                     <FaLock
                       className={`absolute left-3 top-1/2 transform -translate-y-1/2 text-sm ${
@@ -396,7 +399,7 @@ const Login = () => {
                       className="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 focus:ring-2"
                     />
                     <label htmlFor="remember" className="text-sm text-gray-600">
-                      Remember me
+                      {t("auth.rememberMe")}
                     </label>
                   </div>
 
@@ -404,7 +407,7 @@ const Login = () => {
                     to="/auth/forgot-password"
                     className="text-sm text-indigo-600 hover:text-indigo-700 font-medium transition-colors duration-200"
                   >
-                    Forgot password?
+                    {t("auth.forgotPassword")}
                   </Link>
                 </div>
 
@@ -475,7 +478,7 @@ const Login = () => {
                   </div>
                   <div className="relative flex justify-center text-sm">
                     <span className="px-4 bg-white text-gray-500">
-                      Or continue with
+                      {t("auth.signIn")}
                     </span>
                   </div>
                 </div>
@@ -535,12 +538,12 @@ const Login = () => {
               {/* Register Link */}
               <div className="text-center mt-8">
                 <p className="text-gray-600">
-                  Don't have an account?{" "}
+                  {t("auth.dontHaveAccount")}{" "}
                   <Link
                     to="/auth/register"
                     className="text-indigo-600 hover:text-indigo-700 font-semibold transition-colors duration-200"
                   >
-                    Create one here
+                    {t("auth.createAccount")}
                   </Link>
                 </p>
               </div>

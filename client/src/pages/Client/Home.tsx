@@ -34,6 +34,8 @@ import AddToCartModal from "../../components/Common/AddToCartModal";
 import { useAddToCartModal } from "../../hooks/useAddToCartModal";
 import { useToast } from "../../components/UI/ToastProvider";
 import { generalToasts } from "../../utils/toastUtils";
+// @ts-ignore
+import { useTranslation } from "react-i18next";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -42,6 +44,7 @@ const Home = () => {
   const { toggleWishlist } = useToggleWishlist();
   const { checkIfInWishlist } = useWishlistHelpers();
   const { showToast } = useToast();
+  const { t } = useTranslation();
 
   const [processingWishlist, setProcessingWishlist] = useState<Set<string>>(
     new Set()

@@ -28,11 +28,14 @@ import CartStats from "../../components/Client/CartStats";
 import type { Course } from "../../types/course.type";
 import { useToast } from "../../components/UI/ToastProvider";
 import { cartToasts, generalToasts } from "../../utils/toastUtils";
+// @ts-ignore
+import { useTranslation } from "react-i18next";
 
 const Cart = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const { isAuthenticated } = useAuthContext();
+  const { t } = useTranslation();
 
   const { cartItems, cartCount, isLoadingCart, cartError } = useCartHelpers();
 
@@ -221,7 +224,7 @@ const Cart = () => {
               <div>
                 <h1 className="text-3xl font-bold text-gray-800 flex items-center space-x-3">
                   <FaShoppingCart className="text-blue-600" />
-                  <span>Shopping Cart</span>
+                  <span>{t("navigation.cart")}</span>
                 </h1>
                 <p className="text-gray-600 mt-1">
                   {cartCount} {cartCount === 1 ? "course" : "courses"} in your
