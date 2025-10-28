@@ -341,18 +341,18 @@ const Header: React.FC = () => {
 
   const userMenuItems = userDisplayData
     ? [
-        { name: "Profile", path: "/profile", icon: FaUser },
-        { name: "Settings", path: "/settings", icon: FaCog },
+        { name: t("common.profile"), path: "/profile", icon: FaUser },
+        { name: t("common.settings"), path: "/settings", icon: FaCog },
         ...(userDisplayData.isInstructor()
           ? [
               {
-                name: "Instructor",
+                name: t("common.instructor"),
                 path: "/instructor/dashboard",
                 icon: FaChalkboardTeacher,
               },
             ]
           : []),
-        { name: "Logout", action: handleLogout, icon: FaSignOutAlt },
+        { name: t("common.logout"), action: handleLogout, icon: FaSignOutAlt },
       ]
     : [];
 
@@ -384,7 +384,7 @@ const Header: React.FC = () => {
                 Skillify
               </h1>
               <p className="text-xs text-gray-500 hidden lg:block">
-                Learn. Grow. Excel.
+                {t("common.learnGrowExcel")}
               </p>
             </div>
           </motion.div>
@@ -404,7 +404,7 @@ const Header: React.FC = () => {
                   onFocus={handleSearchInputFocus}
                   onBlur={handleSearchInputBlur}
                   onKeyDown={handleKeyDown}
-                  placeholder="Search courses, instructors..."
+                  placeholder={t("common.searchCoursesInstructors")}
                   className="w-full min-w-0 pl-10 pr-4 py-2 lg:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/70 backdrop-blur-sm"
                 />
                 <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm" />
@@ -428,7 +428,7 @@ const Header: React.FC = () => {
                         // Search Suggestions
                         <div className="py-2">
                           <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-gray-100">
-                            Search Suggestions
+                            {t("common.searchSuggestions")}
                           </div>
                           {isLoadingSuggestions ? (
                             <div className="px-4 py-8 text-center text-gray-500">
@@ -485,7 +485,8 @@ const Header: React.FC = () => {
                                       </span>
                                       {suggestion.count && (
                                         <span className="text-xs text-gray-400">
-                                          {suggestion.count} results
+                                          {suggestion.count}{" "}
+                                          {t("common.results")}
                                         </span>
                                       )}
                                     </div>
@@ -500,7 +501,7 @@ const Header: React.FC = () => {
                         <div className="py-2">
                           <div className="flex items-center justify-between px-4 py-2 border-b border-gray-100">
                             <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                              Recent Searches
+                              {t("common.recentSearches")}
                             </span>
                             {searchHistory.length > 0 && (
                               <button
@@ -508,14 +509,16 @@ const Header: React.FC = () => {
                                 className="text-xs text-red-500 hover:text-red-600 transition-colors duration-150"
                               >
                                 <FaTrash className="inline mr-1" />
-                                Clear All
+                                {t("common.clearAll")}
                               </button>
                             )}
                           </div>
                           {searchHistory.length === 0 ? (
                             <div className="px-4 py-8 text-center text-gray-500">
                               <FaClock className="mx-auto h-8 w-8 text-gray-300 mb-2" />
-                              <p className="text-sm">No recent searches</p>
+                              <p className="text-sm">
+                                {t("common.noRecentSearches")}
+                              </p>
                             </div>
                           ) : (
                             searchHistory.map((historyItem, index) => (
@@ -571,7 +574,7 @@ const Header: React.FC = () => {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => navigate("/wishlist")}
                     className="relative p-2 text-gray-700 hover:text-red-500 transition-colors duration-200 group cursor-pointer"
-                    title="Wishlist"
+                    title={t("common.wishlist")}
                   >
                     <FaHeart className="text-lg" />
                     {wishlistCount > 0 && (
@@ -587,7 +590,7 @@ const Header: React.FC = () => {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => navigate("/cart")}
                     className="relative p-2 text-gray-700 hover:text-indigo-600 transition-colors duration-200 group cursor-pointer"
-                    title="Shopping Cart"
+                    title={t("common.shoppingCart")}
                   >
                     <FaShoppingCart className="text-lg" />
                     {cartCount > 0 && (
@@ -603,7 +606,7 @@ const Header: React.FC = () => {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => navigate("/messages")}
                     className="relative p-2 text-gray-700 hover:text-blue-600 transition-colors duration-200 group cursor-pointer"
-                    title="Messages"
+                    title={t("common.messages")}
                   >
                     <FaComments className="text-lg" />
                     {/* Unread messages count - you can add this later */}
@@ -635,10 +638,10 @@ const Header: React.FC = () => {
                       whileTap={{ scale: 0.95 }}
                       onClick={() => navigate("/become-instructor/apply")}
                       className="hidden xl:flex items-center space-x-2 px-3 py-2 text-gray-700 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-all duration-200 cursor-pointer"
-                      title="Become an Instructor"
+                      title={t("common.becomeInstructor")}
                     >
                       <FaChalkboardTeacher className="text-sm" />
-                      <span className="font-medium">Teach</span>
+                      <span className="font-medium">{t("common.teach")}</span>
                     </motion.button>
                   )}
 
@@ -651,7 +654,7 @@ const Header: React.FC = () => {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => navigate("/notifications")}
                     className="relative p-2 text-gray-700 hover:text-blue-600 transition-colors duration-200 cursor-pointer"
-                    title="Notifications"
+                    title={t("common.notifications")}
                   >
                     <FaBell className="text-lg" />
                     {notifications > 0 && (
@@ -729,8 +732,8 @@ const Header: React.FC = () => {
                               }`}
                             >
                               {userDisplayData.isVerified()
-                                ? "Verified"
-                                : "Unverified"}
+                                ? t("common.verified")
+                                : t("common.unverified")}
                             </span>
                           </div>
                         </div>
@@ -782,7 +785,7 @@ const Header: React.FC = () => {
                   to="/auth/login"
                   className="px-4 py-2 text-gray-700 hover:text-indigo-600 font-medium transition-colors duration-200"
                 >
-                  Log In
+                  {t("common.logIn")}
                 </Link>
                 <motion.div
                   whileHover={{ scale: 1.05 }}
@@ -792,7 +795,7 @@ const Header: React.FC = () => {
                     to="/auth/register"
                     className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-lg shadow-lg transition-all duration-200"
                   >
-                    Sign Up
+                    {t("common.signUp")}
                   </Link>
                 </motion.div>
               </div>
@@ -834,7 +837,7 @@ const Header: React.FC = () => {
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search courses, instructors..."
+                    placeholder={t("common.searchCoursesInstructors")}
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/70 backdrop-blur-sm"
                   />
                   <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm" />
@@ -851,7 +854,7 @@ const Header: React.FC = () => {
                   >
                     <div className="flex items-center space-x-3">
                       <FaHeart />
-                      <span>Wishlist</span>
+                      <span>{t("common.wishlist")}</span>
                     </div>
                     {wishlistCount > 0 && (
                       <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -867,7 +870,7 @@ const Header: React.FC = () => {
                   >
                     <div className="flex items-center space-x-3">
                       <FaShoppingCart />
-                      <span>Shopping Cart</span>
+                      <span>{t("common.shoppingCart")}</span>
                     </div>
                     {cartCount > 0 && (
                       <span className="bg-indigo-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -882,7 +885,7 @@ const Header: React.FC = () => {
                     className="flex items-center space-x-3 p-3 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-200"
                   >
                     <FaBookOpen />
-                    <span>My Learning</span>
+                    <span>{t("common.myLearning")}</span>
                   </Link>
 
                   {/* Become Instructor - Only for students */}
@@ -893,7 +896,7 @@ const Header: React.FC = () => {
                       className="flex items-center space-x-3 p-3 text-gray-700 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-all duration-200"
                     >
                       <FaChalkboardTeacher />
-                      <span>Become an Instructor</span>
+                      <span>{t("common.becomeInstructor")}</span>
                     </Link>
                   )}
 
@@ -904,7 +907,7 @@ const Header: React.FC = () => {
                   >
                     <div className="flex items-center space-x-3">
                       <FaBell />
-                      <span>Notifications</span>
+                      <span>{t("common.notifications")}</span>
                     </div>
                     {notifications > 0 && (
                       <span className="bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -924,7 +927,7 @@ const Header: React.FC = () => {
                     className="flex items-center justify-center p-3 text-gray-700 hover:text-indigo-600 font-medium border border-gray-300 rounded-lg transition-all duration-200"
                   >
                     <FaUserCircle className="mr-2 text-lg" />
-                    Log In
+                    {t("common.logIn")}
                   </Link>
                   <Link
                     to="/auth/register"
@@ -932,7 +935,7 @@ const Header: React.FC = () => {
                     className="flex items-center justify-center p-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-lg transition-all duration-200"
                   >
                     <FaUser className="mr-2 text-lg" />
-                    Sign Up
+                    {t("common.signUp")}
                   </Link>
                 </div>
               )}
