@@ -96,7 +96,7 @@ const Cart = () => {
       showToast(cartToasts.removed(courseTitle));
     } catch (error) {
       showToast(
-        generalToasts.error("Error", "Failed to remove item from cart")
+        generalToasts.error(t("common.error"), t("cart.failedToRemoveItem"))
       );
     }
   };
@@ -107,12 +107,14 @@ const Cart = () => {
       setSelectedItems(new Set());
       showToast(
         generalToasts.success(
-          "🎉 Congratulations!",
-          "Cart cleared successfully! "
+          "🎉 " + t("common.congratulations"),
+          t("cart.cartCleared")
         )
       );
     } catch (error) {
-      showToast(generalToasts.error("Error", "Failed to clear cart"));
+      showToast(
+        generalToasts.error(t("common.error"), t("cart.failedToClearCart"))
+      );
     }
   };
 
@@ -133,7 +135,7 @@ const Cart = () => {
       showToast(cartToasts.wishlistAdded(courseTitle));
     } catch (error) {
       showToast(
-        generalToasts.error("Error", "Failed to move item to wishlist")
+        generalToasts.error(t("common.error"), t("cart.failedToMoveToWishlist"))
       );
     }
   };
@@ -151,19 +153,21 @@ const Cart = () => {
       setDiscount(discountPercent);
       showToast(
         generalToasts.success(
-          "🎉 Congratulations!",
-          `Promo code applied! ${discountPercent}% discount 🎉`
+          "🎉 " + t("common.congratulations"),
+          t("cart.promoCodeApplied", { discount: discountPercent })
         )
       );
     } else {
-      showToast(generalToasts.error("Error", "Invalid promo code"));
+      showToast(
+        generalToasts.error(t("common.error"), t("cart.invalidPromoCode"))
+      );
     }
   };
 
   const handleCheckout = () => {
     if (selectedItems.size === 0) {
       showToast(
-        generalToasts.warning("Warning", "Please select items to checkout")
+        generalToasts.warning(t("common.warning"), t("cart.pleaseSelectItems"))
       );
       return;
     }
@@ -187,16 +191,14 @@ const Cart = () => {
           <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
             <FaExclamationTriangle className="text-6xl text-red-500 mb-4" />
             <h2 className="text-2xl font-bold text-gray-800 mb-2">
-              Something went wrong
+              {t("common.somethingWentWrong")}
             </h2>
-            <p className="text-gray-600 mb-4">
-              We couldn't load your cart. Please try again.
-            </p>
+            <p className="text-gray-600 mb-4">{t("cart.couldNotLoadCart")}</p>
             <button
               onClick={() => window.location.reload()}
               className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
-              Retry
+              {t("common.retry")}
             </button>
           </div>
         </div>
@@ -227,8 +229,9 @@ const Cart = () => {
                   <span>{t("navigation.cart")}</span>
                 </h1>
                 <p className="text-gray-600 mt-1">
-                  {cartCount} {cartCount === 1 ? "course" : "courses"} in your
-                  cart
+                  {cartCount}{" "}
+                  {cartCount === 1 ? t("common.course") : t("common.courses")}{" "}
+                  {t("cart.inYourCart")}
                 </p>
               </div>
             </div>
@@ -239,7 +242,7 @@ const Cart = () => {
                 className="px-4 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors flex items-center space-x-2 disabled:opacity-50 cursor-pointer"
               >
                 <FaTrash className="text-sm" />
-                <span>Clear Cart</span>
+                <span>{t("cart.clearCart")}</span>
               </button>
             )}
           </div>
@@ -255,24 +258,22 @@ const Cart = () => {
             <div className="max-w-md mx-auto">
               <EmptyCartAnimation />
               <h2 className="text-2xl font-bold text-gray-800 mb-4">
-                Your cart is empty
+                {t("cart.cartIsEmpty")}
               </h2>
-              <p className="text-gray-600 mb-8">
-                Discover amazing courses and start your learning journey today!
-              </p>
+              <p className="text-gray-600 mb-8">{t("cart.discoverCourses")}</p>
               <div className="space-y-3">
                 <button
                   onClick={() => navigate("/courses")}
                   className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl cursor-pointer"
                 >
-                  Browse Courses
+                  {t("navigation.browse")}
                 </button>
                 <button
                   onClick={() => navigate("/wishlist")}
                   className="w-full py-3 border border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-colors flex items-center justify-center space-x-2 cursor-pointer"
                 >
                   <FaHeart className="text-red-500" />
-                  <span>View Wishlist</span>
+                  <span>{t("navigation.wishlist")}</span>
                 </button>
               </div>
             </div>
@@ -302,11 +303,13 @@ const Cart = () => {
                       className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 cursor-pointer"
                     />
                     <span className="font-semibold text-gray-800">
-                      Select All ({cartItems.length} items)
+                      {t("cart.selectAll")} ({cartItems.length}{" "}
+                      {t("cart.items")})
                     </span>
                   </label>
                   <div className="text-sm text-gray-600">
-                    {selectedItems.size} of {cartItems.length} selected
+                    {selectedItems.size} {t("cart.of")} {cartItems.length}{" "}
+                    {t("cart.selected")}
                   </div>
                 </div>
               </motion.div>
@@ -380,6 +383,7 @@ const CartItem: React.FC<CartItemProps> = ({
   isInWishlist,
 }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <motion.div
@@ -428,8 +432,9 @@ const CartItem: React.FC<CartItemProps> = ({
                   {course.title}
                 </h3>
                 <p className="text-sm text-gray-600 mt-1">
-                  By {course.instructor?.firstName}{" "}
-                  {course.instructor?.lastName}
+                  {t("course.createdBy", {
+                    instructor: `${course.instructor?.firstName} ${course.instructor?.lastName}`,
+                  })}
                 </p>
 
                 {/* Stats */}
@@ -447,7 +452,8 @@ const CartItem: React.FC<CartItemProps> = ({
                   <div className="flex items-center space-x-1">
                     <FaClock className="text-green-500" />
                     <span>
-                      {Math.round(course.totalDuration / 60) || 0} min
+                      {Math.round(course.totalDuration / 60) || 0}{" "}
+                      {t("common.minutes")}
                     </span>
                   </div>
                 </div>
@@ -477,7 +483,7 @@ const CartItem: React.FC<CartItemProps> = ({
                   className="text-red-600 hover:text-red-700 text-sm font-medium flex items-center space-x-1 disabled:opacity-50 cursor-pointer"
                 >
                   <FaTrash className="text-xs" />
-                  <span>Remove</span>
+                  <span>{t("common.remove")}</span>
                 </button>
                 {!isInWishlist && (
                   <button
@@ -485,7 +491,7 @@ const CartItem: React.FC<CartItemProps> = ({
                     className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center space-x-1 cursor-pointer"
                   >
                     <FaHeart className="text-xs" />
-                    <span>Save for Later</span>
+                    <span>{t("cart.saveForLater")}</span>
                   </button>
                 )}
               </div>
@@ -493,7 +499,7 @@ const CartItem: React.FC<CartItemProps> = ({
               <div className="flex items-center space-x-2">
                 <span className="text-xs text-green-600 font-medium flex items-center space-x-1">
                   <FaGift className="text-xs" />
-                  <span>Lifetime access</span>
+                  <span>{t("course.lifetimeAccess")}</span>
                 </span>
               </div>
             </div>
@@ -531,18 +537,21 @@ const CheckoutSidebar: React.FC<CheckoutSidebarProps> = ({
   onApplyPromo,
   onCheckout,
 }) => {
+  const { t } = useTranslation();
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="bg-white rounded-xl shadow-xl p-6 border border-gray-200"
     >
-      <h2 className="text-xl font-bold text-gray-800 mb-6">Order Summary</h2>
+      <h2 className="text-xl font-bold text-gray-800 mb-6">
+        {t("cart.orderSummary")}
+      </h2>
 
       {/* Selected Items Count */}
       <div className="mb-6">
         <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
-          <span>Selected items:</span>
+          <span>{t("cart.selectedItems")}:</span>
           <span>{selectedItems.length}</span>
         </div>
         {selectedItems.length > 0 && (
@@ -565,7 +574,7 @@ const CheckoutSidebar: React.FC<CheckoutSidebarProps> = ({
             className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center space-x-1"
           >
             <FaTag className="text-xs" />
-            <span>Add promo code</span>
+            <span>{t("cart.addPromoCode")}</span>
           </button>
         ) : (
           <motion.div
@@ -578,14 +587,14 @@ const CheckoutSidebar: React.FC<CheckoutSidebarProps> = ({
                 type="text"
                 value={promoCode}
                 onChange={(e) => setPromoCode(e.target.value)}
-                placeholder="Enter promo code"
+                placeholder={t("cart.enterPromoCode")}
                 className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               />
               <button
                 onClick={onApplyPromo}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
               >
-                Apply
+                {t("common.apply")}
               </button>
             </div>
             <button
@@ -595,7 +604,7 @@ const CheckoutSidebar: React.FC<CheckoutSidebarProps> = ({
               }}
               className="text-xs text-gray-500 hover:text-gray-700"
             >
-              Cancel
+              {t("common.cancel")}
             </button>
           </motion.div>
         )}
@@ -604,17 +613,19 @@ const CheckoutSidebar: React.FC<CheckoutSidebarProps> = ({
       {/* Price Breakdown */}
       <div className="space-y-3 mb-6 pb-6 border-b border-gray-200">
         <div className="flex items-center justify-between text-gray-600">
-          <span>Subtotal:</span>
+          <span>{t("cart.subtotal")}:</span>
           <span>${subtotal.toFixed(2)}</span>
         </div>
         {discount > 0 && (
           <div className="flex items-center justify-between text-green-600">
-            <span>Discount ({discount}%):</span>
+            <span>
+              {t("cart.discount")} ({discount}%):
+            </span>
             <span>-${discountAmount.toFixed(2)}</span>
           </div>
         )}
         <div className="flex items-center justify-between text-xl font-bold text-gray-900">
-          <span>Total:</span>
+          <span>{t("cart.total")}:</span>
           <span>${total.toFixed(2)}</span>
         </div>
       </div>
@@ -623,15 +634,15 @@ const CheckoutSidebar: React.FC<CheckoutSidebarProps> = ({
       <div className="mb-6 space-y-2">
         <div className="flex items-center space-x-2 text-sm text-green-600">
           <FaCheckCircle className="text-xs" />
-          <span>Lifetime access</span>
+          <span>{t("course.lifetimeAccess")}</span>
         </div>
         <div className="flex items-center space-x-2 text-sm text-green-600">
           <FaCheckCircle className="text-xs" />
-          <span>Mobile and TV access</span>
+          <span>{t("cart.mobileAndTVAccess")}</span>
         </div>
         <div className="flex items-center space-x-2 text-sm text-green-600">
           <FaCheckCircle className="text-xs" />
-          <span>Certificate of completion</span>
+          <span>{t("course.certificateOfCompletion")}</span>
         </div>
       </div>
 
@@ -644,15 +655,13 @@ const CheckoutSidebar: React.FC<CheckoutSidebarProps> = ({
         <FaCreditCard className="text-lg" />
         <span>
           {selectedItems.length === 0
-            ? "Select items to checkout"
-            : `Checkout ${selectedItems.length} course${
-                selectedItems.length > 1 ? "s" : ""
-              }`}
+            ? t("cart.selectItemsToCheckout")
+            : t("cart.checkoutItems", { count: selectedItems.length })}
         </span>
       </button>
 
       <p className="text-xs text-gray-500 text-center mt-4">
-        30-Day Money-Back Guarantee
+        {t("cart.moneyBackGuarantee")}
       </p>
     </motion.div>
   );

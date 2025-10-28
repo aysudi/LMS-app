@@ -5,7 +5,6 @@ import {
   useSearchParams,
   useLocation,
 } from "react-router-dom";
-import { useSnackbar } from "notistack";
 import {
   FaCheckCircle,
   FaExclamationTriangle,
@@ -21,6 +20,10 @@ import {
 } from "../../hooks/useAuth";
 import { getErrorMessage } from "../../utils/errorUtils";
 import Loading from "../../components/Common/Loading";
+import { useToast } from "../../components/UI/ToastProvider";
+import { generalToasts } from "../../utils/toastUtils";
+// @ts-ignore
+import { useTranslation } from "react-i18next";
 
 type VerificationStatus =
   | "loading"
@@ -40,7 +43,8 @@ const VerifyEmail = () => {
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const { enqueueSnackbar } = useSnackbar();
+  const { showToast } = useToast();
+  const { t } = useTranslation();
 
   const verifyEmailMutation = useVerifyEmail();
   const resendVerificationMutation = useResendVerificationEmail();
@@ -52,15 +56,11 @@ const VerifyEmail = () => {
     if (!token) {
       if (fromRegistration) {
         setVerificationStatus("awaiting-verification");
-        setMessage(
-          "We've sent a verification email to your inbox. Please check your email and click the verification link to activate your account."
-        );
+        setMessage(t("auth.verificationEmailSentToInbox"));
         setResendEmail(email || "");
       } else {
         setVerificationStatus("invalid-token");
-        setMessage(
-          "No verification token provided. Please check your email link."
-        );
+        setMessage(t("auth.noVerificationToken"));
       }
       return;
     }
@@ -82,21 +82,20 @@ const VerifyEmail = () => {
       console.log(result);
 
       setVerificationStatus("success");
-      setMessage(
-        result.message ||
-          "Your email has been successfully verified! You can now log in to your account."
-      );
+      setMessage(result.message || t("auth.emailVerifiedCanLogin"));
 
-      enqueueSnackbar("🎉 Email verified successfully! You can now log in.", {
-        variant: "success",
-        autoHideDuration: 6000,
-      });
+      showToast(
+        generalToasts.success(
+          t("auth.emailVerifiedSuccess"),
+          `🎉 ${t("auth.emailVerifiedSuccessDesc")}`
+        )
+      );
 
       setTimeout(() => {
         navigate("/auth/login", {
           state: {
             fromVerification: true,
-            message: "Email verified successfully! Please log in to continue.",
+            message: t("auth.emailVerifiedLoginToContinue"),
           },
         });
       }, 3000);
@@ -105,10 +104,12 @@ const VerifyEmail = () => {
       const errorMsg = getErrorMessage(error);
       setMessage(errorMsg);
 
-      enqueueSnackbar(`❌ Verification failed: ${errorMsg}`, {
-        variant: "error",
-        autoHideDuration: 8000,
-      });
+      showToast(
+        generalToasts.error(
+          t("auth.verificationFailed"),
+          `❌ ${t("auth.verificationFailedDesc")}: ${errorMsg}`
+        )
+      );
     }
   };
 
@@ -116,26 +117,34 @@ const VerifyEmail = () => {
     e.preventDefault();
 
     if (!resendEmail) {
-      enqueueSnackbar("Please enter your email address", {
-        variant: "warning",
-      });
+      showToast(
+        generalToasts.warning(
+          t("auth.enterEmailRequired"),
+          t("auth.enterEmailRequired")
+        )
+      );
       return;
     }
 
     try {
       await resendVerificationMutation.mutateAsync(resendEmail);
 
-      enqueueSnackbar("📧 Verification email sent! Check your inbox.", {
-        variant: "success",
-        autoHideDuration: 6000,
-      });
+      showToast(
+        generalToasts.success(
+          t("auth.verificationEmailSent"),
+          `📧 ${t("auth.verificationEmailSentDesc")}`
+        )
+      );
 
       setShowResendForm(false);
       setResendEmail("");
     } catch (error) {
-      enqueueSnackbar(`❌ Failed to resend: ${getErrorMessage(error)}`, {
-        variant: "error",
-      });
+      showToast(
+        generalToasts.error(
+          t("auth.failedToResend"),
+          `❌ ${t("auth.failedToResendDesc")}: ${getErrorMessage(error)}`
+        )
+      );
     }
   };
 
@@ -143,7 +152,11 @@ const VerifyEmail = () => {
     switch (verificationStatus) {
       case "loading":
         return (
-          <Loading variant="default" size="lg" message="Verifying email..." />
+          <Loading
+            variant="default"
+            size="lg"
+            message={t("auth.verifyingEmail")}
+          />
         );
       case "success":
         return <FaCheckCircle className="text-4xl text-green-500" />;
@@ -200,7 +213,7 @@ const VerifyEmail = () => {
               </h1>
             </div>
             <h2 className="text-2xl font-bold text-gray-800 mb-2">
-              Email Verification
+              {t("auth.emailVerification")}
             </h2>
           </div>
 
@@ -227,14 +240,15 @@ const VerifyEmail = () => {
               <div className="space-y-4 mb-8">
                 <h3 className="text-xl font-semibold text-gray-800">
                   {verificationStatus === "loading" &&
-                    "Verifying Your Email..."}
+                    t("auth.verifyingYourEmail")}
                   {verificationStatus === "success" &&
-                    "Email Verified Successfully! 🎉"}
+                    `${t("auth.emailVerifiedSuccessfully")} 🎉`}
                   {verificationStatus === "awaiting-verification" &&
-                    "Check Your Email 📧"}
-                  {verificationStatus === "error" && "Verification Failed"}
+                    `${t("auth.checkYourEmail")} 📧`}
+                  {verificationStatus === "error" &&
+                    t("auth.verificationFailed")}
                   {verificationStatus === "invalid-token" &&
-                    "Invalid Verification Link"}
+                    t("auth.invalidVerificationLink")}
                 </h3>
 
                 <p className="text-gray-600 leading-relaxed">{message}</p>
@@ -247,8 +261,8 @@ const VerifyEmail = () => {
                     className="bg-green-50 border border-green-200 rounded-xl p-4 mt-4"
                   >
                     <p className="text-sm text-green-700">
-                      🎊 Welcome to Skillify! You'll be redirected to your login
-                      page in a few seconds...
+                      🎊 {t("auth.welcomeToSkillify")}{" "}
+                      {t("auth.redirectingToLoginPage")}
                     </p>
                   </motion.div>
                 )}
@@ -267,13 +281,13 @@ const VerifyEmail = () => {
                       onClick={() => navigate("/dashboard")}
                       className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl"
                     >
-                      Go to Login
+                      {t("auth.goToLogin")}
                     </button>
                     <Link
                       to="/auth/login"
                       className="block w-full text-center py-3 px-6 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-all duration-200"
                     >
-                      Sign In
+                      {t("auth.signIn")}
                     </Link>
                   </motion.div>
                 )}
@@ -289,13 +303,12 @@ const VerifyEmail = () => {
                       to="/auth/login"
                       className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
                     >
-                      <span>I've verified my email - Sign In</span>
+                      <span>{t("auth.verifiedEmailSignIn")}</span>
                     </Link>
                     <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                       <p className="text-sm text-blue-700">
-                        💡 <strong>Tip:</strong> Can't find the email? Check
-                        your spam/junk folder. If you still can't find it, you
-                        can request a new verification email below.
+                        💡 <strong>{t("auth.tip")}:</strong>{" "}
+                        {t("auth.cantFindEmailTip")}
                       </p>
                     </div>
                     <button
@@ -303,7 +316,7 @@ const VerifyEmail = () => {
                       className="w-full py-3 px-6 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-all duration-200 flex items-center justify-center space-x-2"
                     >
                       <FaRedo className="text-sm" />
-                      <span>Resend Verification Email</span>
+                      <span>{t("auth.resendVerificationEmail")}</span>
                     </button>
                   </motion.div>
                 )}
@@ -323,13 +336,13 @@ const VerifyEmail = () => {
                           className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
                         >
                           <FaRedo className="text-sm" />
-                          <span>Resend Verification Email</span>
+                          <span>{t("auth.resendVerificationEmail")}</span>
                         </button>
                         <Link
                           to="/auth/login"
                           className="block w-full text-center py-3 px-6 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-all duration-200"
                         >
-                          Back to Login
+                          {t("auth.backToLogin")}
                         </Link>
                       </>
                     ) : (
@@ -344,7 +357,7 @@ const VerifyEmail = () => {
                         >
                           <div className="relative">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Email Address
+                              {t("auth.emailAddress")}
                             </label>
                             <div className="relative">
                               <input
@@ -352,7 +365,7 @@ const VerifyEmail = () => {
                                 value={resendEmail}
                                 onChange={(e) => setResendEmail(e.target.value)}
                                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm"
-                                placeholder="Enter your email address"
+                                placeholder={t("auth.enterYourEmailAddress")}
                                 required
                               />
                               <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm" />
@@ -372,12 +385,12 @@ const VerifyEmail = () => {
                                     size="sm"
                                     message=""
                                   />
-                                  <span>Sending...</span>
+                                  <span>{t("auth.sending")}</span>
                                 </>
                               ) : (
                                 <>
                                   <FaEnvelope className="text-sm" />
-                                  <span>Send Email</span>
+                                  <span>{t("auth.sendEmail")}</span>
                                 </>
                               )}
                             </button>
@@ -386,7 +399,7 @@ const VerifyEmail = () => {
                               onClick={() => setShowResendForm(false)}
                               className="px-4 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-all duration-200"
                             >
-                              Cancel
+                              {t("common.cancel")}
                             </button>
                           </div>
                         </form>
@@ -400,20 +413,22 @@ const VerifyEmail = () => {
 
           {/* Help Section */}
           <div className="text-center mt-8 pt-6 border-t border-gray-200">
-            <p className="text-sm text-gray-500 mb-2">Having trouble?</p>
+            <p className="text-sm text-gray-500 mb-2">
+              {t("auth.havingTrouble")}?
+            </p>
             <div className="flex justify-center space-x-4 text-sm">
               <Link
                 to="/auth/login"
                 className="text-indigo-600 hover:text-indigo-700 font-medium transition-colors duration-200 flex items-center space-x-1"
               >
                 <FaArrowLeft className="text-xs" />
-                <span>Back to Login</span>
+                <span>{t("auth.backToLogin")}</span>
               </Link>
               <Link
                 to="/support"
                 className="text-indigo-600 hover:text-indigo-700 font-medium transition-colors duration-200"
               >
-                Contact Support
+                {t("auth.contactSupport")}
               </Link>
             </div>
           </div>
