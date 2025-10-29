@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { HTMLRenderer } from "../../utils/htmlRenderer";
 import {
   FaPlay,
@@ -73,6 +74,7 @@ const CoursePreviewCard: React.FC<{
   enrollInFreeCourseMutation,
   navigate,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="bg-white border border-gray-200 rounded-2xl shadow-lg overflow-hidden">
       {/* Video Preview */}
@@ -143,7 +145,7 @@ const CoursePreviewCard: React.FC<{
         {/* Preview Badge */}
         <div className="absolute top-3 left-3">
           <span className="px-2 py-1 bg-purple-600 text-white text-xs font-medium rounded">
-            Preview this course
+            {t("courseDetails.previewThisCourse")}
           </span>
         </div>
       </div>
@@ -152,7 +154,9 @@ const CoursePreviewCard: React.FC<{
         {/* Price Section */}
         <div className="mb-6">
           {course.isFree ? (
-            <div className="text-3xl font-bold text-gray-900">Free</div>
+            <div className="text-3xl font-bold text-gray-900">
+              {t("courseDetails.free")}
+            </div>
           ) : (
             <div className="flex items-baseline gap-3 flex-wrap">
               <span className="text-3xl font-bold text-gray-900">
@@ -164,7 +168,7 @@ const CoursePreviewCard: React.FC<{
                     ${course.originalPrice}
                   </span>
                   <span className="px-2 py-1 bg-red-100 text-red-800 text-sm font-medium rounded">
-                    {calculateDiscountPercentage()}% off
+                    {calculateDiscountPercentage()}% {t("courseDetails.off")}
                   </span>
                 </>
               )}
@@ -173,7 +177,7 @@ const CoursePreviewCard: React.FC<{
 
           {!course.isFree && calculateDiscountPercentage() > 0 && (
             <p className="text-red-600 text-sm font-medium mt-2">
-              🔥 3 days left at this price!
+              🔥 {t("courseDetails.daysLeftAtThisPrice")}
             </p>
           )}
         </div>
@@ -189,7 +193,7 @@ const CoursePreviewCard: React.FC<{
               className="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-bold text-center rounded-lg transition-colors duration-200 cursor-pointer flex items-center justify-center space-x-2"
             >
               <FaPlay />
-              <span>Continue Learning</span>
+              <span>{t("courseDetails.continueLearning")}</span>
             </button>
           ) : course.isFree ? (
             <button
@@ -211,12 +215,12 @@ const CoursePreviewCard: React.FC<{
                     }}
                     className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
                   />
-                  <span>Enrolling...</span>
+                  <span>{t("courseDetails.enrolling")}</span>
                 </>
               ) : (
                 <>
                   <FaPlay />
-                  <span>Enroll for Free</span>
+                  <span>{t("courseDetails.enrollForFree")}</span>
                 </>
               )}
             </button>
@@ -229,7 +233,7 @@ const CoursePreviewCard: React.FC<{
               className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-center rounded-lg transition-colors duration-200 cursor-pointer flex items-center justify-center space-x-2"
             >
               <FaShoppingCart />
-              <span>Go to Cart</span>
+              <span>{t("courseDetails.goToCart")}</span>
             </button>
           ) : (
             <button
@@ -251,12 +255,12 @@ const CoursePreviewCard: React.FC<{
                     }}
                     className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
                   />
-                  <span>Adding...</span>
+                  <span>{t("courseDetails.adding")}</span>
                 </>
               ) : (
                 <>
                   <FaShoppingCart />
-                  <span>Add to Cart</span>
+                  <span>{t("courseDetails.addToCart")}</span>
                 </>
               )}
             </button>
@@ -271,42 +275,45 @@ const CoursePreviewCard: React.FC<{
               disabled={addToCartMutation.isPending}
               className="w-full py-3 border border-gray-800 hover:bg-gray-50 text-gray-900 font-bold text-center rounded-lg transition-colors duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Buy Now
+              {t("courseDetails.buyNow")}
             </button>
           )}
         </div>
 
         {/* Money-back guarantee */}
         <div className="text-center text-sm text-gray-600 mb-6">
-          30-Day Money-Back Guarantee
+          {t("courseDetails.moneyBackGuarantee")}
         </div>
 
         {/* Course Includes */}
         <div className="space-y-3 mb-6">
-          <h4 className="font-semibold text-gray-900">This course includes:</h4>
+          <h4 className="font-semibold text-gray-900">
+            {t("courseDetails.thisCourseIncludes")}
+          </h4>
           <div className="space-y-2 text-sm">
             <div className="flex items-center gap-3">
               <FaTv className="text-gray-500 flex-shrink-0" />
               <span>
-                {formatDuration(course.totalDuration)} on-demand video
+                {formatDuration(course.totalDuration)}{" "}
+                {t("courseDetails.onDemandVideo")}
               </span>
             </div>
             <div className="flex items-center gap-3">
               <FaDownload className="text-gray-500 flex-shrink-0" />
-              <span>Downloadable resources</span>
+              <span>{t("courseDetails.downloadableResources")}</span>
             </div>
             <div className="flex items-center gap-3">
               <FaInfinity className="text-gray-500 flex-shrink-0" />
-              <span>Full lifetime access</span>
+              <span>{t("courseDetails.fullLifetimeAccess")}</span>
             </div>
             <div className="flex items-center gap-3">
               <FaMobile className="text-gray-500 flex-shrink-0" />
-              <span>Access on mobile and TV</span>
+              <span>{t("courseDetails.accessOnMobileAndTV")}</span>
             </div>
             {course.certificateProvided && (
               <div className="flex items-center gap-3">
                 <FaAward className="text-gray-500 flex-shrink-0" />
-                <span>Certificate of completion</span>
+                <span>{t("courseDetails.certificateOfCompletion")}</span>
               </div>
             )}
           </div>
@@ -329,11 +336,11 @@ const CoursePreviewCard: React.FC<{
             >
               <FaShare className="group-hover:text-purple-500 transition-colors" />
             </motion.div>
-            <span className="text-sm">Share Course</span>
+            <span className="text-sm">{t("courseDetails.shareCourse")}</span>
 
             {/* Tooltip */}
             <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
-              Copy link
+              {t("courseDetails.copyLink")}
             </div>
           </motion.button>
         </div>
@@ -343,6 +350,8 @@ const CoursePreviewCard: React.FC<{
 };
 
 const InstructorInfo: React.FC<{ course: Course }> = ({ course }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-6">
       <div className="flex items-start gap-6">
@@ -356,11 +365,13 @@ const InstructorInfo: React.FC<{ course: Course }> = ({ course }) => {
           <h3 className="text-2xl font-bold text-gray-900 mb-2">
             {course.instructor.firstName} {course.instructor.lastName}
           </h3>
-          <p className="text-gray-600 mb-4">Expert Instructor</p>
+          <p className="text-gray-600 mb-4">
+            {t("courseDetails.expertInstructor")}
+          </p>
           <p className="text-gray-700 leading-relaxed">
-            Experienced professional with expertise in {course.category}.
-            Passionate about teaching and helping students achieve their
-            learning goals.
+            {t("courseDetails.experiencedProfessional", {
+              category: course.category,
+            })}
           </p>
         </div>
       </div>
@@ -368,14 +379,20 @@ const InstructorInfo: React.FC<{ course: Course }> = ({ course }) => {
       <div className="grid md:grid-cols-2 gap-6 pt-6 border-t border-gray-200">
         <div>
           <h4 className="font-semibold text-gray-900 mb-2">
-            Teaching Experience
+            {t("courseDetails.teachingExperience")}
           </h4>
-          <p className="text-gray-600">5+ years of industry experience</p>
+          <p className="text-gray-600">
+            {t("courseDetails.yearsOfIndustryExperience")}
+          </p>
         </div>
         <div>
-          <h4 className="font-semibold text-gray-900 mb-2">Students Taught</h4>
+          <h4 className="font-semibold text-gray-900 mb-2">
+            {t("courseDetails.studentsTaught")}
+          </h4>
           <p className="text-gray-600">
-            {course.studentsEnrolled.length.toLocaleString()}+ students
+            {t("courseDetails.studentsCount", {
+              count: course.studentsEnrolled.length,
+            })}
           </p>
         </div>
       </div>
@@ -384,6 +401,7 @@ const InstructorInfo: React.FC<{ course: Course }> = ({ course }) => {
 };
 
 const CourseDetails = () => {
+  const { t } = useTranslation();
   const { courseId } = useParams<{ courseId: string }>();
   const navigate = useNavigate();
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
@@ -544,7 +562,7 @@ const CourseDetails = () => {
                 onClick={() => navigate("/courses")}
                 className="hover:text-white transition-colors cursor-pointer"
               >
-                Courses
+                {t("courseDetails.courses")}
               </button>
               <span>›</span>
               <span className="text-purple-300">{course.category}</span>
@@ -599,13 +617,15 @@ const CourseDetails = () => {
                   {renderStars(course.rating)}
                 </div>
                 <span className="text-orange-300 text-sm underline cursor-pointer">
-                  ({course.ratingsCount.toLocaleString()} ratings)
+                  ({course.ratingsCount.toLocaleString()}{" "}
+                  {t("courseDetails.ratings")})
                 </span>
               </div>
 
               {/* Students */}
               <div className="text-gray-300">
-                {course.studentsEnrolled.length.toLocaleString()} students
+                {course.studentsEnrolled.length.toLocaleString()}{" "}
+                {t("courseDetails.students")}
               </div>
 
               {/* Level */}
@@ -622,13 +642,15 @@ const CourseDetails = () => {
               className="flex flex-wrap items-center gap-6 text-sm text-gray-300"
             >
               <div className="flex items-center gap-2">
-                <span>Created by</span>
+                <span>{t("courseDetails.createdBy")}</span>
                 <span className="text-purple-300 underline cursor-pointer">
                   {course.instructor.firstName} {course.instructor.lastName}
                 </span>
               </div>
               <div>
-                Last updated {new Date(course.lastUpdated).toLocaleDateString()}
+                {t("courseDetails.lastUpdated", {
+                  date: new Date(course.lastUpdated).toLocaleDateString(),
+                })}
               </div>
               <div className="flex items-center gap-1">
                 <FaGlobe />
@@ -637,7 +659,7 @@ const CourseDetails = () => {
               {course.certificateProvided && (
                 <div className="flex items-center gap-1">
                   <FaAward className="text-yellow-400" />
-                  <span>Certificate</span>
+                  <span>{t("courseDetails.certificate")}</span>
                 </div>
               )}
             </motion.div>
@@ -677,10 +699,16 @@ const CourseDetails = () => {
               <div className="border-b border-gray-200">
                 <nav className="flex">
                   {[
-                    { id: "overview", label: "Overview" },
-                    { id: "curriculum", label: "Curriculum" },
-                    { id: "instructor", label: "Instructor" },
-                    { id: "reviews", label: "Reviews" },
+                    { id: "overview", label: t("courseDetails.tabs.overview") },
+                    {
+                      id: "curriculum",
+                      label: t("courseDetails.tabs.curriculum"),
+                    },
+                    {
+                      id: "instructor",
+                      label: t("courseDetails.tabs.instructor"),
+                    },
+                    { id: "reviews", label: t("courseDetails.tabs.reviews") },
                   ].map((tab) => (
                     <button
                       key={tab.id}
@@ -801,12 +829,14 @@ const CourseDetails = () => {
 };
 
 const CourseOverview: React.FC<{ course: Course }> = ({ course }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-8">
       {/* Course Description */}
       <div>
         <h3 className="text-2xl font-bold text-gray-900 mb-6">
-          About this course
+          {t("courseDetails.description")}
         </h3>
         <div className="prose prose-lg max-w-none text-gray-700">
           <HTMLRenderer
@@ -820,7 +850,7 @@ const CourseOverview: React.FC<{ course: Course }> = ({ course }) => {
       {course.learningObjectives.length > 0 && (
         <div className="border border-gray-200 rounded-lg p-6">
           <h3 className="text-xl font-bold text-gray-900 mb-6">
-            What you'll learn
+            {t("courseDetails.whatYoullLearn")}
           </h3>
           <div className="grid md:grid-cols-2 gap-4">
             {course.learningObjectives.map((objective, index) => (
@@ -844,7 +874,9 @@ const CourseOverview: React.FC<{ course: Course }> = ({ course }) => {
       {/* Requirements */}
       {course.requirements.length > 0 && (
         <div>
-          <h3 className="text-xl font-bold text-gray-900 mb-4">Requirements</h3>
+          <h3 className="text-xl font-bold text-gray-900 mb-4">
+            {t("courseDetails.requirements")}
+          </h3>
           <ul className="space-y-3">
             {course.requirements.map((requirement, index) => (
               <li key={index} className="flex items-start gap-3 text-gray-700">
@@ -860,7 +892,7 @@ const CourseOverview: React.FC<{ course: Course }> = ({ course }) => {
       {course.targetAudience.length > 0 && (
         <div>
           <h3 className="text-xl font-bold text-gray-900 mb-4">
-            Who this course is for
+            {t("courseDetails.whoThisCourseIsFor")}
           </h3>
           <ul className="space-y-3">
             {course.targetAudience.map((audience, index) => (
@@ -882,17 +914,28 @@ const CourseCurriculum: React.FC<{
   toggleSection: (sectionId: string) => void;
   formatDuration: (seconds: number) => string;
 }> = ({ course, expandedSections, toggleSection, formatDuration }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-6">
       {/* Header with Course Stats */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <h3 className="text-2xl font-bold text-gray-900">Course content</h3>
+        <h3 className="text-2xl font-bold text-gray-900">
+          {t("courseDetails.courseContent")}
+        </h3>
         <div className="text-sm text-gray-600 flex flex-wrap gap-4">
-          <span>{course.sections.length} sections</span>
+          <span>
+            {course.sections.length} {t("courseDetails.sections")}
+          </span>
           <span>•</span>
-          <span>{course.totalLessons} lectures</span>
+          <span>
+            {course.totalLessons} {t("courseDetails.lectures")}
+          </span>
           <span>•</span>
-          <span>{formatDuration(course.totalDuration)} total length</span>
+          <span>
+            {formatDuration(course.totalDuration)}{" "}
+            {t("courseDetails.totalLength")}
+          </span>
         </div>
       </div>
 
@@ -992,6 +1035,8 @@ const LessonItem: React.FC<{
   lessonIndex: number;
   formatDuration: (seconds: number) => string;
 }> = ({ lesson, lessonIndex, formatDuration }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="flex items-center gap-4 py-3 hover:bg-white rounded-lg px-4 transition-colors group cursor-pointer">
       {/* Lesson Icon */}
@@ -1015,7 +1060,7 @@ const LessonItem: React.FC<{
           </span>
           {lesson.isPreview && (
             <span className="px-2 py-0.5 bg-green-100 text-green-800 text-xs font-medium rounded">
-              Preview
+              {t("courseDetails.preview")}
             </span>
           )}
         </div>
@@ -1054,6 +1099,8 @@ const CourseReviews: React.FC<{
   course: Course;
   renderStars: (rating: number) => React.ReactElement[];
 }> = ({ course, renderStars }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-8">
       {/* Rating Overview */}
@@ -1067,7 +1114,9 @@ const CourseReviews: React.FC<{
             <div className="flex items-center justify-center gap-1 mb-2">
               {renderStars(course.rating)}
             </div>
-            <div className="text-sm text-gray-600">Course Rating</div>
+            <div className="text-sm text-gray-600">
+              {t("courseDetails.courseRating")}
+            </div>
           </div>
 
           {/* Rating Bars */}
@@ -1106,7 +1155,9 @@ const CourseReviews: React.FC<{
 
       {/* Reviews List */}
       <div>
-        <h3 className="text-xl font-bold text-gray-900 mb-6">Reviews</h3>
+        <h3 className="text-xl font-bold text-gray-900 mb-6">
+          {t("courseDetails.reviews")}
+        </h3>
 
         {course.reviews.length > 0 ? (
           <div className="space-y-6">
@@ -1130,7 +1181,7 @@ const CourseReviews: React.FC<{
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
                       <span className="font-semibold text-gray-900">
-                        Anonymous User
+                        {t("courseDetails.anonymousUser")}
                       </span>
                       <div className="flex items-center gap-1">
                         {renderStars(review.rating)}
@@ -1153,13 +1204,13 @@ const CourseReviews: React.FC<{
               <FaStar className="text-2xl text-gray-400" />
             </div>
             <h4 className="text-lg font-semibold text-gray-700 mb-2">
-              No reviews yet
+              {t("courseDetails.noReviewsYet")}
             </h4>
             <p className="text-gray-500 mb-6">
-              Be the first to review this course and help other students!
+              {t("courseDetails.beFirstToReview")}
             </p>
             <button className="px-6 py-3 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-colors cursor-pointer">
-              Write a Review
+              {t("courseDetails.writeAReview")}
             </button>
           </div>
         )}
@@ -1239,6 +1290,7 @@ const CourseDetailsLoader = () => {
 
 const CourseNotFound: React.FC<{ error: any }> = ({ error }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -1247,24 +1299,23 @@ const CourseNotFound: React.FC<{ error: any }> = ({ error }) => {
           <FaExclamationTriangle className="text-3xl text-gray-400" />
         </div>
         <h2 className="text-2xl font-bold text-gray-900 mb-4">
-          Course Not Found
+          {t("courseDetails.courseNotFound")}
         </h2>
         <p className="text-gray-600 mb-8 leading-relaxed">
-          {error?.message ||
-            "The course you're looking for doesn't exist or has been removed."}
+          {error?.message || t("courseDetails.courseNotFoundDesc")}
         </p>
         <div className="space-x-4">
           <button
             onClick={() => navigate("/courses")}
             className="px-6 py-3 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-colors"
           >
-            Browse Courses
+            {t("courseDetails.browseCourses")}
           </button>
           <button
             onClick={() => window.history.back()}
             className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
           >
-            Go Back
+            {t("courseDetails.goBack")}
           </button>
         </div>
       </div>
