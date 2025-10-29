@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   FaFilter,
   FaChevronDown,
@@ -14,6 +15,7 @@ import Loading from "../../components/Common/Loading";
 import CourseCard from "../../components/Client/CourseCard";
 
 const Courses: React.FC = () => {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [currentQuery, setCurrentQuery] = useState<CourseQuery>({
@@ -129,8 +131,8 @@ const Courses: React.FC = () => {
               <div className="flex-1">
                 <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-3">
                   {searchQuery
-                    ? `Search Results for "${searchQuery}"`
-                    : "Discover Courses"}
+                    ? t("courses.searchResults", { query: searchQuery })
+                    : t("courses.discoverCourses")}
                 </h1>
 
                 {/* Active Filters Display */}
@@ -141,22 +143,22 @@ const Courses: React.FC = () => {
                   <div className="flex flex-wrap items-center gap-2 mb-3">
                     {searchQuery && (
                       <span className="inline-flex items-center px-3 py-1.5 bg-indigo-100 text-indigo-800 text-sm font-medium rounded-full">
-                        🔍 Search: "{searchQuery}"
+                        🔍 {t("courses.searchLabel")}: "{searchQuery}"
                       </span>
                     )}
                     {filters.category && (
                       <span className="inline-flex items-center px-3 py-1.5 bg-green-100 text-green-800 text-sm font-medium rounded-full">
-                        📂 Category: {filters.category}
+                        📂 {t("courses.category")}: {filters.category}
                       </span>
                     )}
                     {filters.level && (
                       <span className="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
-                        📊 Level: {filters.level}
+                        📊 {t("courses.level")}: {filters.level}
                       </span>
                     )}
                     {filters.isFree && (
                       <span className="inline-flex items-center px-3 py-1.5 bg-yellow-100 text-yellow-800 text-sm font-medium rounded-full">
-                        💰 Free Only
+                        💰 {t("courses.freeOnly")}
                       </span>
                     )}
                   </div>
@@ -165,12 +167,14 @@ const Courses: React.FC = () => {
                 <p className="text-gray-600 text-lg">
                   {!isLoading && pagination && pagination.totalCourses > 0 && (
                     <span>
-                      Showing {(pagination.currentPage - 1) * 12 + 1} -{" "}
-                      {Math.min(
-                        pagination.currentPage * 12,
-                        pagination.totalCourses
-                      )}{" "}
-                      of {pagination.totalCourses} courses
+                      {t("courses.showingResults", {
+                        start: (pagination.currentPage - 1) * 12 + 1,
+                        end: Math.min(
+                          pagination.currentPage * 12,
+                          pagination.totalCourses
+                        ),
+                        total: pagination.totalCourses,
+                      })}
                     </span>
                   )}
                 </p>
@@ -217,7 +221,7 @@ const Courses: React.FC = () => {
                 className="flex items-center space-x-3 px-5 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all duration-200 font-medium"
               >
                 <FaFilter className="w-4 h-4" />
-                <span>Filters</span>
+                <span>{t("courses.filters")}</span>
                 <FaChevronDown
                   className={`w-3 h-3 transform transition-transform duration-200 ${
                     showFilters ? "rotate-180" : ""
@@ -235,13 +239,23 @@ const Courses: React.FC = () => {
                   }
                   className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
                 >
-                  <option value="">All Categories</option>
-                  <option value="development">Development</option>
-                  <option value="design">Design</option>
-                  <option value="business">Business</option>
-                  <option value="marketing">Marketing</option>
-                  <option value="photography">Photography</option>
-                  <option value="music">Music</option>
+                  <option value="">{t("courses.allCategories")}</option>
+                  <option value="development">
+                    {t("courses.categories.development")}
+                  </option>
+                  <option value="design">
+                    {t("courses.categories.design")}
+                  </option>
+                  <option value="business">
+                    {t("courses.categories.business")}
+                  </option>
+                  <option value="marketing">
+                    {t("courses.categories.marketing")}
+                  </option>
+                  <option value="photography">
+                    {t("courses.categories.photography")}
+                  </option>
+                  <option value="music">{t("courses.categories.music")}</option>
                 </select>
 
                 {/* Level Filter */}
@@ -250,10 +264,16 @@ const Courses: React.FC = () => {
                   onChange={(e) => handleFilterChange("level", e.target.value)}
                   className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
                 >
-                  <option value="">All Levels</option>
-                  <option value="Beginner">Beginner</option>
-                  <option value="Intermediate">Intermediate</option>
-                  <option value="Advanced">Advanced</option>
+                  <option value="">{t("courses.allLevels")}</option>
+                  <option value="Beginner">
+                    {t("courses.levels.beginner")}
+                  </option>
+                  <option value="Intermediate">
+                    {t("courses.levels.intermediate")}
+                  </option>
+                  <option value="Advanced">
+                    {t("courses.levels.advanced")}
+                  </option>
                 </select>
 
                 {/* Free Toggle */}
@@ -267,7 +287,7 @@ const Courses: React.FC = () => {
                     className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                   />
                   <span className="text-sm font-medium text-gray-700">
-                    Free Only
+                    {t("courses.freeOnly")}
                   </span>
                 </label>
               </div>
@@ -275,7 +295,7 @@ const Courses: React.FC = () => {
               {/* Sort */}
               <div className="ml-auto flex items-center space-x-3">
                 <span className="text-sm text-gray-600 font-medium">
-                  Sort by:
+                  {t("courses.sortBy")}:
                 </span>
                 <select
                   value={`${searchParams.get("sortBy") || "rating"}-${
@@ -291,11 +311,21 @@ const Courses: React.FC = () => {
                   }}
                   className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
                 >
-                  <option value="rating-desc">Highest Rated</option>
-                  <option value="originalPrice-asc">Price: Low to High</option>
-                  <option value="originalPrice-desc">Price: High to Low</option>
-                  <option value="createdAt-desc">Newest First</option>
-                  <option value="studentsCount-desc">Most Popular</option>
+                  <option value="rating-desc">
+                    {t("courses.sortOptions.highestRated")}
+                  </option>
+                  <option value="originalPrice-asc">
+                    {t("courses.sortOptions.priceLowToHigh")}
+                  </option>
+                  <option value="originalPrice-desc">
+                    {t("courses.sortOptions.priceHighToLow")}
+                  </option>
+                  <option value="createdAt-desc">
+                    {t("courses.sortOptions.newestFirst")}
+                  </option>
+                  <option value="studentsCount-desc">
+                    {t("courses.sortOptions.mostPopular")}
+                  </option>
                 </select>
               </div>
 
@@ -310,7 +340,7 @@ const Courses: React.FC = () => {
                   onClick={clearFilters}
                   className="px-4 py-3 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-xl transition-all duration-200 font-medium"
                 >
-                  Clear All
+                  {t("courses.clearAll")}
                 </button>
               )}
             </div>
@@ -330,12 +360,12 @@ const Courses: React.FC = () => {
                       {/* Price Range */}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Price Range
+                          {t("courses.priceRange")}
                         </label>
                         <div className="flex space-x-2">
                           <input
                             type="number"
-                            placeholder="Min"
+                            placeholder={t("courses.min")}
                             value={filters.minPrice}
                             onChange={(e) =>
                               handleFilterChange("minPrice", e.target.value)
@@ -344,7 +374,7 @@ const Courses: React.FC = () => {
                           />
                           <input
                             type="number"
-                            placeholder="Max"
+                            placeholder={t("courses.max")}
                             value={filters.maxPrice}
                             onChange={(e) =>
                               handleFilterChange("maxPrice", e.target.value)
@@ -357,42 +387,66 @@ const Courses: React.FC = () => {
                       {/* Duration Filter */}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Duration
+                          {t("courses.duration")}
                         </label>
                         <select className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                          <option value="">Any Duration</option>
-                          <option value="0-2">0-2 hours</option>
-                          <option value="2-6">2-6 hours</option>
-                          <option value="6-12">6-12 hours</option>
-                          <option value="12+">12+ hours</option>
+                          <option value="">{t("courses.anyDuration")}</option>
+                          <option value="0-2">
+                            {t("courses.duration02Hours")}
+                          </option>
+                          <option value="2-6">
+                            {t("courses.duration26Hours")}
+                          </option>
+                          <option value="6-12">
+                            {t("courses.duration612Hours")}
+                          </option>
+                          <option value="12+">
+                            {t("courses.duration12PlusHours")}
+                          </option>
                         </select>
                       </div>
 
                       {/* Rating Filter */}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Minimum Rating
+                          {t("courses.minimumRating")}
                         </label>
                         <select className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                          <option value="">Any Rating</option>
-                          <option value="4.5">4.5+ Stars</option>
-                          <option value="4.0">4.0+ Stars</option>
-                          <option value="3.5">3.5+ Stars</option>
-                          <option value="3.0">3.0+ Stars</option>
+                          <option value="">{t("courses.anyRating")}</option>
+                          <option value="4.5">
+                            {t("courses.rating45Plus")}
+                          </option>
+                          <option value="4.0">
+                            {t("courses.rating40Plus")}
+                          </option>
+                          <option value="3.5">
+                            {t("courses.rating35Plus")}
+                          </option>
+                          <option value="3.0">
+                            {t("courses.rating30Plus")}
+                          </option>
                         </select>
                       </div>
 
                       {/* Language Filter */}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Language
+                          {t("courses.language")}
                         </label>
                         <select className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                          <option value="">Any Language</option>
-                          <option value="english">English</option>
-                          <option value="spanish">Spanish</option>
-                          <option value="french">French</option>
-                          <option value="german">German</option>
+                          <option value="">{t("courses.anyLanguage")}</option>
+                          <option value="english">
+                            {t("courses.languages.english")}
+                          </option>
+                          <option value="spanish">
+                            {t("courses.languages.spanish")}
+                          </option>
+                          <option value="french">
+                            {t("courses.languages.french")}
+                          </option>
+                          <option value="german">
+                            {t("courses.languages.german")}
+                          </option>
                         </select>
                       </div>
                     </div>
@@ -407,20 +461,22 @@ const Courses: React.FC = () => {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* Loading State */}
-        {isLoading && <Loading variant="page" message="Loading courses..." />}
+        {isLoading && (
+          <Loading variant="page" message={t("courses.loadingCourses")} />
+        )}
 
         {/* Error State */}
         {error && (
           <div className="text-center py-24">
             <div className="bg-red-50 border border-red-200 rounded-2xl p-10 max-w-md mx-auto">
               <div className="text-red-500 text-xl mb-6 font-semibold">
-                Failed to load courses
+                {t("courses.failedToLoad")}
               </div>
               <button
                 onClick={() => window.location.reload()}
                 className="px-8 py-4 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-200 font-medium"
               >
-                Try Again
+                {t("courses.tryAgain")}
               </button>
             </div>
           </div>
@@ -432,18 +488,18 @@ const Courses: React.FC = () => {
             <div className="bg-white rounded-3xl p-12 max-w-md mx-auto shadow-sm border border-gray-100">
               <FaGraduationCap className="text-8xl text-gray-300 mb-6 mx-auto" />
               <h3 className="text-3xl font-bold text-gray-900 mb-6">
-                No courses found
+                {t("courses.noCoursesFound")}
               </h3>
               <p className="text-gray-600 mb-8 text-lg leading-relaxed">
                 {searchQuery
-                  ? `We couldn't find any courses matching "${searchQuery}". Try adjusting your search or filters.`
-                  : "No courses match your current filters. Try adjusting your criteria."}
+                  ? t("courses.noSearchResults", { query: searchQuery })
+                  : t("courses.noFilterResults")}
               </p>
               <button
                 onClick={clearFilters}
                 className="px-8 py-4 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all duration-200 font-medium"
               >
-                Clear Filters
+                {t("courses.clearFilters")}
               </button>
             </div>
           </div>
@@ -488,7 +544,7 @@ const Courses: React.FC = () => {
                     disabled={pagination.currentPage === 1}
                     className="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Previous
+                    {t("courses.previous")}
                   </button>
 
                   {Array.from(
@@ -519,7 +575,7 @@ const Courses: React.FC = () => {
                     disabled={pagination.currentPage === pagination.totalPages}
                     className="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Next
+                    {t("courses.next")}
                   </button>
                 </div>
               </motion.div>
