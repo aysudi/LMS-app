@@ -113,7 +113,12 @@
     "warning": "Warning",
     "somethingWentWrong": "Something went wrong",
     "retry": "Retry",
-    "minutes": "min"
+    "minutes": "min",
+    "viewAll": "View All",
+    "processing": "Processing...",
+    "addingToCart": "Adding to cart...",
+    "alreadyInCart": "Already in cart",
+    "refreshPage": "Refresh Page"
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -133,6 +138,42 @@
     "assignments": "Assignments",
     "quizzes": "Quizzes",
     "certificates": "Certificates"
+  },
+  "wishlist": {
+    "loadingWishlist": "Loading wishlist...",
+    "failedToLoadWishlist": "Failed to load wishlist",
+    "wishlistLoadError": "Something went wrong while loading your wishlist.",
+    "coursesSavedForLater": "{{count}} course saved for later",
+    "coursesSavedForLater_plural": "{{count}} courses saved for later",
+    "selectAll": "Select All",
+    "deselectAll": "Deselect All",
+    "removeSelected": "Remove ({{count}})",
+    "searchCourses": "Search courses...",
+    "allCourses": "All Courses",
+    "freeCourses": "Free Courses",
+    "paidCourses": "Paid Courses",
+    "beginnerLevel": "Beginner Level",
+    "intermediateLevel": "Intermediate Level",
+    "advancedLevel": "Advanced Level",
+    "newestFirst": "Newest First",
+    "titleAZ": "Title A-Z",
+    "priceLowHigh": "Price Low-High",
+    "highestRated": "Highest Rated",
+    "wishlistEmpty": "Your wishlist is empty",
+    "wishlistEmptyDescription": "Start exploring courses and add your favorites to your wishlist for easy access later.",
+    "exploreCourses": "Explore Courses",
+    "noCoursesFound": "No courses found",
+    "adjustFilters": "Try adjusting your search or filter criteria to find what you're looking for.",
+    "clearFilters": "Clear Filters",
+    "showingResults": "Showing {{showing}} of {{total}} courses",
+    "matching": "matching \"{{query}}\"",
+    "removedFromWishlist": "Removed from wishlist",
+    "addedToWishlist": "Added to wishlist",
+    "courseRemovedFromWishlist": "\"{{title}}\" removed from wishlist",
+    "courseAddedToWishlist": "\"{{title}}\" added to wishlist",
+    "failedToUpdateWishlist": "Failed to update wishlist",
+    "removeFromWishlist": "Remove from wishlist",
+    "addToWishlist": "Add to wishlist"
   },
   "auth": {
     "welcome": "Welcome",
@@ -327,7 +368,11 @@
     "checkoutItems": "Checkout {{count}} course",
     "checkoutItems_plural": "Checkout {{count}} courses",
     "moneyBackGuarantee": "30-Day Money-Back Guarantee",
-    "promoCodeApplied": "Promo code applied! {{discount}}% discount 🎉"
+    "promoCodeApplied": "Promo code applied! {{discount}}% discount 🎉",
+    "totalDuration": "Total Duration",
+    "avgRating": "Avg Rating",
+    "learningOverview": "Learning Overview",
+    "aboutToJoinStudents": "You're about to join {{count}} students in these amazing courses!"
   },
   "course": {
     "title": "Course Title",
@@ -363,7 +408,11 @@
     "courseRating": "{{rating}} course rating",
     "totalReviews": "{{count}} reviews",
     "lifetimeAccess": "Lifetime access",
-    "certificateOfCompletion": "Certificate of completion"
+    "certificateOfCompletion": "Certificate of completion",
+    "by": "by",
+    "free": "Free",
+    "reviews": "reviews",
+    "students": "students"
   },
   "instructor": {
     "createNewCourse": "Create New Course",
@@ -523,7 +572,19 @@
     "downvote": "Downvote",
     "reply": "Reply",
     "markAsSolution": "Mark as Solution",
-    "solution": "Solution"
+    "solution": "Solution",
+    "inProgress": "In Progress",
+    "watchTime": "Watch Time",
+    "loadingCourses": "Loading your courses...",
+    "failedToLoadCourses": "Failed to Load Courses",
+    "couldntLoadCourses": "We couldn't load your enrolled courses. Please try refreshing the page.",
+    "startLearningJourney": "Start Your Learning Journey",
+    "notEnrolledYet": "You haven't enrolled in any courses yet. Discover amazing courses to get started!",
+    "browseCourses": "Browse Courses",
+    "lastAccessed": "Last accessed:",
+    "never": "Never",
+    "certificateAvailable": "Certificate Available",
+    "certificatePending": "Certificate Pending"
   },
   "filters": {
     "filterBy": "Filter by",
@@ -657,5 +718,55 @@
     "invalidFormat": "Invalid format",
     "fieldRequired": "{{field}} is required",
     "fieldInvalid": "{{field}} is invalid"
+  },
+  "home": {
+    "hero": {
+      "joinBadge": "🎉 Join 50,000+ learners worldwide",
+      "masterNew": "Master New",
+      "skills": "Skills",
+      "unlockPotential": "Unlock your potential with expert-led courses designed for the modern learner.",
+      "buildSkills": "Build skills that shape the future."
+    },
+    "stats": {
+      "activeStudents": "Active Students",
+      "expertCourses": "Expert Courses",
+      "industryExperts": "Industry Experts",
+      "learningSupport": "Learning Support"
+    },
+    "categories": {
+      "exploreCategories": "Explore Categories",
+      "findYour": "Find Your",
+      "learningPath": "Learning Path",
+      "discoverCourses": "Discover courses tailored to your interests. Each category is designed to take you from beginner to expert.",
+      "exploreCategoryDescription": "Explore {{category}} courses and enhance your skills"
+    },
+    "sections": {
+      "personalized": "Personalized",
+      "recommended": "Recommended",
+      "forYou": "for You",
+      "coursesPickedForYou": "Courses picked just for your learning journey",
+      "freeCoursesToStart": "Free Courses to Get Started"
+    },
+    "trending": {
+      "hotTrending": "Hot Trending",
+      "thisWeeks": "This Week's",
+      "hottestCourse": "Hottest Course",
+      "joinThousands": "Join thousands of learners in the most popular course of the week",
+      "trendingBadge": "🔥 #1 TRENDING"
+    },
+    "toasts": {
+      "noCoursesAvailable": "📚 No Courses Available",
+      "allCoursesInCart": "All recommended courses are already in your cart!",
+      "coursesAddedSuccess": "🎉 Courses Added Successfully!",
+      "coursesAddedToCart": "{{count}} {{courses}} have been added to your cart. All courses are ready for checkout!",
+      "partialSuccess": "⚠️ Partial Success",
+      "someCoursesNotAdded": "{{count}} {{courses}} couldn't be added. Please try again.",
+      "operationFailed": "❌ Operation Failed",
+      "failedToAddCourses": "Failed to add courses to cart. Please try again later.",
+      "alreadyInCart": "📚 Already in Cart",
+      "courseAlreadyInCart": "\"{{title}}\" is already in your cart!",
+      "failedToAdd": "❌ Failed to Add",
+      "failedToAddCourse": "Failed to add course to cart. Please try again."
+    }
   }
 }

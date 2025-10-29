@@ -20,6 +20,8 @@ import { useWishlistToast } from "../../hooks/useWishlistToast";
 
 import CourseCard from "../../components/Client/WishlistCourseCard";
 import Loading from "../../components/Common/Loading";
+// @ts-ignore
+import { useTranslation } from "react-i18next";
 
 type ViewMode = "grid" | "list";
 type SortOption = "date" | "title" | "price" | "rating";
@@ -32,6 +34,7 @@ type FilterOption =
   | "advanced";
 
 const Wishlist: React.FC = () => {
+  const { t } = useTranslation();
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [sortBy, setSortBy] = useState<SortOption>("date");
   const [filterBy, setFilterBy] = useState<FilterOption>("all");
@@ -163,7 +166,7 @@ const Wishlist: React.FC = () => {
   };
 
   if (isLoadingWishlist) {
-    return <Loading variant="page" message="Loading wishlist..." />;
+    return <Loading variant="page" message={t("wishlist.loadingWishlist")} />;
   }
 
   if (error) {
@@ -174,16 +177,16 @@ const Wishlist: React.FC = () => {
             <div className="text-center">
               <FaExclamationCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Failed to load wishlist
+                {t("wishlist.failedToLoadWishlist")}
               </h2>
               <p className="text-gray-600 mb-4">
-                Something went wrong while loading your wishlist.
+                {t("wishlist.wishlistLoadError")}
               </p>
               <button
                 onClick={() => window.location.reload()}
                 className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors duration-200"
               >
-                Try Again
+                {t("common.tryAgain")}
               </button>
             </div>
           </div>
@@ -193,7 +196,7 @@ const Wishlist: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50 pt-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 pt-4">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <motion.div
@@ -208,17 +211,21 @@ const Wishlist: React.FC = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => navigate(-1)}
-                className="p-2 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg transition-all duration-200"
+                className="p-3 bg-white hover:bg-gray-50 border border-gray-200 rounded-xl shadow-sm transition-all duration-200"
               >
                 <FaArrowLeft className="text-gray-600" />
               </motion.button>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 flex items-center space-x-3">
-                  <span>My Wishlist</span>
-                </h1>
-                <p className="text-gray-600 mt-1">
-                  {wishlistCount} course{wishlistCount !== 1 ? "s" : ""} saved
-                  for later
+                <div className="flex items-center space-x-3 mb-2">
+                  {/* <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl shadow-lg">
+                    <FaRegHeart className="text-xl text-white" />
+                  </div> */}
+                  <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent">
+                    {t("navigation.wishlist")}
+                  </h1>
+                </div>
+                <p className="text-gray-600 text-lg">
+                  {t("wishlist.coursesSavedForLater", { count: wishlistCount })}
                 </p>
               </div>
             </div>
@@ -231,10 +238,10 @@ const Wishlist: React.FC = () => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setIsSelectionMode(true)}
-                    className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-all duration-200 flex items-center space-x-2 cursor-pointer"
+                    className="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center space-x-2 cursor-pointer"
                   >
                     <FaCheckCircle className="text-sm" />
-                    <span>Select</span>
+                    <span>{t("common.select")}</span>
                   </motion.button>
                 ) : (
                   <div className="flex items-center space-x-2">
@@ -245,8 +252,8 @@ const Wishlist: React.FC = () => {
                       className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-all duration-200 cursor-pointer"
                     >
                       {selectedCourses.size === filteredAndSortedCourses.length
-                        ? "Deselect All"
-                        : "Select All"}
+                        ? t("wishlist.deselectAll")
+                        : t("wishlist.selectAll")}
                     </motion.button>
 
                     {selectedCourses.size > 0 && (
@@ -262,7 +269,11 @@ const Wishlist: React.FC = () => {
                         ) : (
                           <FaTrash className="text-sm" />
                         )}
-                        <span>Remove ({selectedCourses.size})</span>
+                        <span>
+                          {t("wishlist.removeSelected", {
+                            count: selectedCourses.size,
+                          })}
+                        </span>
                       </motion.button>
                     )}
 
@@ -275,7 +286,7 @@ const Wishlist: React.FC = () => {
                       }}
                       className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-all duration-200 cursor-pointer"
                     >
-                      Cancel
+                      {t("common.cancel")}
                     </motion.button>
                   </div>
                 )}
@@ -285,15 +296,15 @@ const Wishlist: React.FC = () => {
 
           {/* Controls */}
           {wishlistCount > 0 && (
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 bg-white">
               {/* Search */}
               <div className="relative flex-1 lg:max-w-md">
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search courses..."
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                  placeholder={t("wishlist.searchCourses")}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50/50 backdrop-blur-sm transition-all duration-200"
                 />
                 <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               </div>
@@ -309,7 +320,7 @@ const Wishlist: React.FC = () => {
                     className="flex items-center space-x-2 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all duration-200 cursor-pointer"
                   >
                     <FaFilter className="text-sm" />
-                    <span>Filter</span>
+                    <span>{t("common.filter")}</span>
                     <FaChevronDown
                       className={`text-sm transition-transform duration-200 ${
                         isFilterOpen ? "rotate-180" : ""
@@ -327,15 +338,21 @@ const Wishlist: React.FC = () => {
                         className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-10"
                       >
                         {[
-                          { value: "all", label: "All Courses" },
-                          { value: "free", label: "Free Courses" },
-                          { value: "paid", label: "Paid Courses" },
-                          { value: "beginner", label: "Beginner Level" },
+                          { value: "all", label: t("wishlist.allCourses") },
+                          { value: "free", label: t("wishlist.freeCourses") },
+                          { value: "paid", label: t("wishlist.paidCourses") },
+                          {
+                            value: "beginner",
+                            label: t("wishlist.beginnerLevel"),
+                          },
                           {
                             value: "intermediate",
-                            label: "Intermediate Level",
+                            label: t("wishlist.intermediateLevel"),
                           },
-                          { value: "advanced", label: "Advanced Level" },
+                          {
+                            value: "advanced",
+                            label: t("wishlist.advancedLevel"),
+                          },
                         ].map((option) => (
                           <button
                             key={option.value}
@@ -366,10 +383,10 @@ const Wishlist: React.FC = () => {
                     className="flex items-center space-x-2 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all duration-200 cursor-pointer"
                   >
                     <span>
-                      {sortBy === "date" && "Newest First"}
-                      {sortBy === "title" && "Title A-Z"}
-                      {sortBy === "price" && "Price Low-High"}
-                      {sortBy === "rating" && "Highest Rated"}
+                      {sortBy === "date" && t("wishlist.newestFirst")}
+                      {sortBy === "title" && t("wishlist.titleAZ")}
+                      {sortBy === "price" && t("wishlist.priceLowHigh")}
+                      {sortBy === "rating" && t("wishlist.highestRated")}
                     </span>
                     <FaChevronDown
                       className={`text-sm transition-transform duration-200 ${
@@ -388,10 +405,13 @@ const Wishlist: React.FC = () => {
                         className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-10"
                       >
                         {[
-                          { value: "date", label: "Newest First" },
-                          { value: "title", label: "Title A-Z" },
-                          { value: "price", label: "Price Low-High" },
-                          { value: "rating", label: "Highest Rated" },
+                          { value: "date", label: t("wishlist.newestFirst") },
+                          { value: "title", label: t("wishlist.titleAZ") },
+                          { value: "price", label: t("wishlist.priceLowHigh") },
+                          {
+                            value: "rating",
+                            label: t("wishlist.highestRated"),
+                          },
                         ].map((option) => (
                           <button
                             key={option.value}
@@ -465,11 +485,10 @@ const Wishlist: React.FC = () => {
                   <FaRegHeart className="text-4xl text-purple-400" />
                 </motion.div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                  Your wishlist is empty
+                  {t("wishlist.wishlistEmpty")}
                 </h2>
                 <p className="text-gray-600 mb-8">
-                  Start exploring courses and add your favorites to your
-                  wishlist for easy access later.
+                  {t("wishlist.wishlistEmptyDescription")}
                 </p>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -477,7 +496,7 @@ const Wishlist: React.FC = () => {
                   onClick={() => navigate("/courses")}
                   className="px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg transition-all duration-200 cursor-pointer"
                 >
-                  Explore Courses
+                  {t("wishlist.exploreCourses")}
                 </motion.button>
               </div>
             </motion.div>
@@ -492,11 +511,10 @@ const Wishlist: React.FC = () => {
             >
               <FaSearch className="w-16 h-16 text-gray-400 mx-auto mb-4" />
               <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                No courses found
+                {t("wishlist.noCoursesFound")}
               </h2>
               <p className="text-gray-600 mb-6">
-                Try adjusting your search or filter criteria to find what you're
-                looking for.
+                {t("wishlist.adjustFilters")}
               </p>
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -507,7 +525,7 @@ const Wishlist: React.FC = () => {
                 }}
                 className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-all duration-200"
               >
-                Clear Filters
+                {t("wishlist.clearFilters")}
               </motion.button>
             </motion.div>
           ) : (
@@ -570,9 +588,13 @@ const Wishlist: React.FC = () => {
             transition={{ delay: 0.3 }}
             className="mt-8 text-center text-gray-600"
           >
-            Showing {filteredAndSortedCourses.length} of {wishlistCount} course
-            {wishlistCount !== 1 ? "s" : ""}
-            {searchQuery && <span> matching "{searchQuery}"</span>}
+            {t("wishlist.showingResults", {
+              showing: filteredAndSortedCourses.length,
+              total: wishlistCount,
+            })}
+            {searchQuery && (
+              <span> {t("wishlist.matching", { query: searchQuery })}</span>
+            )}
           </motion.div>
         )}
       </div>

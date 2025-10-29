@@ -113,7 +113,14 @@
     "warning": "Предупреждение",
     "somethingWentWrong": "Что-то пошло не так",
     "retry": "Повторить",
-    "minutes": "мин"
+    "minutes": "мин",
+    "viewAll": "Посмотреть все",
+    "processing": "Обработка...",
+    "addingToCart": "Добавление в корзину...",
+    "alreadyInCart": "Уже в корзине",
+    "removeFromWishlist": "Удалить из избранного",
+    "addToWishlist": "Добавить в избранное",
+    "refreshPage": "Обновить страницу"
   },
   "navigation": {
     "dashboard": "Панель управления",
@@ -133,6 +140,42 @@
     "assignments": "Задания",
     "quizzes": "Тесты",
     "certificates": "Сертификаты"
+  },
+  "wishlist": {
+    "loadingWishlist": "Загрузка списка желаний...",
+    "failedToLoadWishlist": "Не удалось загрузить список желаний",
+    "wishlistLoadError": "Что-то пошло не так при загрузке вашего списка желаний.",
+    "coursesSavedForLater": "{{count}} курс сохранен на потом",
+    "coursesSavedForLater_plural": "{{count}} курсов сохранено на потом",
+    "selectAll": "Выбрать все",
+    "deselectAll": "Отменить выбор",
+    "removeSelected": "Удалить ({{count}})",
+    "searchCourses": "Поиск курсов...",
+    "allCourses": "Все курсы",
+    "freeCourses": "Бесплатные курсы",
+    "paidCourses": "Платные курсы",
+    "beginnerLevel": "Уровень для начинающих",
+    "intermediateLevel": "Средний уровень",
+    "advancedLevel": "Продвинутый уровень",
+    "newestFirst": "Сначала новые",
+    "titleAZ": "Название А-Я",
+    "priceLowHigh": "Цена по возрастанию",
+    "highestRated": "Высокий рейтинг",
+    "wishlistEmpty": "Ваш список желаний пуст",
+    "wishlistEmptyDescription": "Начните изучать курсы и добавляйте избранные в список желаний для удобного доступа.",
+    "exploreCourses": "Исследовать курсы",
+    "noCoursesFound": "Курсы не найдены",
+    "adjustFilters": "Попробуйте изменить критерии поиска или фильтра, чтобы найти то, что вы ищете.",
+    "clearFilters": "Очистить фильтры",
+    "showingResults": "Показано {{showing}} из {{total}} курсов",
+    "matching": "соответствующих \"{{query}}\"",
+    "removedFromWishlist": "Удалено из списка желаний",
+    "addedToWishlist": "Добавлено в список желаний",
+    "courseRemovedFromWishlist": "\"{{title}}\" удален из списка желаний",
+    "courseAddedToWishlist": "\"{{title}}\" добавлен в список желаний",
+    "failedToUpdateWishlist": "Не удалось обновить список желаний",
+    "removeFromWishlist": "Удалить из списка желаний",
+    "addToWishlist": "Добавить в список желаний"
   },
   "auth": {
     "welcome": "Добро пожаловать",
@@ -334,7 +377,11 @@
     "checkoutItems": "Оформить {{count}} курс",
     "checkoutItems_plural": "Оформить {{count}} курсов",
     "moneyBackGuarantee": "30-дневная гарантия возврата денег",
-    "promoCodeApplied": "Промокод применен! Скидка {{discount}}% 🎉"
+    "promoCodeApplied": "Промокод применен! Скидка {{discount}}% 🎉",
+    "totalDuration": "Общая продолжительность",
+    "avgRating": "Средний рейтинг",
+    "learningOverview": "Обзор обучения",
+    "aboutToJoinStudents": "Вы собираетесь присоединиться к {{count}} студентам на этих удивительных курсах!"
   },
 
   "course": {
@@ -374,6 +421,7 @@
     "new": "Новый",
     "updated": "Обновлен",
     "lifetimeAccess": "Пожизненный доступ",
+    "expertInstructor": "Опытный преподаватель",
     "preview": "Предпросмотр",
     "startCourse": "Начать курс",
     "continueCourse": "Продолжить курс",
@@ -405,6 +453,77 @@
     "totalEnrollments": "{{count}} студентов записались",
     "createdBy": "Создано {{instructor}}",
     "courseRating": "{{rating}} рейтинг курса",
-    "totalReviews": "{{count}} отзывов"
+    "totalReviews": "{{count}} отзывов",
+    "by": "от"
+  },
+  "student": {
+    "myLearning": "Мое обучение",
+    "continueLearning": "Продолжить обучение",
+    "completed": "Завершено",
+    "inProgress": "В процессе",
+    "watchTime": "Время просмотра",
+    "loadingCourses": "Загрузка ваших курсов...",
+    "failedToLoadCourses": "Не удалось загрузить курсы",
+    "couldntLoadCourses": "Мы не смогли загрузить ваши записанные курсы. Пожалуйста, попробуйте обновить страницу.",
+    "startLearningJourney": "Начните свое учебное путешествие",
+    "notEnrolledYet": "Вы еще не записались ни на один курс. Откройте для себя удивительные курсы, чтобы начать!",
+    "browseCourses": "Просмотреть курсы",
+    "lastAccessed": "Последний доступ:",
+    "never": "Никогда",
+    "certificateAvailable": "Сертификат доступен",
+    "certificatePending": "Сертификат ожидается"
+  },
+  "instructor": {
+    "totalCourses": "Всего курсов"
+  },
+  "home": {
+    "hero": {
+      "joinBadge": "🎉 Присоединяйтесь к 50,000+ учащихся по всему миру",
+      "masterNew": "Освойте новые",
+      "skills": "Навыки",
+      "unlockPotential": "Раскройте свой потенциал с курсами под руководством экспертов, разработанными для современного учащегося.",
+      "buildSkills": "Развивайте навыки, которые формируют будущее."
+    },
+    "stats": {
+      "activeStudents": "Активные студенты",
+      "expertCourses": "Экспертные курсы",
+      "industryExperts": "Отраслевые эксперты",
+      "learningSupport": "Поддержка обучения"
+    },
+    "categories": {
+      "exploreCategories": "Изучить категории",
+      "findYour": "Найдите свой",
+      "learningPath": "Путь обучения",
+      "discoverCourses": "Откройте для себя курсы, адаптированные к вашим интересам. Каждая категория разработана для перехода от новичка к эксперту.",
+      "exploreCategoryDescription": "Изучите курсы {{category}} и развивайте свои навыки"
+    },
+    "sections": {
+      "personalized": "Персонализированные",
+      "recommended": "Рекомендуемые",
+      "forYou": "для вас",
+      "coursesPickedForYou": "Курсы, подобранные специально для вашего учебного путешествия",
+      "freeCoursesToStart": "Бесплатные курсы для начала"
+    },
+    "trending": {
+      "hotTrending": "Горячие тренды",
+      "thisWeeks": "На этой неделе",
+      "hottestCourse": "Самый популярный курс",
+      "joinThousands": "Присоединяйтесь к тысячам учащихся на самом популярном курсе недели",
+      "trendingBadge": "🔥 #1 В ТРЕНДЕ"
+    },
+    "toasts": {
+      "noCoursesAvailable": "📚 Нет доступных курсов",
+      "allCoursesInCart": "Все рекомендуемые курсы уже в вашей корзине!",
+      "coursesAddedSuccess": "🎉 Курсы успешно добавлены!",
+      "coursesAddedToCart": "{{count}} {{courses}} добавлены в вашу корзину. Все курсы готовы к оформлению заказа!",
+      "partialSuccess": "⚠️ Частичный успех",
+      "someCoursesNotAdded": "{{count}} {{courses}} не удалось добавить. Пожалуйста, попробуйте еще раз.",
+      "operationFailed": "❌ Операция не удалась",
+      "failedToAddCourses": "Не удалось добавить курсы в корзину. Пожалуйста, попробуйте позже.",
+      "alreadyInCart": "📚 Уже в корзине",
+      "courseAlreadyInCart": "\"{{title}}\" уже в вашей корзине!",
+      "failedToAdd": "❌ Не удалось добавить",
+      "failedToAddCourse": "Не удалось добавить курс в корзину. Пожалуйста, попробуйте еще раз."
+    }
   }
 }

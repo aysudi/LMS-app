@@ -113,7 +113,14 @@
     "warning": "Xəbərdarlıq",
     "somethingWentWrong": "Nəsə səhv oldu",
     "retry": "Yenidən cəhd edin",
-    "minutes": "dəq"
+    "minutes": "dəq",
+    "viewAll": "Hamısına bax",
+    "processing": "İşlənir...",
+    "addingToCart": "Səbətə əlavə edilir...",
+    "alreadyInCart": "Artıq səbətdə",
+    "removeFromWishlist": "İstək siyahısından sil",
+    "addToWishlist": "İstək siyahısına əlavə et",
+    "refreshPage": "Səhifəni yenilə"
   },
   "navigation": {
     "dashboard": "İdarə paneli",
@@ -133,6 +140,42 @@
     "assignments": "Tapşırıqlar",
     "quizzes": "Testlər",
     "certificates": "Sertifikatlar"
+  },
+  "wishlist": {
+    "loadingWishlist": "İstək siyahısı yüklənir...",
+    "failedToLoadWishlist": "İstək siyahısı yüklənmədi",
+    "wishlistLoadError": "İstək siyahınızı yükləyərkən bir səhv baş verdi.",
+    "coursesSavedForLater": "{{count}} kurs sonraya saxlanılıb",
+    "coursesSavedForLater_plural": "{{count}} kurs sonraya saxlanılıb",
+    "selectAll": "Hamısını seç",
+    "deselectAll": "Seçimi ləğv et",
+    "removeSelected": "Sil ({{count}})",
+    "searchCourses": "Kursları axtarın...",
+    "allCourses": "Bütün kurslar",
+    "freeCourses": "Pulsuz kurslar",
+    "paidCourses": "Ödənişli kurslar",
+    "beginnerLevel": "Başlanğıc səviyyə",
+    "intermediateLevel": "Orta səviyyə",
+    "advancedLevel": "İrəli səviyyə",
+    "newestFirst": "Əvvəlcə yenilər",
+    "titleAZ": "Başlıq A-Z",
+    "priceLowHigh": "Qiymət aşağıdan yuxarıya",
+    "highestRated": "Ən yüksək reytinq",
+    "wishlistEmpty": "İstək siyahınız boşdur",
+    "wishlistEmptyDescription": "Kursları araşdırmağa başlayın və sevimlilərini asان giriş üçün istək siyahınıza əlavə edin.",
+    "exploreCourses": "Kursları araşdırın",
+    "noCoursesFound": "Kurs tapılmadı",
+    "adjustFilters": "Axtardığınızı tapmaq üçün axtarış və ya filtr meyarlarınızı dəyişdirməyə çalışın.",
+    "clearFilters": "Filtrləri təmizlə",
+    "showingResults": "{{total}} kursdan {{showing}} göstərilir",
+    "matching": "\"{{query}}\" ilə uyğun",
+    "removedFromWishlist": "İstək siyahısından silindi",
+    "addedToWishlist": "İstək siyahısına əlavə edildi",
+    "courseRemovedFromWishlist": "\"{{title}}\" istək siyahısından silindi",
+    "courseAddedToWishlist": "\"{{title}}\" istək siyahısına əlavə edildi",
+    "failedToUpdateWishlist": "İstək siyahısı yenilənmədi",
+    "removeFromWishlist": "İstək siyahısından sil",
+    "addToWishlist": "İstək siyahısına əlavə et"
   },
   "auth": {
     "welcome": "Xoş gəlmisiniz",
@@ -327,7 +370,11 @@
     "checkoutItems": "{{count}} kursu ödə",
     "checkoutItems_plural": "{{count}} kursu ödə",
     "moneyBackGuarantee": "30 günlük pul geri qaytarma zəmanəti",
-    "promoCodeApplied": "Promo kod tətbiq edildi! {{discount}}% endirim 🎉"
+    "promoCodeApplied": "Promo kod tətbiq edildi! {{discount}}% endirim 🎉",
+    "totalDuration": "Ümumi müddət",
+    "avgRating": "Orta reytinq",
+    "learningOverview": "Öyrənmə icmalı",
+    "aboutToJoinStudents": "Bu möhtəşəm kurslarda {{count}} tələbəyə qoşulmaq üzrəsiniz!"
   },
   "course": {
     "title": "Kurs adı",
@@ -362,7 +409,13 @@
     "createdBy": "{{instructor}} tərəfindən yaradılmışdır",
     "courseRating": "{{rating}} kurs reytinqi",
     "totalReviews": "{{count}} rəy",
-    "lifetimeAccess": "Ömürlük giriş"
+    "lifetimeAccess": "Ömürlük giriş",
+    "expertInstructor": "Mütəxəssis müəllim",
+    "by": "tərəfindən",
+    "free": "Pulsuz",
+    "reviews": "rəylər",
+    "students": "tələbələr",
+    "lessons": "dərslər"
   },
   "instructor": {
     "createNewCourse": "Yeni kurs yarat",
@@ -460,7 +513,19 @@
     "downvote": "Bəyənmə",
     "reply": "Cavab ver",
     "markAsSolution": "Həll kimi qeyd et",
-    "solution": "Həll"
+    "solution": "Həll",
+    "inProgress": "Davam edir",
+    "watchTime": "İzləmə vaxtı",
+    "loadingCourses": "Kurslarınız yüklənir...",
+    "failedToLoadCourses": "Kursları yükləmək mümkün olmadı",
+    "couldntLoadCourses": "Qeydiyyatdan keçdiyiniz kursları yükləyə bilmədik. Zəhmət olmasa səhifəni yenidən yükləməyə çalışın.",
+    "startLearningJourney": "Təhsil səyahətinizə başlayın",
+    "notEnrolledYet": "Hələ heç bir kursa qeydiyyatdan keçməmisiniz. Başlamaq üçün möhtəşəm kursları kəşf edin!",
+    "browseCourses": "Kursları gəz",
+    "lastAccessed": "Son giriş:",
+    "never": "Heç vaxt",
+    "certificateAvailable": "Sertifikat mövcuddur",
+    "certificatePending": "Sertifikat gözlənilir"
   },
   "filters": {
     "filterBy": "Filtrləmə",
@@ -590,5 +655,56 @@
     "invalidFormat": "Yanlış format",
     "fieldRequired": "{{field}} tələb olunur",
     "fieldInvalid": "{{field}} yanlışdır"
+  },
+
+  "home": {
+    "hero": {
+      "joinBadge": "🎉 Dünya genelində 50,000+ öyrənənlərə qoşulun",
+      "masterNew": "Yeni sahib olun",
+      "skills": "Bacarıqlar",
+      "unlockPotential": "Müasir öyrənən üçün hazırlanmış ekspert rəhbərliyi ilə kurslarla potensialınızı açın.",
+      "buildSkills": "Gələcəyi formalaşdıran bacarıqlar qurun."
+    },
+    "stats": {
+      "activeStudents": "Aktiv tələbələr",
+      "expertCourses": "Ekspert kursları",
+      "industryExperts": "Sənaye ekspertləri",
+      "learningSupport": "Öyrənmə dəstəyi"
+    },
+    "categories": {
+      "exploreCategories": "Kateqoriyaları kəşf et",
+      "findYour": "Tapın",
+      "learningPath": "Öyrənmə yolu",
+      "discoverCourses": "Maraqlarınıza uyğun kursları kəşf edin. Hər kateqoriya yeni başlayandan ekspertə qədər aparılmaq üçün hazırlanmışdır.",
+      "exploreCategoryDescription": "{{category}} kurslarını kəşf edin və bacarıqlarınızı inkişaf etdirin"
+    },
+    "sections": {
+      "personalized": "Fərdiləşdirilmiş",
+      "recommended": "Tövsiyə edilən",
+      "forYou": "sizin üçün",
+      "coursesPickedForYou": "Öyrənmə səyahətiniz üçün seçilmiş kurslar",
+      "freeCoursesToStart": "Başlamaq üçün pulsuz kurslar"
+    },
+    "trending": {
+      "hotTrending": "Qaynar trend",
+      "thisWeeks": "Bu həftənin",
+      "hottestCourse": "Ən populyar kursu",
+      "joinThousands": "Bu həftənin ən populyar kursunda minlərlə öyrənənə qoşulun",
+      "trendingBadge": "🔥 #1 TRENDƏ"
+    },
+    "toasts": {
+      "noCoursesAvailable": "📚 Mövcud kurs yoxdur",
+      "allCoursesInCart": "Bütün tövsiyə edilən kurslar artıq səbətinizdədir!",
+      "coursesAddedSuccess": "🎉 Kurslar uğurla əlavə edildi!",
+      "coursesAddedToCart": "{{count}} {{courses}} səbətinizə əlavə edildi. Bütün kurslar sifarişə hazırdır!",
+      "partialSuccess": "⚠️ Qismən uğur",
+      "someCoursesNotAdded": "{{count}} {{courses}} əlavə edilə bilmədi. Zəhmət olmasa yenidən cəhd edin.",
+      "operationFailed": "❌ Əməliyyat uğursuz oldu",
+      "failedToAddCourses": "Kursları səbətə əlavə etmək mümkün olmadı. Zəhmət olmasa daha sonra cəhd edin.",
+      "alreadyInCart": "📚 Artıq səbətdə",
+      "courseAlreadyInCart": "\"{{title}}\" artıq səbətinizdədir!",
+      "failedToAdd": "❌ Əlavə etmək mümkün olmadı",
+      "failedToAddCourse": "Kursu səbətə əlavə etmək mümkün olmadı. Zəhmət olmasa yenidən cəhd edin."
+    }
   }
 }

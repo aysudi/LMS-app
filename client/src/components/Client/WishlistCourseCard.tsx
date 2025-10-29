@@ -7,6 +7,8 @@ import { useToggleWishlist, useWishlistHelpers } from "../../hooks/useWishlist";
 import type { Course } from "../../types/course.type";
 import { useToast } from "../UI/ToastProvider";
 import { generalToasts } from "../../utils/toastUtils";
+// @ts-ignore
+import { useTranslation } from "react-i18next";
 
 interface CourseCardProps {
   course: Course;
@@ -24,6 +26,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
   onRemoveFromWishlist,
 }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { showToast } = useToast();
   const { isAuthenticated } = useAuthContext();
   const { addViewedCourse } = usePersonalization();
@@ -51,15 +54,20 @@ const CourseCard: React.FC<CourseCardProps> = ({
 
       showToast(
         generalToasts.success(
-          wasInWishlist ? "Removed from wishlist" : "Added to wishlist",
           wasInWishlist
-            ? `"${course.title}" removed from wishlist`
-            : `"${course.title}" added to wishlist`
+            ? t("wishlist.removedFromWishlist")
+            : t("wishlist.addedToWishlist"),
+          wasInWishlist
+            ? t("wishlist.courseRemovedFromWishlist", { title: course.title })
+            : t("wishlist.courseAddedToWishlist", { title: course.title })
         )
       );
     } catch (error) {
       showToast(
-        generalToasts.error("Failed to update wishlist", `"${course.title}"`)
+        generalToasts.error(
+          t("wishlist.failedToUpdateWishlist"),
+          `"${course.title}"`
+        )
       );
     }
   };
@@ -112,7 +120,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
               whileTap={{ scale: 0.9 }}
               onClick={handleRemove}
               className="p-3 bg-white/90 hover:bg-red-50 text-red-500 rounded-full custom-icon-shadow transition-all duration-200 cursor-pointer"
-              title="Remove from wishlist"
+              title={t("wishlist.removeFromWishlist")}
             >
               <FaHeart className="text-lg" />
             </motion.button>
@@ -129,8 +137,8 @@ const CourseCard: React.FC<CourseCardProps> = ({
               }`}
               title={
                 checkIfInWishlist(course.id)
-                  ? "Remove from wishlist"
-                  : "Add to wishlist"
+                  ? t("wishlist.removeFromWishlist")
+                  : t("wishlist.addToWishlist")
               }
             >
               <FaHeart
@@ -147,7 +155,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
           <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-3 py-1 rounded-full shadow-lg">
             <span className="text-sm font-bold">
               {course.isFree || course.originalPrice === 0
-                ? "FREE"
+                ? t("common.free")
                 : `$${course.discountPrice || course.originalPrice}`}
             </span>
           </div>
@@ -178,7 +186,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
           <p className="text-sm text-gray-600">
             {course.instructor?.firstName
               ? `${course.instructor.firstName} ${course.instructor.lastName}`
-              : "Expert Instructor"}
+              : t("course.expertInstructor")}
           </p>
         </div>
 
@@ -211,7 +219,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
             }}
             className="w-full py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] flex items-center justify-center space-x-2 cursor-pointer"
           >
-            <span className="text-sm">Enroll Now</span>
+            <span className="text-sm">{t("course.enrollNow")}</span>
             <FaArrowRight className="text-sm" />
           </button>
         </div>

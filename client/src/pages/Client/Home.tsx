@@ -98,8 +98,8 @@ const Home = () => {
 
     if (courses.length === 0) {
       showToast({
-        title: "📚 No Courses Available",
-        message: "All recommended courses are already in your cart!",
+        title: t("home.toasts.noCoursesAvailable"),
+        message: t("home.toasts.allCoursesInCart"),
         type: "info",
         duration: 3000,
       });
@@ -124,12 +124,11 @@ const Home = () => {
 
       if (successCount > 0) {
         showToast({
-          title: "🎉 Courses Added Successfully!",
-          message: `${successCount} ${
-            successCount > 1 ? "courses" : "course"
-          } ${successCount > 1 ? "have" : "has"} been added to your cart. ${
-            successCount > 1 ? "All courses are" : "Course is"
-          } ready for checkout!`,
+          title: t("home.toasts.coursesAddedSuccess"),
+          message: t("home.toasts.coursesAddedToCart", { 
+            count: successCount, 
+            courses: successCount > 1 ? t("common.courses") : t("common.course")
+          }),
           type: "success",
           duration: 3200,
         });
@@ -137,10 +136,11 @@ const Home = () => {
 
       if (errorCount > 0) {
         showToast({
-          title: "⚠️ Partial Success",
-          message: `${errorCount} course${
-            errorCount > 1 ? "s" : ""
-          } couldn't be added. Please try again.`,
+          title: t("home.toasts.partialSuccess"),
+          message: t("home.toasts.someCoursesNotAdded", { 
+            count: errorCount,
+            courses: errorCount > 1 ? t("common.courses") : t("common.course")
+          }),
           type: "warning",
           duration: 4000,
         });
@@ -149,8 +149,8 @@ const Home = () => {
       closeModal();
     } catch (error) {
       showToast({
-        title: "❌ Operation Failed",
-        message: "Failed to add courses to cart. Please try again later.",
+        title: t("home.toasts.operationFailed"),
+        message: t("home.toasts.failedToAddCourses"),
         type: "error",
         duration: 4000,
       });
@@ -215,8 +215,8 @@ const Home = () => {
       // Check if course is already in cart locally first (faster UI feedback)
       if (checkIfInCartLocal(course.id)) {
         showToast({
-          title: "📚 Already in Cart",
-          message: `"${course.title}" is already in your cart!`,
+          title: t("home.toasts.alreadyInCart"),
+          message: t("home.toasts.courseAlreadyInCart", { title: course.title }),
           type: "info",
           duration: 3000,
         });
@@ -231,9 +231,8 @@ const Home = () => {
     } catch (error: any) {
       console.error("Cart error:", error);
       showToast({
-        title: "❌ Failed to Add",
-        message:
-          error.message || "Failed to add course to cart. Please try again.",
+        title: t("home.toasts.failedToAdd"),
+        message: error.message || t("home.toasts.failedToAddCourse"),
         type: "error",
         duration: 4000,
       });
@@ -287,15 +286,15 @@ const Home = () => {
               <div className="inline-flex items-center px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-indigo-100 shadow-lg mb-8">
                 <FaFire className="text-orange-500 mr-2" />
                 <span className="text-sm font-semibold text-gray-700">
-                  🎉 Join 50,000+ learners worldwide
+                  {t("home.hero.joinBadge")}
                 </span>
               </div>
 
               <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-gray-900 mb-8 leading-tight">
-                Master New{" "}
+                {t("home.hero.masterNew")}{" "}
                 <span className="relative">
                   <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                    Skills
+                    {t("home.hero.skills")}
                   </span>
                   <svg
                     className="absolute -bottom-2 left-0 w-full h-3"
@@ -327,10 +326,9 @@ const Home = () => {
               </h1>
 
               <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed mb-12">
-                Unlock your potential with expert-led courses designed for the
-                modern learner.
+                {t("home.hero.unlockPotential")}
                 <span className="block mt-2 font-semibold text-gray-700">
-                  Build skills that shape the future.
+                  {t("home.hero.buildSkills")}
                 </span>
               </p>
             </motion.div>
@@ -350,25 +348,25 @@ const Home = () => {
                 {
                   icon: FaUsers,
                   value: "50K+",
-                  label: "Active Students",
+                  label: t("home.stats.activeStudents"),
                   color: "from-blue-500 to-cyan-500",
                 },
                 {
                   icon: FaGraduationCap,
                   value: "1K+",
-                  label: "Expert Courses",
+                  label: t("home.stats.expertCourses"),
                   color: "from-indigo-500 to-purple-500",
                 },
                 {
                   icon: FaTrophy,
                   value: "100+",
-                  label: "Industry Experts",
+                  label: t("home.stats.industryExperts"),
                   color: "from-purple-500 to-pink-500",
                 },
                 {
                   icon: FaLightbulb,
                   value: "24/7",
-                  label: "Learning Support",
+                  label: t("home.stats.learningSupport"),
                   color: "from-orange-500 to-red-500",
                 },
               ].map((stat, index) => (
@@ -411,18 +409,17 @@ const Home = () => {
               <div className="inline-flex items-center px-4 py-2 bg-indigo-50 rounded-full mb-6">
                 <FaGraduationCap className="text-indigo-600 mr-2" />
                 <span className="text-sm font-semibold text-indigo-600">
-                  Explore Categories
+                  {t("home.categories.exploreCategories")}
                 </span>
               </div>
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                Find Your{" "}
+                {t("home.categories.findYour")}{" "}
                 <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                  Learning Path
+                  {t("home.categories.learningPath")}
                 </span>
               </h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-                Discover courses tailored to your interests. Each category is
-                designed to take you from beginner to expert.
+                {t("home.categories.discoverCourses")}
               </p>
             </div>
 
@@ -500,7 +497,7 @@ const Home = () => {
                           : "text-gray-500 group-hover:text-indigo-500"
                       }`}
                     >
-                      {category.count} courses
+                      {category.count} {t("common.courses")}
                     </div>
                   </div>
 
@@ -538,17 +535,17 @@ const Home = () => {
                       <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-full mb-4">
                         <FaLightbulb className="text-orange-500 mr-2" />
                         <span className="text-sm font-semibold text-orange-600">
-                          Personalized
+                          {t("home.sections.personalized")}
                         </span>
                       </div>
                       <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-                        Recommended{" "}
+                        {t("home.sections.recommended")}{" "}
                         <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
-                          for You
+                          {t("home.sections.forYou")}
                         </span>
                       </h2>
                       <p className="text-gray-600 mt-2">
-                        Courses picked just for your learning journey
+                        {t("home.sections.coursesPickedForYou")}
                       </p>
                     </div>
                     <motion.button
@@ -556,7 +553,7 @@ const Home = () => {
                       whileTap={{ scale: 0.95 }}
                       className="hidden md:flex items-center gap-2 px-6 py-3 text-indigo-600 hover:text-indigo-700 font-semibold rounded-xl hover:bg-indigo-50 transition-all duration-300"
                     >
-                      View All <FaArrowRight className="text-sm" />
+                      {t("common.viewAll")} <FaArrowRight className="text-sm" />
                     </motion.button>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -607,10 +604,10 @@ const Home = () => {
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
                       <FaRocket className="text-green-600" />
-                      Free Courses to Get Started
+                      {t("home.sections.freeCoursesToStart")}
                     </h2>
                     <button className="text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1">
-                      View All <FaArrowRight className="text-sm" />
+                      {t("common.viewAll")} <FaArrowRight className="text-sm" />
                     </button>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -667,18 +664,17 @@ const Home = () => {
                 <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-orange-50 to-red-50 rounded-full mb-6">
                   <FaFire className="text-orange-500 mr-2 animate-pulse" />
                   <span className="text-sm font-semibold text-orange-600">
-                    Hot Trending
+                    {t("home.trending.hotTrending")}
                   </span>
                 </div>
                 <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                  This Week's{" "}
+                  {t("home.trending.thisWeeks")}{" "}
                   <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
-                    Hottest Course
+                    {t("home.trending.hottestCourse")}
                   </span>
                 </h2>
                 <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-                  Join thousands of learners in the most popular course of the
-                  week
+                  {t("home.trending.joinThousands")}
                 </p>
               </div>
 
@@ -721,10 +717,10 @@ const Home = () => {
 
                         {/* Enhanced Trending Badge */}
                         <div className="absolute top-8 left-8 z-10">
-                          <div className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white rounded-2xl shadow-2xl border border-white/20 backdrop-blur-sm">
+                                                      <div className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white rounded-2xl shadow-2xl border border-white/20 backdrop-blur-sm">
                             <FaFire className="animate-pulse text-lg" />
                             <span className="font-bold text-sm tracking-wide">
-                              🔥 #1 TRENDING
+                              {t("home.trending.trendingBadge")}
                             </span>
                             <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-ping"></div>
                           </div>
@@ -762,10 +758,10 @@ const Home = () => {
                                 }`}
                                 title={
                                   processingWishlist.has(displayCourse.id)
-                                    ? "Processing..."
+                                    ? t("common.processing")
                                     : checkIfInWishlist(displayCourse.id)
-                                    ? "Remove from wishlist"
-                                    : "Add to wishlist"
+                                    ? t("common.removeFromWishlist")
+                                    : t("common.addToWishlist")
                                 }
                                 animate={
                                   processingWishlist.has(displayCourse.id)
@@ -810,10 +806,10 @@ const Home = () => {
                                   }`}
                                   title={
                                     processingCart.has(displayCourse.id)
-                                      ? "Adding to cart..."
+                                      ? t("common.addingToCart")
                                       : checkIfInCartLocal(displayCourse.id)
-                                      ? "Already in cart"
-                                      : "Add to cart"
+                                      ? t("common.alreadyInCart")
+                                      : t("common.addToCart")
                                   }
                                   animate={
                                     processingCart.has(displayCourse.id)
@@ -860,7 +856,7 @@ const Home = () => {
                             </div>
 
                             <div className="text-lg text-gray-700 mb-6">
-                              by{" "}
+                              {t("course.by")}{" "}
                               <span className="font-semibold text-gray-900">
                                 {displayCourse.instructor?.firstName}{" "}
                                 {displayCourse.instructor?.lastName}
@@ -875,7 +871,7 @@ const Home = () => {
                                   {displayCourse.rating || 0}
                                 </span>
                                 <span className="text-gray-500">
-                                  ({displayCourse.ratingsCount || 0} reviews)
+                                  ({displayCourse.ratingsCount || 0} {t("course.reviews")})
                                 </span>
                               </div>
                               <div className="flex items-center gap-2">
@@ -885,7 +881,7 @@ const Home = () => {
                                     displayCourse.enrollmentCount || 0
                                   ).toLocaleString()}
                                 </span>
-                                <span className="text-gray-500">students</span>
+                                <span className="text-gray-500">{t("course.students")}</span>
                               </div>
                             </div>
 
@@ -895,7 +891,7 @@ const Home = () => {
                                 <span className="text-3xl font-bold text-gray-900">
                                   {displayCourse.isFree ||
                                   displayCourse.originalPrice === 0
-                                    ? "Free"
+                                    ? t("course.free")
                                     : `$${
                                         displayCourse.discountPrice ||
                                         displayCourse.originalPrice
@@ -909,7 +905,7 @@ const Home = () => {
                                 }}
                                 className="px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 cursor-pointer"
                               >
-                                Enroll Now
+                                {t("course.enrollNow")}
                               </button>
                             </div>
                           </div>
@@ -1062,14 +1058,14 @@ const Home = () => {
                               {category.name}
                             </h2>
                             <p className="text-gray-600">
-                              {category.description}
+                              {t("home.categories.exploreCategoryDescription", { category: category.name })}
                             </p>
                           </div>
                         </div>
                         <button
                           className={`${category.buttonColor} font-medium flex items-center gap-2 px-4 py-2 rounded-lg ${category.hoverBg} transition-colors`}
                         >
-                          View All <FaArrowRight className="text-sm" />
+                          {t("common.viewAll")} <FaArrowRight className="text-sm" />
                         </button>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

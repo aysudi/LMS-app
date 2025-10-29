@@ -2,9 +2,9 @@ import { useTranslation } from "react-i18next";
 import { Globe } from "lucide-react";
 
 const languages = [
-  { code: "en", name: "English", flag: "🇺🇸" },
-  { code: "ru", name: "Русский", flag: "🇷🇺" },
-  { code: "az", name: "Azərbaycan", flag: "🇦🇿" },
+  { code: "en", name: "English" },
+  { code: "ru", name: "Русский" },
+  { code: "az", name: "Azərbaycan" },
 ];
 
 export default function LanguageSwitcher() {
@@ -16,7 +16,7 @@ export default function LanguageSwitcher() {
 
   return (
     <div className="relative group">
-      <button className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:text-blue-600 transition-colors">
+      <button className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:text-blue-600 transition-colors cursor-pointer">
         <Globe size={16} />
         <span className="hidden sm:inline">
           {languages.find((lang) => lang.code === i18n.language)?.name ||
@@ -30,13 +30,12 @@ export default function LanguageSwitcher() {
             <button
               key={language.code}
               onClick={() => changeLanguage(language.code)}
-              className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-3 ${
+              className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-3 cursor-pointer ${
                 i18n.language === language.code
                   ? "bg-blue-50 text-blue-600"
                   : "text-gray-700"
               }`}
             >
-              <span>{language.flag}</span>
               <span>{language.name}</span>
               {i18n.language === language.code && (
                 <span className="ml-auto text-blue-600">✓</span>
