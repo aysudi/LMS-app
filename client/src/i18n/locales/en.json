@@ -118,7 +118,12 @@
     "processing": "Processing...",
     "addingToCart": "Adding to cart...",
     "alreadyInCart": "Already in cart",
-    "refreshPage": "Refresh Page"
+    "refreshPage": "Refresh Page",
+    "today": "today",
+    "daysAgo": "days ago",
+    "certificate": "Certificate",
+    "days": "days",
+    "saving": "Saving..."
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -767,6 +772,177 @@
       "courseAlreadyInCart": "\"{{title}}\" is already in your cart!",
       "failedToAdd": "❌ Failed to Add",
       "failedToAddCourse": "Failed to add course to cart. Please try again."
+    }
+  },
+  "profile": {
+    "loadingProfile": "Loading profile...",
+    "joined": "Joined",
+    "verified": "Verified",
+    "pending": "Pending",
+    "rank": "Rank",
+    "about": "About",
+    "noBioAvailable": "No bio available.",
+    "personalInformation": "Personal Information",
+    "fullName": "Full Name",
+    "role": "Role",
+    "recentActivity": "Recent Activity",
+    "tabs": {
+      "overview": "Overview",
+      "myLearning": "My Learning",
+      "achievements": "Achievements",
+      "settings": "Settings"
+    },
+    "achievements": {
+      "firstSteps": "First Steps",
+      "firstStepsDesc": "Complete your first course",
+      "courseCompleted": "Course completed",
+      "learningEnthusiast": "Learning Enthusiast",
+      "learningEnthusiastDesc": "Complete 5 courses",
+      "courseMaster": "Course Master",
+      "courseMasterDesc": "Complete 10+ courses",
+      "marathonLearner": "Marathon Learner",
+      "marathonLearnerDesc": "Complete 20 courses",
+      "consistentLearner": "Consistent Learner",
+      "consistentLearnerDesc": "3-day learning streak",
+      "weekWarrior": "Week Warrior",
+      "weekWarriorDesc": "7-day learning streak",
+      "weekWarriorGoal": "Achieve 7-day learning streak",
+      "monthlyMaster": "Monthly Master",
+      "monthlyMasterDesc": "30-day learning streak",
+      "monthlyMasterGoal": "Achieve 30-day learning streak",
+      "dedicatedStudent": "Dedicated Student",
+      "dedicatedStudentDesc": "10+ hours of learning",
+      "timeInvestor": "Time Investor",
+      "timeInvestorDesc": "50+ hours of learning",
+      "learningMachine": "Learning Machine",
+      "learningMachineDesc": "100+ hours of learning",
+      "certified": "Certified",
+      "certifiedDesc": "Earn your first certificate",
+      "certificateCollector": "Certificate Collector",
+      "certificateCollectorDesc": "Earn 5 certificates",
+      "lessonMaster": "Lesson Master",
+      "lessonMasterDesc": "Complete 50+ lessons",
+      "knowledgeSeeker": "Knowledge Seeker",
+      "knowledgeSeekerDesc": "Complete 100+ lessons",
+      "coursesCompleted": "{{count}} courses completed",
+      "daysStreak": "{{count}} days streak",
+      "hoursWatched": "{{count}} hours watched",
+      "certificatesEarned": "{{count}} certificates earned",
+      "lessonsCompleted": "{{count}} lessons completed",
+      "overview": "Achievement Overview",
+      "unlocked": "Achievements Unlocked",
+      "dayStreak": "Day Streak",
+      "certificates": "Certificates",
+      "totalHours": "Total Hours",
+      "recent": "Recent Achievements",
+      "earned": "Earned",
+      "noAchievements": "No achievements yet",
+      "completeCoursesToUnlock": "Complete courses and maintain learning streaks to unlock achievements!",
+      "nextAchievement": "Next Achievement",
+      "more": "more",
+      "toUnlock": "to unlock this achievement!"
+    },
+    "ranks": {
+      "newLearner": "New Learner",
+      "beginnerLearner": "Beginner Learner",
+      "activeLearner": "Active Learner",
+      "advancedLearner": "Advanced Learner",
+      "expertLearner": "Expert Learner",
+      "masterLearner": "Master Learner"
+    },
+    "errors": {
+      "passwordsDontMatch": "New passwords don't match",
+      "invalidImageFile": "Please select a valid image file",
+      "imageTooLarge": "Image size should be less than 5MB"
+    },
+    "editProfile": "Edit Profile",
+    "aboutMe": "About Me",
+    "defaultBio": "This user hasn't written a bio yet. Add a bio to tell others about yourself!",
+    "activity": {
+      "courseCompleted": "Course Completed",
+      "courseInProgress": "Course In Progress",
+      "courseStarted": "Course Started",
+      "noRecentActivity": "No recent activity",
+      "startLearningToSeeActivity": "Start learning to see your activity here!"
+    },
+    "learning": {
+      "progressOverview": "Learning Progress Overview",
+      "coursesEnrolled": "Courses Enrolled",
+      "coursesCompleted": "Courses Completed",
+      "completed": "Completed",
+      "totalHours": "Total Hours",
+      "currentCourses": "Current Courses",
+      "recentlyCompleted": "Recently Completed",
+      "noCoursesInProgress": "No courses in progress",
+      "noCompletedCourses": "No completed courses yet"
+    },
+
+    "settings": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "bio": "Bio",
+      "bioPlaceholder": "Tell us about yourself...",
+      "saveChanges": "Save Changes",
+      "accountSettings": "Account Settings",
+      "emailAddress": "Email Address",
+      "verify": "Verify",
+      "changePassword": "Change Password",
+      "currentPassword": "Current Password",
+      "enterCurrentPassword": "Enter your current password",
+      "newPassword": "New Password",
+      "enterNewPassword": "Enter new password",
+      "confirmPassword": "Confirm New Password",
+      "confirmPasswordPlaceholder": "Confirm new password",
+      "changing": "Changing...",
+      "passwordRequirements": "Password Requirements:",
+      "atLeast6Characters": "At least 6 characters long",
+      "useStrongPassword": "Use a strong, unique password",
+      "considerPasswordManager": "Consider using a password manager",
+      "notificationPreferences": "Notification Preferences",
+      "notifications": {
+        "courseUpdates": {
+          "label": "Course Updates",
+          "description": "Get notified about new lessons and announcements"
+        },
+        "achievements": {
+          "label": "Achievement Notifications",
+          "description": "Receive notifications when you earn new badges"
+        },
+        "reminders": {
+          "label": "Learning Reminders",
+          "description": "Daily reminders to continue your learning"
+        },
+        "marketing": {
+          "label": "Marketing Emails",
+          "description": "Promotional emails about new courses and features"
+        }
+      },
+      "dangerZone": "Danger Zone",
+      "deleteAccount": "Delete Account",
+      "deleteAccountDescription": "Permanently delete your account and all data"
+    },
+    "stats": {
+      "courses": "Courses",
+      "progress": "Progress",
+      "certificates": "Certificates",
+      "hours": "Hours"
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "browseCourses": "Browse Courses",
+      "viewCertificates": "View Certificates",
+      "downloadProgress": "Download Progress"
+    },
+    "learningStreak": {
+      "title": "Learning Streak",
+      "daysInRow": "Days in a row",
+      "keepItUp": "Keep it up! You're on fire! 🔥",
+      "startToday": "Start your learning streak today! 📚"
+    },
+    "recentAchievements": {
+      "title": "Recent Achievements",
+      "noAchievements": "No achievements yet",
+      "completeCoursesToUnlock": "Complete courses to unlock achievements!"
     }
   }
 }
