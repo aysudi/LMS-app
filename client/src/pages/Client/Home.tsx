@@ -125,9 +125,10 @@ const Home = () => {
       if (successCount > 0) {
         showToast({
           title: t("home.toasts.coursesAddedSuccess"),
-          message: t("home.toasts.coursesAddedToCart", { 
-            count: successCount, 
-            courses: successCount > 1 ? t("common.courses") : t("common.course")
+          message: t("home.toasts.coursesAddedToCart", {
+            count: successCount,
+            courses:
+              successCount > 1 ? t("common.courses") : t("common.course"),
           }),
           type: "success",
           duration: 3200,
@@ -137,9 +138,9 @@ const Home = () => {
       if (errorCount > 0) {
         showToast({
           title: t("home.toasts.partialSuccess"),
-          message: t("home.toasts.someCoursesNotAdded", { 
+          message: t("home.toasts.someCoursesNotAdded", {
             count: errorCount,
-            courses: errorCount > 1 ? t("common.courses") : t("common.course")
+            courses: errorCount > 1 ? t("common.courses") : t("common.course"),
           }),
           type: "warning",
           duration: 4000,
@@ -189,14 +190,13 @@ const Home = () => {
     } catch (error) {
       showToast(generalToasts.error("Fail", "Failed to update wishlist"));
     } finally {
-      // Remove course from processing state
       setTimeout(() => {
         setProcessingWishlist((prev) => {
           const newSet = new Set(prev);
           newSet.delete(course.id);
           return newSet;
         });
-      }, 500); // Small delay to show the effect
+      }, 500);
     }
   };
 
@@ -208,25 +208,23 @@ const Home = () => {
       return;
     }
 
-    // Add course to processing state
     setProcessingCart((prev) => new Set([...prev, course.id]));
 
     try {
-      // Check if course is already in cart locally first (faster UI feedback)
       if (checkIfInCartLocal(course.id)) {
         showToast({
           title: t("home.toasts.alreadyInCart"),
-          message: t("home.toasts.courseAlreadyInCart", { title: course.title }),
+          message: t("home.toasts.courseAlreadyInCart", {
+            title: course.title,
+          }),
           type: "info",
           duration: 3000,
         });
         return;
       }
 
-      // Add course to cart using the mutation
       await addToCartMutation.mutateAsync(course.id);
 
-      // Open the add to cart modal
       openModal(course);
     } catch (error: any) {
       console.error("Cart error:", error);
@@ -237,7 +235,6 @@ const Home = () => {
         duration: 4000,
       });
     } finally {
-      // Remove course from processing state
       setTimeout(() => {
         setProcessingCart((prev) => {
           const newSet = new Set(prev);
@@ -717,7 +714,7 @@ const Home = () => {
 
                         {/* Enhanced Trending Badge */}
                         <div className="absolute top-8 left-8 z-10">
-                                                      <div className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white rounded-2xl shadow-2xl border border-white/20 backdrop-blur-sm">
+                          <div className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white rounded-2xl shadow-2xl border border-white/20 backdrop-blur-sm">
                             <FaFire className="animate-pulse text-lg" />
                             <span className="font-bold text-sm tracking-wide">
                               {t("home.trending.trendingBadge")}
@@ -871,7 +868,8 @@ const Home = () => {
                                   {displayCourse.rating || 0}
                                 </span>
                                 <span className="text-gray-500">
-                                  ({displayCourse.ratingsCount || 0} {t("course.reviews")})
+                                  ({displayCourse.ratingsCount || 0}{" "}
+                                  {t("course.reviews")})
                                 </span>
                               </div>
                               <div className="flex items-center gap-2">
@@ -881,7 +879,9 @@ const Home = () => {
                                     displayCourse.enrollmentCount || 0
                                   ).toLocaleString()}
                                 </span>
-                                <span className="text-gray-500">{t("course.students")}</span>
+                                <span className="text-gray-500">
+                                  {t("course.students")}
+                                </span>
                               </div>
                             </div>
 
@@ -1058,14 +1058,17 @@ const Home = () => {
                               {category.name}
                             </h2>
                             <p className="text-gray-600">
-                              {t("home.categories.exploreCategoryDescription", { category: category.name })}
+                              {t("home.categories.exploreCategoryDescription", {
+                                category: category.name,
+                              })}
                             </p>
                           </div>
                         </div>
                         <button
                           className={`${category.buttonColor} font-medium flex items-center gap-2 px-4 py-2 rounded-lg ${category.hoverBg} transition-colors`}
                         >
-                          {t("common.viewAll")} <FaArrowRight className="text-sm" />
+                          {t("common.viewAll")}{" "}
+                          <FaArrowRight className="text-sm" />
                         </button>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
