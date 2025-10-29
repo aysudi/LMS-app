@@ -458,11 +458,9 @@ const CourseDetails = () => {
     if (!courseId) return;
 
     try {
-      // Add to cart first if not already in cart
       if (!isInCart) {
         await addToCartMutation.mutateAsync(courseId);
       }
-      // Navigate to cart
       navigate("/cart");
     } catch (error: any) {
       const message = error.response?.data?.message || "Failed to add to cart";
@@ -547,8 +545,6 @@ const CourseDetails = () => {
     }
     return 0;
   };
-
-  // console.log("isEnrolled", isEnrolled);
 
   return (
     <div className="min-h-screen bg-gray-50">
