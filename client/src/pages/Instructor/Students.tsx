@@ -103,9 +103,11 @@ const InstructorStudents = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl font-semibold text-gray-900">
-            Error loading students
+            {t("instructor.students.errorLoadingStudents")}
           </h2>
-          <p className="text-gray-600 mt-2">Please try again later</p>
+          <p className="text-gray-600 mt-2">
+            {t("instructor.students.pleaseReTryLater")}
+          </p>
         </div>
       </div>
     );
@@ -135,7 +137,7 @@ const InstructorStudents = () => {
             className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200 font-medium flex items-center space-x-2"
           >
             <FaDownload className="text-sm" />
-            <span>Export Data</span>
+            <span>{t("instructor.students.exportData")}</span>
           </motion.button>
         </motion.div>
 
@@ -153,7 +155,7 @@ const InstructorStudents = () => {
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-500">
-                  Total Students
+                  {t("instructor.students.totalStudents")}
                 </p>
                 <p className="text-2xl font-bold text-gray-900">
                   {totalStudents.toLocaleString()}
@@ -169,7 +171,7 @@ const InstructorStudents = () => {
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-500">
-                  Average Progress
+                  {t("instructor.students.averageProgress")}
                 </p>
                 <p className="text-2xl font-bold text-gray-900">
                   {averageProgress}%
@@ -184,7 +186,9 @@ const InstructorStudents = () => {
                 <FaGraduationCap className="text-xl text-yellow-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-500">Completed</p>
+                <p className="text-sm font-medium text-gray-500">
+                  {t("common.completed")}
+                </p>
                 <p className="text-2xl font-bold text-gray-900">
                   {completedStudents}
                 </p>
@@ -199,7 +203,7 @@ const InstructorStudents = () => {
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-500">
-                  Active Today
+                  {t("instructor.students.activeToday")}
                 </p>
                 <p className="text-2xl font-bold text-gray-900">
                   {activeToday}
@@ -222,7 +226,7 @@ const InstructorStudents = () => {
               <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search students..."
+                placeholder={t("instructor.students.searchStudents")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
@@ -236,7 +240,9 @@ const InstructorStudents = () => {
                 onChange={(e) => setSelectedCourse(e.target.value)}
                 className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               >
-                <option value="all">All Courses</option>
+                <option value="all">
+                  {t("instructor.students.allCourses")}
+                </option>
                 {instructorCourses.map((course) => (
                   <option key={course._id} value={course._id}>
                     {course.title}
@@ -249,10 +255,18 @@ const InstructorStudents = () => {
                 onChange={(e) => setSortBy(e.target.value as any)}
                 className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               >
-                <option value="name">Sort by Name</option>
-                <option value="progress">Sort by Progress</option>
-                <option value="enrolled">Sort by Enrollment Date</option>
-                <option value="lastActive">Sort by Last Active</option>
+                <option value="name">
+                  {t("instructor.students.sortByName")}
+                </option>
+                <option value="progress">
+                  {t("instructor.students.sortByProgress")}
+                </option>
+                <option value="enrolled">
+                  {t("instructor.students.sortByEnrollmentDate")}
+                </option>
+                <option value="lastActive">
+                  {t("instructor.students.sortByLastActive")}
+                </option>
               </select>
             </div>
           </div>
@@ -269,12 +283,12 @@ const InstructorStudents = () => {
             <div className="text-center py-16">
               <FaUsers className="text-6xl text-gray-300 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                No students found
+                {t("instructor.students.noStudentsFound")}
               </h3>
               <p className="text-gray-600">
                 {searchTerm
-                  ? "Try adjusting your search"
-                  : "Students will appear here once they enroll in your courses"}
+                  ? t("instructor.students.tryAdjustingSearch")
+                  : t("instructor.students.studentsWillAppear")}
               </p>
             </div>
           ) : (
@@ -283,19 +297,19 @@ const InstructorStudents = () => {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Student
+                      {t("instructor.students.student")}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Course
+                      {t("instructor.students.course")}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Progress
+                      {t("instructor.students.progress")}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Enrolled
+                      {t("instructor.students.enrolled")}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Last Active
+                      {t("instructor.students.lastActive")}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions

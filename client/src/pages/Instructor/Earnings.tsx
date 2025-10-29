@@ -124,7 +124,9 @@ const InstructorEarnings = () => {
             className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl border border-gray-200 p-4 mb-6"
           >
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">Platform Fee (30%):</span>
+              <span className="text-gray-600">
+                {t("instructor.earnings.platformFee")}:
+              </span>
               <span className="font-medium text-gray-900">
                 {formatCurrency(earnings.totalPlatformFees)}
               </span>
@@ -141,7 +143,7 @@ const InstructorEarnings = () => {
         >
           <EarningsCard
             icon={FaDollarSign}
-            title="Total Earnings"
+            title={t("instructor.earnings.totalEarnings")}
             value={formatCurrency(earnings.totalInstructorShare)}
             change={15.2}
             changeType="increase"
@@ -150,25 +152,25 @@ const InstructorEarnings = () => {
 
           <EarningsCard
             icon={FaPiggyBank}
-            title="Gross Revenue"
+            title={t("instructor.earnings.grossRevenue")}
             value={formatCurrency(earnings.totalGross)}
-            subtitle="Before platform fees"
+            subtitle={t("instructor.earnings.beforePlatformFees")}
             color="bg-gradient-to-r from-blue-500 to-cyan-600"
           />
 
           <EarningsCard
             icon={FaClock}
-            title="Pending Earnings"
+            title={t("instructor.earnings.pendingEarnings")}
             value={formatCurrency(earnings.totalPending)}
-            subtitle="Processing period"
+            subtitle={t("instructor.earnings.processingPeriod")}
             color="bg-gradient-to-r from-yellow-500 to-orange-600"
           />
 
           <EarningsCard
             icon={FaChartBar}
-            title="Paid Earnings"
+            title={t("instructor.earnings.paidEarnings")}
             value={formatCurrency(earnings.totalPaid)}
-            subtitle="Completed payouts"
+            subtitle={t("instructor.earnings.completedPayouts")}
             color="bg-gradient-to-r from-purple-500 to-indigo-600"
           />
         </motion.div>
@@ -182,12 +184,14 @@ const InstructorEarnings = () => {
         >
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-gray-900">
-              Monthly Earnings Trend
+              {t("instructor.earnings.monthlyEarningsTrend")}
             </h2>
             <div className="flex items-center space-x-4 text-sm">
               <div className="flex items-center space-x-2">
                 <div className="w-3 h-3 bg-indigo-500 rounded-full"></div>
-                <span className="text-gray-600">Earnings</span>
+                <span className="text-gray-600">
+                  {t("instructor.earnings.earnings")}
+                </span>
               </div>
             </div>
           </div>

@@ -204,14 +204,14 @@ const InstructorCourses = () => {
     const courseTitle = course?.title || "this course";
 
     const result = await Swal.fire({
-      title: "Delete Course",
-      html: `Are you sure you want to delete <strong>"${courseTitle}"</strong>?<br><br>This action cannot be undone and will remove all associated lessons, sections, and student progress.`,
+      title: t("instructor.courses.deleteCourse"),
+      html: t("instructor.courses.deleteConfirmation", { courseTitle }),
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#EF4444",
       cancelButtonColor: "#6B7280",
-      confirmButtonText: "Yes, Delete",
-      cancelButtonText: "Cancel",
+      confirmButtonText: t("instructor.courses.yesDelete"),
+      cancelButtonText: t("common.cancel"),
     });
 
     if (result.isConfirmed) {
@@ -243,14 +243,18 @@ const InstructorCourses = () => {
     if (selectedCourses.length === 0) return;
 
     const result = await Swal.fire({
-      title: "Delete Selected Courses",
-      html: `Are you sure you want to delete <strong>${selectedCourses.length} selected course(s)</strong>?<br><br>This action cannot be undone.`,
+      title: t("instructor.courses.deleteSelectedCourses"),
+      html: t("instructor.courses.bulkDeleteConfirmation", {
+        count: selectedCourses.length,
+      }),
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#EF4444",
       cancelButtonColor: "#6B7280",
-      confirmButtonText: `Yes, Delete ${selectedCourses.length} Course(s)`,
-      cancelButtonText: "Cancel",
+      confirmButtonText: t("instructor.courses.yesDeleteCourses", {
+        count: selectedCourses.length,
+      }),
+      cancelButtonText: t("common.cancel"),
     });
 
     if (result.isConfirmed) {
@@ -279,9 +283,9 @@ const InstructorCourses = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl font-semibold text-gray-900">
-            Error loading courses
+            {t("instructor.courses.errorLoadingCourses")}
           </h2>
-          <p className="text-gray-600 mt-2">Please try again later</p>
+          <p className="text-gray-600 mt-2">{t("common.retry")}</p>
         </div>
       </div>
     );

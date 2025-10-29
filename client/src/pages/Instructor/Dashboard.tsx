@@ -87,31 +87,31 @@ const InstructorDashboard = () => {
   const quickActions = [
     {
       icon: FaPlus,
-      title: "Create New Course",
-      description: "Start building your next course",
+      title: t("instructor.dashboard.createNewCourse"),
+      description: t("instructor.dashboard.startBuildingCourse"),
       onClick: () => navigate("/instructor/courses/create"),
       color: "bg-gradient-to-r from-indigo-500 to-purple-600",
     },
     {
       icon: FaComment,
-      title: "Reply to Messages",
-      description: `${
-        messageStats?.data?.byStatus?.unread || 0
-      } unread messages`,
+      title: t("instructor.dashboard.replyToMessages"),
+      description: t("instructor.dashboard.unreadMessages", {
+        count: messageStats?.data?.byStatus?.unread || 0,
+      }),
       onClick: () => navigate("/instructor/messages"),
       color: "bg-gradient-to-r from-blue-500 to-cyan-600",
     },
     {
       icon: FaChartLine,
-      title: "View Analytics",
-      description: "Detailed performance insights",
+      title: t("instructor.dashboard.viewAnalytics"),
+      description: t("instructor.dashboard.performanceInsights"),
       onClick: () => navigate("/instructor/analytics"),
       color: "bg-gradient-to-r from-green-500 to-teal-600",
     },
     {
       icon: FaDollarSign,
-      title: "Check Earnings",
-      description: "Review your revenue and payouts",
+      title: t("instructor.dashboard.checkEarnings"),
+      description: t("instructor.dashboard.reviewRevenue"),
       onClick: () => navigate("/instructor/earnings"),
       color: "bg-gradient-to-r from-yellow-500 to-orange-600",
     },
@@ -126,9 +126,11 @@ const InstructorDashboard = () => {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            {t("instructor.dashboard.title")}
+          </h1>
           <p className="text-gray-600 mt-2">
-            Welcome back! Here's what's happening with your courses.
+            {t("instructor.dashboard.welcomeMessage")}
           </p>
         </motion.div>
 
@@ -141,9 +143,9 @@ const InstructorDashboard = () => {
         >
           <div className="flex space-x-2 bg-white rounded-xl p-2 border border-gray-200 w-fit">
             {[
-              { key: "7d", label: "Last 7 days" },
-              { key: "30d", label: "Last 30 days" },
-              { key: "90d", label: "Last 90 days" },
+              { key: "7d", label: t("instructor.dashboard.last7Days") },
+              { key: "30d", label: t("instructor.dashboard.last30Days") },
+              { key: "90d", label: t("instructor.dashboard.last90Days") },
             ].map(({ key, label }) => (
               <button
                 key={key}
@@ -164,40 +166,46 @@ const InstructorDashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatCard
             icon={FaDollarSign}
-            title="Total Revenue"
+            title={t("instructor.dashboard.totalRevenue")}
             value={formatCurrency(stats.totalRevenue)}
             change={revenueGrowth}
             changeType={revenueGrowth >= 0 ? "increase" : "decrease"}
-            subtitle={`${formatCurrency(stats.monthlyRevenue)} this month`}
+            subtitle={t("instructor.dashboard.thisMonth", {
+              amount: formatCurrency(stats.monthlyRevenue),
+            })}
             color="bg-gradient-to-r from-green-500 to-emerald-600"
             delay={0.1}
           />
 
           <StatCard
             icon={FaUsers}
-            title="Total Students"
+            title={t("instructor.dashboard.totalStudents")}
             value={stats.totalStudents.toLocaleString()}
             change={studentsGrowth}
             changeType={studentsGrowth >= 0 ? "increase" : "decrease"}
-            subtitle={`${stats.recentEnrollments} recent enrollments`}
+            subtitle={t("instructor.dashboard.recentEnrollments", {
+              count: stats.recentEnrollments,
+            })}
             color="bg-gradient-to-r from-blue-500 to-cyan-600"
             delay={0.2}
           />
 
           <StatCard
             icon={FaBook}
-            title="Published Courses"
+            title={t("instructor.dashboard.publishedCourses")}
             value={stats.totalCourses}
-            subtitle={`${stats.completions} completions`}
+            subtitle={t("instructor.dashboard.completions", {
+              count: stats.completions,
+            })}
             color="bg-gradient-to-r from-indigo-500 to-purple-600"
             delay={0.3}
           />
 
           <StatCard
             icon={FaStar}
-            title="Average Rating"
+            title={t("instructor.dashboard.averageRating")}
             value={stats.averageRating.toFixed(1)}
-            subtitle="Based on student reviews"
+            subtitle={t("instructor.dashboard.basedOnReviews")}
             color="bg-gradient-to-r from-yellow-500 to-orange-600"
             delay={0.4}
           />
@@ -216,7 +224,9 @@ const InstructorDashboard = () => {
                 <FaEye className="text-blue-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900">Course Views</h3>
+                <h3 className="font-semibold text-gray-900">
+                  {t("instructor.dashboard.courseViews")}
+                </h3>
                 <p className="text-2xl font-bold text-gray-900">
                   {performance.views.toLocaleString()}
                 </p>
@@ -230,7 +240,9 @@ const InstructorDashboard = () => {
                 <FaGraduationCap className="text-green-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900">Enrollments</h3>
+                <h3 className="font-semibold text-gray-900">
+                  {t("instructor.dashboard.enrollments")}
+                </h3>
                 <p className="text-2xl font-bold text-gray-900">
                   {stats.recentEnrollments.toLocaleString()}
                 </p>
@@ -244,7 +256,9 @@ const InstructorDashboard = () => {
                 <FaClock className="text-purple-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900">Watch Time</h3>
+                <h3 className="font-semibold text-gray-900">
+                  {t("instructor.dashboard.watchTime")}
+                </h3>
                 <p className="text-2xl font-bold text-gray-900">
                   {performance.watchTime}h
                 </p>
@@ -258,7 +272,9 @@ const InstructorDashboard = () => {
                 <FaChartLine className="text-orange-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900">Conversion</h3>
+                <h3 className="font-semibold text-gray-900">
+                  {t("instructor.dashboard.conversion")}
+                </h3>
                 <p className="text-2xl font-bold text-gray-900">
                   {performance.conversionRate}%
                 </p>
@@ -278,7 +294,7 @@ const InstructorDashboard = () => {
           >
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-6">
-                Quick Actions
+                {t("instructor.dashboard.quickActions")}
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {quickActions.map((action) => (

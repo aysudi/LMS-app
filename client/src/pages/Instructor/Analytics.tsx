@@ -94,10 +94,18 @@ const InstructorAnalytics = () => {
   }));
 
   const trafficSourceData = [
-    { name: "Organic Search", value: 45, color: "#3B82F6" },
-    { name: "Social Media", value: 28, color: "#10B981" },
-    { name: "Direct", value: 15, color: "#F59E0B" },
-    { name: "Referrals", value: 12, color: "#EF4444" },
+    {
+      name: t("instructor.analytics.organicSearch"),
+      value: 45,
+      color: "#3B82F6",
+    },
+    {
+      name: t("instructor.analytics.socialMedia"),
+      value: 28,
+      color: "#10B981",
+    },
+    { name: t("instructor.analytics.direct"), value: 15, color: "#F59E0B" },
+    { name: t("instructor.analytics.referrals"), value: 12, color: "#EF4444" },
   ];
 
   const handleExportReport = () => {
@@ -215,12 +223,14 @@ const InstructorAnalytics = () => {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">
-                Completion Rate
+                {t("instructor.analytics.completionRate")}
               </h3>
               <FaTrophy className="text-2xl text-yellow-500" />
             </div>
             <div className="text-3xl font-bold text-gray-900 mb-2">78.5%</div>
-            <p className="text-sm text-gray-600">Average across all courses</p>
+            <p className="text-sm text-gray-600">
+              {t("instructor.analytics.averageAcrossAllCourses")}
+            </p>
             <div className="mt-4 bg-gray-200 rounded-full h-2">
               <div
                 className="bg-green-500 h-2 rounded-full"
@@ -232,30 +242,38 @@ const InstructorAnalytics = () => {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">
-                Avg. Watch Time
+                {t("instructor.analytics.avgWatchTime")}
               </h3>
               <FaClock className="text-2xl text-blue-500" />
             </div>
             <div className="text-3xl font-bold text-gray-900 mb-2">24.3m</div>
-            <p className="text-sm text-gray-600">Per student session</p>
+            <p className="text-sm text-gray-600">
+              {t("instructor.analytics.perStudentSession")}
+            </p>
             <div className="flex items-center mt-4 text-sm">
               <span className="text-green-600 font-medium">+12.4%</span>
-              <span className="text-gray-600 ml-2">vs last month</span>
+              <span className="text-gray-600 ml-2">
+                {t("instructor.analytics.vsLastMonth")}
+              </span>
             </div>
           </div>
 
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">
-                Certificates Issued
+                {t("instructor.analytics.certificatesIssued")}
               </h3>
               <FaGraduationCap className="text-2xl text-purple-500" />
             </div>
             <div className="text-3xl font-bold text-gray-900 mb-2">342</div>
-            <p className="text-sm text-gray-600">This month</p>
+            <p className="text-sm text-gray-600">
+              {t("instructor.analytics.thisMonth")}
+            </p>
             <div className="flex items-center mt-4 text-sm">
               <span className="text-green-600 font-medium">+18.2%</span>
-              <span className="text-gray-600 ml-2">vs last month</span>
+              <span className="text-gray-600 ml-2">
+                {t("instructor.analytics.vsLastMonth")}
+              </span>
             </div>
           </div>
         </motion.div>
