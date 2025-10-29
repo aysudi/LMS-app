@@ -51,7 +51,7 @@ const CartStats: React.FC<CartStatsProps> = ({ courses }) => {
     {
       icon: FaClock,
       label: t("cart.totalDuration"),
-      value: formatDuration(totalDuration * 60), // Convert minutes to seconds for formatDuration
+      value: formatDuration(totalDuration * 60),
       color: "from-green-500 to-emerald-500",
       bgColor: "bg-green-50",
       textColor: "text-green-600",

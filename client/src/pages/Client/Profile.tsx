@@ -41,7 +41,6 @@ const Profile: React.FC = () => {
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Profile form state
   const [profileForm, setProfileForm] = useState({
     firstName: user?.firstName || "",
     lastName: user?.lastName || "",
@@ -49,7 +48,6 @@ const Profile: React.FC = () => {
     bio: user?.bio || "",
   });
 
-  // Update form when user data changes
   React.useEffect(() => {
     if (user) {
       setProfileForm({
@@ -61,7 +59,6 @@ const Profile: React.FC = () => {
     }
   }, [user]);
 
-  // Password form state
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: "",
     newPassword: "",
