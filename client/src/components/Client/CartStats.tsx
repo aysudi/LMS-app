@@ -7,12 +7,15 @@ import {
   FaChartLine,
 } from "react-icons/fa";
 import type { Course } from "../../types/course.type";
+// @ts-ignore
+import { useTranslation } from "react-i18next";
 
 interface CartStatsProps {
   courses: Course[];
 }
 
 const CartStats: React.FC<CartStatsProps> = ({ courses }) => {
+  const { t } = useTranslation();
   const totalCourses = courses.length;
   const totalDuration = courses.reduce(
     (sum, course) => sum + (course.totalDuration || 0),
@@ -39,7 +42,7 @@ const CartStats: React.FC<CartStatsProps> = ({ courses }) => {
   const stats = [
     {
       icon: FaGraduationCap,
-      label: "Courses",
+      label: t("common.courses"),
       value: totalCourses,
       color: "from-blue-500 to-cyan-500",
       bgColor: "bg-blue-50",
@@ -47,7 +50,7 @@ const CartStats: React.FC<CartStatsProps> = ({ courses }) => {
     },
     {
       icon: FaClock,
-      label: "Total Duration",
+      label: t("cart.totalDuration"),
       value: formatDuration(totalDuration * 60), // Convert minutes to seconds for formatDuration
       color: "from-green-500 to-emerald-500",
       bgColor: "bg-green-50",
@@ -55,7 +58,7 @@ const CartStats: React.FC<CartStatsProps> = ({ courses }) => {
     },
     {
       icon: FaUsers,
-      label: "Lessons",
+      label: t("common.lessons"),
       value: totalLessons,
       color: "from-purple-500 to-pink-500",
       bgColor: "bg-purple-50",
@@ -63,7 +66,7 @@ const CartStats: React.FC<CartStatsProps> = ({ courses }) => {
     },
     {
       icon: FaStar,
-      label: "Avg Rating",
+      label: t("cart.avgRating"),
       value: averageRating.toFixed(1),
       color: "from-yellow-500 to-orange-500",
       bgColor: "bg-yellow-50",
@@ -82,7 +85,7 @@ const CartStats: React.FC<CartStatsProps> = ({ courses }) => {
       <div className="flex items-center space-x-2 mb-4">
         <FaChartLine className="text-lg text-blue-600" />
         <h3 className="text-lg font-semibold text-gray-800">
-          Learning Overview
+          {t("cart.learningOverview")}
         </h3>
       </div>
 
@@ -117,11 +120,10 @@ const CartStats: React.FC<CartStatsProps> = ({ courses }) => {
 
       <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100">
         <p className="text-sm text-gray-700 text-center">
-          🎯 You're about to join{" "}
-          <span className="font-semibold text-blue-600">
-            {totalStudents.toLocaleString()}
-          </span>{" "}
-          students in these amazing courses!
+          🎯{" "}
+          {t("cart.aboutToJoinStudents", {
+            count: totalStudents.toLocaleString(),
+          })}
         </p>
       </div>
     </motion.div>

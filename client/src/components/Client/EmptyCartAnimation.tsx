@@ -1,46 +1,35 @@
 import { motion } from "framer-motion";
-import { FaShoppingCart, FaHeart, FaSearch, FaStar } from "react-icons/fa";
+import {
+  FaShoppingBag,
+  FaGraduationCap,
+  FaBook,
+  FaLightbulb,
+} from "react-icons/fa";
 
 const EmptyCartAnimation = () => {
   return (
-    <div className="relative">
-      {/* Floating Elements Background */}
+    <div className="relative py-12">
+      {/* Subtle floating elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
           animate={{
-            y: [0, -20, 0],
-            rotate: [0, 5, -5, 0],
+            y: [0, -12, 0],
+            opacity: [0.3, 0.6, 0.3],
           }}
           transition={{
-            duration: 4,
+            duration: 6,
             repeat: Infinity,
             ease: "easeInOut",
           }}
-          className="absolute top-10 left-10 text-blue-200"
+          className="absolute top-8 left-1/4 text-slate-300"
         >
-          <FaSearch className="text-3xl" />
+          <FaBook className="text-lg" />
         </motion.div>
 
         <motion.div
           animate={{
-            y: [0, -15, 0],
-            rotate: [0, -3, 3, 0],
-          }}
-          transition={{
-            duration: 3.5,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 1,
-          }}
-          className="absolute top-20 right-20 text-purple-200"
-        >
-          <FaStar className="text-2xl" />
-        </motion.div>
-
-        <motion.div
-          animate={{
-            y: [0, -25, 0],
-            rotate: [0, 8, -8, 0],
+            y: [0, -8, 0],
+            opacity: [0.4, 0.7, 0.4],
           }}
           transition={{
             duration: 5,
@@ -48,92 +37,106 @@ const EmptyCartAnimation = () => {
             ease: "easeInOut",
             delay: 2,
           }}
-          className="absolute bottom-20 left-20 text-pink-200"
+          className="absolute top-16 right-1/4 text-slate-300"
         >
-          <FaHeart className="text-2xl" />
+          <FaGraduationCap className="text-xl" />
         </motion.div>
 
         <motion.div
           animate={{
-            y: [0, -18, 0],
-            rotate: [0, -5, 5, 0],
+            y: [0, -10, 0],
+            opacity: [0.2, 0.5, 0.2],
           }}
           transition={{
-            duration: 4.5,
+            duration: 7,
             repeat: Infinity,
             ease: "easeInOut",
-            delay: 0.5,
+            delay: 4,
           }}
-          className="absolute bottom-10 right-10 text-indigo-200"
+          className="absolute bottom-20 left-1/3 text-slate-300"
         >
-          <FaShoppingCart className="text-2xl" />
+          <FaLightbulb className="text-lg" />
         </motion.div>
       </div>
 
-      {/* Main Cart Icon */}
+      {/* Main illustration */}
       <motion.div
-        initial={{ scale: 0, opacity: 0 }}
+        initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{
           type: "spring",
-          stiffness: 260,
-          damping: 20,
-          delay: 0.2,
+          stiffness: 100,
+          damping: 15,
+          delay: 0.1,
         }}
         className="relative"
       >
-        <div className="w-32 h-32 mx-auto mb-6 bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 rounded-full flex items-center justify-center relative overflow-hidden">
-          {/* Animated background gradient */}
+        {/* Background circle with subtle gradient */}
+        <div className="w-48 h-48 mx-auto mb-8 relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-50 to-slate-100 rounded-full shadow-inner"></div>
+
+          {/* Subtle ring animation */}
           <motion.div
             animate={{
-              background: [
-                "linear-gradient(45deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1))",
-                "linear-gradient(90deg, rgba(147, 51, 234, 0.1), rgba(236, 72, 153, 0.1))",
-                "linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(59, 130, 246, 0.1))",
-                "linear-gradient(45deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1))",
-              ],
+              scale: [1, 1.05, 1],
+              opacity: [0.4, 0.6, 0.4],
             }}
             transition={{
-              duration: 6,
+              duration: 4,
               repeat: Infinity,
-              ease: "linear",
+              ease: "easeInOut",
             }}
-            className="absolute inset-0"
+            className="absolute inset-4 border-2 border-slate-200 rounded-full"
           />
 
-          {/* Cart Icon */}
+          {/* Central shopping bag icon */}
           <motion.div
             animate={{
-              scale: [1, 1.1, 1],
-              rotate: [0, 5, -5, 0],
+              y: [0, -6, 0],
             }}
             transition={{
               duration: 3,
               repeat: Infinity,
               ease: "easeInOut",
             }}
+            className="absolute inset-0 flex items-center justify-center"
           >
-            <FaShoppingCart className="text-5xl text-gray-400" />
+            <div className="relative">
+              <FaShoppingBag className="text-6xl text-slate-400" />
+
+              {/* Subtle glow effect */}
+              <motion.div
+                animate={{
+                  opacity: [0, 0.3, 0],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+                className="absolute inset-0 bg-blue-500 rounded-full blur-xl scale-150 -z-10"
+              />
+            </div>
           </motion.div>
         </div>
       </motion.div>
 
-      {/* Pulsing dots */}
-      <div className="flex justify-center space-x-2 mt-8">
+      {/* Elegant indicator dots */}
+      <div className="flex justify-center space-x-3 mt-6">
         {[0, 1, 2].map((index) => (
           <motion.div
             key={index}
             animate={{
-              scale: [1, 1.5, 1],
-              opacity: [0.5, 1, 0.5],
+              scale: [1, 1.2, 1],
+              opacity: [0.4, 0.8, 0.4],
             }}
             transition={{
-              duration: 1.5,
+              duration: 2,
               repeat: Infinity,
               ease: "easeInOut",
-              delay: index * 0.2,
+              delay: index * 0.3,
             }}
-            className="w-3 h-3 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full"
+            className="w-2 h-2 bg-slate-300 rounded-full"
           />
         ))}
       </div>

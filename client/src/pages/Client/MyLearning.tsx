@@ -94,7 +94,9 @@ const MyLearning = () => {
                   <FaCertificate className="text-green-600 text-xl" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Completed</p>
+                  <p className="text-sm text-gray-600">
+                    {t("student.completed")}
+                  </p>
                   <p className="text-2xl font-bold text-gray-800">
                     {stats.totalCompletedCourses}
                   </p>
@@ -108,7 +110,9 @@ const MyLearning = () => {
                   <FaPlay className="text-orange-600 text-xl" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">In Progress</p>
+                  <p className="text-sm text-gray-600">
+                    {t("student.inProgress")}
+                  </p>
                   <p className="text-2xl font-bold text-gray-800">
                     {stats.totalInProgressCourses}
                   </p>
@@ -122,7 +126,9 @@ const MyLearning = () => {
                   <FaClock className="text-purple-600 text-xl" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Watch Time</p>
+                  <p className="text-sm text-gray-600">
+                    {t("student.watchTime")}
+                  </p>
                   <p className="text-2xl font-bold text-gray-800">
                     {Math.round(stats.totalWatchTime / 3600)}h{" "}
                     {Math.round((stats.totalWatchTime % 3600) / 60)}m
@@ -142,7 +148,7 @@ const MyLearning = () => {
           >
             <div className="flex items-center space-x-3 text-gray-600">
               <FaSpinner className="animate-spin text-2xl" />
-              <span className="text-lg">Loading your courses...</span>
+              <span className="text-lg">{t("student.loadingCourses")}</span>
             </div>
           </motion.div>
         ) : enrollmentsError ? (
@@ -157,17 +163,16 @@ const MyLearning = () => {
                 <FaBook className="text-4xl text-red-400" />
               </div>
               <h2 className="text-2xl font-bold text-gray-800 mb-4">
-                Failed to Load Courses
+                {t("student.failedToLoadCourses")}
               </h2>
               <p className="text-gray-600 mb-8">
-                We couldn't load your enrolled courses. Please try refreshing
-                the page.
+                {t("student.couldntLoadCourses")}
               </p>
               <button
                 onClick={() => window.location.reload()}
                 className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300"
               >
-                Refresh Page
+                {t("common.refreshPage")}
               </button>
             </div>
           </motion.div>
@@ -183,17 +188,16 @@ const MyLearning = () => {
                 <FaBook className="text-4xl text-gray-400" />
               </div>
               <h2 className="text-2xl font-bold text-gray-800 mb-4">
-                Start Your Learning Journey
+                {t("student.startLearningJourney")}
               </h2>
               <p className="text-gray-600 mb-8">
-                You haven't enrolled in any courses yet. Discover amazing
-                courses to get started!
+                {t("student.notEnrolledYet")}
               </p>
               <button
                 onClick={() => navigate("/courses")}
                 className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg"
               >
-                Browse Courses
+                {t("student.browseCourses")}
               </button>
             </div>
           </motion.div>
@@ -247,7 +251,7 @@ const MyLearning = () => {
                       {enrollment.course.title}
                     </h3>
                     <p className="text-sm text-gray-600 mt-1">
-                      By {enrollment.course.instructor?.firstName}{" "}
+                      {t("course.by")} {enrollment.course.instructor?.firstName}{" "}
                       {enrollment.course.instructor?.lastName}
                     </p>
                   </div>
@@ -259,7 +263,8 @@ const MyLearning = () => {
                         <FaBook className="text-xs text-blue-500" />
                         <span>
                           {enrollment.completedLessons.length}/
-                          {enrollment.course.totalLessons || 0} lessons
+                          {enrollment.course.totalLessons || 0}{" "}
+                          {t("course.lessons")}
                         </span>
                       </div>
                       <div className="flex items-center space-x-1">
@@ -274,12 +279,12 @@ const MyLearning = () => {
                     <div className="flex items-center space-x-1 text-sm text-gray-500">
                       <FaClock className="text-xs" />
                       <span>
-                        Last accessed:{" "}
+                        {t("student.lastAccessed")}{" "}
                         {enrollment.lastAccessedAt
                           ? new Date(
                               enrollment.lastAccessedAt
                             ).toLocaleDateString()
-                          : "Never"}
+                          : t("student.never")}
                       </span>
                     </div>
                   </div>
@@ -293,7 +298,7 @@ const MyLearning = () => {
                     className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center space-x-2 cursor-pointer"
                   >
                     <FaPlay className="text-sm" />
-                    <span>Continue Learning</span>
+                    <span>{t("student.continueLearning")}</span>
                     <FaArrowRight className="text-sm" />
                   </button>
 
@@ -303,8 +308,8 @@ const MyLearning = () => {
                       <FaCertificate />
                       <span>
                         {enrollment.certificateIssued
-                          ? "Certificate Available"
-                          : "Certificate Pending"}
+                          ? t("student.certificateAvailable")
+                          : t("student.certificatePending")}
                       </span>
                     </div>
                   )}
