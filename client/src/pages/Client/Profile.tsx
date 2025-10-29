@@ -65,12 +65,10 @@ const Profile: React.FC = () => {
     confirmPassword: "",
   });
 
-  // Profile management hooks
   const updateProfileMutation = useUpdateProfile();
   const changePasswordMutation = useChangePassword();
   const updateAvatarMutation = useUpdateAvatar();
 
-  // Enrollment and stats hooks
   const { data: enrollmentsData } = useUserEnrollments({
     status: "all",
     sortBy: "lastAccessedAt",
@@ -84,13 +82,11 @@ const Profile: React.FC = () => {
   const stats = statsData?.data;
   const analytics = analyticsData?.data;
 
-  // Create dynamic achievements based on user data
   const achievements = React.useMemo(() => {
     if (!stats || !analytics) return [];
 
     const userAchievements = [];
 
-    // Course completion achievements
     if (stats.totalCompletedCourses >= 1) {
       userAchievements.push({
         name: t("profile.achievements.firstSteps"),
@@ -126,7 +122,6 @@ const Profile: React.FC = () => {
       });
     }
 
-    // Learning streak achievements
     if (analytics.learningStreak >= 3) {
       userAchievements.push({
         name: t("profile.achievements.consistentLearner"),
@@ -166,7 +161,6 @@ const Profile: React.FC = () => {
       });
     }
 
-    // Watch time achievements
     const totalHours = Math.floor(analytics.totalWatchTime / 3600);
     if (totalHours >= 10) {
       userAchievements.push({
@@ -201,7 +195,6 @@ const Profile: React.FC = () => {
       });
     }
 
-    // Certificate achievements
     if (stats.certificatesEarned >= 1) {
       userAchievements.push({
         name: t("profile.achievements.certified"),
@@ -228,7 +221,6 @@ const Profile: React.FC = () => {
       });
     }
 
-    // Lessons completion achievements
     if (analytics.totalLessonsCompleted >= 50) {
       userAchievements.push({
         name: t("profile.achievements.lessonMaster"),
@@ -261,14 +253,12 @@ const Profile: React.FC = () => {
     });
   }, [stats, analytics]);
 
-  // Calculate next achievement progress
   const nextAchievement = React.useMemo(() => {
     if (!stats || !analytics) return null;
 
     const currentCourses = stats.totalCompletedCourses;
     const currentStreak = analytics.learningStreak;
 
-    // Course completion milestones
     if (currentCourses < 1) {
       return {
         name: t("profile.achievements.firstSteps"),
@@ -307,7 +297,6 @@ const Profile: React.FC = () => {
       };
     }
 
-    // Streak milestones if courses are maxed
     if (currentStreak < 7) {
       return {
         name: t("profile.achievements.weekWarrior"),
@@ -331,7 +320,6 @@ const Profile: React.FC = () => {
     return null;
   }, [stats, analytics]);
 
-  // Calculate user rank based on achievements and progress
   const userRank = React.useMemo(() => {
     if (!stats || !analytics) return t("profile.ranks.newLearner");
 
@@ -355,7 +343,6 @@ const Profile: React.FC = () => {
     return t("profile.ranks.newLearner");
   }, [stats, analytics, t]);
 
-  // Handle profile form changes
   const handleProfileChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -365,7 +352,6 @@ const Profile: React.FC = () => {
     }));
   };
 
-  // Handle password form changes
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPasswordForm((prev) => ({
       ...prev,
@@ -373,14 +359,12 @@ const Profile: React.FC = () => {
     }));
   };
 
-  // Handle profile update
   const handleUpdateProfile = (e: React.FormEvent) => {
     e.preventDefault();
     updateProfileMutation.mutate(profileForm);
     setIsEditing(false);
   };
 
-  // Handle password change
   const handleChangePassword = (e: React.FormEvent) => {
     e.preventDefault();
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
@@ -399,18 +383,15 @@ const Profile: React.FC = () => {
     });
   };
 
-  // Handle avatar upload
   const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith("image/")) {
       toast.error(t("profile.errors.invalidImageFile"));
       return;
     }
 
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.error(t("profile.errors.imageTooLarge"));
       return;
