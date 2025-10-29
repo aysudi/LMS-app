@@ -135,7 +135,6 @@ const Cart = () => {
   };
 
   const handleApplyPromo = () => {
-    // Simple promo code logic - you can enhance this
     const promoCodes: Record<string, number> = {
       SAVE10: 10,
       WELCOME20: 20,
