@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+// @ts-ignore
+import { useTranslation } from "react-i18next";
 import {
   FaSearch,
   FaEnvelope,
@@ -20,6 +22,7 @@ import Loading from "../../components/Common/Loading";
 type MessageStatus = "all" | "unread" | "read" | "resolved";
 
 const InstructorMessages = () => {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<MessageStatus>("all");
   const [selectedMessage, setSelectedMessage] = useState<string | null>(null);
@@ -75,9 +78,9 @@ const InstructorMessages = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl font-semibold text-gray-900">
-            Error loading messages
+            {t("instructor.messages.errorLoadingMessages")}
           </h2>
-          <p className="text-gray-600 mt-2">Please try again later</p>
+          <p className="text-gray-600 mt-2">{t("common.retry")}</p>
         </div>
       </div>
     );
@@ -93,9 +96,11 @@ const InstructorMessages = () => {
           className="flex items-center justify-between mb-8"
         >
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Messages</h1>
+            <h1 className="text-3xl font-bold text-gray-900">
+              {t("navigation.messages")}
+            </h1>
             <p className="text-gray-600 mt-2">
-              Communicate with your students and manage inquiries
+              {t("instructor.messages.description")}
             </p>
           </div>
         </motion.div>
