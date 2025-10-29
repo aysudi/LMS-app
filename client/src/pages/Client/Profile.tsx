@@ -30,9 +30,12 @@ import {
 import { useLearningAnalytics } from "../../hooks/useUserProgress";
 import { toast } from "react-hot-toast";
 import { formatDistanceToNow } from "date-fns";
+// @ts-ignore
+import { useTranslation } from "react-i18next";
 
 const Profile: React.FC = () => {
   const { user } = useAuthContext();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("overview");
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -93,33 +96,35 @@ const Profile: React.FC = () => {
     // Course completion achievements
     if (stats.totalCompletedCourses >= 1) {
       userAchievements.push({
-        name: "First Steps",
-        description: "Complete your first course",
+        name: t("profile.achievements.firstSteps"),
+        description: t("profile.achievements.firstStepsDesc"),
         icon: "🎯",
         rarity: "bronze" as const,
-        earned: "Course completed",
+        earned: t("profile.achievements.courseCompleted"),
         unlocked: true,
       });
     }
 
     if (stats.totalCompletedCourses >= 5) {
       userAchievements.push({
-        name: "Learning Enthusiast",
-        description: "Complete 5 courses",
+        name: t("profile.achievements.learningEnthusiast"),
+        description: t("profile.achievements.learningEnthusiastDesc"),
         icon: "📚",
         rarity: "silver" as const,
-        earned: "5 courses completed",
+        earned: t("profile.achievements.coursesCompleted", { count: 5 }),
         unlocked: true,
       });
     }
 
     if (stats.totalCompletedCourses >= 10) {
       userAchievements.push({
-        name: "Course Master",
-        description: "Complete 10+ courses",
+        name: t("profile.achievements.courseMaster"),
+        description: t("profile.achievements.courseMasterDesc"),
         icon: "🏆",
         rarity: "gold" as const,
-        earned: `${stats.totalCompletedCourses} courses completed`,
+        earned: t("profile.achievements.coursesCompleted", {
+          count: stats.totalCompletedCourses,
+        }),
         unlocked: true,
       });
     }
@@ -127,33 +132,39 @@ const Profile: React.FC = () => {
     // Learning streak achievements
     if (analytics.learningStreak >= 3) {
       userAchievements.push({
-        name: "Consistent Learner",
-        description: "3-day learning streak",
+        name: t("profile.achievements.consistentLearner"),
+        description: t("profile.achievements.consistentLearnerDesc"),
         icon: "🔥",
         rarity: "bronze" as const,
-        earned: `${analytics.learningStreak} days streak`,
+        earned: t("profile.achievements.daysStreak", {
+          count: analytics.learningStreak,
+        }),
         unlocked: true,
       });
     }
 
     if (analytics.learningStreak >= 7) {
       userAchievements.push({
-        name: "Week Warrior",
-        description: "7-day learning streak",
+        name: t("profile.achievements.weekWarrior"),
+        description: t("profile.achievements.weekWarriorDesc"),
         icon: "⚡",
         rarity: "silver" as const,
-        earned: `${analytics.learningStreak} days streak`,
+        earned: t("profile.achievements.daysStreak", {
+          count: analytics.learningStreak,
+        }),
         unlocked: true,
       });
     }
 
     if (analytics.learningStreak >= 30) {
       userAchievements.push({
-        name: "Monthly Master",
-        description: "30-day learning streak",
+        name: t("profile.achievements.monthlyMaster"),
+        description: t("profile.achievements.monthlyMasterDesc"),
         icon: "👑",
         rarity: "gold" as const,
-        earned: `${analytics.learningStreak} days streak`,
+        earned: t("profile.achievements.daysStreak", {
+          count: analytics.learningStreak,
+        }),
         unlocked: true,
       });
     }
@@ -162,33 +173,33 @@ const Profile: React.FC = () => {
     const totalHours = Math.floor(analytics.totalWatchTime / 3600);
     if (totalHours >= 10) {
       userAchievements.push({
-        name: "Dedicated Student",
-        description: "10+ hours of learning",
+        name: t("profile.achievements.dedicatedStudent"),
+        description: t("profile.achievements.dedicatedStudentDesc"),
         icon: "⏱️",
         rarity: "bronze" as const,
-        earned: `${totalHours} hours watched`,
+        earned: t("profile.achievements.hoursWatched", { count: totalHours }),
         unlocked: true,
       });
     }
 
     if (totalHours >= 50) {
       userAchievements.push({
-        name: "Time Investor",
-        description: "50+ hours of learning",
+        name: t("profile.achievements.timeInvestor"),
+        description: t("profile.achievements.timeInvestorDesc"),
         icon: "⏰",
         rarity: "silver" as const,
-        earned: `${totalHours} hours watched`,
+        earned: t("profile.achievements.hoursWatched", { count: totalHours }),
         unlocked: true,
       });
     }
 
     if (totalHours >= 100) {
       userAchievements.push({
-        name: "Learning Machine",
-        description: "100+ hours of learning",
+        name: t("profile.achievements.learningMachine"),
+        description: t("profile.achievements.learningMachineDesc"),
         icon: "🤖",
         rarity: "gold" as const,
-        earned: `${totalHours} hours watched`,
+        earned: t("profile.achievements.hoursWatched", { count: totalHours }),
         unlocked: true,
       });
     }
@@ -196,22 +207,26 @@ const Profile: React.FC = () => {
     // Certificate achievements
     if (stats.certificatesEarned >= 1) {
       userAchievements.push({
-        name: "Certified",
-        description: "Earn your first certificate",
+        name: t("profile.achievements.certified"),
+        description: t("profile.achievements.certifiedDesc"),
         icon: "📜",
         rarity: "silver" as const,
-        earned: `${stats.certificatesEarned} certificates earned`,
+        earned: t("profile.achievements.certificatesEarned", {
+          count: stats.certificatesEarned,
+        }),
         unlocked: true,
       });
     }
 
     if (stats.certificatesEarned >= 5) {
       userAchievements.push({
-        name: "Certificate Collector",
-        description: "Earn 5 certificates",
+        name: t("profile.achievements.certificateCollector"),
+        description: t("profile.achievements.certificateCollectorDesc"),
         icon: "🏅",
         rarity: "gold" as const,
-        earned: `${stats.certificatesEarned} certificates earned`,
+        earned: t("profile.achievements.certificatesEarned", {
+          count: stats.certificatesEarned,
+        }),
         unlocked: true,
       });
     }
@@ -219,22 +234,26 @@ const Profile: React.FC = () => {
     // Lessons completion achievements
     if (analytics.totalLessonsCompleted >= 50) {
       userAchievements.push({
-        name: "Lesson Master",
-        description: "Complete 50+ lessons",
+        name: t("profile.achievements.lessonMaster"),
+        description: t("profile.achievements.lessonMasterDesc"),
         icon: "🎓",
         rarity: "silver" as const,
-        earned: `${analytics.totalLessonsCompleted} lessons completed`,
+        earned: t("profile.achievements.lessonsCompleted", {
+          count: analytics.totalLessonsCompleted,
+        }),
         unlocked: true,
       });
     }
 
     if (analytics.totalLessonsCompleted >= 100) {
       userAchievements.push({
-        name: "Knowledge Seeker",
-        description: "Complete 100+ lessons",
+        name: t("profile.achievements.knowledgeSeeker"),
+        description: t("profile.achievements.knowledgeSeekerDesc"),
         icon: "🧠",
         rarity: "gold" as const,
-        earned: `${analytics.totalLessonsCompleted} lessons completed`,
+        earned: t("profile.achievements.lessonsCompleted", {
+          count: analytics.totalLessonsCompleted,
+        }),
         unlocked: true,
       });
     }
@@ -255,8 +274,8 @@ const Profile: React.FC = () => {
     // Course completion milestones
     if (currentCourses < 1) {
       return {
-        name: "First Steps",
-        description: "Complete your first course",
+        name: t("profile.achievements.firstSteps"),
+        description: t("profile.achievements.firstStepsDesc"),
         icon: "🎯",
         progress: 0,
         target: 1,
@@ -264,8 +283,8 @@ const Profile: React.FC = () => {
       };
     } else if (currentCourses < 5) {
       return {
-        name: "Learning Enthusiast",
-        description: "Complete 5 courses",
+        name: t("profile.achievements.learningEnthusiast"),
+        description: t("profile.achievements.learningEnthusiastDesc"),
         icon: "📚",
         progress: currentCourses,
         target: 5,
@@ -273,8 +292,8 @@ const Profile: React.FC = () => {
       };
     } else if (currentCourses < 10) {
       return {
-        name: "Course Master",
-        description: "Complete 10 courses",
+        name: t("profile.achievements.courseMaster"),
+        description: t("profile.achievements.courseMasterDesc"),
         icon: "🏆",
         progress: currentCourses,
         target: 10,
@@ -282,8 +301,8 @@ const Profile: React.FC = () => {
       };
     } else if (currentCourses < 20) {
       return {
-        name: "Marathon Learner",
-        description: "Complete 20 courses",
+        name: t("profile.achievements.marathonLearner"),
+        description: t("profile.achievements.marathonLearnerDesc"),
         icon: "🏃",
         progress: currentCourses,
         target: 20,
@@ -294,8 +313,8 @@ const Profile: React.FC = () => {
     // Streak milestones if courses are maxed
     if (currentStreak < 7) {
       return {
-        name: "Week Warrior",
-        description: "Achieve 7-day learning streak",
+        name: t("profile.achievements.weekWarrior"),
+        description: t("profile.achievements.weekWarriorGoal"),
         icon: "⚡",
         progress: currentStreak,
         target: 7,
@@ -303,8 +322,8 @@ const Profile: React.FC = () => {
       };
     } else if (currentStreak < 30) {
       return {
-        name: "Monthly Master",
-        description: "Achieve 30-day learning streak",
+        name: t("profile.achievements.monthlyMaster"),
+        description: t("profile.achievements.monthlyMasterGoal"),
         icon: "👑",
         progress: currentStreak,
         target: 30,
@@ -317,7 +336,7 @@ const Profile: React.FC = () => {
 
   // Calculate user rank based on achievements and progress
   const userRank = React.useMemo(() => {
-    if (!stats || !analytics) return "New Learner";
+    if (!stats || !analytics) return t("profile.ranks.newLearner");
 
     const totalCourses = stats.totalCompletedCourses;
     const streak = analytics.learningStreak;
@@ -325,19 +344,19 @@ const Profile: React.FC = () => {
     const totalHours = Math.floor(analytics.totalWatchTime / 3600);
 
     if (totalCourses >= 20 && streak >= 30 && certificates >= 10) {
-      return "Master Learner";
+      return t("profile.ranks.masterLearner");
     } else if (totalCourses >= 10 && (streak >= 14 || certificates >= 5)) {
-      return "Expert Learner";
+      return t("profile.ranks.expertLearner");
     } else if (totalCourses >= 5 && (streak >= 7 || certificates >= 2)) {
-      return "Advanced Learner";
+      return t("profile.ranks.advancedLearner");
     } else if (totalCourses >= 2 || streak >= 3 || totalHours >= 10) {
-      return "Active Learner";
+      return t("profile.ranks.activeLearner");
     } else if (totalCourses >= 1 || analytics.totalLessonsCompleted >= 10) {
-      return "Beginner Learner";
+      return t("profile.ranks.beginnerLearner");
     }
 
-    return "New Learner";
-  }, [stats, analytics]);
+    return t("profile.ranks.newLearner");
+  }, [stats, analytics, t]);
 
   // Handle profile form changes
   const handleProfileChange = (
@@ -368,7 +387,7 @@ const Profile: React.FC = () => {
   const handleChangePassword = (e: React.FormEvent) => {
     e.preventDefault();
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      toast.error("New passwords don't match");
+      toast.error(t("profile.errors.passwordsDontMatch"));
       return;
     }
     changePasswordMutation.mutate({
@@ -390,13 +409,13 @@ const Profile: React.FC = () => {
 
     // Validate file type
     if (!file.type.startsWith("image/")) {
-      toast.error("Please select a valid image file");
+      toast.error(t("profile.errors.invalidImageFile"));
       return;
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("Image size should be less than 5MB");
+      toast.error(t("profile.errors.imageTooLarge"));
       return;
     }
 
@@ -408,7 +427,7 @@ const Profile: React.FC = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading profile...</p>
+          <p className="text-gray-600">{t("profile.loadingProfile")}</p>
         </div>
       </div>
     );
@@ -541,7 +560,7 @@ const Profile: React.FC = () => {
                     {stats?.totalEnrolledCourses || 0}
                   </div>
                   <div className="text-gray-600 text-sm font-semibold uppercase tracking-wide">
-                    Courses
+                    {t("profile.stats.courses")}
                   </div>
                 </motion.div>
 
@@ -555,7 +574,7 @@ const Profile: React.FC = () => {
                     {stats?.averageProgress || 0}%
                   </div>
                   <div className="text-gray-600 text-sm font-semibold uppercase tracking-wide">
-                    Progress
+                    {t("profile.stats.progress")}
                   </div>
                 </motion.div>
 
@@ -569,7 +588,7 @@ const Profile: React.FC = () => {
                     {stats?.certificatesEarned || 0}
                   </div>
                   <div className="text-gray-600 text-sm font-semibold uppercase tracking-wide">
-                    Certificates
+                    {t("profile.stats.certificates")}
                   </div>
                 </motion.div>
 
@@ -583,7 +602,7 @@ const Profile: React.FC = () => {
                     {Math.floor((analytics?.totalWatchTime || 0) / 3600) || 0}h
                   </div>
                   <div className="text-gray-600 text-sm font-semibold uppercase tracking-wide">
-                    Hours
+                    {t("profile.stats.hours")}
                   </div>
                 </motion.div>
               </div>
@@ -596,7 +615,9 @@ const Profile: React.FC = () => {
                       <FaCalendarAlt className="text-purple-600 text-sm" />
                     </div>
                     <div>
-                      <div className="text-sm text-gray-500">Joined</div>
+                      <div className="text-sm text-gray-500">
+                        {t("profile.joined")}
+                      </div>
                       <div className="font-medium text-gray-900">
                         {new Date(user.createdAt || "").toLocaleDateString()}
                       </div>
@@ -608,7 +629,9 @@ const Profile: React.FC = () => {
                       <FaEnvelope className="text-indigo-600 text-sm" />
                     </div>
                     <div>
-                      <div className="text-sm text-gray-500">Email</div>
+                      <div className="text-sm text-gray-500">
+                        {t("common.email")}
+                      </div>
                       <div className="font-medium text-gray-900 truncate">
                         {user.email}
                       </div>
@@ -620,9 +643,13 @@ const Profile: React.FC = () => {
                       <FaCheck className="text-emerald-600 text-sm" />
                     </div>
                     <div>
-                      <div className="text-sm text-gray-500">Status</div>
+                      <div className="text-sm text-gray-500">
+                        {t("common.status")}
+                      </div>
                       <div className="font-medium text-emerald-700">
-                        {user.isEmailVerified ? "Verified" : "Pending"}
+                        {user.isEmailVerified
+                          ? t("profile.verified")
+                          : t("profile.pending")}
                       </div>
                     </div>
                   </div>
@@ -632,7 +659,9 @@ const Profile: React.FC = () => {
                       <FaTrophy className="text-amber-600 text-sm" />
                     </div>
                     <div>
-                      <div className="text-sm text-gray-500">Rank</div>
+                      <div className="text-sm text-gray-500">
+                        {t("profile.rank")}
+                      </div>
                       <div className="font-medium text-gray-900">
                         {userRank}
                       </div>
@@ -643,10 +672,10 @@ const Profile: React.FC = () => {
                 {/* Bio Section */}
                 <div className="mt-6 pt-6 border-t border-gray-200">
                   <h3 className="text-sm font-medium text-gray-500 mb-2">
-                    About
+                    {t("profile.about")}
                   </h3>
                   <p className="text-gray-700 leading-relaxed">
-                    {user.bio || "No bio available."}
+                    {user.bio || t("profile.noBioAvailable")}
                   </p>
                 </div>
               </div>
@@ -666,18 +695,26 @@ const Profile: React.FC = () => {
               <div className="border-b border-gray-200">
                 <nav className="flex">
                   {[
-                    { id: "overview", label: "Overview", icon: FaUser },
+                    {
+                      id: "overview",
+                      label: t("profile.tabs.overview"),
+                      icon: FaUser,
+                    },
                     {
                       id: "courses",
-                      label: "My Learning",
+                      label: t("profile.tabs.myLearning"),
                       icon: FaGraduationCap,
                     },
                     {
                       id: "achievements",
-                      label: "Achievements",
+                      label: t("profile.tabs.achievements"),
                       icon: FaTrophy,
                     },
-                    { id: "settings", label: "Settings", icon: FaCog },
+                    {
+                      id: "settings",
+                      label: t("profile.tabs.settings"),
+                      icon: FaCog,
+                    },
                   ].map((tab) => (
                     <button
                       key={tab.id}
@@ -712,12 +749,12 @@ const Profile: React.FC = () => {
                         <div className="bg-gray-50 rounded-lg p-6">
                           <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                             <FaUser className="text-purple-600" />
-                            Personal Information
+                            {t("profile.personalInformation")}
                           </h3>
                           <div className="space-y-3">
                             <div>
                               <label className="text-sm font-medium text-gray-600">
-                                Full Name
+                                {t("profile.fullName")}
                               </label>
                               <p className="text-gray-900 font-medium">
                                 {user.firstName} {user.lastName}
@@ -725,7 +762,7 @@ const Profile: React.FC = () => {
                             </div>
                             <div>
                               <label className="text-sm font-medium text-gray-600">
-                                Username
+                                {t("common.username")}
                               </label>
                               <p className="text-gray-900 font-medium">
                                 @{user.username}
@@ -733,7 +770,7 @@ const Profile: React.FC = () => {
                             </div>
                             <div>
                               <label className="text-sm font-medium text-gray-600">
-                                Email
+                                {t("common.email")}
                               </label>
                               <p className="text-gray-900 font-medium">
                                 {user.email}
@@ -741,7 +778,7 @@ const Profile: React.FC = () => {
                             </div>
                             <div>
                               <label className="text-sm font-medium text-gray-600">
-                                Role
+                                {t("profile.role")}
                               </label>
                               <p className="text-gray-900 font-medium capitalize">
                                 {user.role}
@@ -754,7 +791,7 @@ const Profile: React.FC = () => {
                         <div className="bg-gray-50 rounded-lg p-6">
                           <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                             <FaChartLine className="text-purple-600" />
-                            Recent Activity
+                            {t("profile.recentActivity")}
                           </h3>
                           <div className="space-y-3">
                             {stats?.recentActivity &&
@@ -788,13 +825,20 @@ const Profile: React.FC = () => {
                                       <div>
                                         <span className="text-sm text-gray-900 block">
                                           {enrollment.status === "completed"
-                                            ? "Course Completed"
+                                            ? t(
+                                                "profile.activity.courseCompleted"
+                                              )
                                             : enrollment.progressPercentage > 0
-                                            ? "Course In Progress"
-                                            : "Course Started"}
+                                            ? t(
+                                                "profile.activity.courseInProgress"
+                                              )
+                                            : t(
+                                                "profile.activity.courseStarted"
+                                              )}
                                         </span>
                                         <span className="text-xs text-gray-500">
-                                          {enrollment.course?.title || "Course"}
+                                          {enrollment.course?.title ||
+                                            t("common.course")}
                                         </span>
                                       </div>
                                     </div>
@@ -813,10 +857,12 @@ const Profile: React.FC = () => {
                               <div className="text-center py-4">
                                 <FaChartLine className="text-2xl text-gray-300 mx-auto mb-2" />
                                 <p className="text-sm text-gray-500">
-                                  No recent activity
+                                  {t("profile.activity.noRecentActivity")}
                                 </p>
                                 <p className="text-xs text-gray-400">
-                                  Start learning to see your activity here!
+                                  {t(
+                                    "profile.activity.startLearningToSeeActivity"
+                                  )}
                                 </p>
                               </div>
                             )}
@@ -828,11 +874,10 @@ const Profile: React.FC = () => {
                       <div className="bg-gray-50 rounded-lg p-6">
                         <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                           <FaEdit className="text-purple-600" />
-                          About Me
+                          {t("profile.aboutMe")}
                         </h3>
                         <p className="text-gray-700 leading-relaxed">
-                          {user.bio ||
-                            "Welcome to my learning journey! Add a bio to tell others about yourself, your interests, and your learning goals."}
+                          {user.bio || t("profile.defaultBio")}
                         </p>
                       </div>
                     </motion.div>
@@ -851,7 +896,7 @@ const Profile: React.FC = () => {
                       <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-6 border border-purple-100">
                         <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                           <FaChartLine className="text-purple-600" />
-                          Learning Progress Overview
+                          {t("profile.learning.progressOverview")}
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div className="text-center">
@@ -859,7 +904,7 @@ const Profile: React.FC = () => {
                               {stats?.totalEnrolledCourses || 0}
                             </div>
                             <div className="text-gray-600 text-sm">
-                              Courses Enrolled
+                              {t("profile.learning.coursesEnrolled")}
                             </div>
                           </div>
                           <div className="text-center">
@@ -867,7 +912,7 @@ const Profile: React.FC = () => {
                               {stats?.totalCompletedCourses || 0}
                             </div>
                             <div className="text-gray-600 text-sm">
-                              Completed
+                              {t("profile.learning.completed")}
                             </div>
                           </div>
                           <div className="text-center">
@@ -878,7 +923,7 @@ const Profile: React.FC = () => {
                               h
                             </div>
                             <div className="text-gray-600 text-sm">
-                              Total Hours
+                              {t("profile.learning.totalHours")}
                             </div>
                           </div>
                         </div>
@@ -887,7 +932,7 @@ const Profile: React.FC = () => {
                       {/* Current Courses */}
                       <div>
                         <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                          Current Courses
+                          {t("profile.learning.currentCourses")}
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {enrolledCourses
@@ -951,7 +996,7 @@ const Profile: React.FC = () => {
                             <div className="col-span-full text-center py-8">
                               <FaGraduationCap className="text-4xl text-gray-300 mx-auto mb-4" />
                               <p className="text-gray-500">
-                                No courses in progress
+                                {t("profile.learning.noCoursesInProgress")}
                               </p>
                             </div>
                           )}
@@ -961,7 +1006,7 @@ const Profile: React.FC = () => {
                       {/* Completed Courses */}
                       <div>
                         <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                          Recently Completed
+                          {t("profile.learning.recentlyCompleted")}
                         </h3>
                         <div className="space-y-3">
                           {enrolledCourses
@@ -994,10 +1039,10 @@ const Profile: React.FC = () => {
                                         {enrollment.course?.title || "Course"}
                                       </h4>
                                       <p className="text-sm text-gray-600">
-                                        Completed{" "}
+                                        {t("profile.learning.completed")}{" "}
                                         {timeAgo === 0
-                                          ? "today"
-                                          : `${timeAgo} days ago`}
+                                          ? t("common.today")
+                                          : `${timeAgo} ${t("common.daysAgo")}`}
                                       </p>
                                     </div>
                                   </div>
@@ -1017,7 +1062,7 @@ const Profile: React.FC = () => {
                                     {enrollment.certificateIssued && (
                                       <button className="ml-3 px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-xs rounded-full transition-colors">
                                         <FaCertificate className="mr-1 inline" />
-                                        Certificate
+                                        {t("common.certificate")}
                                       </button>
                                     )}
                                   </div>
@@ -1032,7 +1077,7 @@ const Profile: React.FC = () => {
                             <div className="text-center py-8">
                               <FaTrophy className="text-4xl text-gray-300 mx-auto mb-4" />
                               <p className="text-gray-500">
-                                No completed courses yet
+                                {t("profile.learning.noCompletedCourses")}
                               </p>
                             </div>
                           )}
@@ -1053,7 +1098,7 @@ const Profile: React.FC = () => {
                       <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg p-6 border border-yellow-200">
                         <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                           <FaTrophy className="text-yellow-500" />
-                          Achievement Overview
+                          {t("profile.achievements.overview")}
                         </h3>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                           <div className="text-center">
@@ -1061,7 +1106,7 @@ const Profile: React.FC = () => {
                               {achievements.length}
                             </div>
                             <div className="text-gray-600 text-sm">
-                              Achievements Unlocked
+                              {t("profile.achievements.unlocked")}
                             </div>
                           </div>
                           <div className="text-center">
@@ -1069,7 +1114,7 @@ const Profile: React.FC = () => {
                               {analytics?.learningStreak || 0}
                             </div>
                             <div className="text-gray-600 text-sm">
-                              Day Streak
+                              {t("profile.achievements.dayStreak")}
                             </div>
                           </div>
                           <div className="text-center">
@@ -1077,7 +1122,7 @@ const Profile: React.FC = () => {
                               {stats?.certificatesEarned || 0}
                             </div>
                             <div className="text-gray-600 text-sm">
-                              Certificates
+                              {t("profile.achievements.certificates")}
                             </div>
                           </div>
                           <div className="text-center">
@@ -1088,7 +1133,7 @@ const Profile: React.FC = () => {
                               h
                             </div>
                             <div className="text-gray-600 text-sm">
-                              Total Hours
+                              {t("profile.achievements.totalHours")}
                             </div>
                           </div>
                         </div>
@@ -1097,7 +1142,7 @@ const Profile: React.FC = () => {
                       {/* Recent Achievements */}
                       <div>
                         <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                          Recent Achievements
+                          {t("profile.achievements.recent")}
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                           {achievements.length > 0 ? (
@@ -1134,7 +1179,8 @@ const Profile: React.FC = () => {
                                     {achievement.rarity.toUpperCase()}
                                   </span>
                                   <div className="text-xs text-gray-500 mt-2">
-                                    Earned {achievement.earned}
+                                    {t("profile.achievements.earned")}{" "}
+                                    {achievement.earned}
                                   </div>
                                 </div>
                               </div>
@@ -1143,11 +1189,12 @@ const Profile: React.FC = () => {
                             <div className="col-span-full text-center py-12">
                               <FaTrophy className="text-4xl text-gray-300 mx-auto mb-4" />
                               <p className="text-gray-500 mb-2">
-                                No achievements yet
+                                {t("profile.achievements.noAchievements")}
                               </p>
                               <p className="text-sm text-gray-400">
-                                Complete courses and maintain learning streaks
-                                to unlock achievements!
+                                {t(
+                                  "profile.achievements.completeCoursesToUnlock"
+                                )}
                               </p>
                             </div>
                           )}
@@ -1158,7 +1205,7 @@ const Profile: React.FC = () => {
                       {nextAchievement && (
                         <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
                           <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                            Next Achievement
+                            {t("profile.achievements.nextAchievement")}
                           </h3>
                           <div className="space-y-4">
                             <div className="flex items-center justify-between">
@@ -1195,11 +1242,11 @@ const Profile: React.FC = () => {
                             <p className="text-sm text-gray-600">
                               {nextAchievement.target -
                                 nextAchievement.progress}{" "}
-                              more{" "}
+                              {t("profile.achievements.more")}{" "}
                               {nextAchievement.type === "courses"
-                                ? "courses"
-                                : "days"}{" "}
-                              to unlock this achievement!
+                                ? t("common.courses")
+                                : t("common.days")}{" "}
+                              {t("profile.achievements.toUnlock")}
                             </p>
                           </div>
                         </div>
@@ -1219,7 +1266,7 @@ const Profile: React.FC = () => {
                       <div className="bg-white border border-gray-200 rounded-lg p-6">
                         <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                           <FaUser className="text-purple-600" />
-                          Profile Settings
+                          {t("profile.settings.profileSettings")}
                         </h3>
                         <form
                           onSubmit={handleUpdateProfile}
@@ -1228,7 +1275,7 @@ const Profile: React.FC = () => {
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-1">
-                                First Name
+                                {t("profile.settings.firstName")}
                               </label>
                               <input
                                 type="text"
@@ -1240,7 +1287,7 @@ const Profile: React.FC = () => {
                             </div>
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Last Name
+                                {t("profile.settings.lastName")}
                               </label>
                               <input
                                 type="text"
@@ -1253,7 +1300,7 @@ const Profile: React.FC = () => {
                           </div>
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Username
+                              {t("common.username")}
                             </label>
                             <input
                               type="text"
@@ -1265,14 +1312,14 @@ const Profile: React.FC = () => {
                           </div>
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Bio
+                              {t("profile.settings.bio")}
                             </label>
                             <textarea
                               rows={3}
                               name="bio"
                               value={profileForm.bio}
                               onChange={handleProfileChange}
-                              placeholder="Tell us about yourself..."
+                              placeholder={t("profile.settings.bioPlaceholder")}
                               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             />
                           </div>
@@ -1282,8 +1329,8 @@ const Profile: React.FC = () => {
                             className="px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white rounded-md transition-colors disabled:cursor-not-allowed cursor-pointer"
                           >
                             {updateProfileMutation.isPending
-                              ? "Saving..."
-                              : "Save Changes"}
+                              ? t("common.saving")
+                              : t("profile.settings.saveChanges")}
                           </button>
                         </form>
                       </div>
@@ -1292,12 +1339,12 @@ const Profile: React.FC = () => {
                       <div className="bg-white border border-gray-200 rounded-lg p-6">
                         <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                           <FaCog className="text-purple-600" />
-                          Account Settings
+                          {t("profile.settings.accountSettings")}
                         </h3>
                         <div className="space-y-4">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Email Address
+                              {t("profile.settings.emailAddress")}
                             </label>
                             <div className="flex gap-3">
                               <input
@@ -1308,11 +1355,11 @@ const Profile: React.FC = () => {
                               {user.isEmailVerified ? (
                                 <span className="px-3 py-2 bg-green-100 text-green-800 text-sm rounded-md flex items-center gap-1">
                                   <FaCheck className="text-xs" />
-                                  Verified
+                                  {t("profile.verified")}
                                 </span>
                               ) : (
                                 <button className="px-3 py-2 bg-yellow-500 hover:bg-yellow-600 text-white text-sm rounded-md">
-                                  Verify
+                                  {t("profile.settings.verify")}
                                 </button>
                               )}
                             </div>
@@ -1325,7 +1372,7 @@ const Profile: React.FC = () => {
                               }
                               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
                             >
-                              Change Password
+                              {t("profile.settings.changePassword")}
                             </button>
                           </div>
 
@@ -1342,7 +1389,7 @@ const Profile: React.FC = () => {
                                   <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
                                     <FaLock className="text-blue-600 text-sm" />
                                   </div>
-                                  Change Password
+                                  {t("profile.settings.changePassword")}
                                 </h4>
                                 <button
                                   type="button"
@@ -1360,7 +1407,7 @@ const Profile: React.FC = () => {
                                 <div className="grid grid-cols-1 gap-4">
                                   <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                      Current Password
+                                      {t("profile.settings.currentPassword")}
                                     </label>
                                     <input
                                       type="password"
@@ -1368,7 +1415,9 @@ const Profile: React.FC = () => {
                                       value={passwordForm.currentPassword}
                                       onChange={handlePasswordChange}
                                       required
-                                      placeholder="Enter your current password"
+                                      placeholder={t(
+                                        "profile.settings.enterCurrentPassword"
+                                      )}
                                       className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm"
                                     />
                                   </div>
@@ -1376,7 +1425,7 @@ const Profile: React.FC = () => {
                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        New Password
+                                        {t("profile.settings.newPassword")}
                                       </label>
                                       <input
                                         type="password"
@@ -1385,14 +1434,16 @@ const Profile: React.FC = () => {
                                         onChange={handlePasswordChange}
                                         required
                                         minLength={6}
-                                        placeholder="Enter new password"
+                                        placeholder={t(
+                                          "profile.settings.enterNewPassword"
+                                        )}
                                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm"
                                       />
                                     </div>
 
                                     <div>
                                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Confirm New Password
+                                        {t("profile.settings.confirmPassword")}
                                       </label>
                                       <input
                                         type="password"
@@ -1401,7 +1452,9 @@ const Profile: React.FC = () => {
                                         onChange={handlePasswordChange}
                                         required
                                         minLength={6}
-                                        placeholder="Confirm new password"
+                                        placeholder={t(
+                                          "profile.settings.confirmPasswordPlaceholder"
+                                        )}
                                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm"
                                       />
                                     </div>
@@ -1414,7 +1467,7 @@ const Profile: React.FC = () => {
                                     onClick={() => setIsChangingPassword(false)}
                                     className="px-6 py-2 text-gray-600 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 hover:text-gray-700 transition-all duration-200 font-medium"
                                   >
-                                    Cancel
+                                    {t("common.cancel")}
                                   </button>
                                   <button
                                     type="submit"
@@ -1432,12 +1485,12 @@ const Profile: React.FC = () => {
                                           }}
                                           className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
                                         />
-                                        Changing...
+                                        {t("profile.settings.changing")}
                                       </>
                                     ) : (
                                       <>
                                         <FaCheck className="text-sm" />
-                                        Change Password
+                                        {t("profile.settings.changePassword")}
                                       </>
                                     )}
                                   </button>
@@ -1447,12 +1500,21 @@ const Profile: React.FC = () => {
                               {/* Password Requirements */}
                               <div className="mt-4 p-4 bg-white/60 rounded-lg">
                                 <p className="text-sm font-medium text-gray-700 mb-2">
-                                  Password Requirements:
+                                  {t("profile.settings.passwordRequirements")}
                                 </p>
                                 <ul className="text-xs text-gray-600 space-y-1">
-                                  <li>• At least 6 characters long</li>
-                                  <li>• Use a strong, unique password</li>
-                                  <li>• Consider using a password manager</li>
+                                  <li>
+                                    • {t("profile.settings.atLeast6Characters")}
+                                  </li>
+                                  <li>
+                                    • {t("profile.settings.useStrongPassword")}
+                                  </li>
+                                  <li>
+                                    •{" "}
+                                    {t(
+                                      "profile.settings.considerPasswordManager"
+                                    )}
+                                  </li>
                                 </ul>
                               </div>
                             </motion.div>
@@ -1464,29 +1526,41 @@ const Profile: React.FC = () => {
                       <div className="bg-white border border-gray-200 rounded-lg p-6">
                         <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                           <FaEnvelope className="text-purple-600" />
-                          Notification Preferences
+                          {t("profile.settings.notificationPreferences")}
                         </h3>
                         <div className="space-y-4">
                           {[
                             {
-                              label: "Course Updates",
-                              description:
-                                "Get notified about new lessons and announcements",
+                              label: t(
+                                "profile.settings.notifications.courseUpdates.label"
+                              ),
+                              description: t(
+                                "profile.settings.notifications.courseUpdates.description"
+                              ),
                             },
                             {
-                              label: "Achievement Notifications",
-                              description:
-                                "Receive notifications when you earn new badges",
+                              label: t(
+                                "profile.settings.notifications.achievements.label"
+                              ),
+                              description: t(
+                                "profile.settings.notifications.achievements.description"
+                              ),
                             },
                             {
-                              label: "Learning Reminders",
-                              description:
-                                "Daily reminders to continue your learning",
+                              label: t(
+                                "profile.settings.notifications.reminders.label"
+                              ),
+                              description: t(
+                                "profile.settings.notifications.reminders.description"
+                              ),
                             },
                             {
-                              label: "Marketing Emails",
-                              description:
-                                "Promotional emails about new courses and features",
+                              label: t(
+                                "profile.settings.notifications.marketing.label"
+                              ),
+                              description: t(
+                                "profile.settings.notifications.marketing.description"
+                              ),
                             },
                           ].map((setting, index) => (
                             <div
@@ -1517,20 +1591,20 @@ const Profile: React.FC = () => {
                       {/* Danger Zone */}
                       <div className="bg-red-50 border border-red-200 rounded-lg p-6">
                         <h3 className="text-lg font-semibold text-red-900 mb-4">
-                          Danger Zone
+                          {t("profile.settings.dangerZone")}
                         </h3>
                         <div className="space-y-3">
                           <div className="flex items-center justify-between">
                             <div>
                               <h4 className="font-medium text-red-900">
-                                Delete Account
+                                {t("profile.settings.deleteAccount")}
                               </h4>
                               <p className="text-sm text-red-700">
-                                Permanently delete your account and all data
+                                {t("profile.settings.deleteAccountDescription")}
                               </p>
                             </div>
                             <button className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors">
-                              Delete Account
+                              {t("profile.settings.deleteAccount")}
                             </button>
                           </div>
                         </div>
@@ -1566,20 +1640,20 @@ const Profile: React.FC = () => {
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <FaRocket className="text-purple-600" />
-                Quick Actions
+                {t("profile.quickActions.title")}
               </h3>
               <div className="space-y-3">
                 <button className="w-full p-3 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-xl text-sm font-medium transition-colors cursor-pointer flex items-center gap-2">
                   <FaGraduationCap />
-                  Browse Courses
+                  {t("profile.quickActions.browseCourses")}
                 </button>
                 <button className="w-full p-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-sm font-medium transition-colors cursor-pointer flex items-center gap-2">
                   <FaCertificate />
-                  View Certificates
+                  {t("profile.quickActions.viewCertificates")}
                 </button>
                 <button className="w-full p-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-sm font-medium transition-colors cursor-pointer flex items-center gap-2">
                   <FaDownload />
-                  Download Progress
+                  {t("profile.quickActions.downloadProgress")}
                 </button>
               </div>
             </div>
@@ -1588,18 +1662,20 @@ const Profile: React.FC = () => {
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <FaFire className="text-orange-500" />
-                Learning Streak
+                {t("profile.learningStreak.title")}
               </h3>
               <div className="text-center">
                 <div className="text-3xl font-bold text-orange-500 mb-2">
                   {analytics?.learningStreak || 0}
                 </div>
-                <p className="text-gray-600 text-sm">Days in a row</p>
+                <p className="text-gray-600 text-sm">
+                  {t("profile.learningStreak.daysInRow")}
+                </p>
                 <div className="mt-4 bg-orange-50 rounded-xl p-3">
                   <p className="text-orange-700 text-xs font-medium">
                     {(analytics?.learningStreak || 0) > 0
-                      ? "Keep it up! You're on fire! 🔥"
-                      : "Start your learning streak today! 📚"}
+                      ? t("profile.learningStreak.keepItUp")
+                      : t("profile.learningStreak.startToday")}
                   </p>
                 </div>
               </div>
@@ -1609,7 +1685,7 @@ const Profile: React.FC = () => {
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <FaTrophy className="text-yellow-500" />
-                Recent Achievements
+                {t("profile.recentAchievements.title")}
               </h3>
               <div className="space-y-3">
                 {achievements.length > 0 ? (
@@ -1648,9 +1724,11 @@ const Profile: React.FC = () => {
                 ) : (
                   <div className="text-center py-4">
                     <FaTrophy className="text-2xl text-gray-300 mx-auto mb-2" />
-                    <p className="text-sm text-gray-500">No achievements yet</p>
+                    <p className="text-sm text-gray-500">
+                      {t("profile.recentAchievements.noAchievements")}
+                    </p>
                     <p className="text-xs text-gray-400">
-                      Complete courses to unlock achievements!
+                      {t("profile.recentAchievements.completeCoursesToUnlock")}
                     </p>
                   </div>
                 )}
@@ -1672,7 +1750,9 @@ const Profile: React.FC = () => {
             {/* Modal Header */}
             <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-6 rounded-t-2xl">
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold text-white">Edit Profile</h3>
+                <h3 className="text-xl font-bold text-white">
+                  {t("profile.editProfile")}
+                </h3>
                 <button
                   onClick={() => {
                     setIsEditing(false);

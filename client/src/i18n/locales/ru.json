@@ -120,7 +120,12 @@
     "alreadyInCart": "Уже в корзине",
     "removeFromWishlist": "Удалить из избранного",
     "addToWishlist": "Добавить в избранное",
-    "refreshPage": "Обновить страницу"
+    "refreshPage": "Обновить страницу",
+    "today": "сегодня",
+    "daysAgo": "дней назад",
+    "certificate": "Сертификат",
+    "days": "дней",
+    "saving": "Сохранение..."
   },
   "navigation": {
     "dashboard": "Панель управления",
@@ -462,6 +467,7 @@
     "completed": "Завершено",
     "inProgress": "В процессе",
     "watchTime": "Время просмотра",
+    "browseCategories": "Просмотреть категории",
     "loadingCourses": "Загрузка ваших курсов...",
     "failedToLoadCourses": "Не удалось загрузить курсы",
     "couldntLoadCourses": "Мы не смогли загрузить ваши записанные курсы. Пожалуйста, попробуйте обновить страницу.",
@@ -524,6 +530,177 @@
       "courseAlreadyInCart": "\"{{title}}\" уже в вашей корзине!",
       "failedToAdd": "❌ Не удалось добавить",
       "failedToAddCourse": "Не удалось добавить курс в корзину. Пожалуйста, попробуйте еще раз."
+    }
+  },
+  "profile": {
+    "loadingProfile": "Загрузка профиля...",
+    "joined": "Присоединился",
+    "verified": "Подтвержден",
+    "pending": "Ожидает",
+    "rank": "Ранг",
+    "about": "О себе",
+    "noBioAvailable": "Биография недоступна.",
+    "personalInformation": "Личная информация",
+    "fullName": "Полное имя",
+    "role": "Роль",
+    "recentActivity": "Недавняя активность",
+    "tabs": {
+      "overview": "Обзор",
+      "myLearning": "Мое обучение",
+      "achievements": "Достижения",
+      "settings": "Настройки"
+    },
+    "achievements": {
+      "firstSteps": "Первые шаги",
+      "firstStepsDesc": "Завершите свой первый курс",
+      "courseCompleted": "Курс завершен",
+      "learningEnthusiast": "Энтузиаст обучения",
+      "learningEnthusiastDesc": "Завершите 5 курсов",
+      "courseMaster": "Мастер курсов",
+      "courseMasterDesc": "Завершите 10+ курсов",
+      "marathonLearner": "Учащийся-марафонец",
+      "marathonLearnerDesc": "Завершите 20 курсов",
+      "consistentLearner": "Последовательный учащийся",
+      "consistentLearnerDesc": "3-дневная серия обучения",
+      "weekWarrior": "Воин недели",
+      "weekWarriorDesc": "7-дневная серия обучения",
+      "weekWarriorGoal": "Достигните 7-дневной серии обучения",
+      "monthlyMaster": "Мастер месяца",
+      "monthlyMasterDesc": "30-дневная серия обучения",
+      "monthlyMasterGoal": "Достигните 30-дневной серии обучения",
+      "dedicatedStudent": "Преданный студент",
+      "dedicatedStudentDesc": "10+ часов обучения",
+      "timeInvestor": "Инвестор времени",
+      "timeInvestorDesc": "50+ часов обучения",
+      "learningMachine": "Машина обучения",
+      "learningMachineDesc": "100+ часов обучения",
+      "certified": "Сертифицирован",
+      "certifiedDesc": "Получите свой первый сертификат",
+      "certificateCollector": "Коллекционер сертификатов",
+      "certificateCollectorDesc": "Получите 5 сертификатов",
+      "lessonMaster": "Мастер уроков",
+      "lessonMasterDesc": "Завершите 50+ уроков",
+      "knowledgeSeeker": "Искатель знаний",
+      "knowledgeSeekerDesc": "Завершите 100+ уроков",
+      "coursesCompleted": "{{count}} курсов завершено",
+      "daysStreak": "{{count}} дней подряд",
+      "hoursWatched": "{{count}} часов просмотрено",
+      "certificatesEarned": "{{count}} сертификатов получено",
+      "lessonsCompleted": "{{count}} уроков завершено",
+      "overview": "Обзор достижений",
+      "unlocked": "Достижения разблокированы",
+      "dayStreak": "Дневная серия",
+      "certificates": "Сертификаты",
+      "totalHours": "Всего часов",
+      "recent": "Недавние достижения",
+      "earned": "Получено",
+      "noAchievements": "Пока нет достижений",
+      "completeCoursesToUnlock": "Завершайте курсы и поддерживайте серии обучения, чтобы разблокировать достижения!",
+      "nextAchievement": "Следующее достижение",
+      "more": "еще",
+      "toUnlock": "чтобы разблокировать это достижение!"
+    },
+    "ranks": {
+      "newLearner": "Новый учащийся",
+      "beginnerLearner": "Начинающий учащийся",
+      "activeLearner": "Активный учащийся",
+      "advancedLearner": "Продвинутый учащийся",
+      "expertLearner": "Учащийся-эксперт",
+      "masterLearner": "Мастер-учащийся"
+    },
+    "errors": {
+      "passwordsDontMatch": "Новые пароли не совпадают",
+      "invalidImageFile": "Пожалуйста, выберите действительный файл изображения",
+      "imageTooLarge": "Размер изображения должен быть менее 5МБ"
+    },
+    "editProfile": "Редактировать профиль",
+    "aboutMe": "Обо мне",
+    "defaultBio": "Этот пользователь еще не написал биографию. Добавьте биографию, чтобы рассказать о себе другим!",
+    "activity": {
+      "courseCompleted": "Курс завершен",
+      "courseInProgress": "Курс в процессе",
+      "courseStarted": "Курс начат",
+      "noRecentActivity": "Нет недавней активности",
+      "startLearningToSeeActivity": "Начните обучение, чтобы увидеть свою активность здесь!"
+    },
+    "learning": {
+      "progressOverview": "Обзор прогресса обучения",
+      "coursesEnrolled": "Записано на курсы",
+      "coursesCompleted": "Курсы завершены",
+      "completed": "Завершено",
+      "totalHours": "Всего часов",
+      "currentCourses": "Текущие курсы",
+      "recentlyCompleted": "Недавно завершенные",
+      "noCoursesInProgress": "Нет курсов в процессе",
+      "noCompletedCourses": "Пока нет завершенных курсов"
+    },
+
+    "settings": {
+      "firstName": "Имя",
+      "lastName": "Фамилия",
+      "bio": "Биография",
+      "bioPlaceholder": "Расскажите нам о себе...",
+      "saveChanges": "Сохранить изменения",
+      "accountSettings": "Настройки аккаунта",
+      "emailAddress": "Адрес электронной почты",
+      "verify": "Подтвердить",
+      "changePassword": "Изменить пароль",
+      "currentPassword": "Текущий пароль",
+      "enterCurrentPassword": "Введите ваш текущий пароль",
+      "newPassword": "Новый пароль",
+      "enterNewPassword": "Введите новый пароль",
+      "confirmPassword": "Подтвердите новый пароль",
+      "confirmPasswordPlaceholder": "Подтвердите новый пароль",
+      "changing": "Изменение...",
+      "passwordRequirements": "Требования к паролю:",
+      "atLeast6Characters": "Минимум 6 символов",
+      "useStrongPassword": "Используйте сильный, уникальный пароль",
+      "considerPasswordManager": "Рассмотрите использование менеджера паролей",
+      "notificationPreferences": "Настройки уведомлений",
+      "notifications": {
+        "courseUpdates": {
+          "label": "Обновления курсов",
+          "description": "Получайте уведомления о новых уроках и объявлениях"
+        },
+        "achievements": {
+          "label": "Уведомления о достижениях",
+          "description": "Получайте уведомления при получении новых значков"
+        },
+        "reminders": {
+          "label": "Напоминания об обучении",
+          "description": "Ежедневные напоминания о продолжении обучения"
+        },
+        "marketing": {
+          "label": "Маркетинговые письма",
+          "description": "Рекламные письма о новых курсах и функциях"
+        }
+      },
+      "dangerZone": "Опасная зона",
+      "deleteAccount": "Удалить аккаунт",
+      "deleteAccountDescription": "Навсегда удалить ваш аккаунт и все данные"
+    },
+    "stats": {
+      "courses": "Курсы",
+      "progress": "Прогресс",
+      "certificates": "Сертификаты",
+      "hours": "Часы"
+    },
+    "quickActions": {
+      "title": "Быстрые действия",
+      "browseCourses": "Просмотреть курсы",
+      "viewCertificates": "Просмотреть сертификаты",
+      "downloadProgress": "Скачать прогресс"
+    },
+    "learningStreak": {
+      "title": "Серия обучения",
+      "daysInRow": "Дней подряд",
+      "keepItUp": "Продолжайте в том же духе! Вы в огне! 🔥",
+      "startToday": "Начните свою серию обучения сегодня! 📚"
+    },
+    "recentAchievements": {
+      "title": "Недавние достижения",
+      "noAchievements": "Пока нет достижений",
+      "completeCoursesToUnlock": "Завершайте курсы, чтобы разблокировать достижения!"
     }
   }
 }

@@ -120,7 +120,12 @@
     "alreadyInCart": "Artıq səbətdə",
     "removeFromWishlist": "İstək siyahısından sil",
     "addToWishlist": "İstək siyahısına əlavə et",
-    "refreshPage": "Səhifəni yenilə"
+    "refreshPage": "Səhifəni yenilə",
+    "today": "bu gün",
+    "daysAgo": "gün əvvəl",
+    "certificate": "Sertifikat",
+    "days": "günlər",
+    "saving": "Saxlanılır..."
   },
   "navigation": {
     "dashboard": "İdarə paneli",
@@ -705,6 +710,177 @@
       "courseAlreadyInCart": "\"{{title}}\" artıq səbətinizdədir!",
       "failedToAdd": "❌ Əlavə etmək mümkün olmadı",
       "failedToAddCourse": "Kursu səbətə əlavə etmək mümkün olmadı. Zəhmət olmasa yenidən cəhd edin."
+    }
+  },
+  "profile": {
+    "loadingProfile": "Profil yüklənir...",
+    "joined": "Qoşulub",
+    "verified": "Təsdiqlənib",
+    "pending": "Gözlənilir",
+    "rank": "Rütbə",
+    "about": "Haqqında",
+    "noBioAvailable": "Bioqrafiya mövcud deyil.",
+    "personalInformation": "Şəxsi məlumatlar",
+    "fullName": "Tam ad",
+    "role": "Rol",
+    "recentActivity": "Son fəaliyyət",
+    "tabs": {
+      "overview": "Ümumi baxış",
+      "myLearning": "Mənim təhsilim",
+      "achievements": "Nailiyyətlər",
+      "settings": "Tənzimləmələr"
+    },
+    "achievements": {
+      "firstSteps": "İlk addımlar",
+      "firstStepsDesc": "İlk kursunuzu tamamlayın",
+      "courseCompleted": "Kurs tamamlandı",
+      "learningEnthusiast": "Öyrənmə həvəskarı",
+      "learningEnthusiastDesc": "5 kursu tamamlayın",
+      "courseMaster": "Kurs ustası",
+      "courseMasterDesc": "10+ kursu tamamlayın",
+      "marathonLearner": "Maraton öyrənəni",
+      "marathonLearnerDesc": "20 kursu tamamlayın",
+      "consistentLearner": "Ardıcıl öyrənən",
+      "consistentLearnerDesc": "3 günlük öyrənmə seriyası",
+      "weekWarrior": "Həftə döyüşçüsü",
+      "weekWarriorDesc": "7 günlük öyrənmə seriyası",
+      "weekWarriorGoal": "7 günlük öyrənmə seriyasına nail olun",
+      "monthlyMaster": "Aylıq usta",
+      "monthlyMasterDesc": "30 günlük öyrənmə seriyası",
+      "monthlyMasterGoal": "30 günlük öyrənmə seriyasına nail olun",
+      "dedicatedStudent": "Sadiq tələbə",
+      "dedicatedStudentDesc": "10+ saat öyrənmə",
+      "timeInvestor": "Vaxt investoru",
+      "timeInvestorDesc": "50+ saat öyrənmə",
+      "learningMachine": "Öyrənmə maşını",
+      "learningMachineDesc": "100+ saat öyrənmə",
+      "certified": "Sertifikatlı",
+      "certifiedDesc": "İlk sertifikatınızı qazanın",
+      "certificateCollector": "Sertifikat kolleksiyaçısı",
+      "certificateCollectorDesc": "5 sertifikat qazanın",
+      "lessonMaster": "Dərs ustası",
+      "lessonMasterDesc": "50+ dərsi tamamlayın",
+      "knowledgeSeeker": "Bilik axtaranı",
+      "knowledgeSeekerDesc": "100+ dərsi tamamlayın",
+      "coursesCompleted": "{{count}} kurs tamamlandı",
+      "daysStreak": "{{count}} gün ardıcıl",
+      "hoursWatched": "{{count}} saat izləndi",
+      "certificatesEarned": "{{count}} sertifikat qazanıldı",
+      "lessonsCompleted": "{{count}} dərs tamamlandı",
+      "overview": "Nailiyyətlərə ümumi baxış",
+      "unlocked": "Nailiyyətlər açıldı",
+      "dayStreak": "Günlük seriya",
+      "certificates": "Sertifikatlar",
+      "totalHours": "Ümumi saatlar",
+      "recent": "Son nailiyyətlər",
+      "earned": "Qazanıldı",
+      "noAchievements": "Hələ nailiyyət yoxdur",
+      "completeCoursesToUnlock": "Nailiyyətləri açmaq üçün kursları tamamlayın və öyrənmə seriyalarını davam etdirin!",
+      "nextAchievement": "Növbəti nailiyyət",
+      "more": "daha",
+      "toUnlock": "bu nailiyyəti açmaq üçün!"
+    },
+    "ranks": {
+      "newLearner": "Yeni öyrənən",
+      "beginnerLearner": "Başlanğıc öyrənəni",
+      "activeLearner": "Aktiv öyrənən",
+      "advancedLearner": "Qabaqcıl öyrənən",
+      "expertLearner": "Ekspert öyrənəni",
+      "masterLearner": "Usta öyrənəni"
+    },
+    "errors": {
+      "passwordsDontMatch": "Yeni şifrələr uyğun gəlmir",
+      "invalidImageFile": "Zəhmət olmasa düzgün şəkil faylı seçin",
+      "imageTooLarge": "Şəkil ölçüsü 5MB-dan az olmalıdır"
+    },
+    "editProfile": "Profili redaktə et",
+    "aboutMe": "Haqqımda",
+    "defaultBio": "Bu istifadəçi hələ bioqrafiya yazmayıb. Özünüz haqqında başqalarına danışmaq üçün bioqrafiya əlavə edin!",
+    "activity": {
+      "courseCompleted": "Kurs tamamlandı",
+      "courseInProgress": "Kurs davam edir",
+      "courseStarted": "Kurs başlandı",
+      "noRecentActivity": "Son fəaliyyət yoxdur",
+      "startLearningToSeeActivity": "Fəaliyyətinizi burada görmək üçün öyrənməyə başlayın!"
+    },
+    "learning": {
+      "progressOverview": "Öyrənmə irəliləyişinə ümumi baxış",
+      "coursesEnrolled": "Yazıldığı kurslar",
+      "coursesCompleted": "Tamamlanmış kurslar",
+      "completed": "Tamamlandı",
+      "totalHours": "Ümumi saatlar",
+      "currentCourses": "Cari kurslar",
+      "recentlyCompleted": "Bu yaxınlarda tamamlanmış",
+      "noCoursesInProgress": "Davam edən kurs yoxdur",
+      "noCompletedCourses": "Hələ tamamlanmış kurs yoxdur"
+    },
+
+    "settings": {
+      "firstName": "Ad",
+      "lastName": "Soyad",
+      "bio": "Bioqrafiya",
+      "bioPlaceholder": "Özünüz haqqında bizə danışın...",
+      "saveChanges": "Dəyişiklikləri saxla",
+      "accountSettings": "Hesab tənzimləmələri",
+      "emailAddress": "E-poçt ünvanı",
+      "verify": "Təsdiq et",
+      "changePassword": "Şifrəni dəyişdir",
+      "currentPassword": "Cari şifrə",
+      "enterCurrentPassword": "Cari şifrənizi daxil edin",
+      "newPassword": "Yeni şifrə",
+      "enterNewPassword": "Yeni şifrə daxil edin",
+      "confirmPassword": "Yeni şifrəni təsdiq edin",
+      "confirmPasswordPlaceholder": "Yeni şifrəni təsdiq edin",
+      "changing": "Dəyişdirilir...",
+      "passwordRequirements": "Şifrə tələbləri:",
+      "atLeast6Characters": "Ən azı 6 simvol",
+      "useStrongPassword": "Güclü, unikal şifrə istifadə edin",
+      "considerPasswordManager": "Şifrə meneceri istifadə etməyi düşünün",
+      "notificationPreferences": "Bildiriş tərcihləri",
+      "notifications": {
+        "courseUpdates": {
+          "label": "Kurs yeniləmələri",
+          "description": "Yeni dərslər və elanlar haqqında bildiriş alın"
+        },
+        "achievements": {
+          "label": "Nailiyyət bildirişləri",
+          "description": "Yeni nişanlar qazandığınızda bildiriş alın"
+        },
+        "reminders": {
+          "label": "Öyrənmə xatırlatmaları",
+          "description": "Öyrənməni davam etdirmək üçün günlük xatırlatmalar"
+        },
+        "marketing": {
+          "label": "Marketinq e-poçtları",
+          "description": "Yeni kurslar və xüsusiyyətlər haqqında reklam e-poçtları"
+        }
+      },
+      "dangerZone": "Təhlükə zonası",
+      "deleteAccount": "Hesabı sil",
+      "deleteAccountDescription": "Hesabınızı və bütün məlumatları həmişəlik silin"
+    },
+    "stats": {
+      "courses": "Kurslar",
+      "progress": "İrəliləyiş",
+      "certificates": "Sertifikatlar",
+      "hours": "Saatlar"
+    },
+    "quickActions": {
+      "title": "Sürətli əməliyyatlar",
+      "browseCourses": "Kursları baxın",
+      "viewCertificates": "Sertifikatları baxın",
+      "downloadProgress": "İrəliləyişi endirin"
+    },
+    "learningStreak": {
+      "title": "Öyrənmə seriyası",
+      "daysInRow": "Ardıcıl günlər",
+      "keepItUp": "Davam edin! Siz alovluısınız! 🔥",
+      "startToday": "Bu gün öyrənmə seriyanıza başlayın! 📚"
+    },
+    "recentAchievements": {
+      "title": "Son nailiyyətlər",
+      "noAchievements": "Hələ nailiyyət yoxdur",
+      "completeCoursesToUnlock": "Nailiyyətləri açmaq üçün kursları tamamlayın!"
     }
   }
 }
