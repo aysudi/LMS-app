@@ -1,174 +1,138 @@
-import nodemailer from "nodemailer";
-import config from "../configs/config";
-// Create transporter based on environment
-const createTransporter = () => {
-    const isDevelopment = process.env.NODE_ENV === "development";
-    if (!isDevelopment) {
-        // Production email configuration (use your actual email service)
-        return nodemailer.createTransport({
-            service: "gmail", // or your email service
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS,
-            },
-        });
-    }
-    else {
-        // Development: Create test account or use console
-        return nodemailer.createTransport({
-            host: "smtp.ethereal.email",
-            port: 587,
-            secure: false,
-            auth: {
-                user: "ethereal.user@ethereal.email",
-                pass: "ethereal.pass",
-            },
-        });
-    }
-};
-export const sendEmail = async (options) => {
+import { sendEmail } from "./sendMail";
+export const sendContactNotificationEmail = async (data) => {
     try {
-        const transporter = createTransporter();
-        const mailOptions = {
-            from: config.GMAIL_USER,
-            to: options.to,
-            subject: options.subject,
-            html: options.html,
-            text: options.text || options.html.replace(/<[^>]*>/g, ""),
-        };
-        if (process.env.NODE_ENV === "development") {
-            // In development, log email details instead of sending
-            // console.log("\n📧 EMAIL WOULD BE SENT IN PRODUCTION:");
-            // console.log("==================================================");
-            // console.log(`📬 To: ${mailOptions.to}`);
-            // console.log(`📝 Subject: ${mailOptions.subject}`);
-            // console.log("📄 HTML Content:");
-            // console.log("--------------------------------------------------");
-            // console.log(mailOptions.html);
-            // console.log("==================================================\n");
-            return true; // Simulate successful send in development
-        }
-        // Send actual email in production
-        const result = await transporter.sendMail(mailOptions);
-        console.log("📧 Email sent successfully:", result.messageId);
-        return true;
-    }
-    catch (error) {
-        console.error("❌ Failed to send email:", error);
-        return false;
-    }
-};
-// Email templates
-export const emailTemplates = {
-    instructorApplicationApproved: (instructorName) => ({
-        subject: "🎉 Congratulations! Your Instructor Application Has Been Approved",
-        html: `
+        const { adminEmail, contactData } = data;
+        const subject = `New Contact Message: ${contactData.subject}`;
+        const html = `
       <!DOCTYPE html>
       <html>
-      <head>
-        <meta charset="utf-8">
-        <title>Application Approved</title>
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-          .content { background: #fff; padding: 30px; border: 1px solid #ddd; }
-          .footer { background: #f8f9fa; padding: 20px; text-align: center; border-radius: 0 0 10px 10px; font-size: 14px; color: #666; }
-          .button { display: inline-block; background: #667eea; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
-          .emoji { font-size: 24px; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <span class="emoji">🎉</span>
-            <h1>Welcome to the Skillify Instructor Team!</h1>
-          </div>
-          <div class="content">
-            <h2>Dear ${instructorName},</h2>
-            <p>We're thrilled to inform you that your instructor application has been <strong>approved</strong>!</p>
-            
-            <p>You can now:</p>
-            <ul>
-              <li>✅ Create and publish courses</li>
-              <li>📚 Manage your course content</li>
-              <li>👥 Interact with students</li>
-              <li>💰 Earn revenue from your expertise</li>
-            </ul>
-            
-            <p>Ready to get started? Click the button below to access your instructor dashboard:</p>
-            <p style="text-align: center;">
-              <a href="http://localhost:5173/instructor/dashboard" class="button">Go to Dashboard</a>
-            </p>
-            
-            <p>If you have any questions or need assistance, our support team is here to help.</p>
-            
-            <p>Welcome aboard!<br>
-            The Skillify Team</p>
-          </div>
-          <div class="footer">
-            <p>© 2024 Skillify. All rights reserved.</p>
-          </div>
-        </div>
-      </body>
-      </html>
-    `,
-    }),
-    instructorApplicationRejected: (instructorName, reason) => ({
-        subject: "Update on Your Instructor Application",
-        html: `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <title>Application Update</title>
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-          .content { background: #fff; padding: 30px; border: 1px solid #ddd; }
-          .footer { background: #f8f9fa; padding: 20px; text-align: center; border-radius: 0 0 10px 10px; font-size: 14px; color: #666; }
-          .button { display: inline-block; background: #f5576c; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
-          .reason-box { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1>Thank You for Your Application</h1>
-          </div>
-          <div class="content">
-            <h2>Dear ${instructorName},</h2>
-            <p>Thank you for your interest in becoming an instructor on Skillify. After careful review, we regret to inform you that we cannot approve your application at this time.</p>
-            
-            <div class="reason-box">
-              <h3>📝 Feedback:</h3>
-              <p>${reason}</p>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>New Contact Message</title>
+          <style>
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f6f9fc; }
+            .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+            .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px 20px; text-align: center; }
+            .content { padding: 30px 20px; }
+            .info-section { background-color: #f8fafc; padding: 20px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #667eea; }
+            .message-section { background-color: #fff; padding: 20px; border: 1px solid #e2e8f0; border-radius: 6px; margin: 20px 0; }
+            .footer { background-color: #f8fafc; padding: 20px; text-align: center; color: #64748b; font-size: 14px; }
+            .badge { display: inline-block; background-color: #667eea; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1 style="margin: 0; font-size: 24px;">📧 New Contact Message</h1>
+              <p style="margin: 10px 0 0 0; opacity: 0.9;">You have received a new message from your website</p>
             </div>
             
-            <p>We encourage you to:</p>
-            <ul>
-              <li>📚 Review our instructor guidelines</li>
-              <li>🛠️ Address the feedback provided</li>
-              <li>🔄 Reapply once you've made the necessary improvements</li>
-            </ul>
+            <div class="content">
+              <div class="info-section">
+                <h3 style="margin: 0 0 15px 0; color: #1e293b;">Contact Information</h3>
+                <p style="margin: 5px 0;"><strong>Name:</strong> ${contactData.name}</p>
+                <p style="margin: 5px 0;"><strong>Email:</strong> ${contactData.email}</p>
+                ${contactData.phone
+            ? `<p style="margin: 5px 0;"><strong>Phone:</strong> ${contactData.phone}</p>`
+            : ""}
+                <p style="margin: 5px 0;"><strong>Subject:</strong> ${contactData.subject}</p>
+              </div>
+              
+              <div class="message-section">
+                <h3 style="margin: 0 0 15px 0; color: #1e293b;">Message</h3>
+                <p style="line-height: 1.6; color: #475569; white-space: pre-wrap;">${contactData.message}</p>
+              </div>
+              
+              <div style="text-align: center; margin-top: 30px;">
+                <span class="badge">Action Required</span>
+                <p style="margin: 10px 0; color: #64748b;">Please respond to this contact message promptly.</p>
+              </div>
+            </div>
             
-            <p>We appreciate your understanding and look forward to a potential future application.</p>
-            
-            <p style="text-align: center;">
-              <a href="http://localhost:5173/become-instructor" class="button">View Guidelines</a>
-            </p>
-            
-            <p>Best regards,<br>
-            The Skillify Team</p>
+            <div class="footer">
+              <p style="margin: 0;">This email was sent from your Skillify contact form</p>
+              <p style="margin: 5px 0 0 0;">© ${new Date().getFullYear()} Skillify Learning Platform</p>
+            </div>
           </div>
-          <div class="footer">
-            <p>© 2024 Skillify. All rights reserved.</p>
-          </div>
-        </div>
-      </body>
+        </body>
       </html>
-    `,
-    }),
+    `;
+        const textContext = `
+    New contact message received:
+    
+    Name: ${contactData.name}
+    Email: ${contactData.email}
+    Subject: ${contactData.subject}
+    Message: ${contactData.message}
+    Phone: ${contactData.phone || "N/A"}    
+    `;
+        await sendEmail(adminEmail, subject, html, textContext);
+    }
+    catch (error) {
+        console.error("Failed to send contact notification email:", error);
+        throw error;
+    }
 };
-export default { sendEmail, emailTemplates };
+export const sendContactReplyEmail = async (data) => {
+    try {
+        const { contactEmail, contactName, originalSubject, originalMessage, replyMessage, } = data;
+        const subject = `Re: ${originalSubject}`;
+        const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Reply to Your Contact Message</title>
+          <style>
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f6f9fc; }
+            .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+            .header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 30px 20px; text-align: center; }
+            .content { padding: 30px 20px; }
+            .reply-section { background-color: #f0fdf4; padding: 20px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #10b981; }
+            .original-section { background-color: #f8fafc; padding: 20px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #64748b; }
+            .footer { background-color: #f8fafc; padding: 20px; text-align: center; color: #64748b; font-size: 14px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1 style="margin: 0; font-size: 24px;">✅ Thank You for Contacting Us</h1>
+              <p style="margin: 10px 0 0 0; opacity: 0.9;">We have received your message and here's our response</p>
+            </div>
+            
+            <div class="content">
+              <p style="margin: 0 0 20px 0; color: #1e293b;">Dear ${contactName},</p>
+              <p style="margin: 0 0 20px 0; color: #475569;">Thank you for reaching out to us. We have reviewed your message and here's our response:</p>
+              
+              <div class="reply-section">
+                <h3 style="margin: 0 0 15px 0; color: #059669;">Our Response</h3>
+                <p style="line-height: 1.6; color: #1e293b; white-space: pre-wrap;">${replyMessage}</p>
+              </div>
+              
+              <div class="original-section">
+                <h3 style="margin: 0 0 15px 0; color: #64748b;">Your Original Message</h3>
+                <p style="margin: 0 0 10px 0; color: #64748b;"><strong>Subject:</strong> ${originalSubject}</p>
+                <p style="line-height: 1.6; color: #64748b; white-space: pre-wrap;">${originalMessage}</p>
+              </div>
+              
+              <p style="margin: 30px 0 0 0; color: #475569;">If you have any further questions, please don't hesitate to contact us again.</p>
+              <p style="margin: 10px 0 0 0; color: #475569;">Best regards,<br>The Skillify Team</p>
+            </div>
+            
+            <div class="footer">
+              <p style="margin: 0;">© ${new Date().getFullYear()} Skillify Learning Platform</p>
+              <p style="margin: 5px 0 0 0;">This email was sent in response to your contact form submission</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+        await sendEmail(contactEmail, subject, html, subject);
+    }
+    catch (error) {
+        console.error("Failed to send contact reply email:", error);
+        throw error;
+    }
+};

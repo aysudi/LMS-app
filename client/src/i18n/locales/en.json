@@ -377,7 +377,9 @@
     "totalDuration": "Total Duration",
     "avgRating": "Avg Rating",
     "learningOverview": "Learning Overview",
-    "aboutToJoinStudents": "You're about to join {{count}} students in these amazing courses!"
+    "aboutToJoinStudents": "You're about to join {{count}} students in these amazing courses!",
+    "certificate": "Certificate",
+    "availableFor": "Available for"
   },
   "course": {
     "title": "Course Title",
@@ -417,11 +419,16 @@
     "by": "by",
     "free": "Free",
     "reviews": "reviews",
-    "students": "students"
+    "students": "students",
+    "previous": "Previous",
+    "next": "Next",
+    "cancel": "Cancel",
+    "add": "Add",
+    "optional": "Optional"
   },
   "instructor": {
     "createNewCourse": "Create New Course",
-    "editCourse": "Edit Course",
+    "editCourseAction": "Edit Course",
     "courseDashboard": "Course Dashboard",
     "myStudents": "My Students",
     "performance": "Performance",
@@ -548,7 +555,16 @@
       "enrollments": "Enrollments",
       "watchTime": "Watch Time",
       "conversion": "Conversion",
-      "quickActions": "Quick Actions"
+      "quickActions": "Quick Actions",
+      "topRatedCourses": "Top Rated Courses",
+      "viewAll": "View All",
+      "noRatedCourses": "No rated courses yet",
+      "coursesWillAppear": "Courses will appear here once students start rating them",
+      "createFirstCourse": "Create Your First Course",
+      "studentsCount": "{{count}} students",
+      "studentsCount_plural": "{{count}} students",
+      "recentMessages": "Recent Messages",
+      "noMessages": "No messages yet"
     },
     "analytics": {
       "organicSearch": "Organic Search",
@@ -573,7 +589,23 @@
       "paidEarnings": "Paid Earnings",
       "completedPayouts": "Completed payouts",
       "monthlyEarningsTrend": "Monthly Earnings Trend",
-      "earnings": "Earnings"
+      "earnings": "Earnings",
+      "earningsByCourse": "Earnings by Course",
+      "recentPayouts": "Recent Payouts",
+      "noEarningsData": "No earnings data available",
+      "noPayoutsYet": "No payouts yet",
+      "payoutsWillAppear": "Payouts will appear here once processed",
+      "payoutInformation": "Payout Information",
+      "payoutSchedule": "Payout Schedule",
+      "payoutsProcessedMonthly": "Payouts are processed monthly",
+      "minimumPayout": "Minimum payout amount: $50",
+      "processingTime": "Processing time: 3-5 business days",
+      "revenueShare": "Revenue Share",
+      "instructorShare": "Instructor share: 70%",
+      "platformFeePercent": "Platform fee: 30%",
+      "noHiddenCharges": "No hidden charges",
+      "vsLastPeriod": "vs last period",
+      "gross": "Gross"
     },
     "students": {
       "exportData": "Export Data",
@@ -595,7 +627,13 @@
       "enrolled": "Enrolled",
       "lastActive": "Last Active",
       "errorLoadingStudents": "Error loading students",
-      "pleaseReTryLater": "Please try again later"
+      "pleaseReTryLater": "Please try again later",
+      "actions": "Actions",
+      "sendMessage": "Send Message",
+      "viewProfile": "View Profile",
+      "previous": "Previous",
+      "next": "Next",
+      "never": "Never"
     },
     "courses": {
       "deleteCourse": "Delete Course",
@@ -609,6 +647,476 @@
     "messages": {
       "errorLoadingMessages": "Error loading messages",
       "description": "Communicate with your students and manage inquiries"
+    },
+    "createCourse": {
+      "title": "Create New Course",
+      "subtitle": "Build an engaging learning experience for your students",
+      "saveDraft": "Save Draft",
+      "stepProgress": "Step {{current}} of {{total}}",
+      "submitting": "Submitting...",
+      "submitForApproval": "Submit for Approval",
+      "courseCreatedSuccess": "Course created successfully!",
+      "courseCreatedError": "Failed to create course. Please try again.",
+      "steps": {
+        "basicInformation": {
+          "title": "Basic Information",
+          "description": "Course title, description, and category"
+        },
+        "courseDetails": {
+          "title": "Course Details",
+          "description": "Objectives, requirements, and target audience"
+        },
+        "pricingSettings": {
+          "title": "Pricing & Settings",
+          "description": "Set pricing, language, and other settings"
+        },
+        "mediaContent": {
+          "title": "Media & Content",
+          "description": "Upload course image and promotional video"
+        },
+        "reviewCreate": {
+          "title": "Review & Create",
+          "description": "Review your course details and create"
+        }
+      },
+      "validation": {
+        "titleRequired": "Title is required",
+        "titleTooLong": "Title must be less than 100 characters",
+        "descriptionRequired": "Description is required",
+        "categoryRequired": "Category is required",
+        "learningObjectiveRequired": "At least one learning objective is required",
+        "priceRequired": "Price must be greater than 0 for paid courses",
+        "discountPriceTooHigh": "Discount price cannot be higher than original price"
+      },
+      "approvalProcess": {
+        "title": "Approval Process",
+        "description": "Your course will be reviewed by our admin team to ensure quality standards. You'll be notified once the review is complete, typically within 24-48 hours."
+      },
+      "basicInformation": {
+        "title": "Basic Information",
+        "description": "Let's start with the fundamental details of your course. This information will help students understand what your course is about.",
+        "courseTitle": "Course Title *",
+        "courseTitlePlaceholder": "Enter an engaging course title",
+        "shortDescription": "Short Description",
+        "shortDescriptionPlaceholder": "A brief, compelling description of your course",
+        "courseDescription": "Course Description *",
+        "courseDescriptionPlaceholder": "Provide a detailed description of your course. What will students learn? How will it benefit them?",
+        "category": "Category *",
+        "selectCategory": "Select a category",
+        "subcategory": "Subcategory",
+        "selectSubcategory": "Select a subcategory",
+        "tags": "Tags",
+        "tagsDescription": "Add tags to help students find your course. You can add up to 10 tags.",
+        "enterTag": "Enter a tag",
+        "maxTagsReached": "Maximum number of tags reached (10/10)",
+        "charactersCount": "{{count}}/{{max}} characters"
+      },
+      "courseDetails": {
+        "title": "Course Details",
+        "description": "Define what students will learn, what they need to know beforehand, and who this course is for.",
+        "courseLevel": "Course Level *",
+        "levels": {
+          "beginner": "Beginner",
+          "intermediate": "Intermediate",
+          "advanced": "Advanced"
+        },
+        "levelDescriptions": {
+          "beginner": "No prior experience required",
+          "intermediate": "Some experience helpful",
+          "advanced": "Extensive experience required"
+        },
+        "learningObjectives": {
+          "title": "Learning Objectives",
+          "placeholder": "What will students learn?",
+          "description": "List the key skills and knowledge students will gain"
+        },
+        "requirements": {
+          "title": "Requirements",
+          "placeholder": "What do students need to know?",
+          "description": "List any prerequisites or requirements for taking this course"
+        },
+        "targetAudience": {
+          "title": "Target Audience",
+          "placeholder": "Who is this course for?",
+          "description": "Describe who would benefit most from this course"
+        },
+        "addAnother": "Add another",
+        "maxItemsAllowed": "Maximum of 10 items allowed"
+      },
+      "pricingSettings": {
+        "title": "Pricing & Settings",
+        "description": "Set your course pricing, language, and additional settings to help students find and enroll in your course.",
+        "coursePricing": "Course Pricing",
+        "chooseFreeOrPaid": "Choose between free or paid course",
+        "courseType": "Course Type",
+        "freeCourse": "Free Course",
+        "paidCourse": "Paid Course",
+        "originalPrice": "Original Price ($) *",
+        "discountPrice": "Discount Price ($)",
+        "freeCoursebenefits": "Free Course Benefits: Reach more students, build your reputation, and gather reviews. You can always convert to paid later.",
+        "courseLanguage": "Course Language",
+        "selectLanguage": "Select the primary language for your course",
+        "certificateCompletion": "Certificate of Completion",
+        "offerCertificate": "Offer a certificate when students complete your course",
+        "provideCertificate": "Provide Certificate:",
+        "certificateDescription": "Students will receive a certificate upon course completion",
+        "certificateFeatures": "Certificate Features: Personalized with student name, course title, completion date, and your instructor signature.",
+        "pricingTips": "💡 Pricing Tips",
+        "tip1": "Research similar courses to set competitive pricing",
+        "tip2": "Consider starting with a lower price to attract initial students",
+        "tip3": "Free courses can help build your reputation and student base",
+        "tip4": "Discount pricing creates urgency and can boost enrollments",
+        "tip5": "You can adjust pricing anytime after publishing",
+        "discount": "% discount"
+      },
+      "mediaContent": {
+        "title": "Media & Content",
+        "description": "Add visual elements to make your course more appealing. A good course image and promotional video can significantly increase enrollment.",
+        "courseImage": "Course Image",
+        "uploadThumbnail": "Upload an engaging thumbnail for your course",
+        "promotionalVideo": "Promotional Video",
+        "shortVideoIntro": "A short video introducing your course",
+        "clickToUpload": "Click to upload or drag and drop",
+        "recommendedSize": "Recommended: 1280x720 pixels (16:9 ratio)",
+        "imageFormats": "PNG, JPG up to 5MB",
+        "keepItShort": "Keep it short and engaging (30-120 seconds recommended)",
+        "videoFormats": "MP4, MOV, AVI up to 100MB",
+        "invalidImageFile": "Please select a valid image file",
+        "imageSizeLimit": "Image size should be less than 5MB",
+        "invalidVideoFile": "Please select a valid video file",
+        "videoSizeLimit": "Video size should be less than 100MB",
+        "mediaGuidelines": "Media Guidelines",
+        "courseImageGuidelines": "Course Image:",
+        "videoGuidelines": "Promotional Video:",
+        "guideline1": "Use high-quality, clear images",
+        "guideline2": "Avoid text-heavy designs",
+        "guideline3": "Keep it professional and relevant",
+        "guideline4": "1280x720 px recommended",
+        "guideline5": "Keep it under 2 minutes",
+        "guideline6": "Introduce yourself and the course",
+        "guideline7": "Show what students will learn",
+        "guideline8": "Use good audio quality"
+      },
+      "reviewCreate": {
+        "title": "Review & Create",
+        "description": "Review all the details before creating your course. You can edit any section by going back to previous steps.",
+        "sections": {
+          "basicInformation": "Basic Information",
+          "courseDetails": "Course Details",
+          "pricingSettings": "Pricing & Settings",
+          "mediaContent": "Media Content"
+        },
+        "labels": {
+          "courseTitle": "Course Title",
+          "shortDescription": "Short Description",
+          "category": "Category",
+          "subcategory": "Subcategory",
+          "courseLevel": "Course Level",
+          "learningObjectives": "Learning Objectives",
+          "requirements": "Requirements",
+          "targetAudience": "Target Audience",
+          "pricing": "Pricing",
+          "language": "Language",
+          "certificate": "Certificate",
+          "courseImage": "Course Image",
+          "promotionalVideo": "Promotional Video"
+        },
+        "values": {
+          "notProvided": "Not provided",
+          "notSpecified": "Not specified",
+          "freeCourse": "Free Course",
+          "provided": "Provided",
+          "uploaded": "✅ Uploaded",
+          "notUploaded": "❌ Not uploaded",
+          "optionalNotUploaded": "📷 Optional - Not uploaded",
+          "objectives": "{{count}} objectives",
+          "requirements": "{{count}} requirements",
+          "audienceGroups": "{{count}} audience groups"
+        },
+        "readyToCreate": "Ready to Create Your Course?",
+        "nextStepsDescription": "Once you create your course, you'll be able to add sections and lessons to build your curriculum. You can always edit course details later from your instructor dashboard.",
+        "previewAvailable": "Preview available after creation"
+      }
+    },
+    "editCourse": {
+      "courseSubmitted": "Course Submitted",
+      "courseSubmittedMessage": "Your course has been submitted for admin approval.",
+      "submissionFailed": "Submission Failed",
+      "submissionFailedMessage": "Failed to submit course for approval. Please try again.",
+      "savedAsDraft": "Saved as Draft",
+      "savedAsDraftMessage": "Your course has been saved as draft.",
+      "saveFailed": "Save Failed",
+      "saveFailedMessage": "Failed to save course as draft. Please try again.",
+      "tabs": {
+        "basicInformation": "Basic Information",
+        "curriculum": "Curriculum",
+        "media": "Media",
+        "announcements": "Announcements",
+        "settings": "Settings"
+      },
+      "failedToLoadCourse": "Failed to load course",
+      "deleteConfirmation": {
+        "title": "Delete Course",
+        "message": "Are you sure you want to delete \"{{courseTitle}}\"? This action cannot be undone.",
+        "confirm": "Yes, delete it!"
+      },
+      "basicInfo": {
+        "courseTitle": "Course Title",
+        "courseTitlePlaceholder": "Enter a descriptive title for your course",
+        "shortDescription": "Short Description",
+        "shortDescriptionPlaceholder": "Write a compelling summary of your course...",
+        "shortDescriptionHelper": "Brief description for course listings. Max 200 characters.",
+        "category": "Category",
+        "categoryPlaceholder": "Select a category",
+        "subcategory": "Subcategory",
+        "subcategoryPlaceholder": "Select a subcategory",
+        "detailedDescription": "Detailed Description",
+        "detailedDescriptionPlaceholder": "Write a detailed description of your course...",
+        "tags": "Tags",
+        "tagsHelper": "Add relevant tags to help students find your course (max 10 tags)",
+        "tagPlaceholder": "Enter a tag and press Enter",
+        "addTag": "Add Tag",
+        "maxTagsReached": "Maximum number of tags reached (10/10)",
+        "learningObjectives": "Learning Objectives",
+        "learningObjectivesHelper": "What will students learn in this course? (Add at least 4 objectives)",
+        "learningObjectivePlaceholder": "Learning objective {{index}}",
+        "addLearningObjective": "+ Add Learning Objective",
+        "requirements": "Requirements",
+        "requirementsHelper": "What do students need to know or have before taking this course?",
+        "requirementPlaceholder": "Requirement {{index}}",
+        "addRequirement": "+ Add Requirement",
+        "targetAudience": "Target Audience",
+        "targetAudienceHelper": "Who is this course for? Define your ideal student.",
+        "targetAudiencePlaceholder": "Target audience {{index}}",
+        "addTargetAudience": "+ Add Target Audience",
+        "saveBasicInfo": "Save Basic Information",
+        "saving": "Saving..."
+      },
+      "curriculum": {
+        "title": "Course Curriculum",
+        "description": "Build your course curriculum by adding sections and lessons",
+        "addSection": "Add Section",
+        "sectionTitle": "Section {{index}}: {{title}}",
+        "lessonsCount": "{{count}} lessons",
+        "lessonsCount_plural": "{{count}} lessons",
+        "addLesson": "Add Lesson",
+        "preview": "Preview",
+        "deleteSection": "Delete Section",
+        "deleteLesson": "Delete Lesson",
+        "deleteConfirmation": {
+          "title": "Delete {{type}}",
+          "message": "Are you sure you want to delete this {{type}}? This action cannot be undone.",
+          "section": "Section",
+          "lesson": "Lesson"
+        },
+        "empty": {
+          "title": "No curriculum content yet",
+          "description": "Start building your course by adding sections and lessons.",
+          "addFirstSection": "Add Your First Section"
+        }
+      },
+      "media": {
+        "courseImage": "Course Image",
+        "courseImagePreview": "Course preview",
+        "uploadImage": "Upload Image",
+        "chooseImage": "Choose Image",
+        "imageRecommendations": {
+          "size": "Recommended image size: 1280x720 pixels (16:9 ratio)",
+          "maxSize": "Maximum file size: 5MB",
+          "formats": "Supported formats: JPG, PNG"
+        },
+        "promotionalVideo": "Promotional Video",
+        "uploadVideo": "Upload Video",
+        "chooseVideo": "Choose Video",
+        "videoRecommendations": {
+          "duration": "Maximum duration: 2 minutes",
+          "maxSize": "Maximum file size: 100MB",
+          "formats": "Supported formats: MP4, WebM"
+        }
+      },
+      "sectionEditor": {
+        "createSection": "Create Section",
+        "editSection": "Edit Section",
+        "sectionTitle": "Section Title",
+        "sectionTitlePlaceholder": "Enter section title...",
+        "description": "Description",
+        "descriptionPlaceholder": "Describe what students will learn in this section...",
+        "sectionThumbnail": "Section Thumbnail",
+        "thumbnailAlt": "Section thumbnail",
+        "change": "Change",
+        "remove": "Remove",
+        "dropImageHere": "Drop an image here, or",
+        "browse": "browse",
+        "imageFormats": "PNG, JPG, GIF up to 5MB",
+        "updateSection": "Update Section",
+        "createSectionBtn": "Create Section",
+        "errors": {
+          "selectImage": "Please select an image file",
+          "imageSize": "Image size should be less than 5MB"
+        }
+      },
+      "announcements": {
+        "title": "Course Announcements",
+        "createAnnouncement": "Create Announcement",
+        "noAnnouncements": "No announcements yet",
+        "noAnnouncementsDesc": "Create your first announcement to keep students informed about important updates.",
+        "createFirstAnnouncement": "Create First Announcement",
+        "priority": {
+          "low": "Low",
+          "medium": "Medium",
+          "high": "High",
+          "urgent": "Urgent"
+        }
+      },
+      "settings": {
+        "title": "Course Settings",
+        "pricing": "Pricing",
+        "free": "Free",
+        "paid": "Paid",
+        "price": "Price",
+        "currency": "Currency",
+        "language": "Language",
+        "level": "Level",
+        "certificate": "Certificate",
+        "certificateEnabled": "Certificate Enabled",
+        "certificateDisabled": "Certificate Disabled",
+        "dangerZone": "Danger Zone",
+        "deleteCourse": "Delete Course",
+        "deleteCourseDesc": "Once you delete this course, there is no going back. Please be certain.",
+        "submitForApproval": "Submit for Approval",
+        "submitForApprovalDesc": "Submit your course for admin review and approval.",
+        "saveAsDraft": "Save as Draft",
+        "saveAsDraftDesc": "Save your course as draft to continue editing later.",
+        "saveSettings": "Save Settings",
+        "levels": {
+          "beginner": "Beginner",
+          "intermediate": "Intermediate",
+          "advanced": "Advanced",
+          "allLevels": "All Levels"
+        },
+        "coursePricing": "Course Pricing",
+        "freeCourseName": "This is a free course",
+        "freeCourseDescription": "Free courses help build your audience and establish credibility"
+      },
+      "lessonEdit": {
+        "title": "Edit Lesson",
+        "backToCourse": "Back to Course",
+        "saveChanges": "Save Changes",
+        "saving": "Saving...",
+        "lessonUpdated": "Lesson updated successfully!",
+        "updateFailed": "Failed to update lesson. Please try again.",
+        "basicInformation": "Basic Information",
+        "lessonTitle": "Lesson Title",
+        "lessonTitlePlaceholder": "Enter lesson title...",
+        "description": "Description",
+        "descriptionPlaceholder": "Describe what students will learn in this lesson...",
+        "lessonVideo": "Lesson Video",
+        "duration": "Duration: {{minutes}} minutes",
+        "currentVideo": "Current Video",
+        "changeVideo": "Change Video",
+        "reset": "Reset",
+        "uploadReplacementVideo": "Upload replacement video",
+        "lessonResources": "Lesson Resources",
+        "addResource": "Add Resource",
+        "resource": "Resource {{index}}",
+        "file": "File",
+        "current": "Current: {{name}}",
+        "leaveEmptyToKeepCurrent": "Leave empty to keep current file",
+        "type": "Type",
+        "resourceTypes": {
+          "pdf": "PDF Document",
+          "zip": "ZIP Archive",
+          "doc": "Document",
+          "other": "Other"
+        },
+        "name": "Name (Optional)",
+        "customNamePlaceholder": "Custom name for this resource",
+        "noResourcesAdded": "No Resources Added",
+        "noResourcesDesc": "Add supplementary materials like PDFs, documents, or other files to enhance your lesson.",
+        "lessonQuiz": "Lesson Quiz",
+        "addQuestion": "Add Question",
+        "question": "Question {{index}}",
+        "enterQuestion": "Enter question...",
+        "option": "Option {{index}}...",
+        "noQuizQuestions": "No quiz questions added yet",
+        "lessonSettings": "Lesson Settings",
+        "durationMinutes": "Duration (minutes)",
+        "previewLesson": "Preview Lesson",
+        "allowFreePreview": "Allow free preview of this lesson",
+        "visibleToAll": "Visible to all students",
+        "onlyForEnrolled": "Only for enrolled students",
+        "validation": {
+          "titleRequired": "Please enter a lesson title",
+          "videoRequired": "Please upload a video for this lesson",
+          "videoTooLarge": "Video size should be less than 500MB",
+          "resourceTooLarge": "File size should be less than 50MB",
+          "selectVideoFile": "Please select a video file"
+        },
+        "toasts": {
+          "videoUploaded": "Video \"{{name}}\" uploaded successfully!",
+          "fileTooLarge": "File too large",
+          "selectVideo": "Select a video"
+        }
+      },
+      "lessonCreate": {
+        "title": "Create New Lesson",
+        "backToCourse": "Back to Course",
+        "createLesson": "Create Lesson",
+        "creating": "Creating...",
+        "lessonCreated": "🎉 Lesson created successfully!",
+        "creationFailed": "❌ Failed to create lesson. Please try again.",
+        "basicInformation": "Basic Information",
+        "lessonTitle": "Lesson Title",
+        "lessonTitlePlaceholder": "Enter lesson title...",
+        "description": "Description",
+        "descriptionPlaceholder": "Describe what students will learn in this lesson...",
+        "lessonVideo": "Lesson Video",
+        "duration": "Duration: {{minutes}} minutes",
+        "removeVideo": "Remove Video",
+        "uploadYourLessonVideo": "Upload your lesson video",
+        "lessonResources": "Lesson Resources",
+        "addResource": "Add Resource",
+        "resource": "Resource {{index}}",
+        "file": "File",
+        "type": "Type",
+        "resourceTypes": {
+          "pdf": "PDF Document",
+          "zip": "ZIP Archive",
+          "doc": "Document",
+          "other": "Other"
+        },
+        "name": "Name (Optional)",
+        "customNamePlaceholder": "Custom name for this resource",
+        "noResourcesAdded": "No Resources Added",
+        "noResourcesDesc": "Add supplementary materials like PDFs, documents, or other files to enhance your lesson.",
+        "lessonQuiz": "Lesson Quiz",
+        "addQuestion": "Add Question",
+        "question": "Question {{index}}",
+        "enterQuestion": "Enter question...",
+        "option": "Option {{index}}...",
+        "noQuizQuestions": "No quiz questions added yet",
+        "lessonSettings": "Lesson Settings",
+        "durationMinutes": "Duration (minutes)",
+        "previewLesson": "Preview Lesson",
+        "allowFreePreview": "Allow free preview of this lesson",
+        "visibleToAll": "Visible to all students",
+        "onlyForEnrolled": "Only for enrolled students",
+        "validation": {
+          "titleRequired": "Please enter a lesson title",
+          "videoRequired": "Please upload a video for this lesson",
+          "videoTooLarge": "Video size should be less than 500MB",
+          "resourceTooLarge": "File size should be less than 50MB",
+          "selectVideoFile": "Please select a video file"
+        },
+        "toasts": {
+          "videoUploaded": "Video \"{{name}}\" uploaded successfully!",
+          "fileTooLarge": "File too large",
+          "selectVideo": "Select a video"
+        },
+        "lessonNotFound": "Lesson Not Found",
+        "lessonNotFoundDesc": "The lesson you're trying to edit doesn't exist.",
+        "backToCurriculum": "Back to Curriculum"
+      }
     }
   },
   "student": {

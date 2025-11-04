@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import {
   FaPlus,
   FaBullhorn,
@@ -214,6 +215,7 @@ const AnnouncementModal = ({
 };
 
 const AnnouncementsPanel = ({ course }: AnnouncementsPanelProps) => {
+  const { t } = useTranslation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAnnouncement, setEditingAnnouncement] = useState<
     Announcement | undefined
@@ -396,18 +398,17 @@ const AnnouncementsPanel = ({ course }: AnnouncementsPanelProps) => {
           <div className="text-center py-12">
             <FaBullhorn className="mx-auto h-16 w-16 text-gray-300 mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No announcements yet
+              {t("instructor.editCourse.announcements.noAnnouncements")}
             </h3>
             <p className="text-gray-500 mb-6">
-              Create your first announcement to keep students informed about
-              important updates.
+              {t("instructor.editCourse.announcements.noAnnouncementsDesc")}
             </p>
             <button
               onClick={handleCreateAnnouncement}
               className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 cursor-pointer"
             >
               <FaPlus className="mr-2" />
-              Create First Announcement
+              {t("instructor.editCourse.announcements.createFirstAnnouncement")}
             </button>
           </div>
         )}

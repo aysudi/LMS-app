@@ -263,13 +263,15 @@ const InstructorEarnings = () => {
             className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
           >
             <h2 className="text-xl font-bold text-gray-900 mb-6">
-              Earnings by Course
+              {t("instructor.earnings.earningsByCourse")}
             </h2>
 
             {courseEarnings.length === 0 ? (
               <div className="text-center py-12">
                 <FaBook className="text-4xl text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500">No earnings data available</p>
+                <p className="text-gray-500">
+                  {t("instructor.earnings.noEarningsData")}
+                </p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -309,7 +311,8 @@ const InstructorEarnings = () => {
                         {formatCurrency(course.instructorShare || 0)}
                       </p>
                       <p className="text-sm text-gray-500">
-                        Gross: {formatCurrency(course.grossAmount || 0)}
+                        {t("instructor.earnings.gross")}:{" "}
+                        {formatCurrency(course.grossAmount || 0)}
                       </p>
                     </div>
                   </div>
@@ -326,15 +329,17 @@ const InstructorEarnings = () => {
             className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
           >
             <h2 className="text-xl font-bold text-gray-900 mb-6">
-              Recent Payouts
+              {t("instructor.earnings.recentPayouts")}
             </h2>
 
             {earnings.totalPaid === 0 ? (
               <div className="text-center py-12">
                 <FaCreditCard className="text-4xl text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500">No payouts yet</p>
+                <p className="text-gray-500">
+                  {t("instructor.earnings.noPayoutsYet")}
+                </p>
                 <p className="text-sm text-gray-400 mt-1">
-                  Payouts will appear here once processed
+                  {t("instructor.earnings.payoutsWillAppear")}
                 </p>
               </div>
             ) : (
@@ -412,27 +417,29 @@ const InstructorEarnings = () => {
             </div>
             <div className="flex-1">
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Payout Information
+                {t("instructor.earnings.payoutInformation")}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
                 <div>
                   <h4 className="font-medium text-gray-900 mb-2">
-                    Payout Schedule
+                    {t("instructor.earnings.payoutSchedule")}
                   </h4>
                   <ul className="space-y-1 text-gray-600">
-                    <li>• Payouts are processed monthly</li>
-                    <li>• Minimum payout amount: $50</li>
-                    <li>• Processing time: 3-5 business days</li>
+                    <li>
+                      • {t("instructor.earnings.payoutsProcessedMonthly")}
+                    </li>
+                    <li>• {t("instructor.earnings.minimumPayout")}</li>
+                    <li>• {t("instructor.earnings.processingTime")}</li>
                   </ul>
                 </div>
                 <div>
                   <h4 className="font-medium text-gray-900 mb-2">
-                    Revenue Share
+                    {t("instructor.earnings.revenueShare")}
                   </h4>
                   <ul className="space-y-1 text-gray-600">
-                    <li>• Instructor share: 70%</li>
-                    <li>• Platform fee: 30%</li>
-                    <li>• No hidden charges</li>
+                    <li>• {t("instructor.earnings.instructorShare")}</li>
+                    <li>• {t("instructor.earnings.platformFeePercent")}</li>
+                    <li>• {t("instructor.earnings.noHiddenCharges")}</li>
                   </ul>
                 </div>
               </div>
@@ -464,6 +471,7 @@ const EarningsCard: React.FC<EarningsCardProps> = ({
   subtitle,
   color,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
       <div className="flex items-center justify-between">
@@ -490,7 +498,9 @@ const EarningsCard: React.FC<EarningsCardProps> = ({
                 <FaArrowDown className="text-xs" />
               )}
               <span>{Math.abs(change)}%</span>
-              <span className="text-gray-500">vs last period</span>
+              <span className="text-gray-500">
+                {t("instructor.earnings.vsLastPeriod")}
+              </span>
             </div>
           )}
 

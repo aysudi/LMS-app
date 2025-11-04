@@ -312,7 +312,7 @@ const InstructorStudents = () => {
                       {t("instructor.students.lastActive")}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
+                      {t("instructor.students.actions")}
                     </th>
                   </tr>
                 </thead>
@@ -346,7 +346,7 @@ const InstructorStudents = () => {
                 disabled={page === 1}
                 className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Previous
+                {t("common.previous")}
               </button>
 
               {Array.from({ length: totalPages }, (_, i) => i + 1).map(
@@ -370,7 +370,7 @@ const InstructorStudents = () => {
                 disabled={page === totalPages}
                 className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Next
+                {t("common.next")}
               </button>
             </div>
           </motion.div>
@@ -387,6 +387,7 @@ interface StudentRowProps {
 }
 
 const StudentRow: React.FC<StudentRowProps> = ({ student, onSendMessage }) => {
+  const { t } = useTranslation();
   const progressPercent = student.enrollment?.progressPercentage || 0;
 
   return (
@@ -434,20 +435,20 @@ const StudentRow: React.FC<StudentRowProps> = ({ student, onSendMessage }) => {
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
         {student.enrollment?.lastAccessedAt
           ? new Date(student.enrollment.lastAccessedAt).toLocaleDateString()
-          : "Never"}
+          : t("instructor.students.never")}
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
         <div className="flex items-center space-x-2">
           <button
             onClick={onSendMessage}
             className="p-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors duration-200"
-            title="Send Message"
+            title={t("instructor.students.sendMessage")}
           >
             <FaEnvelope />
           </button>
           <button
             className="p-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors duration-200"
-            title="View Profile"
+            title={t("instructor.students.viewProfile")}
           >
             <FaEye />
           </button>

@@ -1,6 +1,5 @@
 import { validateCertificateGeneration } from "../validations/certificateValidation";
-import { sendCertificateEmail } from "../utils/sendMail";
-import { generateCertificate } from "../services/certificateService";
+import { generateCertificate, sendCertificateEmail, } from "../services/certificateService";
 import Certificate from "../models/Certificate";
 import Enrollment from "../models/Enrollment";
 import mongoose from "mongoose";
@@ -46,7 +45,6 @@ export const generateAndSendCertificate = async (req, res) => {
                 .toUpperCase()}`,
         };
         const certificateBuffer = await generateCertificate(certificateData);
-        // Save certificate to database first
         const certificate = new Certificate({
             userId: new mongoose.Types.ObjectId(userId),
             courseId: new mongoose.Types.ObjectId(courseId),
@@ -58,37 +56,36 @@ export const generateAndSendCertificate = async (req, res) => {
             emailSent: false,
         });
         await certificate.save();
-        // Update enrollment to mark certificate as issued
-        await Enrollment.findOneAndUpdate({
+        const enrollment = await Enrollment.findOneAndUpdate({
             user: new mongoose.Types.ObjectId(userId),
             course: new mongoose.Types.ObjectId(courseId),
-            completionStatus: "completed"
+            status: "completed",
         }, {
             certificateIssued: true,
             certificateIssuedAt: new Date(),
-            certificateId: certificateData.certificateId
+            certificateId: certificateData.certificateId,
         });
         let emailSuccess = false;
         let emailError = null;
-        // Try to send certificate via email (non-blocking)
         try {
             await sendCertificateEmail(userEmail, studentName, courseName, certificateBuffer, certificateData.certificateId);
             emailSuccess = true;
-            // Update certificate to mark email as sent
             await Certificate.findByIdAndUpdate(certificate._id, {
-                emailSent: true
+                emailSent: true,
             });
         }
         catch (error) {
             console.error("Email sending failed (non-critical):", error);
-            emailError = error instanceof Error ? error.message : "Email sending failed";
-            // Continue without failing - certificate is still generated
+            emailError =
+                error instanceof Error ? error.message : "Email sending failed";
         }
         res.status(200).json({
             success: true,
             message: emailSuccess
                 ? "Certificate generated and sent successfully"
-                : `Certificate generated successfully${emailError ? `. Email delivery failed: ${emailError}` : ', but email sending failed'}`,
+                : `Certificate generated successfully${emailError
+                    ? `. Email delivery failed: ${emailError}`
+                    : ", but email sending failed"}`,
             data: {
                 certificateId: certificateData.certificateId,
                 issuedAt: certificate.issuedAt,

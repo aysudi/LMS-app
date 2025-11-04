@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import {
   FaPlus,
   FaMinus,
@@ -39,6 +40,7 @@ const CourseDetailsStep: React.FC<CourseDetailsStepProps> = ({
   setFormData,
   errors,
 }) => {
+  const { t } = useTranslation();
   const renderArrayField = (
     field: "learningObjectives" | "requirements" | "targetAudience",
     title: string,
@@ -92,12 +94,12 @@ const CourseDetailsStep: React.FC<CourseDetailsStepProps> = ({
             className="w-full py-2 px-4 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-indigo-400 hover:text-indigo-600 transition-colors duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <FaPlus className="text-sm" />
-            <span>Add another {title.toLowerCase().slice(0, -1)}</span>
+            <span>{t("courses.createCourse.courseDetails.addAnother")}</span>
           </button>
 
           {formData[field].length >= 10 && (
             <p className="text-sm text-amber-600">
-              Maximum of 10 items allowed
+              {t("courses.createCourse.courseDetails.maxItemsAllowed")}
             </p>
           )}
         </div>
@@ -121,11 +123,10 @@ const CourseDetailsStep: React.FC<CourseDetailsStepProps> = ({
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Course Details
+            {t("courses.createCourse.courseDetails.title")}
           </h2>
           <p className="text-gray-600">
-            Define what students will learn, what they need to know beforehand,
-            and who this course is for.
+            {t("courses.createCourse.courseDetails.description")}
           </p>
         </div>
 
@@ -133,7 +134,7 @@ const CourseDetailsStep: React.FC<CourseDetailsStepProps> = ({
           {/* Course Level */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-4">
-              Course Level *
+              {t("courses.createCourse.courseDetails.courseLevel")}
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {(["Beginner", "Intermediate", "Advanced"] as const).map(
@@ -168,12 +169,15 @@ const CourseDetailsStep: React.FC<CourseDetailsStepProps> = ({
                         {level === "Intermediate" && "2"}
                         {level === "Advanced" && "3"}
                       </div>
-                      <span className="font-medium text-gray-900">{level}</span>
+                      <span className="font-medium text-gray-900">
+                        {t(
+                          `courses.createCourse.courseDetails.levels.${level.toLowerCase()}`
+                        )}
+                      </span>
                       <span className="text-sm text-gray-500 text-center mt-1">
-                        {level === "Beginner" && "No prior experience required"}
-                        {level === "Intermediate" && "Some experience helpful"}
-                        {level === "Advanced" &&
-                          "Extensive experience required"}
+                        {t(
+                          `courses.createCourse.courseDetails.levelDescriptions.${level.toLowerCase()}`
+                        )}
                       </span>
                     </label>
                   </div>
@@ -185,28 +189,32 @@ const CourseDetailsStep: React.FC<CourseDetailsStepProps> = ({
           {/* Learning Objectives */}
           {renderArrayField(
             "learningObjectives",
-            "Learning Objectives",
-            "What will students learn?",
+            t("courses.createCourse.courseDetails.learningObjectives.title"),
+            t(
+              "courses.createCourse.courseDetails.learningObjectives.placeholder"
+            ),
             FaLightbulb,
-            "List the key skills and knowledge students will gain"
+            t(
+              "courses.createCourse.courseDetails.learningObjectives.description"
+            )
           )}
 
           {/* Requirements */}
           {renderArrayField(
             "requirements",
-            "Requirements",
-            "What do students need to know?",
+            t("courses.createCourse.courseDetails.requirements.title"),
+            t("courses.createCourse.courseDetails.requirements.placeholder"),
             FaClipboardList,
-            "List any prerequisites or requirements for taking this course"
+            t("courses.createCourse.courseDetails.requirements.description")
           )}
 
           {/* Target Audience */}
           {renderArrayField(
             "targetAudience",
-            "Target Audience",
-            "Who is this course for?",
+            t("courses.createCourse.courseDetails.targetAudience.title"),
+            t("courses.createCourse.courseDetails.targetAudience.placeholder"),
             FaUsers,
-            "Describe who would benefit most from this course"
+            t("courses.createCourse.courseDetails.targetAudience.description")
           )}
         </div>
       </div>

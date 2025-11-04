@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+// @ts-ignore
+import { useTranslation } from "react-i18next";
 import {
   FaArrowLeft,
   FaArrowRight,
@@ -20,52 +22,59 @@ import MediaContentStep from "../../components/Instructor/CreateCourse/MediaCont
 import ReviewCreateStep from "../../components/Instructor/CreateCourse/ReviewCreateStep";
 import type { CourseFormData } from "../../types/course.type";
 
-const CREATION_STEPS = [
-  {
-    id: 1,
-    title: "Basic Information",
-    description: "Course title, description, and category",
-    icon: FaBook,
-  },
-  {
-    id: 2,
-    title: "Course Details",
-    description: "Objectives, requirements, and target audience",
-    icon: FaBullseye,
-  },
-  {
-    id: 3,
-    title: "Pricing & Settings",
-    description: "Set pricing, language, and other settings",
-    icon: FaDollarSign,
-  },
-  {
-    id: 4,
-    title: "Media & Content",
-    description: "Upload course image and promotional video",
-    icon: FaImage,
-  },
-  {
-    id: 5,
-    title: "Review & Create",
-    description: "Review your course details and create",
-    icon: FaCheck,
-  },
-];
+// Steps will be defined inside component to use translation
 
 const CreateCourse = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const CREATION_STEPS = [
+    {
+      id: 1,
+      title: t("instructor.createCourse.steps.basicInformation.title"),
+      description: t(
+        "instructor.createCourse.steps.basicInformation.description"
+      ),
+      icon: FaBook,
+    },
+    {
+      id: 2,
+      title: t("instructor.createCourse.steps.courseDetails.title"),
+      description: t("instructor.createCourse.steps.courseDetails.description"),
+      icon: FaBullseye,
+    },
+    {
+      id: 3,
+      title: t("instructor.createCourse.steps.pricingSettings.title"),
+      description: t(
+        "instructor.createCourse.steps.pricingSettings.description"
+      ),
+      icon: FaDollarSign,
+    },
+    {
+      id: 4,
+      title: t("instructor.createCourse.steps.mediaContent.title"),
+      description: t("instructor.createCourse.steps.mediaContent.description"),
+      icon: FaImage,
+    },
+    {
+      id: 5,
+      title: t("instructor.createCourse.steps.reviewCreate.title"),
+      description: t("instructor.createCourse.steps.reviewCreate.description"),
+      icon: FaCheck,
+    },
+  ];
+
   const createCourseMutation = useCreateCourse({
     onSuccess: () => {
-      toast.success("Course created successfully!");
+      toast.success(t("instructor.createCourse.courseCreatedSuccess"));
       navigate("/instructor/courses");
     },
     onError: (error) => {
       console.error("Error creating course:", error);
-      toast.error("Failed to create course. Please try again.");
+      toast.error(t("instructor.createCourse.courseCreatedError"));
     },
   });
 
@@ -95,29 +104,42 @@ const CreateCourse = () => {
 
     switch (step) {
       case 1:
-        if (!formData.title.trim()) newErrors.title = "Title is required";
+        if (!formData.title.trim())
+          newErrors.title = t(
+            "instructor.createCourse.validation.titleRequired"
+          );
         if (formData.title.length > 100)
-          newErrors.title = "Title must be less than 100 characters";
+          newErrors.title = t(
+            "instructor.createCourse.validation.titleTooLong"
+          );
         if (!formData.description.trim())
-          newErrors.description = "Description is required";
-        if (!formData.category) newErrors.category = "Category is required";
+          newErrors.description = t(
+            "instructor.createCourse.validation.descriptionRequired"
+          );
+        if (!formData.category)
+          newErrors.category = t(
+            "instructor.createCourse.validation.categoryRequired"
+          );
         break;
 
       case 2:
         if (
           formData.learningObjectives.filter((obj) => obj.trim()).length === 0
         )
-          newErrors.learningObjectives =
-            "At least one learning objective is required";
+          newErrors.learningObjectives = t(
+            "instructor.createCourse.validation.learningObjectiveRequired"
+          );
         break;
 
       case 3:
         if (!formData.isFree && formData.originalPrice <= 0)
-          newErrors.originalPrice =
-            "Price must be greater than 0 for paid courses";
+          newErrors.originalPrice = t(
+            "instructor.createCourse.validation.priceRequired"
+          );
         if (formData.discountPrice > formData.originalPrice)
-          newErrors.discountPrice =
-            "Discount price cannot be higher than original price";
+          newErrors.discountPrice = t(
+            "instructor.createCourse.validation.discountPriceTooHigh"
+          );
         break;
     }
 
@@ -267,10 +289,10 @@ const CreateCourse = () => {
             </button>
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
-                Create New Course
+                {t("instructor.createCourse.title")}
               </h1>
               <p className="text-gray-600 mt-1">
-                Build an engaging learning experience for your students
+                {t("instructor.createCourse.subtitle")}
               </p>
             </div>
           </div>
@@ -338,7 +360,7 @@ const CreateCourse = () => {
               className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200 flex items-center space-x-2 cursor-pointer"
             >
               <FaSave className="text-sm" />
-              <span>Save Draft</span>
+              <span>{t("instructor.createCourse.saveDraft")}</span>
             </button>
           )}
         </motion.div>
@@ -462,11 +484,14 @@ const CreateCourse = () => {
               className="px-6 py-3 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <FaArrowLeft className="text-sm" />
-              <span>Previous</span>
+              <span>{t("common.previous")}</span>
             </button>
 
             <span className="text-sm text-gray-500">
-              Step {currentStep} of {CREATION_STEPS.length}
+              {t("instructor.createCourse.stepProgress", {
+                current: currentStep,
+                total: CREATION_STEPS.length,
+              })}
             </span>
 
             {currentStep < CREATION_STEPS.length ? (
@@ -474,7 +499,7 @@ const CreateCourse = () => {
                 onClick={handleNext}
                 className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200 flex items-center space-x-2 cursor-pointer"
               >
-                <span>Next</span>
+                <span>{t("common.next")}</span>
                 <FaArrowRight className="text-sm" />
               </button>
             ) : (
@@ -486,12 +511,14 @@ const CreateCourse = () => {
                 {createCourseMutation.isPending ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Submitting...</span>
+                    <span>{t("instructor.createCourse.submitting")}</span>
                   </>
                 ) : (
                   <>
                     <FaCheck className="text-sm" />
-                    <span>Submit for Approval</span>
+                    <span>
+                      {t("instructor.createCourse.submitForApproval")}
+                    </span>
                   </>
                 )}
               </button>
@@ -500,9 +527,10 @@ const CreateCourse = () => {
           </div>
           <div className="m-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-sm text-blue-800">
-              <strong>📋 Approval Process:</strong> Your course will be reviewed
-              by our admin team to ensure quality standards. You'll be notified
-              once the review is complete, typically within 24-48 hours.
+              <strong>
+                📋 {t("instructor.createCourse.approvalProcess.title")}:
+              </strong>{" "}
+              {t("instructor.createCourse.approvalProcess.description")}
             </p>
           </div>
         </div>

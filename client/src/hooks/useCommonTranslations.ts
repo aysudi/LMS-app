@@ -106,7 +106,7 @@ export const useCommonTranslations = () => {
     // Instructor
     instructor: {
       createNewCourse: t("instructor.createNewCourse"),
-      editCourse: t("instructor.editCourse"),
+      editCourse: t("instructor.editCourseAction"),
       courseDashboard: t("instructor.courseDashboard"),
       myStudents: t("instructor.myStudents"),
       earnings: t("instructor.earnings"),

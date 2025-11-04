@@ -29,6 +29,7 @@ import { useUserEnrollments } from "../../hooks/useEnrollment";
 import { useSocket } from "../../hooks/useSocket";
 import Loading from "../../components/Common/Loading";
 import NoConversationsState from "../../components/Common/NoConversationsState";
+import EmojiAndStickerPicker from "../../components/Common/EmojiPicker";
 import { format, isToday, isYesterday } from "date-fns";
 import type { Message, CreateMessageData } from "../../types/message.type";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -49,11 +50,11 @@ const Messages: React.FC = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [isMobileView, setIsMobileView] = useState(false);
   const [showMobileConversations, setShowMobileConversations] = useState(true);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout>(null);
 
   // Debounce search term to prevent constant API calls
   useEffect(() => {
@@ -83,9 +84,18 @@ const Messages: React.FC = () => {
   );
 
   const selectedConversationId = selectedConversation?._id || "";
-  const { data: messagesData, isLoading: loadingMessages } = useMessages({
-    conversationId: selectedConversationId,
-  });
+  const { data: messagesData, isLoading: loadingMessages } = useMessages(
+    {
+      conversationId: selectedConversationId,
+    },
+    {
+      enabled: !!selectedConversationId,
+      staleTime: 30 * 1000, // 30 seconds - messages can be a bit stale for performance
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchInterval: false,
+    }
+  );
 
   const { data: enrollments } = useUserEnrollments();
   const { sendMessage } = useMessageMutations();
@@ -138,14 +148,14 @@ const Messages: React.FC = () => {
     }
   }, [selectedConversation?._id, markAsRead]);
 
-  // Auto-resize textarea with throttling
-  useEffect(() => {
+  // Auto-resize textarea with throttling - use ref to avoid re-renders
+  const autoResizeTextarea = useCallback(() => {
     const textarea = textareaRef.current;
     if (textarea) {
       textarea.style.height = "auto";
       textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
     }
-  }, [messageInput]);
+  }, []);
 
   const handleSendMessage = useCallback(() => {
     if (!messageInput.trim() || !selectedConversation || sendMessage.isPending)
@@ -166,14 +176,13 @@ const Messages: React.FC = () => {
       onSuccess: () => {
         setMessageInput("");
         setIsTyping(false);
-        if (textareaRef.current) {
-          textareaRef.current.style.height = "auto";
-        }
+        // Reset textarea height after clearing message
+        setTimeout(() => autoResizeTextarea(), 0);
       },
     });
   }, [messageInput, selectedConversation, user?.id, sendMessage]);
 
-  const handleKeyPress = useCallback(
+  const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
@@ -188,27 +197,23 @@ const Messages: React.FC = () => {
       const newValue = e.target.value;
       setMessageInput(newValue);
 
-      // Simplified typing indicator - no socket calls to prevent lag
-      if (selectedConversationId && newValue.trim()) {
-        if (!isTyping) {
-          setIsTyping(true);
-        }
+      // Direct auto-resize without refs to avoid re-renders
+      const textarea = e.target;
+      textarea.style.height = "auto";
+      textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
 
-        if (typingTimeoutRef.current) {
-          clearTimeout(typingTimeoutRef.current);
-        }
-
-        typingTimeoutRef.current = setTimeout(() => {
+      // Simple typing indicator with direct state updates
+      if (newValue.trim()) {
+        setIsTyping(true);
+        // Use a simple timeout without refs to avoid dependency issues
+        setTimeout(() => {
           setIsTyping(false);
-        }, 1000);
-      } else if (!newValue.trim() && isTyping) {
+        }, 2000);
+      } else {
         setIsTyping(false);
-        if (typingTimeoutRef.current) {
-          clearTimeout(typingTimeoutRef.current);
-        }
       }
     },
-    [selectedConversationId, isTyping]
+    [] // EMPTY dependency array to prevent re-renders!
   );
 
   const handleSearchChange = useCallback(
@@ -237,6 +242,39 @@ const Messages: React.FC = () => {
       return String(senderId) === String(user?.id || "");
     },
     [user?.id]
+  );
+
+  const handleEmojiSelect = useCallback(
+    (emoji: string) => {
+      setMessageInput((prev) => prev + emoji);
+      setShowEmojiPicker(false);
+      // Auto-resize after emoji addition
+      setTimeout(() => autoResizeTextarea(), 0);
+    },
+    [autoResizeTextarea]
+  );
+
+  const handleStickerSelect = useCallback(
+    (sticker: string) => {
+      // For stickers, we'll send them as special message type
+      if (selectedConversation && sendMessage) {
+        const otherParticipant =
+          selectedConversation.participants.student._id === user?.id
+            ? selectedConversation.participants.instructor
+            : selectedConversation.participants.student;
+
+        const messageData = {
+          receiverId: otherParticipant._id,
+          courseId: selectedConversation.courseId._id,
+          content: sticker,
+          messageType: "image" as const,
+        };
+
+        sendMessage.mutate(messageData);
+      }
+      setShowEmojiPicker(false);
+    },
+    [selectedConversation, user?.id, sendMessage]
   );
 
   const formatMessageTime = useCallback((date: string) => {
@@ -423,7 +461,9 @@ const Messages: React.FC = () => {
                             {conversation.lastMessage.senderId === user?.id && (
                               <span className="text-gray-500">You: </span>
                             )}
-                            {conversation.lastMessage.content}
+                            {conversation.lastMessage.content.startsWith("http")
+                              ? "🎨 Sticker"
+                              : conversation.lastMessage.content}
                           </p>
                           {conversation.lastMessage.senderId === user?.id && (
                             <div className="flex-shrink-0">
@@ -586,7 +626,7 @@ const Messages: React.FC = () => {
               </div>
             ) : (
               <>
-                {messages.map((message, index) => {
+                {messages.map((message: any, index: number) => {
                   const fromMe = isMessageFromMe(message);
                   const showDateSeparator =
                     index === 0 ||
@@ -620,9 +660,31 @@ const Messages: React.FC = () => {
                               : "bg-white text-gray-900 rounded-bl-md border border-gray-200"
                           }`}
                         >
-                          <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                            {message.content}
-                          </p>
+                          {message.messageType === "image" &&
+                          message.content.startsWith("http") ? (
+                            <img
+                              src={message.content}
+                              alt="Sticker"
+                              className="w-24 h-24 object-contain rounded-lg"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = "none";
+                                // Show text fallback
+                                const parent = target.parentElement;
+                                if (parent) {
+                                  const fallback = document.createElement("p");
+                                  fallback.className =
+                                    "text-sm leading-relaxed whitespace-pre-wrap";
+                                  fallback.textContent = message.content;
+                                  parent.appendChild(fallback);
+                                }
+                              }}
+                            />
+                          ) : (
+                            <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                              {message.content}
+                            </p>
+                          )}
                           <div
                             className={`flex items-center gap-1 mt-2 justify-end ${
                               fromMe ? "text-blue-200" : "text-gray-500"
@@ -715,25 +777,38 @@ const Messages: React.FC = () => {
                   ref={textareaRef}
                   value={messageInput}
                   onChange={handleInputChange}
-                  onKeyPress={handleKeyPress}
+                  onKeyDown={handleKeyDown}
                   placeholder="Type your message..."
                   rows={1}
-                  className="w-full resize-none border border-gray-300 rounded-xl px-4 py-3 pr-12 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 max-h-32"
+                  className="w-full resize-none border border-gray-300 rounded-xl px-4 py-3 pr-12 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 max-h-32 bg-white"
                   style={{ minHeight: "48px" }}
                   autoComplete="off"
+                  disabled={false}
+                  readOnly={false}
                 />
 
                 {/* Emoji button */}
-                <button
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors duration-200"
-                  title="Add emoji"
-                >
-                  <FaSmile className="text-gray-500" />
-                </button>
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <button
+                    type="button"
+                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                    className="p-1 hover:bg-gray-100 rounded-full transition-colors duration-200"
+                    title="Add emoji"
+                  >
+                    <FaSmile className="text-gray-500" />
+                  </button>
+                  <EmojiAndStickerPicker
+                    isOpen={showEmojiPicker}
+                    onClose={() => setShowEmojiPicker(false)}
+                    onEmojiSelect={handleEmojiSelect}
+                    onStickerSelect={handleStickerSelect}
+                  />
+                </div>
               </div>
 
               {/* File attachment button */}
               <button
+                type="button"
                 onClick={() => fileInputRef.current?.click()}
                 className="p-3 hover:bg-gray-100 rounded-xl transition-colors duration-200"
                 title="Attach file"
@@ -743,6 +818,7 @@ const Messages: React.FC = () => {
 
               {/* Send button */}
               <button
+                type="button"
                 onClick={handleSendMessage}
                 disabled={!messageInput.trim() || sendMessage.isPending}
                 className="p-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-xl transition-all duration-200 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"

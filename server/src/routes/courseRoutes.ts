@@ -14,6 +14,10 @@ import {
   updateCourse,
   toggleCourseStatus,
   submitCourseForApproval,
+  addReview,
+  getCourseReviews,
+  updateReview,
+  deleteReview,
 } from "../controllers/courseController";
 import {
   courseUploadMiddleware,
@@ -23,12 +27,15 @@ import {
 
 const courseRouter = Router();
 
+// Public routes
 courseRouter.get("/", (req, res) => getAllCourses(req, res));
 courseRouter.get("/:id", (req, res) => getCourseById(req, res));
+courseRouter.get("/:id/reviews", (req, res) => getCourseReviews(req, res));
 
+// Protected routes
 courseRouter.use(authenticateToken);
 
-courseRouter.get("/user/enrolled", authenticateToken, (req, res) =>
+courseRouter.get("/user/enrolled", (req, res) =>
   getUserCourses(req as any, res)
 );
 
@@ -65,6 +72,15 @@ courseRouter.patch(
   "/:id/submit-for-approval",
   authorizeRoles(UserRole.INSTRUCTOR),
   (req, res) => submitCourseForApproval(req as any, res)
+);
+
+// Review routes (authenticated)
+courseRouter.post("/:id/reviews", (req, res) => addReview(req as any, res));
+courseRouter.put("/:id/reviews/:reviewId", (req, res) =>
+  updateReview(req as any, res)
+);
+courseRouter.delete("/:id/reviews/:reviewId", (req, res) =>
+  deleteReview(req as any, res)
 );
 
 export default courseRouter;

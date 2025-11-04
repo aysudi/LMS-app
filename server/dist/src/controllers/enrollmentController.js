@@ -2,6 +2,7 @@ import Enrollment from "../models/Enrollment";
 import Course from "../models/Course";
 import User from "../models/User";
 import { EnrollmentStatus } from "../types/enrollment.types";
+import { findOrCreateConversation } from "../services/conversationService.js";
 import formatMongoData from "../utils/formatMongoData";
 export const getUserEnrollments = async (req, res) => {
     try {
@@ -565,6 +566,28 @@ export const enrollInFreeCourse = async (req, res) => {
         await Course.findByIdAndUpdate(courseId, {
             $push: { studentsEnrolled: userId },
         });
+        // Automatically create a conversation between student and instructor
+        try {
+            const courseWithInstructor = await Course.findById(courseId).populate("instructor", "_id firstName lastName");
+            if (courseWithInstructor && courseWithInstructor.instructor) {
+                console.log("Creating conversation between student and instructor...");
+                const conversationResult = await findOrCreateConversation({
+                    studentId: userId,
+                    instructorId: courseWithInstructor.instructor._id,
+                    courseId: courseId,
+                });
+                if (conversationResult.success) {
+                    console.log("✅ Conversation created successfully:", conversationResult.data?._id);
+                }
+                else {
+                    console.log("❌ Failed to create conversation");
+                }
+            }
+        }
+        catch (conversationError) {
+            console.log("❌ Error creating conversation:", conversationError);
+            // Don't fail the enrollment if conversation creation fails
+        }
         console.log("populatedEnrollment:", populatedEnrollment);
         res.status(201).json({
             success: true,

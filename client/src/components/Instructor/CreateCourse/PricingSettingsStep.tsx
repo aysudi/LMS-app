@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import {
   FaDollarSign,
   FaGlobe,
@@ -38,6 +39,7 @@ const PricingSettingsStep: React.FC<PricingSettingsStepProps> = ({
   setFormData,
   errors,
 }) => {
+  const { t } = useTranslation();
   return (
     <motion.div
       key="pricing-settings"
@@ -50,11 +52,10 @@ const PricingSettingsStep: React.FC<PricingSettingsStepProps> = ({
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Pricing & Settings
+            {t("instructor.createCourse.pricingSettings.title")}
           </h2>
           <p className="text-gray-600">
-            Set your course pricing, language, and additional settings to help
-            students find and enroll in your course.
+            {t("instructor.createCourse.pricingSettings.description")}
           </p>
         </div>
 
@@ -66,9 +67,13 @@ const PricingSettingsStep: React.FC<PricingSettingsStepProps> = ({
                 <FaDollarSign className="text-green-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900">Course Pricing</h3>
+                <h3 className="font-semibold text-gray-900">
+                  {t("instructor.createCourse.pricingSettings.coursePricing")}
+                </h3>
                 <p className="text-sm text-gray-600">
-                  Choose between free or paid course
+                  {t(
+                    "instructor.createCourse.pricingSettings.chooseFreeOrPaid"
+                  )}
                 </p>
               </div>
             </div>
@@ -77,7 +82,7 @@ const PricingSettingsStep: React.FC<PricingSettingsStepProps> = ({
             <div className="mb-6">
               <div className="flex items-center space-x-4">
                 <span className="text-sm font-medium text-gray-700">
-                  Course Type:
+                  {t("instructor.createCourse.pricingSettings.courseType")}:
                 </span>
                 <button
                   type="button"
@@ -93,14 +98,18 @@ const PricingSettingsStep: React.FC<PricingSettingsStepProps> = ({
                     <>
                       <FaToggleOn className="text-2xl text-green-500" />
                       <span className="text-green-600 font-medium">
-                        Free Course
+                        {t(
+                          "instructor.createCourse.pricingSettings.freeCourse"
+                        )}
                       </span>
                     </>
                   ) : (
                     <>
                       <FaToggleOff className="text-2xl text-gray-400" />
                       <span className="text-gray-600 font-medium">
-                        Paid Course
+                        {t(
+                          "instructor.createCourse.pricingSettings.paidCourse"
+                        )}
                       </span>
                     </>
                   )}
@@ -116,7 +125,7 @@ const PricingSettingsStep: React.FC<PricingSettingsStepProps> = ({
                     htmlFor="originalPrice"
                     className="block text-sm font-medium text-gray-700 mb-2"
                   >
-                    Original Price ($) *
+                    {t("instructor.createCourse.pricingSettings.originalPrice")}
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -154,9 +163,9 @@ const PricingSettingsStep: React.FC<PricingSettingsStepProps> = ({
                     htmlFor="discountPrice"
                     className="block text-sm font-medium text-gray-700 mb-2"
                   >
-                    Discount Price ($)
+                    {t("instructor.createCourse.pricingSettings.discountPrice")}
                     <span className="text-gray-500 text-xs ml-1">
-                      (Optional)
+                      ({t("common.optional")})
                     </span>
                   </label>
                   <div className="relative">
@@ -195,7 +204,7 @@ const PricingSettingsStep: React.FC<PricingSettingsStepProps> = ({
                           formData.originalPrice) *
                           100
                       )}
-                      % discount
+                      {t("instructor.createCourse.pricingSettings.discount")}
                     </p>
                   )}
                 </div>
@@ -205,9 +214,11 @@ const PricingSettingsStep: React.FC<PricingSettingsStepProps> = ({
             {formData.isFree && (
               <div className="bg-green-100 border border-green-200 rounded-lg p-4">
                 <p className="text-green-800 text-sm">
-                  <strong>Free Course Benefits:</strong> Reach more students,
-                  build your reputation, and gather reviews. You can always
-                  convert to paid later.
+                  <strong>
+                    {t(
+                      "instructor.createCourse.pricingSettings.freeCoursebenefits"
+                    )}
+                  </strong>
                 </p>
               </div>
             )}
@@ -220,9 +231,11 @@ const PricingSettingsStep: React.FC<PricingSettingsStepProps> = ({
                 <FaGlobe className="text-blue-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900">Course Language</h3>
+                <h3 className="font-semibold text-gray-900">
+                  {t("instructor.createCourse.pricingSettings.courseLanguage")}
+                </h3>
                 <p className="text-sm text-gray-600">
-                  Select the primary language for your course
+                  {t("instructor.createCourse.pricingSettings.selectLanguage")}
                 </p>
               </div>
             </div>
@@ -253,10 +266,14 @@ const PricingSettingsStep: React.FC<PricingSettingsStepProps> = ({
               </div>
               <div>
                 <h3 className="font-semibold text-gray-900">
-                  Certificate of Completion
+                  {t(
+                    "instructor.createCourse.pricingSettings.certificateCompletion"
+                  )}
                 </h3>
                 <p className="text-sm text-gray-600">
-                  Offer a certificate when students complete your course
+                  {t(
+                    "instructor.createCourse.pricingSettings.offerCertificate"
+                  )}
                 </p>
               </div>
             </div>
@@ -264,10 +281,16 @@ const PricingSettingsStep: React.FC<PricingSettingsStepProps> = ({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-700 mb-1">
-                  <strong>Provide Certificate:</strong>
+                  <strong>
+                    {t(
+                      "instructor.createCourse.pricingSettings.provideCertificate"
+                    )}
+                  </strong>
                 </p>
                 <p className="text-sm text-gray-500">
-                  Students will receive a certificate upon course completion
+                  {t(
+                    "instructor.createCourse.pricingSettings.certificateDescription"
+                  )}
                 </p>
               </div>
               <button
@@ -291,9 +314,11 @@ const PricingSettingsStep: React.FC<PricingSettingsStepProps> = ({
             {formData.certificateProvided && (
               <div className="mt-4 bg-purple-100 border border-purple-200 rounded-lg p-4">
                 <p className="text-purple-800 text-sm">
-                  <strong>Certificate Features:</strong> Personalized with
-                  student name, course title, completion date, and your
-                  instructor signature.
+                  <strong>
+                    {t(
+                      "instructor.createCourse.pricingSettings.certificateFeatures"
+                    )}
+                  </strong>
                 </p>
               </div>
             )}
@@ -302,21 +327,14 @@ const PricingSettingsStep: React.FC<PricingSettingsStepProps> = ({
           {/* Pricing Tips */}
           <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
             <h4 className="font-semibold text-yellow-800 mb-3">
-              💡 Pricing Tips
+              {t("instructor.createCourse.pricingSettings.pricingTips")}
             </h4>
             <ul className="text-sm text-yellow-700 space-y-2">
-              <li>• Research similar courses to set competitive pricing</li>
-              <li>
-                • Consider starting with a lower price to attract initial
-                students
-              </li>
-              <li>
-                • Free courses can help build your reputation and student base
-              </li>
-              <li>
-                • Discount pricing creates urgency and can boost enrollments
-              </li>
-              <li>• You can adjust pricing anytime after publishing</li>
+              <li>• {t("instructor.createCourse.pricingSettings.tip1")}</li>
+              <li>• {t("instructor.createCourse.pricingSettings.tip2")}</li>
+              <li>• {t("instructor.createCourse.pricingSettings.tip3")}</li>
+              <li>• {t("instructor.createCourse.pricingSettings.tip4")}</li>
+              <li>• {t("instructor.createCourse.pricingSettings.tip5")}</li>
             </ul>
           </div>
         </div>

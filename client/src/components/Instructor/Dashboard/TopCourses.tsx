@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { FaBook, FaStar } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 interface Course {
   _id: string;
@@ -24,6 +25,7 @@ const TopCourses: React.FC<TopCoursesProps> = ({
   isLoading,
 }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const topRatedCourses = courses
     .filter(
@@ -36,7 +38,7 @@ const TopCourses: React.FC<TopCoursesProps> = ({
     return (
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <h2 className="text-xl font-bold text-gray-900 mb-6">
-          Top Rated Courses
+          {t("instructor.dashboard.topRatedCourses")}
         </h2>
         <div className="space-y-4">
           {Array.from({ length: 3 }, (_, i) => (
@@ -68,7 +70,7 @@ const TopCourses: React.FC<TopCoursesProps> = ({
           onClick={() => navigate("/instructor/courses")}
           className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
         >
-          View All
+          {t("instructor.dashboard.viewAll")}
         </button>
       </div>
 
@@ -76,16 +78,16 @@ const TopCourses: React.FC<TopCoursesProps> = ({
         <div className="text-center py-12">
           <FaBook className="text-4xl text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
-            No rated courses yet
+            {t("instructor.dashboard.noRatedCourses")}
           </h3>
           <p className="text-gray-600 mb-6">
-            Courses will appear here once students start rating them
+            {t("instructor.dashboard.coursesWillAppear")}
           </p>
           <button
             onClick={() => navigate("/instructor/courses/create")}
             className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200 font-medium"
           >
-            Create Your First Course
+            {t("instructor.dashboard.createFirstCourse")}
           </button>
         </div>
       ) : (
@@ -147,7 +149,11 @@ const TopCourses: React.FC<TopCoursesProps> = ({
                       {course.rating?.toFixed(1)}
                     </span>
                   </div>
-                  <span>{course.studentsEnrolled?.length || 0} students</span>
+                  <span>
+                    {t("instructor.dashboard.studentsCount", {
+                      count: course.studentsEnrolled?.length || 0,
+                    })}
+                  </span>
                 </div>
               </div>
 

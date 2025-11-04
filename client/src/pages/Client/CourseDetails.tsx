@@ -40,6 +40,7 @@ import {
 import type { Course, Lesson } from "../../types/course.type";
 import { useToast } from "../../components/UI/ToastProvider";
 import { cartToasts, generalToasts } from "../../utils/toastUtils";
+import ReviewsList from "../../components/CourseDetails/ReviewsList";
 
 const CoursePreviewCard: React.FC<{
   course: Course;
@@ -775,9 +776,9 @@ const CourseDetails = () => {
                       exit={{ opacity: 0, y: -20 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <CourseReviews
-                        course={course}
-                        renderStars={renderStars}
+                      <ReviewsList
+                        courseId={course.id}
+                        hasUserEnrolled={isEnrolled}
                       />
                     </motion.div>
                   )}
@@ -1086,130 +1087,6 @@ const LessonItem: React.FC<{
       {/* Duration */}
       <div className="text-sm text-gray-500 font-medium">
         {formatDuration(lesson.duration)}
-      </div>
-    </div>
-  );
-};
-
-const CourseReviews: React.FC<{
-  course: Course;
-  renderStars: (rating: number) => React.ReactElement[];
-}> = ({ course, renderStars }) => {
-  const { t } = useTranslation();
-
-  return (
-    <div className="space-y-8">
-      {/* Rating Overview */}
-      <div className="border border-gray-200 rounded-lg p-6">
-        <div className="grid md:grid-cols-3 gap-8 items-center">
-          {/* Overall Rating */}
-          <div className="text-center">
-            <div className="text-5xl font-bold text-gray-900 mb-3">
-              {course.rating.toFixed(1)}
-            </div>
-            <div className="flex items-center justify-center gap-1 mb-2">
-              {renderStars(course.rating)}
-            </div>
-            <div className="text-sm text-gray-600">
-              {t("courseDetails.courseRating")}
-            </div>
-          </div>
-
-          {/* Rating Bars */}
-          <div className="md:col-span-2 space-y-3">
-            {[5, 4, 3, 2, 1].map((rating) => {
-              const count = course.reviews.filter(
-                (r) => Math.floor(r.rating) === rating
-              ).length;
-              const percentage =
-                course.ratingsCount > 0
-                  ? (count / course.ratingsCount) * 100
-                  : 0;
-
-              return (
-                <div key={rating} className="flex items-center gap-3">
-                  <div className="flex items-center gap-1 text-sm font-medium text-gray-700 w-20">
-                    {rating} <FaStar className="text-yellow-400 text-xs" />
-                  </div>
-                  <div className="flex-1 bg-gray-200 rounded-full h-2">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${percentage}%` }}
-                      transition={{ duration: 1, delay: (5 - rating) * 0.1 }}
-                      className="h-full bg-yellow-400 rounded-full"
-                    />
-                  </div>
-                  <span className="text-sm text-gray-600 w-12 text-right">
-                    {percentage.toFixed(0)}%
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* Reviews List */}
-      <div>
-        <h3 className="text-xl font-bold text-gray-900 mb-6">
-          {t("courseDetails.reviews")}
-        </h3>
-
-        {course.reviews.length > 0 ? (
-          <div className="space-y-6">
-            {course.reviews.map((review, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="border-b border-gray-200 pb-6 last:border-b-0"
-              >
-                <div className="flex items-start gap-4">
-                  {/* Avatar */}
-                  <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-white font-medium">
-                      {review.user.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-
-                  {/* Review Content */}
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-3">
-                      <span className="font-semibold text-gray-900">
-                        {t("courseDetails.anonymousUser")}
-                      </span>
-                      <div className="flex items-center gap-1">
-                        {renderStars(review.rating)}
-                      </div>
-                      <span className="text-sm text-gray-500">
-                        {new Date(review.date).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <p className="text-gray-700 leading-relaxed">
-                      {review.comment}
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <FaStar className="text-2xl text-gray-400" />
-            </div>
-            <h4 className="text-lg font-semibold text-gray-700 mb-2">
-              {t("courseDetails.noReviewsYet")}
-            </h4>
-            <p className="text-gray-500 mb-6">
-              {t("courseDetails.beFirstToReview")}
-            </p>
-            <button className="px-6 py-3 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-colors cursor-pointer">
-              {t("courseDetails.writeAReview")}
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );

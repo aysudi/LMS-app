@@ -1,4 +1,4 @@
-import { createCourseService, deleteCourseService, getAllCoursesService, getCourseByIdService, getInstructorCoursesService, getUserCoursesService, updateCourseService, toggleCourseStatusService, } from "../services/courseService";
+import { createCourseService, deleteCourseService, getAllCoursesService, getCourseByIdService, getInstructorCoursesService, getUserCoursesService, updateCourseService, toggleCourseStatusService, submitCourseForApprovalService, } from "../services/courseService";
 import formatMongoData from "../utils/formatMongoData";
 // Get all courses with filtering and pagination
 export const getAllCourses = async (req, res) => {
@@ -145,6 +145,25 @@ export const getInstructorCourses = async (req, res) => {
         });
     }
 };
+// Submit course for approval (instructor only)
+export const submitCourseForApproval = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const instructorId = req.user.userId;
+        const course = await submitCourseForApprovalService(id, instructorId);
+        res.status(200).json({
+            success: true,
+            message: "Course submitted for approval successfully",
+            data: formatMongoData(course),
+        });
+    }
+    catch (error) {
+        res.status(400).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
 // Toggle course status (instructor only)
 export const toggleCourseStatus = async (req, res) => {
     try {
@@ -153,8 +172,115 @@ export const toggleCourseStatus = async (req, res) => {
         const course = await toggleCourseStatusService(id, instructorId);
         res.status(200).json({
             success: true,
-            message: `Course ${course.isPublished ? 'published' : 'unpublished'} successfully`,
+            message: `Course ${course.isPublished ? "published" : "unpublished"} successfully`,
             data: formatMongoData(course),
+        });
+    }
+    catch (error) {
+        res.status(400).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+// Add review to course
+export const addReview = async (req, res) => {
+    try {
+        const { id } = req.params; // courseId
+        const userId = req.user.userId;
+        const { rating, comment } = req.body;
+        // Validate input
+        if (!rating || !comment) {
+            return res.status(400).json({
+                success: false,
+                message: "Rating and comment are required",
+            });
+        }
+        if (rating < 1 || rating > 5) {
+            return res.status(400).json({
+                success: false,
+                message: "Rating must be between 1 and 5",
+            });
+        }
+        const { addReviewToCourseService } = await import("../services/courseService");
+        const course = await addReviewToCourseService(id, userId, rating, comment);
+        res.status(201).json({
+            success: true,
+            message: "Review added successfully",
+            data: formatMongoData(course),
+        });
+    }
+    catch (error) {
+        res.status(400).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+// Get course reviews
+export const getCourseReviews = async (req, res) => {
+    try {
+        const { id } = req.params; // courseId
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const { getCourseReviewsService } = await import("../services/courseService");
+        const result = await getCourseReviewsService(id, page, limit);
+        res.status(200).json({
+            success: true,
+            data: result,
+        });
+    }
+    catch (error) {
+        res.status(404).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+// Update user's review
+export const updateReview = async (req, res) => {
+    try {
+        const { id } = req.params; // courseId
+        const userId = req.user.userId;
+        const { rating, comment } = req.body;
+        // Validate input
+        if (!rating || !comment) {
+            return res.status(400).json({
+                success: false,
+                message: "Rating and comment are required",
+            });
+        }
+        if (rating < 1 || rating > 5) {
+            return res.status(400).json({
+                success: false,
+                message: "Rating must be between 1 and 5",
+            });
+        }
+        const { updateReviewService } = await import("../services/courseService");
+        const course = await updateReviewService(id, userId, rating, comment);
+        res.status(200).json({
+            success: true,
+            message: "Review updated successfully",
+            data: formatMongoData(course),
+        });
+    }
+    catch (error) {
+        res.status(400).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+// Delete user's review
+export const deleteReview = async (req, res) => {
+    try {
+        const { id } = req.params; // courseId
+        const userId = req.user.userId;
+        const { deleteReviewService } = await import("../services/courseService");
+        const result = await deleteReviewService(id, userId);
+        res.status(200).json({
+            success: true,
+            message: result.message,
         });
     }
     catch (error) {

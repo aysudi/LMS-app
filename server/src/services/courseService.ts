@@ -402,3 +402,157 @@ export const enrollUserInCourseService = async (
 
   return { message: "Successfully enrolled in course" };
 };
+
+// Add review to course
+export const addReviewToCourseService = async (
+  courseId: string,
+  userId: string,
+  rating: number,
+  comment: string
+) => {
+  const course = await Course.findById(courseId);
+
+  if (!course) {
+    throw new Error("Course not found");
+  }
+
+  // Check if user is enrolled in the course
+  if (!course.studentsEnrolled.includes(userId as any)) {
+    throw new Error("You must be enrolled in this course to leave a review");
+  }
+
+  // Check if user has already reviewed this course
+  const existingReview = course.reviews.find(
+    (review: any) => review.user.toString() === userId
+  );
+
+  if (existingReview) {
+    throw new Error("You have already reviewed this course");
+  }
+
+  // Add the new review
+  course.reviews.push({
+    user: userId as any,
+    rating,
+    comment,
+    date: new Date(),
+  });
+
+  // Recalculate average rating
+  (course as any).calculateAverageRating();
+
+  await course.save();
+
+  // Populate the new review and return the course
+  const updatedCourse = await Course.findById(courseId)
+    .populate("reviews.user", "firstName lastName avatar")
+    .lean();
+
+  return updatedCourse;
+};
+
+// Get course reviews with pagination
+export const getCourseReviewsService = async (
+  courseId: string,
+  page: number = 1,
+  limit: number = 10
+) => {
+  const course = await Course.findById(courseId)
+    .select("reviews rating ratingsCount")
+    .populate("reviews.user", "firstName lastName avatar")
+    .lean();
+
+  if (!course) {
+    throw new Error("Course not found");
+  }
+
+  // Sort reviews by date (newest first)
+  const sortedReviews = course.reviews.sort(
+    (a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
+
+  // Apply pagination
+  const skip = (page - 1) * limit;
+  const paginatedReviews = sortedReviews.slice(skip, skip + limit);
+
+  return {
+    reviews: paginatedReviews,
+    totalReviews: course.reviews.length,
+    averageRating: course.rating,
+    ratingsCount: course.ratingsCount,
+    pagination: {
+      current: page,
+      pages: Math.ceil(course.reviews.length / limit),
+      total: course.reviews.length,
+      hasNext: page < Math.ceil(course.reviews.length / limit),
+      hasPrev: page > 1,
+    },
+  };
+};
+
+// Update user's review
+export const updateReviewService = async (
+  courseId: string,
+  userId: string,
+  rating: number,
+  comment: string
+) => {
+  const course = await Course.findById(courseId);
+
+  if (!course) {
+    throw new Error("Course not found");
+  }
+
+  // Find the user's existing review
+  const reviewIndex = course.reviews.findIndex(
+    (review: any) => review.user.toString() === userId
+  );
+
+  if (reviewIndex === -1) {
+    throw new Error("Review not found");
+  }
+
+  // Update the review
+  course.reviews[reviewIndex].rating = rating;
+  course.reviews[reviewIndex].comment = comment;
+  course.reviews[reviewIndex].date = new Date();
+
+  // Recalculate average rating
+  (course as any).calculateAverageRating();
+
+  await course.save();
+
+  // Return updated course with populated reviews
+  const updatedCourse = await Course.findById(courseId)
+    .populate("reviews.user", "firstName lastName avatar")
+    .lean();
+
+  return updatedCourse;
+};
+
+// Delete user's review
+export const deleteReviewService = async (courseId: string, userId: string) => {
+  const course = await Course.findById(courseId);
+
+  if (!course) {
+    throw new Error("Course not found");
+  }
+
+  // Find and remove the user's review
+  const reviewIndex = course.reviews.findIndex(
+    (review: any) => review.user.toString() === userId
+  );
+
+  if (reviewIndex === -1) {
+    throw new Error("Review not found");
+  }
+
+  course.reviews.splice(reviewIndex, 1);
+
+  // Recalculate average rating
+  (course as any).calculateAverageRating();
+
+  await course.save();
+
+  return { message: "Review deleted successfully" };
+};

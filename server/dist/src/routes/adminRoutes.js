@@ -1,6 +1,6 @@
 import express from "express";
 import { syncAllEnrollments, syncFromEnrollmentModel, syncUsersToCoursesOnly, syncCoursesToUsersOnly, } from "../controllers/enrollmentMigrationController";
-import { getAdminDashboardStats, getAdminUsers, updateUserStatus, updateUserRole, bulkUpdateUsers, deleteUser, getRecentActivity, getAdminAnalytics, getAdminCertificates, } from "../controllers/adminController";
+import { getAdminDashboardStats, getAdminUsers, updateUserStatus, updateUserRole, bulkUpdateUsers, deleteUser, getRecentActivity, getAdminAnalytics, getAdminCertificates, getAdminCourses, getAdminCourseDetails, approveCourse, rejectCourse, } from "../controllers/adminController";
 import { authenticateToken } from "../middlewares/auth.middleware";
 const adminRouter = express.Router();
 // Dashboard routes
@@ -16,6 +16,11 @@ adminRouter.delete("/users/:userId", authenticateToken, (req, res) => deleteUser
 adminRouter.get("/analytics", authenticateToken, (req, res) => getAdminAnalytics(req, res));
 // Certificates routes
 adminRouter.get("/certificates", authenticateToken, (req, res) => getAdminCertificates(req, res));
+// Course moderation routes
+adminRouter.get("/courses", authenticateToken, (req, res) => getAdminCourses(req, res));
+adminRouter.get("/courses/:courseId", authenticateToken, (req, res) => getAdminCourseDetails(req, res));
+adminRouter.patch("/courses/:courseId/approve", authenticateToken, (req, res) => approveCourse(req, res));
+adminRouter.patch("/courses/:courseId/reject", authenticateToken, (req, res) => rejectCourse(req, res));
 // Data migration routes (for development/maintenance)
 adminRouter.post("/sync/enrollments/all", syncAllEnrollments);
 adminRouter.post("/sync/enrollments/from-model", syncFromEnrollmentModel);

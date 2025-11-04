@@ -386,9 +386,10 @@
     "totalDuration": "Общая продолжительность",
     "avgRating": "Средний рейтинг",
     "learningOverview": "Обзор обучения",
-    "aboutToJoinStudents": "Вы собираетесь присоединиться к {{count}} студентам на этих удивительных курсах!"
+    "aboutToJoinStudents": "Вы собираетесь присоединиться к {{count}} студентам на этих удивительных курсах!",
+    "certificate": "Сертификат",
+    "availableFor": "Доступно для"
   },
-
   "course": {
     "enrollNow": "Записаться сейчас",
     "addToCart": "Добавить в корзину",
@@ -480,7 +481,580 @@
     "certificatePending": "Сертификат ожидается"
   },
   "instructor": {
-    "totalCourses": "Всего курсов"
+    "totalCourses": "Всего курсов",
+    "createCourse": {
+      "title": "Создать новый курс",
+      "subtitle": "Создайте увлекательный опыт обучения для ваших студентов",
+      "saveDraft": "Сохранить черновик",
+      "stepProgress": "Шаг {{current}} из {{total}}",
+      "submitting": "Отправка...",
+      "submitForApproval": "Отправить на утверждение",
+      "courseCreatedSuccess": "Курс успешно создан!",
+      "courseCreatedError": "Не удалось создать курс. Попробуйте еще раз.",
+      "steps": {
+        "basicInformation": {
+          "title": "Основная информация",
+          "description": "Название курса, описание и категория"
+        },
+        "courseDetails": {
+          "title": "Детали курса",
+          "description": "Цели, требования и целевая аудитория"
+        },
+        "pricingSettings": {
+          "title": "Ценообразование и настройки",
+          "description": "Установите цену, язык и другие настройки"
+        },
+        "mediaContent": {
+          "title": "Медиа и контент",
+          "description": "Загрузите изображение курса и промо-видео"
+        },
+        "reviewCreate": {
+          "title": "Просмотр и создание",
+          "description": "Просмотрите детали курса и создайте"
+        }
+      },
+      "validation": {
+        "titleRequired": "Название обязательно",
+        "titleTooLong": "Название должно быть менее 100 символов",
+        "descriptionRequired": "Описание обязательно",
+        "categoryRequired": "Категория обязательна",
+        "learningObjectiveRequired": "Требуется хотя бы одна цель обучения",
+        "priceRequired": "Цена должна быть больше 0 для платных курсов",
+        "discountPriceTooHigh": "Цена со скидкой не может быть выше первоначальной цены"
+      },
+      "approvalProcess": {
+        "title": "Процесс утверждения",
+        "description": "Ваш курс будет рассмотрен нашей административной командой для обеспечения стандартов качества. Вы получите уведомление после завершения проверки, обычно в течение 24-48 часов."
+      },
+      "basicInformation": {
+        "title": "Основная информация",
+        "description": "Начнем с основных деталей вашего курса. Эта информация поможет студентам понять, о чем ваш курс.",
+        "courseTitle": "Название курса *",
+        "courseTitlePlaceholder": "Введите привлекательное название курса",
+        "shortDescription": "Краткое описание",
+        "shortDescriptionPlaceholder": "Краткое, убедительное описание вашего курса",
+        "courseDescription": "Описание курса *",
+        "courseDescriptionPlaceholder": "Предоставьте подробное описание вашего курса. Что изучат студенты? Как это им поможет?",
+        "category": "Категория *",
+        "selectCategory": "Выберите категорию",
+        "subcategory": "Подкategория",
+        "selectSubcategory": "Выберите подкатегорию",
+        "tags": "Теги",
+        "tagsDescription": "Добавьте теги, чтобы помочь студентам найти ваш курс. Вы можете добавить до 10 тегов.",
+        "enterTag": "Введите тег",
+        "maxTagsReached": "Достигнуто максимальное количество тегов (10/10)",
+        "charactersCount": "{{count}}/{{max}} символов"
+      },
+      "courseDetails": {
+        "title": "Детали курса",
+        "description": "Определите, что студенты изучат, что им нужно знать заранее, и для кого предназначен этот курс.",
+        "courseLevel": "Уровень курса *",
+        "levels": {
+          "beginner": "Начальный",
+          "intermediate": "Средний",
+          "advanced": "Продвинутый"
+        },
+        "levelDescriptions": {
+          "beginner": "Предварительный опыт не требуется",
+          "intermediate": "Некоторый опыт желателен",
+          "advanced": "Требуется обширный опыт"
+        },
+        "learningObjectives": {
+          "title": "Цели обучения",
+          "placeholder": "Что изучат студенты?",
+          "description": "Перечислите ключевые навыки и знания, которые получат студенты"
+        },
+        "requirements": {
+          "title": "Требования",
+          "placeholder": "Что нужно знать студентам?",
+          "description": "Перечислите любые предварительные условия или требования для прохождения этого курса"
+        },
+        "targetAudience": {
+          "title": "Целевая аудитория",
+          "placeholder": "Для кого этот курс?",
+          "description": "Опишите, кому больше всего подойдет этот курс"
+        },
+        "addAnother": "Добавить ещё",
+        "maxItemsAllowed": "Максимум 10 элементов"
+      },
+      "pricingSettings": {
+        "title": "Ценообразование и настройки",
+        "description": "Установите цену курса, язык и дополнительные настройки, чтобы помочь студентам найти и записаться на ваш курс.",
+        "coursePricing": "Ценообразование курса",
+        "chooseFreeOrPaid": "Выберите между бесплатным или платным курсом",
+        "courseType": "Тип курса",
+        "freeCourse": "Бесплатный курс",
+        "paidCourse": "Платный курс",
+        "originalPrice": "Первоначальная цена ($) *",
+        "discountPrice": "Цена со скидкой ($)",
+        "freeCoursebenefits": "Преимущества бесплатного курса: охватите больше студентов, создайте репутацию и соберите отзывы. Вы всегда можете перевести на платный позже.",
+        "courseLanguage": "Язык курса",
+        "selectLanguage": "Выберите основной язык для вашего курса",
+        "certificateCompletion": "Сертификат о завершении",
+        "offerCertificate": "Предложите сертификат при завершении курса студентами",
+        "provideCertificate": "Предоставить сертификат:",
+        "certificateDescription": "Студенты получат сертификат по завершении курса",
+        "certificateFeatures": "Функции сертификата: персонализированный с именем студента, названием курса, датой завершения и подписью преподавателя.",
+        "pricingTips": "💡 Советы по ценообразованию",
+        "tip1": "Изучите похожие курсы для установки конкурентной цены",
+        "tip2": "Рассмотрите возможность начать с более низкой цены для привлечения первых студентов",
+        "tip3": "Бесплатные курсы могут помочь построить репутацию и базу студентов",
+        "tip4": "Ценообразование со скидкой создает срочность и может увеличить записи",
+        "tip5": "Вы можете изменить цену в любое время после публикации",
+        "discount": "% скидка"
+      },
+      "mediaContent": {
+        "title": "Медиа и контент",
+        "description": "Добавьте визуальные элементы, чтобы сделать ваш курс более привлекательным. Хорошее изображение курса и промо-видео могут значительно увеличить записи.",
+        "courseImage": "Изображение курса",
+        "uploadThumbnail": "Загрузите привлекательную миниатюру для вашего курса",
+        "promotionalVideo": "Промо-видео",
+        "shortVideoIntro": "Короткое видео, представляющее ваш курс",
+        "clickToUpload": "Нажмите для загрузки или перетащите",
+        "recommendedSize": "Рекомендуется: 1280x720 пикселей (соотношение 16:9)",
+        "imageFormats": "PNG, JPG до 5МБ",
+        "keepItShort": "Сделайте его коротким и увлекательным (рекомендуется 30-120 секунд)",
+        "videoFormats": "MP4, MOV, AVI до 100МБ",
+        "invalidImageFile": "Пожалуйста, выберите действительный файл изображения",
+        "imageSizeLimit": "Размер изображения должен быть менее 5МБ",
+        "invalidVideoFile": "Пожалуйста, выберите действительный видеофайл",
+        "videoSizeLimit": "Размер видео должен быть менее 100МБ",
+        "mediaGuidelines": "Рекомендации по медиа",
+        "courseImageGuidelines": "Изображение курса:",
+        "videoGuidelines": "Промо-видео:",
+        "guideline1": "Используйте высококачественные, четкие изображения",
+        "guideline2": "Избегайте дизайнов с большим количеством текста",
+        "guideline3": "Делайте их профессиональными и релевантными",
+        "guideline4": "Рекомендуется 1280x720 пикселей",
+        "guideline5": "Держите его менее 2 минут",
+        "guideline6": "Представьте себя и курс",
+        "guideline7": "Покажите, что изучат студенты",
+        "guideline8": "Используйте хорошее качество звука"
+      },
+      "reviewCreate": {
+        "title": "Просмотр и создание",
+        "description": "Просмотрите все детали перед созданием курса. Вы можете отредактировать любой раздел, вернувшись к предыдущим шагам.",
+        "sections": {
+          "basicInformation": "Основная информация",
+          "courseDetails": "Детали курса",
+          "pricingSettings": "Ценообразование и настройки",
+          "mediaContent": "Медиа-контент"
+        },
+        "labels": {
+          "courseTitle": "Название курса",
+          "shortDescription": "Краткое описание",
+          "category": "Категория",
+          "subcategory": "Подкategория",
+          "courseLevel": "Уровень курса",
+          "learningObjectives": "Цели обучения",
+          "requirements": "Требования",
+          "targetAudience": "Целевая аудитория",
+          "pricing": "Ценообразование",
+          "language": "Язык",
+          "certificate": "Сертификат",
+          "courseImage": "Изображение курса",
+          "promotionalVideo": "Промо-видео"
+        },
+        "values": {
+          "notProvided": "Не предоставлено",
+          "notSpecified": "Не указано",
+          "freeCourse": "Бесплатный курс",
+          "provided": "Предоставлено",
+          "uploaded": "✅ Загружено",
+          "notUploaded": "❌ Не загружено",
+          "optionalNotUploaded": "📷 Необязательно - Не загружено",
+          "objectives": "{{count}} целей",
+          "requirements": "{{count}} требований",
+          "audienceGroups": "{{count}} групп аудитории"
+        },
+        "readyToCreate": "Готовы создать свой курс?",
+        "nextStepsDescription": "После создания курса вы сможете добавить разделы и уроки для построения учебной программы. Вы всегда можете отредактировать детали курса позже из панели инструктора.",
+        "previewAvailable": "Предварительный просмотр доступен после создания"
+      }
+    },
+    "editCourse": {
+      "courseSubmitted": "Курс отправлен",
+      "courseSubmittedMessage": "Ваш курс был отправлен на утверждение администратора.",
+      "submissionFailed": "Отправка не удалась",
+      "submissionFailedMessage": "Не удалось отправить курс на утверждение. Попробуйте еще раз.",
+      "savedAsDraft": "Сохранено как черновик",
+      "savedAsDraftMessage": "Ваш курс сохранен как черновик.",
+      "saveFailed": "Сохранение не удалось",
+      "saveFailedMessage": "Не удалось сохранить курс как черновик. Попробуйте еще раз.",
+      "tabs": {
+        "basicInformation": "Основная информация",
+        "curriculum": "Учебная программа",
+        "media": "Медиа",
+        "announcements": "Объявления",
+        "settings": "Настройки"
+      },
+      "failedToLoadCourse": "Не удалось загрузить курс",
+      "deleteConfirmation": {
+        "title": "Удалить курс",
+        "message": "Вы уверены, что хотите удалить \"{{courseTitle}}\"? Это действие нельзя отменить.",
+        "confirm": "Да, удалить!"
+      },
+      "basicInfo": {
+        "courseTitle": "Название курса",
+        "courseTitlePlaceholder": "Введите описательное название для вашего курса",
+        "shortDescription": "Краткое описание",
+        "shortDescriptionPlaceholder": "Напишите убедительное резюме вашего курса...",
+        "shortDescriptionHelper": "Краткое описание для списков курсов. Максимум 200 символов.",
+        "category": "Категория",
+        "categoryPlaceholder": "Выберите категорию",
+        "subcategory": "Подкategория",
+        "subcategoryPlaceholder": "Выберите подkategорию",
+        "detailedDescription": "Подробное описание",
+        "detailedDescriptionPlaceholder": "Напишите подробное описание вашего курса...",
+        "tags": "Теги",
+        "tagsHelper": "Добавьте релевантные теги, чтобы помочь студентам найти ваш курс (максимум 10 тегов)",
+        "tagPlaceholder": "Введите тег и нажмите Enter",
+        "addTag": "Добавить тег",
+        "maxTagsReached": "Достигнуто максимальное количество тегов (10/10)",
+        "learningObjectives": "Цели обучения",
+        "learningObjectivesHelper": "Что изучат студенты на этом курсе? (Добавьте минимум 4 цели)",
+        "learningObjectivePlaceholder": "Цель обучения {{index}}",
+        "addLearningObjective": "+ Добавить цель обучения",
+        "requirements": "Требования",
+        "requirementsHelper": "Что студенты должны знать или иметь перед прохождением этого курса?",
+        "requirementPlaceholder": "Требование {{index}}",
+        "addRequirement": "+ Добавить требование",
+        "targetAudience": "Целевая аудитория",
+        "targetAudienceHelper": "Для кого этот курс? Определите вашего идеального студента.",
+        "targetAudiencePlaceholder": "Целевая аудитория {{index}}",
+        "addTargetAudience": "+ Добавить целевую аудиторию",
+        "saveBasicInfo": "Сохранить основную информацию",
+        "saving": "Сохранение..."
+      },
+      "curriculum": {
+        "title": "Учебная программа курса",
+        "description": "Создайте учебную программу курса, добавив разделы и уроки",
+        "addSection": "Добавить раздел",
+        "sectionTitle": "Раздел {{index}}: {{title}}",
+        "lessonsCount": "{{count}} урок",
+        "lessonsCount_plural": "{{count}} уроков",
+        "addLesson": "Добавить урок",
+        "preview": "Предпросмотр",
+        "deleteSection": "Удалить раздел",
+        "deleteLesson": "Удалить урок",
+        "deleteConfirmation": {
+          "title": "Удалить {{type}}",
+          "message": "Вы уверены, что хотите удалить этот {{type}}? Это действие нельзя отменить.",
+          "section": "раздел",
+          "lesson": "урок"
+        },
+        "empty": {
+          "title": "Пока нет содержимого учебной программы",
+          "description": "Начните создание курса, добавив разделы и уроки.",
+          "addFirstSection": "Добавить ваш первый раздел"
+        }
+      },
+      "media": {
+        "courseImage": "Изображение курса",
+        "courseImagePreview": "Предварительный просмотр курса",
+        "uploadImage": "Загрузить изображение",
+        "chooseImage": "Выбрать изображение",
+        "imageRecommendations": {
+          "size": "Рекомендуемый размер изображения: 1280x720 пикселей (соотношение 16:9)",
+          "maxSize": "Максимальный размер файла: 5МБ",
+          "formats": "Поддерживаемые форматы: JPG, PNG"
+        },
+        "promotionalVideo": "Промо-видео",
+        "uploadVideo": "Загрузить видео",
+        "chooseVideo": "Выбрать видео",
+        "videoRecommendations": {
+          "duration": "Максимальная продолжительность: 2 минуты",
+          "maxSize": "Максимальный размер файла: 100МБ",
+          "formats": "Поддерживаемые форматы: MP4, WebM"
+        }
+      },
+      "sectionEditor": {
+        "createSection": "Создать раздел",
+        "editSection": "Редактировать раздел",
+        "sectionTitle": "Название раздела",
+        "sectionTitlePlaceholder": "Введите название раздела...",
+        "description": "Описание",
+        "descriptionPlaceholder": "Опишите, что студенты изучат в этом разделе...",
+        "sectionThumbnail": "Миниатюра раздела",
+        "thumbnailAlt": "Миниатюра раздела",
+        "change": "Изменить",
+        "remove": "Удалить",
+        "dropImageHere": "Перетащите изображение сюда или",
+        "browse": "выберите",
+        "imageFormats": "PNG, JPG, GIF до 5МБ",
+        "updateSection": "Обновить раздел",
+        "createSectionBtn": "Создать раздел",
+        "errors": {
+          "selectImage": "Пожалуйста, выберите файл изображения",
+          "imageSize": "Размер изображения должен быть менее 5МБ"
+        }
+      },
+      "announcements": {
+        "title": "Объявления курса",
+        "createAnnouncement": "Создать объявление",
+        "noAnnouncements": "Пока нет объявлений",
+        "noAnnouncementsDesc": "Создайте первое объявление, чтобы информировать студентов о важных обновлениях.",
+        "createFirstAnnouncement": "Создать первое объявление",
+        "priority": {
+          "low": "Низкий",
+          "medium": "Средний",
+          "high": "Высокий",
+          "urgent": "Срочный"
+        }
+      },
+      "settings": {
+        "title": "Настройки курса",
+        "pricing": "Ценообразование",
+        "free": "Бесплатно",
+        "paid": "Платно",
+        "price": "Цена",
+        "currency": "Валюта",
+        "language": "Язык",
+        "level": "Уровень",
+        "certificate": "Сертификат",
+        "certificateEnabled": "Сертификат включен",
+        "certificateDisabled": "Сертификат отключен",
+        "dangerZone": "Опасная зона",
+        "deleteCourse": "Удалить курс",
+        "deleteCourseDesc": "После удаления курса восстановить его будет невозможно. Будьте уверены в своем решении.",
+        "submitForApproval": "Отправить на утверждение",
+        "submitForApprovalDesc": "Отправить курс на проверку и утверждение администратором.",
+        "saveAsDraft": "Сохранить как черновик",
+        "saveAsDraftDesc": "Сохранить курс как черновик для продолжения редактирования позже.",
+        "saveSettings": "Сохранить настройки",
+        "levels": {
+          "beginner": "Начинающий",
+          "intermediate": "Средний",
+          "advanced": "Продвинутый",
+          "allLevels": "Все уровни"
+        }
+      },
+      "lessonEdit": {
+        "title": "Редактировать урок",
+        "backToCourse": "Вернуться к курсу",
+        "saveChanges": "Сохранить изменения",
+        "saving": "Сохранение...",
+        "lessonUpdated": "Урок успешно обновлен!",
+        "updateFailed": "Не удалось обновить урок. Попробуйте снова.",
+        "basicInformation": "Основная информация",
+        "lessonTitle": "Название урока",
+        "lessonTitlePlaceholder": "Введите название урока...",
+        "description": "Описание",
+        "descriptionPlaceholder": "Опишите, что студенты изучат в этом уроке...",
+        "lessonVideo": "Видео урока",
+        "duration": "Продолжительность: {{minutes}} минут",
+        "currentVideo": "Текущее видео",
+        "changeVideo": "Изменить видео",
+        "reset": "Сбросить",
+        "uploadReplacementVideo": "Загрузить замещающее видео",
+        "lessonResources": "Ресурсы урока",
+        "addResource": "Добавить ресурс",
+        "resource": "Ресурс {{index}}",
+        "file": "Файл",
+        "current": "Текущий: {{name}}",
+        "leaveEmptyToKeepCurrent": "Оставьте пустым, чтобы сохранить текущий файл",
+        "type": "Тип",
+        "resourceTypes": {
+          "pdf": "PDF документ",
+          "zip": "ZIP архив",
+          "doc": "Документ",
+          "other": "Другое"
+        },
+        "name": "Название (необязательно)",
+        "customNamePlaceholder": "Пользовательское название для этого ресурса",
+        "noResourcesAdded": "Ресурсы не добавлены",
+        "noResourcesDesc": "Добавьте дополнительные материалы, такие как PDF, документы или другие файлы, чтобы улучшить ваш урок.",
+        "lessonQuiz": "Тест урока",
+        "addQuestion": "Добавить вопрос",
+        "question": "Вопрос {{index}}",
+        "enterQuestion": "Введите вопрос...",
+        "option": "Вариант {{index}}...",
+        "noQuizQuestions": "Вопросы теста пока не добавлены",
+        "lessonSettings": "Настройки урока",
+        "durationMinutes": "Продолжительность (минуты)",
+        "previewLesson": "Предварительный просмотр урока",
+        "allowFreePreview": "Разрешить бесплатный предварительный просмотр этого урока",
+        "visibleToAll": "Видно всем студентам",
+        "onlyForEnrolled": "Только для записанных студентов",
+        "validation": {
+          "titleRequired": "Пожалуйста, введите название урока",
+          "videoRequired": "Пожалуйста, загрузите видео для этого урока",
+          "videoTooLarge": "Размер видео должен быть менее 500МБ",
+          "resourceTooLarge": "Размер файла должен быть менее 50МБ",
+          "selectVideoFile": "Пожалуйста, выберите видеофайл"
+        },
+        "toasts": {
+          "videoUploaded": "Видео \"{{name}}\" успешно загружено!",
+          "fileTooLarge": "Файл слишком большой",
+          "selectVideo": "Выберите видео"
+        }
+      },
+      "lessonCreate": {
+        "title": "Создать новый урок",
+        "backToCourse": "Вернуться к курсу",
+        "createLesson": "Создать урок",
+        "creating": "Создание...",
+        "lessonCreated": "🎉 Урок успешно создан!",
+        "creationFailed": "❌ Не удалось создать урок. Попробуйте снова.",
+        "basicInformation": "Основная информация",
+        "lessonTitle": "Название урока",
+        "lessonTitlePlaceholder": "Введите название урока...",
+        "description": "Описание",
+        "descriptionPlaceholder": "Опишите, что студенты изучат в этом уроке...",
+        "lessonVideo": "Видео урока",
+        "duration": "Продолжительность: {{minutes}} минут",
+        "removeVideo": "Удалить видео",
+        "uploadYourLessonVideo": "Загрузите ваше видео урока",
+        "lessonResources": "Ресурсы урока",
+        "addResource": "Добавить ресурс",
+        "resource": "Ресурс {{index}}",
+        "file": "Файл",
+        "type": "Тип",
+        "resourceTypes": {
+          "pdf": "PDF документ",
+          "zip": "ZIP архив",
+          "doc": "Документ",
+          "other": "Другое"
+        },
+        "name": "Название (необязательно)",
+        "customNamePlaceholder": "Пользовательское название для этого ресурса",
+        "noResourcesAdded": "Ресурсы не добавлены",
+        "noResourcesDesc": "Добавьте дополнительные материалы, такие как PDF, документы или другие файлы, чтобы улучшить ваш урок.",
+        "lessonQuiz": "Тест урока",
+        "addQuestion": "Добавить вопрос",
+        "question": "Вопрос {{index}}",
+        "enterQuestion": "Введите вопрос...",
+        "option": "Вариант {{index}}...",
+        "noQuizQuestions": "Вопросы теста пока не добавлены",
+        "lessonSettings": "Настройки урока",
+        "durationMinutes": "Продолжительность (минуты)",
+        "previewLesson": "Предварительный просмотр урока",
+        "allowFreePreview": "Разрешить бесплатный предварительный просмотр этого урока",
+        "visibleToAll": "Видно всем студентам",
+        "onlyForEnrolled": "Только для записанных студентов",
+        "validation": {
+          "titleRequired": "Пожалуйста, введите название урока",
+          "videoRequired": "Пожалуйста, загрузите видео для этого урока",
+          "videoTooLarge": "Размер видео должен быть менее 500МБ",
+          "resourceTooLarge": "Размер файла должен быть менее 50МБ",
+          "selectVideoFile": "Пожалуйста, выберите видеофайл"
+        },
+        "toasts": {
+          "videoUploaded": "Видео \"{{name}}\" успешно загружено!",
+          "fileTooLarge": "Файл слишком большой",
+          "selectVideo": "Выберите видео"
+        },
+        "lessonNotFound": "Урок не найден",
+        "lessonNotFoundDesc": "Урок, который вы пытаетесь редактировать, не существует.",
+        "backToCurriculum": "Назад к программе"
+      },
+      "students": {
+        "exportData": "Экспорт данных",
+        "totalStudents": "Всего студентов",
+        "averageProgress": "Средний прогресс",
+        "activeToday": "Активны сегодня",
+        "searchStudents": "Поиск студентов...",
+        "allCourses": "Все курсы",
+        "sortByName": "Сортировать по имени",
+        "sortByProgress": "Сортировать по прогрессу",
+        "sortByEnrollmentDate": "Сортировать по дате записи",
+        "sortByLastActive": "Сортировать по последней активности",
+        "noStudentsFound": "Студенты не найдены",
+        "tryAdjustingSearch": "Попробуйте изменить поиск",
+        "studentsWillAppear": "Студенты появятся здесь после записи на ваши курсы",
+        "student": "Студент",
+        "course": "Курс",
+        "progress": "Прогресс",
+        "enrolled": "Записан",
+        "lastActive": "Последняя активность",
+        "errorLoadingStudents": "Ошибка загрузки студентов",
+        "pleaseReTryLater": "Попробуйте еще раз позже",
+        "actions": "Действия",
+        "sendMessage": "Отправить сообщение",
+        "viewProfile": "Просмотреть профиль",
+        "previous": "Предыдущий",
+        "next": "Следующий",
+        "never": "Никогда"
+      },
+      "earnings": {
+        "platformFee": "Комиссия платформы (30%)",
+        "totalEarnings": "Общий доход",
+        "grossRevenue": "Валовой доход",
+        "beforePlatformFees": "До вычета комиссии платформы",
+        "pendingEarnings": "Ожидающий доход",
+        "processingPeriod": "Период обработки",
+        "paidEarnings": "Выплаченный доход",
+        "completedPayouts": "Завершенные выплаты",
+        "monthlyEarningsTrend": "Тренд месячных доходов",
+        "earnings": "Доходы",
+        "earningsByCourse": "Доходы по курсам",
+        "recentPayouts": "Недавние выплаты",
+        "noEarningsData": "Данные о доходах недоступны",
+        "noPayoutsYet": "Выплат пока нет",
+        "payoutsWillAppear": "Выплаты появятся здесь после обработки",
+        "payoutInformation": "Информация о выплатах",
+        "payoutSchedule": "График выплат",
+        "payoutsProcessedMonthly": "Выплаты обрабатываются ежемесячно",
+        "minimumPayout": "Минимальная сумма выплаты: $50",
+        "processingTime": "Время обработки: 3-5 рабочих дней",
+        "revenueShare": "Распределение дохода",
+        "instructorShare": "Доля преподавателя: 70%",
+        "platformFeePercent": "Комиссия платформы: 30%",
+        "noHiddenCharges": "Без скрытых платежей",
+        "vsLastPeriod": "по сравнению с прошлым периодом",
+        "gross": "Валовой"
+      },
+      "analytics": {
+        "organicSearch": "Органический поиск",
+        "socialMedia": "Социальные сети",
+        "direct": "Прямой трафик",
+        "referrals": "Рефералы",
+        "completionRate": "Процент завершения",
+        "averageAcrossAllCourses": "Среднее по всем курсам",
+        "avgWatchTime": "Среднее время просмотра",
+        "perStudentSession": "За сессию студента",
+        "vsLastMonth": "по сравнению с прошлым месяцем",
+        "certificatesIssued": "Выданных сертификатов",
+        "thisMonth": "В этом месяце"
+      }
+    },
+    "dashboard": {
+      "title": "Панель управления",
+      "welcomeMessage": "Добро пожаловать! Вот что происходит с вашими курсами.",
+      "createNewCourse": "Создать новый курс",
+      "startBuildingCourse": "Начните создавать ваш следующий курс",
+      "replyToMessages": "Ответить на сообщения",
+      "unreadMessages": "{{count}} непрочитанных сообщений",
+      "viewAnalytics": "Просмотреть аналитику",
+      "performanceInsights": "Детальные показатели производительности",
+      "checkEarnings": "Проверить доходы",
+      "reviewRevenue": "Просмотреть ваш доход и выплаты",
+      "last7Days": "Последние 7 дней",
+      "last30Days": "Последние 30 дней",
+      "last90Days": "Последние 90 дней",
+      "totalRevenue": "Общий доход",
+      "thisMonth": "{{amount}} в этом месяце",
+      "totalStudents": "Всего студентов",
+      "recentEnrollments": "{{count}} новых записей",
+      "publishedCourses": "Опубликованные курсы",
+      "completions": "{{count}} завершений",
+      "averageRating": "Средний рейтинг",
+      "basedOnReviews": "На основе отзывов студентов",
+      "courseViews": "Просмотры курсов",
+      "enrollments": "Записи",
+      "watchTime": "Время просмотра",
+      "conversion": "Конверсия",
+      "quickActions": "Быстрые действия",
+      "topRatedCourses": "Топ рейтинговые курсы",
+      "viewAll": "Показать все",
+      "noRatedCourses": "Пока нет оцененных курсов",
+      "coursesWillAppear": "Курсы появятся здесь, как только студенты начнут их оценивать",
+      "createFirstCourse": "Создать ваш первый курс",
+      "studentsCount": "{{count}} студент",
+      "studentsCount_plural": "{{count}} студентов",
+      "recentMessages": "Недавние сообщения",
+      "noMessages": "Пока нет сообщений"
+    }
   },
   "home": {
     "hero": {
@@ -733,6 +1307,10 @@
     "courses": "Курсы",
     "ratings": "рейтинги",
     "students": "студенты",
+    "previous": "Назад",
+    "next": "Далее",
+    "cancel": "Отмена",
+    "add": "Добавить",
     "createdBy": "Создан",
     "lastUpdated": "Последнее обновление {{date}}",
     "certificate": "Сертификат",
@@ -839,34 +1417,6 @@
       "newestFirst": "Сначала новые",
       "mostPopular": "Самые популярные"
     },
-    "dashboard": {
-      "title": "Панель управления",
-      "welcomeMessage": "Добро пожаловать! Вот что происходит с вашими курсами.",
-      "createNewCourse": "Создать новый курс",
-      "startBuildingCourse": "Начните создавать ваш следующий курс",
-      "replyToMessages": "Ответить на сообщения",
-      "unreadMessages": "{{count}} непрочитанных сообщений",
-      "viewAnalytics": "Просмотреть аналитику",
-      "performanceInsights": "Детальные показатели производительности",
-      "checkEarnings": "Проверить доходы",
-      "reviewRevenue": "Просмотреть ваш доход и выплаты",
-      "last7Days": "Последние 7 дней",
-      "last30Days": "Последние 30 дней",
-      "last90Days": "Последние 90 дней",
-      "totalRevenue": "Общий доход",
-      "thisMonth": "{{amount}} в этом месяце",
-      "totalStudents": "Всего студентов",
-      "recentEnrollments": "{{count}} новых записей",
-      "publishedCourses": "Опубликованные курсы",
-      "completions": "{{count}} завершений",
-      "averageRating": "Средний рейтинг",
-      "basedOnReviews": "На основе отзывов студентов",
-      "courseViews": "Просмотры курсов",
-      "enrollments": "Записи",
-      "watchTime": "Время просмотра",
-      "conversion": "Конверсия",
-      "quickActions": "Быстрые действия"
-    },
     "analytics": {
       "organicSearch": "Органический поиск",
       "socialMedia": "Социальные сети",
@@ -926,6 +1476,102 @@
     "messages": {
       "errorLoadingMessages": "Ошибка загрузки сообщений",
       "description": "Общайтесь со студентами и управляйте запросами"
+    },
+    "createCourse": {
+      "title": "Создать новый курс",
+      "subtitle": "Создайте увлекательный опыт обучения для ваших студентов",
+      "saveDraft": "Сохранить черновик",
+      "stepProgress": "Шаг {{current}} из {{total}}",
+      "submitting": "Отправка...",
+      "submitForApproval": "Отправить на утверждение",
+      "courseCreatedSuccess": "Курс успешно создан!",
+      "courseCreatedError": "Не удалось создать курс. Попробуйте еще раз.",
+      "steps": {
+        "basicInformation": {
+          "title": "Основная информация",
+          "description": "Название курса, описание и категория"
+        },
+        "courseDetails": {
+          "title": "Детали курса",
+          "description": "Цели, требования и целевая аудитория"
+        },
+        "pricingSettings": {
+          "title": "Ценообразование и настройки",
+          "description": "Установите цену, язык и другие настройки"
+        },
+        "mediaContent": {
+          "title": "Медиа и контент",
+          "description": "Загрузите изображение курса и промо-видео"
+        },
+        "reviewCreate": {
+          "title": "Просмотр и создание",
+          "description": "Просмотрите детали курса и создайте"
+        }
+      },
+      "validation": {
+        "titleRequired": "Название обязательно",
+        "titleTooLong": "Название должно быть менее 100 символов",
+        "descriptionRequired": "Описание обязательно",
+        "categoryRequired": "Категория обязательна",
+        "learningObjectiveRequired": "Требуется хотя бы одна цель обучения",
+        "priceRequired": "Цена должна быть больше 0 для платных курсов",
+        "discountPriceTooHigh": "Цена со скидкой не может быть выше первоначальной цены"
+      },
+      "approvalProcess": {
+        "title": "Процесс утверждения",
+        "description": "Ваш курс будет рассмотрен нашей административной командой для обеспечения стандартов качества. Вы получите уведомление после завершения проверки, обычно в течение 24-48 часов."
+      },
+      "basicInformation": {
+        "title": "Основная информация",
+        "description": "Начнем с основных деталей вашего курса. Эта информация поможет студентам понять, о чем ваш курс.",
+        "courseTitle": "Название курса *",
+        "courseTitlePlaceholder": "Введите привлекательное название курса",
+        "shortDescription": "Краткое описание",
+        "shortDescriptionPlaceholder": "Краткое, убедительное описание вашего курса",
+        "courseDescription": "Описание курса *",
+        "courseDescriptionPlaceholder": "Предоставьте подробное описание вашего курса. Что изучат студенты? Как это им поможет?",
+        "category": "Категория *",
+        "selectCategory": "Выберите категорию",
+        "subcategory": "Подкategория",
+        "selectSubcategory": "Выберите подкатегорию",
+        "tags": "Теги",
+        "tagsDescription": "Добавьте теги, чтобы помочь студентам найти ваш курс. Вы можете добавить до 10 тегов.",
+        "enterTag": "Введите тег",
+        "maxTagsReached": "Достигнуто максимальное количество тегов (10/10)",
+        "charactersCount": "{{count}}/{{max}} символов"
+      },
+      "courseDetails": {
+        "title": "Детали курса",
+        "description": "Определите, что студенты изучат, что им нужно знать заранее, и для кого предназначен этот курс.",
+        "courseLevel": "Уровень курса *",
+        "levels": {
+          "beginner": "Начальный",
+          "intermediate": "Средний",
+          "advanced": "Продвинутый"
+        },
+        "levelDescriptions": {
+          "beginner": "Предварительный опыт не требуется",
+          "intermediate": "Некоторый опыт желателен",
+          "advanced": "Требуется обширный опыт"
+        },
+        "learningObjectives": {
+          "title": "Цели обучения",
+          "placeholder": "Что изучат студенты?",
+          "description": "Перечислите ключевые навыки и знания, которые получат студенты"
+        },
+        "requirements": {
+          "title": "Требования",
+          "placeholder": "Что нужно знать студентам?",
+          "description": "Перечислите любые предварительные условия или требования для прохождения этого курса"
+        },
+        "targetAudience": {
+          "title": "Целевая аудитория",
+          "placeholder": "Для кого этот курс?",
+          "description": "Опишите, кому больше всего подойдет этот курс"
+        },
+        "addAnother": "Добавить ещё",
+        "maxItemsAllowed": "Максимум 10 элементов"
+      }
     }
   }
 }

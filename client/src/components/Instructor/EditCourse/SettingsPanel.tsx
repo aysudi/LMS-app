@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   FaDollarSign,
   FaGlobe,
@@ -50,6 +51,7 @@ const SettingsPanel = ({
   onSubmitForApproval,
   onSaveAsDraft,
 }: SettingsPanelProps) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     isFree: course.isFree,
     originalPrice: course.originalPrice,
@@ -75,7 +77,7 @@ const SettingsPanel = ({
               <div className="p-2 bg-green-100 rounded-lg mr-3">
                 <FaDollarSign className="text-green-600" />
               </div>
-              Course Pricing
+              {t("instructor.editCourse.settings.coursePricing")}
             </h3>
             <div className="space-y-6">
               <div className="bg-white rounded-lg p-4 border border-green-200">
@@ -91,12 +93,11 @@ const SettingsPanel = ({
                     htmlFor="isFree"
                     className="ml-3 block text-base font-medium text-gray-900"
                   >
-                    This is a free course
+                    {t("instructor.editCourse.settings.freeCourseName")}
                   </label>
                 </div>
                 <p className="mt-2 text-sm text-gray-600 ml-8">
-                  Free courses help build your audience and establish
-                  credibility
+                  {t("instructor.editCourse.settings.freeCourseDescription")}
                 </p>
               </div>
 

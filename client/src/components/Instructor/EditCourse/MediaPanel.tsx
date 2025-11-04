@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { FaUpload, FaImage, FaVideo, FaTrash } from "react-icons/fa";
 import type { Course } from "../../../types/course.type";
 
@@ -8,6 +9,7 @@ interface MediaPanelProps {
 }
 
 const MediaPanel = ({ course, onUpdate }: MediaPanelProps) => {
+  const { t } = useTranslation();
   const [previewImage, setPreviewImage] = useState<string | null>(
     course.image?.url || null
   );
@@ -80,7 +82,7 @@ const MediaPanel = ({ course, onUpdate }: MediaPanelProps) => {
           {/* Course Image */}
           <div>
             <h3 className="text-lg font-medium text-gray-900 mb-4">
-              Course Image
+              {t("instructor.editCourse.media.courseImage")}
             </h3>
             <div className="flex items-start space-x-6">
               <div className="flex-shrink-0">
@@ -89,7 +91,9 @@ const MediaPanel = ({ course, onUpdate }: MediaPanelProps) => {
                     <div className="relative w-48 h-32 rounded-lg overflow-hidden">
                       <img
                         src={previewImage}
-                        alt="Course preview"
+                        alt={t(
+                          "instructor.editCourse.media.courseImagePreview"
+                        )}
                         className="w-full h-full object-cover"
                       />
                       <button
@@ -105,16 +109,28 @@ const MediaPanel = ({ course, onUpdate }: MediaPanelProps) => {
                       onClick={() => imageInputRef.current?.click()}
                     >
                       <FaImage size={24} />
-                      <span className="mt-2 text-sm">Upload Image</span>
+                      <span className="mt-2 text-sm">
+                        {t("instructor.editCourse.media.uploadImage")}
+                      </span>
                     </div>
                   )}
                 </div>
               </div>
               <div className="flex-1">
                 <div className="text-sm text-gray-500">
-                  <p>Recommended image size: 1280x720 pixels (16:9 ratio)</p>
-                  <p>Maximum file size: 5MB</p>
-                  <p>Supported formats: JPG, PNG</p>
+                  <p>
+                    {t("instructor.editCourse.media.imageRecommendations.size")}
+                  </p>
+                  <p>
+                    {t(
+                      "instructor.editCourse.media.imageRecommendations.maxSize"
+                    )}
+                  </p>
+                  <p>
+                    {t(
+                      "instructor.editCourse.media.imageRecommendations.formats"
+                    )}
+                  </p>
                 </div>
                 <input
                   ref={imageInputRef}
@@ -129,7 +145,7 @@ const MediaPanel = ({ course, onUpdate }: MediaPanelProps) => {
                     className="mt-4 inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer"
                   >
                     <FaUpload className="mr-2" />
-                    Choose Image
+                    {t("instructor.editCourse.media.chooseImage")}
                   </button>
                 )}
               </div>
@@ -139,7 +155,7 @@ const MediaPanel = ({ course, onUpdate }: MediaPanelProps) => {
           {/* Promotional Video */}
           <div>
             <h3 className="text-lg font-medium text-gray-900 mb-4">
-              Promotional Video
+              {t("instructor.editCourse.media.promotionalVideo")}
             </h3>
             <div className="flex items-start space-x-6">
               <div className="flex-shrink-0">
@@ -164,16 +180,30 @@ const MediaPanel = ({ course, onUpdate }: MediaPanelProps) => {
                       onClick={() => videoInputRef.current?.click()}
                     >
                       <FaVideo size={24} />
-                      <span className="mt-2 text-sm">Upload Video</span>
+                      <span className="mt-2 text-sm">
+                        {t("instructor.editCourse.media.uploadVideo")}
+                      </span>
                     </div>
                   )}
                 </div>
               </div>
               <div className="flex-1">
                 <div className="text-sm text-gray-500">
-                  <p>Maximum duration: 2 minutes</p>
-                  <p>Maximum file size: 100MB</p>
-                  <p>Supported formats: MP4, WebM</p>
+                  <p>
+                    {t(
+                      "instructor.editCourse.media.videoRecommendations.duration"
+                    )}
+                  </p>
+                  <p>
+                    {t(
+                      "instructor.editCourse.media.videoRecommendations.maxSize"
+                    )}
+                  </p>
+                  <p>
+                    {t(
+                      "instructor.editCourse.media.videoRecommendations.formats"
+                    )}
+                  </p>
                 </div>
                 <input
                   ref={videoInputRef}
@@ -188,7 +218,7 @@ const MediaPanel = ({ course, onUpdate }: MediaPanelProps) => {
                     className="mt-4 inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer"
                   >
                     <FaUpload className="mr-2" />
-                    Choose Video
+                    {t("instructor.editCourse.media.chooseVideo")}
                   </button>
                 )}
               </div>
