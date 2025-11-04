@@ -67,11 +67,17 @@ export const useConversation = (conversationId: string) => {
 };
 
 // Messages hooks
-export const useMessages = (params: {
-  conversationId: string;
-  page?: number;
-  limit?: number;
-}) => {
+export const useMessages = (
+  params: {
+    conversationId: string;
+    page?: number;
+    limit?: number;
+  },
+  options?: Omit<
+    UseQueryOptions<{ success: boolean; data: any }>,
+    "queryKey" | "queryFn"
+  >
+) => {
   return useQuery({
     queryKey: messageQueryKeys.messages(params.conversationId, {
       page: params.page,
@@ -98,6 +104,7 @@ export const useMessages = (params: {
     refetchOnMount: false, // Only refetch if stale
     retry: 2,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    ...options,
   });
 };
 

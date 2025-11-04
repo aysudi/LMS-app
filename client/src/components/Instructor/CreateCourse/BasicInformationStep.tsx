@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { FaPlus, FaTimes, FaHashtag } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 import RichTextEditor from "../../UI/RichTextEditor";
 
 interface BasicInformationStepProps {
@@ -120,6 +121,7 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({
   onTagAdd,
   onTagRemove,
 }) => {
+  const { t } = useTranslation();
   const [newTag, setNewTag] = useState("");
   const tagInputRef = useRef<HTMLInputElement>(null);
 
@@ -152,11 +154,10 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Basic Information
+            {t("courses.createCourse.basicInformation.title")}
           </h2>
           <p className="text-gray-600">
-            Let's start with the fundamental details of your course. This
-            information will help students understand what your course is about.
+            {t("courses.createCourse.basicInformation.description")}
           </p>
         </div>
 
@@ -167,7 +168,7 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({
               htmlFor="title"
               className="block text-sm font-medium text-gray-700 mb-2"
             >
-              Course Title *
+              {t("courses.createCourse.basicInformation.courseTitle")}
             </label>
             <input
               type="text"
@@ -176,7 +177,9 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({
               onChange={(e) =>
                 setFormData((prev: any) => ({ ...prev, title: e.target.value }))
               }
-              placeholder="Enter an engaging course title"
+              placeholder={t(
+                "courses.createCourse.basicInformation.courseTitlePlaceholder"
+              )}
               className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 ${
                 errors.title ? "border-red-300 bg-red-50" : "border-gray-300"
               }`}
@@ -187,7 +190,10 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({
                 <p className="text-sm text-red-600">{errors.title}</p>
               )}
               <p className="text-sm text-gray-500 ml-auto">
-                {formData.title.length}/100 characters
+                {t("courses.createCourse.basicInformation.charactersCount", {
+                  count: formData.title.length,
+                  max: 100,
+                })}
               </p>
             </div>
           </div>
@@ -198,7 +204,7 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({
               htmlFor="shortDescription"
               className="block text-sm font-medium text-gray-700 mb-2"
             >
-              Short Description
+              {t("courses.createCourse.basicInformation.shortDescription")}
             </label>
             <input
               type="text"
@@ -210,12 +216,17 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({
                   shortDescription: e.target.value,
                 }))
               }
-              placeholder="A brief, compelling description of your course"
+              placeholder={t(
+                "courses.createCourse.basicInformation.shortDescriptionPlaceholder"
+              )}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
               maxLength={150}
             />
             <p className="text-sm text-gray-500 mt-2">
-              {formData.shortDescription.length}/150 characters
+              {t("courses.createCourse.basicInformation.charactersCount", {
+                count: formData.shortDescription.length,
+                max: 150,
+              })}
             </p>
           </div>
 
@@ -225,7 +236,7 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({
               htmlFor="description"
               className="block text-sm font-medium text-gray-700 mb-2"
             >
-              Course Description *
+              {t("courses.createCourse.basicInformation.courseDescription")}
             </label>
             <RichTextEditor
               content={formData.description}
@@ -235,7 +246,9 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({
                   description: content,
                 }))
               }
-              placeholder="Provide a detailed description of your course. What will students learn? How will it benefit them?"
+              placeholder={t(
+                "courses.createCourse.basicInformation.courseDescriptionPlaceholder"
+              )}
             />
             {errors.description && (
               <p className="text-sm text-red-600 mt-2">{errors.description}</p>
@@ -249,7 +262,7 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({
                 htmlFor="category"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Category *
+                {t("courses.createCourse.basicInformation.category")}
               </label>
               <select
                 id="category"
@@ -267,7 +280,9 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({
                     : "border-gray-300"
                 }`}
               >
-                <option value="">Select a category</option>
+                <option value="">
+                  {t("courses.createCourse.basicInformation.selectCategory")}
+                </option>
                 {CATEGORIES.map((category) => (
                   <option key={category} value={category}>
                     {category}
@@ -284,7 +299,7 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({
                 htmlFor="subcategory"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Subcategory
+                {t("courses.createCourse.basicInformation.subcategory")}
               </label>
               <select
                 id="subcategory"
@@ -298,7 +313,9 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({
                 disabled={!formData.category}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
               >
-                <option value="">Select a subcategory</option>
+                <option value="">
+                  {t("courses.createCourse.basicInformation.selectSubcategory")}
+                </option>
                 {formData.category &&
                   SUBCATEGORIES[formData.category]?.map((subcategory) => (
                     <option key={subcategory} value={subcategory}>
@@ -312,11 +329,10 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({
           {/* Tags */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Tags
+              {t("courses.createCourse.basicInformation.tags")}
             </label>
             <p className="text-sm text-gray-500 mb-4">
-              Add tags to help students find your course. You can add up to 10
-              tags.
+              {t("courses.createCourse.basicInformation.tagsDescription")}
             </p>
 
             {/* Tag Input */}
@@ -329,7 +345,9 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
                   onKeyPress={handleTagKeyPress}
-                  placeholder="Enter a tag"
+                  placeholder={t(
+                    "courses.createCourse.basicInformation.enterTag"
+                  )}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
                   maxLength={30}
                   disabled={formData.tags.length >= 10}
@@ -342,7 +360,7 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({
                 className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <FaPlus className="text-sm" />
-                <span>Add</span>
+                <span>{t("common.add")}</span>
               </button>
             </div>
 
@@ -369,7 +387,7 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({
 
             {formData.tags.length >= 10 && (
               <p className="text-sm text-amber-600 mt-2">
-                Maximum number of tags reached (10/10)
+                {t("courses.createCourse.basicInformation.maxTagsReached")}
               </p>
             )}
           </div>

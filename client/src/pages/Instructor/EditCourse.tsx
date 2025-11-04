@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
+// @ts-ignore
+import { useTranslation } from "react-i18next";
 import { FaArrowLeft } from "react-icons/fa";
 import type { Course } from "../../types/course.type";
 import {
@@ -21,18 +23,38 @@ import { useToast } from "../../components/UI/ToastProvider";
 import { courseToasts } from "../../utils/toastUtils";
 import Swal from "sweetalert2";
 
-const TABS = [
-  { id: "basic-info", label: "Basic Information", icon: "📝" },
-  { id: "curriculum", label: "Curriculum", icon: "📚" },
-  { id: "media", label: "Media", icon: "🎬" },
-  { id: "announcements", label: "Announcements", icon: "📢" },
-  { id: "settings", label: "Settings", icon: "⚙️" },
-] as const;
+// TABS will be defined inside component to use translation
 
 const EditCourse = () => {
   const { courseId } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
+
+  const TABS = [
+    {
+      id: "basic-info",
+      label: t("instructor.editCourse.tabs.basicInformation"),
+      icon: "📝",
+    },
+    {
+      id: "curriculum",
+      label: t("instructor.editCourse.tabs.curriculum"),
+      icon: "📚",
+    },
+    { id: "media", label: t("instructor.editCourse.tabs.media"), icon: "🎬" },
+    {
+      id: "announcements",
+      label: t("instructor.editCourse.tabs.announcements"),
+      icon: "📢",
+    },
+    {
+      id: "settings",
+      label: t("instructor.editCourse.tabs.settings"),
+      icon: "⚙️",
+    },
+  ] as const;
+
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]["id"]>(
     (searchParams.get("tab") as (typeof TABS)[number]["id"]) || "basic-info"
   );
@@ -71,15 +93,15 @@ const EditCourse = () => {
     onSuccess: () => {
       showToast({
         type: "success",
-        title: "Course Submitted",
-        message: "Your course has been submitted for admin approval.",
+        title: t("instructor.editCourse.courseSubmitted"),
+        message: t("instructor.editCourse.courseSubmittedMessage"),
       });
     },
     onError: () => {
       showToast({
         type: "error",
-        title: "Submission Failed",
-        message: "Failed to submit course for approval. Please try again.",
+        title: t("instructor.editCourse.submissionFailed"),
+        message: t("instructor.editCourse.submissionFailedMessage"),
       });
     },
   });
@@ -88,15 +110,15 @@ const EditCourse = () => {
     onSuccess: () => {
       showToast({
         type: "success",
-        title: "Saved as Draft",
-        message: "Your course has been saved as draft.",
+        title: t("instructor.editCourse.savedAsDraft"),
+        message: t("instructor.editCourse.savedAsDraftMessage"),
       });
     },
     onError: () => {
       showToast({
         type: "error",
-        title: "Save Failed",
-        message: "Failed to save course as draft. Please try again.",
+        title: t("instructor.editCourse.saveFailed"),
+        message: t("instructor.editCourse.saveFailedMessage"),
       });
     },
   });
@@ -123,7 +145,9 @@ const EditCourse = () => {
 
   if (isLoading) return <LoadingSpinner fullScreen />;
   if (error || !courseData)
-    return <ErrorState message="Failed to load course" />;
+    return (
+      <ErrorState message={t("instructor.editCourse.failedToLoadCourse")} />
+    );
 
   const handlePanelUpdate = (changes: Partial<Course>) => {
     setUnsavedChanges(true);
@@ -180,16 +204,17 @@ const EditCourse = () => {
     const courseTitle = courseData?.data?.title || "this course";
 
     const result = await Swal.fire({
-      title: "Delete Course",
-      html: `Are you sure you want to delete <strong>"${courseTitle}"</strong>?<br><br>This action cannot be undone and will remove all associated lessons, sections, and student progress.`,
+      title: t("instructor.editCourse.deleteConfirmation.title"),
+      text: t("instructor.editCourse.deleteConfirmation.message", {
+        courseTitle,
+      }),
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#EF4444",
-      cancelButtonColor: "#6B7280",
-      confirmButtonText: "Yes, Delete",
-      cancelButtonText: "Cancel",
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: t("instructor.editCourse.deleteConfirmation.confirm"),
+      cancelButtonText: t("common.cancel"),
     });
-
     if (result.isConfirmed) {
       try {
         await deleteMutation.mutateAsync(courseId!);
@@ -238,8 +263,11 @@ const EditCourse = () => {
                   {courseData.data.title}
                 </h1>
                 <p className="text-sm text-gray-500">
-                  Last updated:{" "}
-                  {new Date(courseData.data.updatedAt).toLocaleDateString()}
+                  {t("common.lastUpdated", {
+                    date: new Date(
+                      courseData.data.updatedAt
+                    ).toLocaleDateString(),
+                  })}
                 </p>
               </div>
             </div>

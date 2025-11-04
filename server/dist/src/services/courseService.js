@@ -95,6 +95,28 @@ export const createCourseService = async (courseData, instructorId) => {
         };
     }
     delete coursePayload.uploadedFiles;
+    // Set status based on what was explicitly provided, or use default logic
+    if (coursePayload.status) {
+        // If status is explicitly provided, use it
+        if (coursePayload.status === "draft") {
+            coursePayload.isPublished = false;
+        }
+        else if (coursePayload.status === "pending") {
+            coursePayload.isPublished = false;
+            coursePayload.submittedAt = new Date();
+        }
+    }
+    else {
+        // Fallback to original logic if no status provided
+        if (coursePayload.isPublished) {
+            coursePayload.status = "pending";
+            coursePayload.submittedAt = new Date();
+            coursePayload.isPublished = false; // Don't publish until approved
+        }
+        else {
+            coursePayload.status = "draft";
+        }
+    }
     const course = new Course(coursePayload);
     await course.save();
     return course.populate("instructor", "firstName lastName email avatar");
@@ -130,6 +152,23 @@ export const updateCourseService = async (id, updateData, instructorId) => {
     if (updateData.isPublished && !course.publishedAt) {
         course.publishedAt = new Date();
     }
+    course.lastUpdated = new Date();
+    await course.save();
+    return course.populate("instructor", "firstName lastName email avatar");
+};
+export const submitCourseForApprovalService = async (id, instructorId) => {
+    const course = await Course.findOne({
+        _id: id,
+        instructor: instructorId,
+    });
+    if (!course) {
+        throw new Error("Course not found or you are not authorized to submit it");
+    }
+    if (course.status !== "draft") {
+        throw new Error("Only draft courses can be submitted for approval");
+    }
+    course.status = "pending";
+    course.submittedAt = new Date();
     course.lastUpdated = new Date();
     await course.save();
     return course.populate("instructor", "firstName lastName email avatar");
@@ -255,4 +294,104 @@ export const enrollUserInCourseService = async (courseId, userId) => {
         await user.save();
     }
     return { message: "Successfully enrolled in course" };
+};
+// Add review to course
+export const addReviewToCourseService = async (courseId, userId, rating, comment) => {
+    const course = await Course.findById(courseId);
+    if (!course) {
+        throw new Error("Course not found");
+    }
+    // Check if user is enrolled in the course
+    if (!course.studentsEnrolled.includes(userId)) {
+        throw new Error("You must be enrolled in this course to leave a review");
+    }
+    // Check if user has already reviewed this course
+    const existingReview = course.reviews.find((review) => review.user.toString() === userId);
+    if (existingReview) {
+        throw new Error("You have already reviewed this course");
+    }
+    // Add the new review
+    course.reviews.push({
+        user: userId,
+        rating,
+        comment,
+        date: new Date(),
+    });
+    // Recalculate average rating
+    course.calculateAverageRating();
+    await course.save();
+    // Populate the new review and return the course
+    const updatedCourse = await Course.findById(courseId)
+        .populate("reviews.user", "firstName lastName avatar")
+        .lean();
+    return updatedCourse;
+};
+// Get course reviews with pagination
+export const getCourseReviewsService = async (courseId, page = 1, limit = 10) => {
+    const course = await Course.findById(courseId)
+        .select("reviews rating ratingsCount")
+        .populate("reviews.user", "firstName lastName avatar")
+        .lean();
+    if (!course) {
+        throw new Error("Course not found");
+    }
+    // Sort reviews by date (newest first)
+    const sortedReviews = course.reviews.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    // Apply pagination
+    const skip = (page - 1) * limit;
+    const paginatedReviews = sortedReviews.slice(skip, skip + limit);
+    return {
+        reviews: paginatedReviews,
+        totalReviews: course.reviews.length,
+        averageRating: course.rating,
+        ratingsCount: course.ratingsCount,
+        pagination: {
+            current: page,
+            pages: Math.ceil(course.reviews.length / limit),
+            total: course.reviews.length,
+            hasNext: page < Math.ceil(course.reviews.length / limit),
+            hasPrev: page > 1,
+        },
+    };
+};
+// Update user's review
+export const updateReviewService = async (courseId, userId, rating, comment) => {
+    const course = await Course.findById(courseId);
+    if (!course) {
+        throw new Error("Course not found");
+    }
+    // Find the user's existing review
+    const reviewIndex = course.reviews.findIndex((review) => review.user.toString() === userId);
+    if (reviewIndex === -1) {
+        throw new Error("Review not found");
+    }
+    // Update the review
+    course.reviews[reviewIndex].rating = rating;
+    course.reviews[reviewIndex].comment = comment;
+    course.reviews[reviewIndex].date = new Date();
+    // Recalculate average rating
+    course.calculateAverageRating();
+    await course.save();
+    // Return updated course with populated reviews
+    const updatedCourse = await Course.findById(courseId)
+        .populate("reviews.user", "firstName lastName avatar")
+        .lean();
+    return updatedCourse;
+};
+// Delete user's review
+export const deleteReviewService = async (courseId, userId) => {
+    const course = await Course.findById(courseId);
+    if (!course) {
+        throw new Error("Course not found");
+    }
+    // Find and remove the user's review
+    const reviewIndex = course.reviews.findIndex((review) => review.user.toString() === userId);
+    if (reviewIndex === -1) {
+        throw new Error("Review not found");
+    }
+    course.reviews.splice(reviewIndex, 1);
+    // Recalculate average rating
+    course.calculateAverageRating();
+    await course.save();
+    return { message: "Review deleted successfully" };
 };

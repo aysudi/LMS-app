@@ -3,6 +3,8 @@ import Course from "../models/Course";
 import Enrollment from "../models/Enrollment";
 import { UserRole } from "../types/user.types";
 import formatMongoData from "../utils/formatMongoData";
+import mongoose from "mongoose";
+import { sendCourseApprovedEmail, sendCourseRejectedEmail, } from "../utils/sendMail";
 // Get admin dashboard statistics
 export const getAdminDashboardStats = async (req, res) => {
     try {
@@ -14,7 +16,6 @@ export const getAdminDashboardStats = async (req, res) => {
                 message: "Admin access required",
             });
         }
-        // Get counts and statistics
         const [totalUsers, totalInstructors, totalStudents, totalCourses, totalEnrollments, pendingCourses,] = await Promise.all([
             User.countDocuments(),
             User.countDocuments({ role: UserRole.INSTRUCTOR }),
@@ -34,14 +35,14 @@ export const getAdminDashboardStats = async (req, res) => {
             totalInstructors,
             totalStudents,
             totalCourses,
-            totalRevenue: 0, // TODO: Calculate from payments/orders
+            totalRevenue: 0,
             pendingApprovals: pendingCourses,
-            activeStudents: totalStudents, // TODO: Calculate active students
-            completedCourses: 0, // TODO: Calculate from enrollments
-            certificatesIssued: 0, // TODO: Calculate from certificates
-            revenueGrowth: 0, // TODO: Calculate growth
+            activeStudents: totalStudents,
+            completedCourses: 0,
+            certificatesIssued: 0,
+            revenueGrowth: 0,
             userGrowth: Math.round((recentUsers / totalUsers) * 100),
-            courseGrowth: 0, // TODO: Calculate course growth
+            courseGrowth: 0,
         };
         res.status(200).json({
             success: true,
@@ -96,7 +97,6 @@ export const getAdminUsers = async (req, res) => {
                 .lean(),
             User.countDocuments(filters),
         ]);
-        // Get additional user data (enrollments, courses created, etc.)
         const usersWithStats = await Promise.all(users.map(async (user) => {
             const [enrollmentCount, coursesCreated] = await Promise.all([
                 user.role === UserRole.STUDENT
@@ -110,7 +110,7 @@ export const getAdminUsers = async (req, res) => {
                 ...formatMongoData(user),
                 coursesEnrolled: enrollmentCount,
                 coursesCreated: coursesCreated,
-                lastActive: "Recently", // TODO: Implement actual last active tracking
+                lastActive: "Recently",
             };
         }));
         const totalPages = Math.ceil(totalUsers / limitNum);
@@ -234,7 +234,6 @@ export const bulkUpdateUsers = async (req, res) => {
                 message: "User IDs array is required",
             });
         }
-        // Validate updates
         const allowedFields = ["status", "role"];
         const validUpdates = {};
         Object.keys(updates).forEach((key) => {
@@ -269,7 +268,6 @@ export const deleteUser = async (req, res) => {
                 message: "Admin access required",
             });
         }
-        // Instead of hard delete, we'll set status to 'deleted'
         const user = await User.findByIdAndUpdate(targetUserId, { status: "deleted", deletedAt: new Date() }, { new: true });
         if (!user) {
             return res.status(404).json({
@@ -302,20 +300,16 @@ export const getRecentActivity = async (req, res) => {
             });
         }
         const limit = parseInt(req.query.limit) || 10;
-        // Get recent activities from different sources
         const [recentUsers, recentCourses, recentEnrollments] = await Promise.all([
-            // Recent user registrations
             User.find()
                 .sort({ createdAt: -1 })
                 .limit(3)
                 .select("firstName lastName email role createdAt"),
-            // Recent course submissions/updates
             Course.find()
                 .sort({ updatedAt: -1 })
                 .limit(3)
                 .populate("instructor", "firstName lastName")
                 .select("title instructor isPublished updatedAt createdAt"),
-            // Recent enrollments
             Enrollment.find()
                 .sort({ createdAt: -1 })
                 .limit(4)
@@ -323,9 +317,7 @@ export const getRecentActivity = async (req, res) => {
                 .populate("course", "title")
                 .select("user course createdAt"),
         ]);
-        // Format activities into a unified structure
         const activities = [];
-        // Add user registrations
         recentUsers.forEach((user) => {
             activities.push({
                 id: `user_${user._id}`,
@@ -336,7 +328,6 @@ export const getRecentActivity = async (req, res) => {
                 metadata: { email: user.email, role: user.role },
             });
         });
-        // Add course activities
         recentCourses.forEach((course) => {
             const instructor = course.instructor;
             const isPublished = course.isPublished;
@@ -353,7 +344,6 @@ export const getRecentActivity = async (req, res) => {
                 metadata: { courseTitle: course.title, isPublished },
             });
         });
-        // Add enrollment activities
         recentEnrollments.forEach((enrollment) => {
             const user = enrollment.user;
             const course = enrollment.course;
@@ -368,10 +358,8 @@ export const getRecentActivity = async (req, res) => {
                 metadata: { courseTitle: course?.title },
             });
         });
-        // Sort by time (most recent first) and limit
         activities.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
         const limitedActivities = activities.slice(0, limit);
-        // Format timestamps
         const formattedActivities = limitedActivities.map((activity) => ({
             ...activity,
             time: new Date(activity.time).toLocaleString(),
@@ -404,16 +392,13 @@ export const getAdminAnalytics = async (req, res) => {
         const now = new Date();
         const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
         const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-        // Get current month data
         const [totalUsers, totalCourses, totalEnrollments, totalRevenue, thisMonthUsers, thisMonthCourses, thisMonthEnrollments, thisMonthRevenue, lastMonthUsers, lastMonthCourses, lastMonthEnrollments, lastMonthRevenue,] = await Promise.all([
-            // Total counts
             User.countDocuments(),
             Course.countDocuments({ isPublished: true }),
             Enrollment.countDocuments(),
             Enrollment.aggregate([
                 { $group: { _id: null, total: { $sum: "$price" } } },
             ]).then((result) => result[0]?.total || 0),
-            // This month counts
             User.countDocuments({ createdAt: { $gte: startOfThisMonth } }),
             Course.countDocuments({
                 createdAt: { $gte: startOfThisMonth },
@@ -424,7 +409,6 @@ export const getAdminAnalytics = async (req, res) => {
                 { $match: { createdAt: { $gte: startOfThisMonth } } },
                 { $group: { _id: null, total: { $sum: "$price" } } },
             ]).then((result) => result[0]?.total || 0),
-            // Last month counts
             User.countDocuments({
                 createdAt: {
                     $gte: startOfLastMonth,
@@ -456,13 +440,11 @@ export const getAdminAnalytics = async (req, res) => {
                 { $group: { _id: null, total: { $sum: "$price" } } },
             ]).then((result) => result[0]?.total || 0),
         ]);
-        // Calculate growth percentages
         const calculateGrowth = (current, previous) => {
             if (previous === 0)
                 return current > 0 ? 100 : 0;
             return ((current - previous) / previous) * 100;
         };
-        // Get monthly data for charts (last 6 months)
         const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
         const monthlyUserData = await User.aggregate([
             { $match: { createdAt: { $gte: sixMonthsAgo } } },
@@ -490,21 +472,18 @@ export const getAdminAnalytics = async (req, res) => {
             },
             { $sort: { "_id.year": 1, "_id.month": 1 } },
         ]);
-        // Get course categories
         const courseCategories = await Course.aggregate([
             { $match: { isPublished: true } },
             { $group: { _id: "$category", count: { $sum: 1 } } },
             { $sort: { count: -1 } },
             { $limit: 10 },
         ]);
-        // Calculate completion rate
         const completedEnrollments = await Enrollment.countDocuments({
             completionStatus: "completed",
         });
         const completionRate = totalEnrollments > 0
             ? (completedEnrollments / totalEnrollments) * 100
             : 0;
-        // Format monthly data for frontend
         const formatMonthlyData = (data) => {
             return data.map((item) => ({
                 month: new Date(item._id.year, item._id.month - 1).toISOString(),
@@ -579,35 +558,31 @@ export const getAdminCertificates = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
         const skip = (page - 1) * limit;
-        // Get certificates with user and course data
-        const [certificates, totalCount] = await Promise.all([
-            Enrollment.find({
-                certificateIssued: true,
-                completionStatus: "completed",
-            })
-                .populate("user", "firstName lastName email avatar")
-                .populate("course", "title instructor category")
-                .populate({
-                path: "course",
-                populate: {
-                    path: "instructor",
-                    select: "firstName lastName",
-                },
-            })
-                .sort({ certificateIssuedAt: -1 })
-                .skip(skip)
-                .limit(limit),
-            Enrollment.countDocuments({
-                certificateIssued: true,
-                completionStatus: "completed",
-            }),
-        ]);
-        // Get certificate statistics
+        const certificates = await Enrollment.find({
+            certificateIssued: true,
+            status: "completed",
+        })
+            .populate("user", "firstName lastName email avatar")
+            .populate("course", "title instructor category")
+            .populate({
+            path: "course",
+            populate: {
+                path: "instructor",
+                select: "firstName lastName",
+            },
+        })
+            .sort({ certificateIssuedAt: -1 })
+            .skip(skip)
+            .limit(limit);
+        const totalCount = await Enrollment.countDocuments({
+            certificateIssued: true,
+            status: "completed",
+        });
         const stats = {
             totalCertificates: totalCount,
             issuedThisMonth: await Enrollment.countDocuments({
                 certificateIssued: true,
-                completionStatus: "completed",
+                status: "completed",
                 certificateIssuedAt: {
                     $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
                 },
@@ -616,7 +591,7 @@ export const getAdminCertificates = async (req, res) => {
                 {
                     $match: {
                         certificateIssued: true,
-                        completionStatus: "completed",
+                        status: "completed",
                         completedAt: { $exists: true },
                         enrolledAt: { $exists: true },
                     },
@@ -636,7 +611,6 @@ export const getAdminCertificates = async (req, res) => {
                 },
             ]).then((result) => Math.round(result[0]?.avgTime || 0)),
         };
-        // Format certificates data
         const formattedCertificates = certificates.map((enrollment) => ({
             id: enrollment._id,
             certificateId: enrollment.certificateId,
@@ -687,6 +661,330 @@ export const getAdminCertificates = async (req, res) => {
         });
     }
 };
+// Get admin courses for moderation
+export const getAdminCourses = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        const userRole = req.user?.role;
+        if (!userId || userRole !== UserRole.ADMIN) {
+            return res.status(403).json({
+                success: false,
+                message: "Admin access required",
+            });
+        }
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const status = req.query.status;
+        const search = req.query.search;
+        const skip = (page - 1) * limit;
+        // Build filter - exclude draft courses, only show courses that have been submitted
+        const filter = {
+            status: { $in: ["pending", "approved", "rejected"] },
+        };
+        if (status && status !== "all") {
+            filter.status = status;
+        }
+        if (search) {
+            filter.$or = [
+                { title: { $regex: search, $options: "i" } },
+                { category: { $regex: search, $options: "i" } },
+            ];
+        }
+        const [courses, totalCount] = await Promise.all([
+            Course.find(filter)
+                .populate("instructor", "firstName lastName email avatar")
+                .populate("reviewedBy", "firstName lastName")
+                .sort({ submittedAt: -1, createdAt: -1 })
+                .skip(skip)
+                .limit(limit),
+            Course.countDocuments(filter),
+        ]);
+        const formattedCourses = courses.map((course) => ({
+            id: course._id,
+            title: course.title,
+            description: course.description,
+            shortDescription: course.shortDescription,
+            category: course.category,
+            level: course.level,
+            originalPrice: course.originalPrice,
+            discountPrice: course.discountPrice,
+            isFree: course.isFree,
+            image: course.image,
+            instructor: {
+                id: course.instructor._id,
+                name: `${course.instructor.firstName} ${course.instructor.lastName}`,
+                email: course.instructor.email,
+                avatar: course.instructor.avatar,
+            },
+            status: course.status,
+            isPublished: course.isPublished,
+            submittedAt: course.submittedAt,
+            reviewedAt: course.reviewedAt,
+            reviewedBy: course.reviewedBy
+                ? {
+                    name: `${course.reviewedBy.firstName} ${course.reviewedBy.lastName}`,
+                }
+                : null,
+            rejectionReason: course.rejectionReason,
+            adminFeedback: course.adminFeedback,
+            createdAt: course.createdAt,
+            updatedAt: course.updatedAt,
+            studentsCount: course.studentsEnrolled?.length || 0,
+            rating: course.rating,
+            ratingsCount: course.ratingsCount,
+            totalLessons: course.totalLessons,
+            totalDuration: course.totalDuration,
+        }));
+        const totalPages = Math.ceil(totalCount / limit);
+        res.status(200).json({
+            success: true,
+            data: {
+                courses: formattedCourses,
+                pagination: {
+                    currentPage: page,
+                    totalPages,
+                    totalCourses: totalCount,
+                    hasNextPage: page < totalPages,
+                    hasPreviousPage: page > 1,
+                },
+            },
+        });
+    }
+    catch (error) {
+        console.error("Error fetching admin courses:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch courses data",
+            error: error.message,
+        });
+    }
+};
+// Approve course
+export const approveCourse = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        const userRole = req.user?.role;
+        if (!userId || userRole !== UserRole.ADMIN) {
+            return res.status(403).json({
+                success: false,
+                message: "Admin access required",
+            });
+        }
+        const { courseId } = req.params;
+        const { adminFeedback } = req.body;
+        const course = await Course.findById(courseId).populate("instructor", "firstName lastName email");
+        if (!course) {
+            return res.status(404).json({
+                success: false,
+                message: "Course not found",
+            });
+        }
+        if (course.status !== "pending") {
+            return res.status(400).json({
+                success: false,
+                message: "Course is not pending approval",
+            });
+        }
+        // Update course status
+        course.status = "approved";
+        course.isPublished = true;
+        course.publishedAt = new Date();
+        course.reviewedAt = new Date();
+        course.reviewedBy = new mongoose.Types.ObjectId(userId);
+        if (adminFeedback) {
+            course.adminFeedback = adminFeedback;
+        }
+        await course.save();
+        // Send email notification to instructor about approval
+        try {
+            const instructor = course.instructor;
+            await sendCourseApprovedEmail(instructor.email, `${instructor.firstName} ${instructor.lastName}`, course.title, course._id.toString(), adminFeedback);
+        }
+        catch (emailError) {
+            console.error("Failed to send approval email:", emailError);
+            // Continue with the response even if email fails
+        }
+        res.status(200).json({
+            success: true,
+            message: "Course approved successfully",
+            data: {
+                courseId: course._id,
+                status: course.status,
+                isPublished: course.isPublished,
+                publishedAt: course.publishedAt,
+            },
+        });
+    }
+    catch (error) {
+        console.error("Error approving course:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to approve course",
+            error: error.message,
+        });
+    }
+};
+// Reject course
+export const rejectCourse = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        const userRole = req.user?.role;
+        if (!userId || userRole !== UserRole.ADMIN) {
+            return res.status(403).json({
+                success: false,
+                message: "Admin access required",
+            });
+        }
+        const { courseId } = req.params;
+        const { rejectionReason, adminFeedback } = req.body;
+        if (!rejectionReason) {
+            return res.status(400).json({
+                success: false,
+                message: "Rejection reason is required",
+            });
+        }
+        const course = await Course.findById(courseId).populate("instructor", "firstName lastName email");
+        if (!course) {
+            return res.status(404).json({
+                success: false,
+                message: "Course not found",
+            });
+        }
+        if (course.status !== "pending") {
+            return res.status(400).json({
+                success: false,
+                message: "Course is not pending approval",
+            });
+        }
+        // Update course status
+        course.status = "rejected";
+        course.isPublished = false;
+        course.reviewedAt = new Date();
+        course.reviewedBy = new mongoose.Types.ObjectId(userId);
+        course.rejectionReason = rejectionReason;
+        if (adminFeedback) {
+            course.adminFeedback = adminFeedback;
+        }
+        await course.save();
+        // Send email notification to instructor about rejection
+        try {
+            const instructor = course.instructor;
+            await sendCourseRejectedEmail(instructor.email, `${instructor.firstName} ${instructor.lastName}`, course.title, course._id.toString(), rejectionReason, adminFeedback);
+        }
+        catch (emailError) {
+            console.error("Failed to send rejection email:", emailError);
+            // Continue with the response even if email fails
+        }
+        res.status(200).json({
+            success: true,
+            message: "Course rejected successfully",
+            data: {
+                courseId: course._id,
+                status: course.status,
+                rejectionReason: course.rejectionReason,
+            },
+        });
+    }
+    catch (error) {
+        console.error("Error rejecting course:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to reject course",
+            error: error.message,
+        });
+    }
+};
+// Get detailed course information for admin review
+export const getAdminCourseDetails = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        const userRole = req.user?.role;
+        if (!userId || userRole !== UserRole.ADMIN) {
+            return res.status(403).json({
+                success: false,
+                message: "Admin access required",
+            });
+        }
+        const { courseId } = req.params;
+        const course = await Course.findById(courseId)
+            .populate("instructor", "firstName lastName email avatar bio")
+            .populate("reviewedBy", "firstName lastName")
+            .populate({
+            path: "sections",
+            populate: {
+                path: "lessons",
+                model: "Lesson",
+            },
+        });
+        if (!course) {
+            return res.status(404).json({
+                success: false,
+                message: "Course not found",
+            });
+        }
+        const instructor = course.instructor;
+        const reviewedBy = course.reviewedBy;
+        const courseDetails = {
+            id: course._id,
+            title: course.title,
+            description: course.description,
+            shortDescription: course.shortDescription,
+            category: course.category,
+            subcategory: course.subcategory,
+            level: course.level,
+            originalPrice: course.originalPrice,
+            discountPrice: course.discountPrice,
+            isFree: course.isFree,
+            image: course.image,
+            videoPromo: course.videoPromo,
+            tags: course.tags,
+            language: course.language,
+            learningObjectives: course.learningObjectives,
+            requirements: course.requirements,
+            targetAudience: course.targetAudience,
+            certificateProvided: course.certificateProvided,
+            instructor: {
+                id: instructor._id,
+                name: `${instructor.firstName} ${instructor.lastName}`,
+                email: instructor.email,
+                avatar: instructor.avatar,
+                bio: instructor.bio,
+            },
+            status: course.status,
+            isPublished: course.isPublished,
+            submittedAt: course.submittedAt,
+            publishedAt: course.publishedAt,
+            reviewedAt: course.reviewedAt,
+            reviewedBy: reviewedBy
+                ? {
+                    name: `${reviewedBy.firstName} ${reviewedBy.lastName}`,
+                }
+                : null,
+            rejectionReason: course.rejectionReason,
+            adminFeedback: course.adminFeedback,
+            createdAt: course.createdAt,
+            updatedAt: course.updatedAt,
+            totalDuration: course.totalDuration,
+            totalLessons: course.totalLessons,
+            studentsEnrolled: course.studentsEnrolled?.length || 0,
+            rating: course.rating,
+            ratingsCount: course.ratingsCount,
+            sections: course.sections || [],
+        };
+        res.status(200).json({
+            success: true,
+            data: courseDetails,
+        });
+    }
+    catch (error) {
+        console.error("Error fetching course details for admin:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch course details",
+            error: error.message,
+        });
+    }
+};
 export default {
     getAdminDashboardStats,
     getAdminUsers,
@@ -697,4 +995,8 @@ export default {
     getRecentActivity,
     getAdminAnalytics,
     getAdminCertificates,
+    getAdminCourses,
+    getAdminCourseDetails,
+    approveCourse,
+    rejectCourse,
 };

@@ -283,58 +283,8 @@ const generateCertificateHTML = (data) => {
 };
 export const sendCertificateEmail = async (email, studentName, courseName, certificateBuffer, certificateId) => {
     try {
-        const subject = `🎉 Your Certificate of Completion - ${courseName}`;
-        const htmlContent = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-          <h1 style="color: white; margin: 0; font-size: 28px;">Congratulations! 🎉</h1>
-          <p style="color: #f8f9fa; margin: 10px 0 0 0; font-size: 16px;">You've earned your certificate!</p>
-        </div>
-        
-        <div style="background: #ffffff; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e9ecef; border-top: none;">
-          <p style="color: #333; font-size: 16px; line-height: 1.6;">Dear ${studentName},</p>
-          
-          <p style="color: #333; font-size: 16px; line-height: 1.6;">
-            Congratulations on successfully completing <strong>"${courseName}"</strong>! 
-            Your dedication and hard work have paid off.
-          </p>
-          
-          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea;">
-            <h3 style="color: #333; margin: 0 0 10px 0;">Certificate Details:</h3>
-            <p style="color: #666; margin: 5px 0;"><strong>Course:</strong> ${courseName}</p>
-            <p style="color: #666; margin: 5px 0;"><strong>Completion Date:</strong> ${new Date().toLocaleDateString()}</p>
-            <p style="color: #666; margin: 5px 0;"><strong>Certificate ID:</strong> ${certificateId}</p>
-          </div>
-          
-          <p style="color: #333; font-size: 16px; line-height: 1.6;">
-            Your certificate is attached to this email as a PDF file. You can download, print, 
-            or share it to showcase your achievement.
-          </p>
-          
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="https://skillify.com" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 12px 30px; text-decoration: none; border-radius: 25px; font-weight: bold;">
-              Continue Learning
-            </a>
-          </div>
-          
-          <p style="color: #333; font-size: 16px; line-height: 1.6;">
-            Keep up the excellent work and continue your learning journey with us!
-          </p>
-          
-          <p style="color: #333; font-size: 16px; line-height: 1.6;">
-            Best regards,<br>
-            <strong>The Skillify Team</strong>
-          </p>
-        </div>
-        
-        <div style="text-align: center; padding: 20px; color: #666; font-size: 12px;">
-          <p>This certificate verifies the completion of the course on Skillify platform.</p>
-          <p>Questions? Contact us at support@skillify.com</p>
-        </div>
-      </div>
-    `;
         // Send email with certificate attachment
-        await emailCertificate(email, subject, htmlContent, certificateBuffer, `certificate-${certificateId}.pdf`);
+        await emailCertificate(email, studentName, courseName, certificateBuffer, `certificate-${certificateId}.pdf`);
         return true;
     }
     catch (error) {

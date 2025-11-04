@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { useCurriculumOperations } from "../../../hooks/useCurriculumMutations";
 import { useDeleteSection } from "../../../hooks/useSectionMutations";
@@ -34,6 +35,7 @@ interface CurriculumPanelProps {
 }
 
 const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
+  const { t } = useTranslation();
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
   const [editModal, setEditModal] = useState<{
     type: "section" | "lesson";
@@ -307,14 +309,14 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
     <div className="bg-white rounded-lg shadow-sm p-6">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-lg font-semibold text-gray-900">
-          Course Curriculum
+          {t("instructor.editCourse.curriculum.title")}
         </h2>
         <button
           onClick={openAddSectionModal}
           className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer"
         >
           <FaPlus className="mr-2" />
-          Add Section
+          {t("instructor.editCourse.curriculum.addSection")}
         </button>
       </div>
 
@@ -360,10 +362,19 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
                                 )}
                                 <div>
                                   <h3 className="font-medium text-gray-900">
-                                    Section {sectionIndex + 1}: {section.title}
+                                    {t(
+                                      "instructor.editCourse.curriculum.sectionTitle",
+                                      {
+                                        index: sectionIndex + 1,
+                                        title: section.title,
+                                      }
+                                    )}
                                   </h3>
                                   <p className="text-sm text-gray-500">
-                                    {section.lessons?.length || 0} lessons
+                                    {t(
+                                      "instructor.editCourse.curriculum.lessonsCount",
+                                      { count: section.lessons?.length || 0 }
+                                    )}
                                   </p>
                                 </div>
                               </button>
@@ -445,7 +456,9 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
                                                         </h4>
                                                         {lesson.isPreview && (
                                                           <span className="ml-2 px-2 py-1 text-xs font-medium text-green-800 bg-green-100 rounded-full">
-                                                            Preview
+                                                            {t(
+                                                              "instructor.editCourse.curriculum.preview"
+                                                            )}
                                                           </span>
                                                         )}
                                                       </div>
@@ -521,7 +534,9 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
                                             className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer"
                                           >
                                             <FaPlus className="mr-2" />
-                                            Add Lesson
+                                            {t(
+                                              "instructor.editCourse.curriculum.addLesson"
+                                            )}
                                           </button>
                                         </div>
                                       </div>
@@ -555,25 +570,44 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
         <div className="fixed inset-0 bg-black/65 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
             <h3 className="text-lg font-medium text-gray-900 mb-4">
-              Delete{" "}
-              {deleteConfirmation.type === "section" ? "Section" : "Lesson"}
+              {t("instructor.editCourse.curriculum.deleteConfirmation.title", {
+                type:
+                  deleteConfirmation.type === "section"
+                    ? t(
+                        "instructor.editCourse.curriculum.deleteConfirmation.section"
+                      )
+                    : t(
+                        "instructor.editCourse.curriculum.deleteConfirmation.lesson"
+                      ),
+              })}
             </h3>
             <p className="text-gray-500 mb-6">
-              Are you sure you want to delete this {deleteConfirmation.type}?
-              This action cannot be undone.
+              {t(
+                "instructor.editCourse.curriculum.deleteConfirmation.message",
+                {
+                  type:
+                    deleteConfirmation.type === "section"
+                      ? t(
+                          "instructor.editCourse.curriculum.deleteConfirmation.section"
+                        )
+                      : t(
+                          "instructor.editCourse.curriculum.deleteConfirmation.lesson"
+                        ),
+                }
+              )}
             </p>
             <div className="flex justify-end space-x-3">
               <button
                 onClick={() => setDeleteConfirmation(null)}
                 className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer"
               >
-                Cancel
+                {t("common.cancel")}
               </button>
               <button
                 onClick={handleConfirmDelete}
                 className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 cursor-pointer"
               >
-                Delete
+                {t("common.delete")}
               </button>
             </div>
           </div>

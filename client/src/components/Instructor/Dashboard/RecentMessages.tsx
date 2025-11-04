@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { FaComment } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 interface Message {
   _id: string;
@@ -23,12 +24,13 @@ const RecentMessages: React.FC<RecentMessagesProps> = ({
   isLoading,
 }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   if (isLoading) {
     return (
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <h2 className="text-xl font-bold text-gray-900 mb-6">
-          Recent Messages
+          {t("instructor.dashboard.recentMessages")}
         </h2>
         <div className="space-y-4">
           {Array.from({ length: 3 }, (_, i) => (
@@ -53,19 +55,23 @@ const RecentMessages: React.FC<RecentMessagesProps> = ({
       className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
     >
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-gray-900">Recent Messages</h2>
+        <h2 className="text-xl font-bold text-gray-900">
+          {t("instructor.dashboard.recentMessages")}
+        </h2>
         <button
           onClick={() => navigate("/instructor/messages")}
           className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
         >
-          View All
+          {t("instructor.dashboard.viewAll")}
         </button>
       </div>
 
       {messages?.length === 0 ? (
         <div className="text-center py-8">
           <FaComment className="text-4xl text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500">No messages yet</p>
+          <p className="text-gray-500">
+            {t("instructor.dashboard.noMessages")}
+          </p>
         </div>
       ) : (
         <div className="space-y-4">

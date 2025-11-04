@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import {
   FaCloudUploadAlt,
   FaImage,
@@ -23,6 +24,7 @@ const MediaContentStep: React.FC<MediaContentStepProps> = ({
   formData,
   setFormData,
 }) => {
+  const { t } = useTranslation();
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState<"image" | "video" | null>(null);
@@ -36,13 +38,13 @@ const MediaContentStep: React.FC<MediaContentStepProps> = ({
 
   const handleImageUpload = (file: File) => {
     if (!file.type.startsWith("image/")) {
-      alert("Please select a valid image file");
+      alert(t("instructor.createCourse.mediaContent.invalidImageFile"));
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
       // 5MB limit
-      alert("Image size should be less than 5MB");
+      alert(t("instructor.createCourse.mediaContent.imageSizeLimit"));
       return;
     }
 
@@ -58,13 +60,13 @@ const MediaContentStep: React.FC<MediaContentStepProps> = ({
 
   const handleVideoUpload = (file: File) => {
     if (!file.type.startsWith("video/")) {
-      alert("Please select a valid video file");
+      alert(t("instructor.createCourse.mediaContent.invalidVideoFile"));
       return;
     }
 
     if (file.size > 100 * 1024 * 1024) {
       // 100MB limit
-      alert("Video size should be less than 100MB");
+      alert(t("instructor.createCourse.mediaContent.videoSizeLimit"));
       return;
     }
 
@@ -134,12 +136,10 @@ const MediaContentStep: React.FC<MediaContentStepProps> = ({
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Media & Content
+            {t("instructor.createCourse.mediaContent.title")}
           </h2>
           <p className="text-gray-600">
-            Add visual elements to make your course more appealing. A good
-            course image and promotional video can significantly increase
-            enrollment.
+            {t("instructor.createCourse.mediaContent.description")}
           </p>
         </div>
 
@@ -151,9 +151,11 @@ const MediaContentStep: React.FC<MediaContentStepProps> = ({
                 <FaImage className="text-blue-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900">Course Image</h3>
+                <h3 className="font-semibold text-gray-900">
+                  {t("instructor.createCourse.mediaContent.courseImage")}
+                </h3>
                 <p className="text-sm text-gray-600">
-                  Upload an engaging thumbnail for your course
+                  {t("instructor.createCourse.mediaContent.uploadThumbnail")}
                 </p>
               </div>
             </div>
@@ -172,12 +174,14 @@ const MediaContentStep: React.FC<MediaContentStepProps> = ({
               >
                 <FaCloudUploadAlt className="mx-auto text-4xl text-gray-400 mb-4" />
                 <h4 className="text-lg font-medium text-gray-900 mb-2">
-                  Click to upload or drag and drop
+                  {t("instructor.createCourse.mediaContent.clickToUpload")}
                 </h4>
                 <p className="text-sm text-gray-600 mb-4">
-                  Recommended: 1280x720 pixels (16:9 ratio)
+                  {t("instructor.createCourse.mediaContent.recommendedSize")}
                 </p>
-                <p className="text-xs text-gray-500">PNG, JPG up to 5MB</p>
+                <p className="text-xs text-gray-500">
+                  {t("instructor.createCourse.mediaContent.imageFormats")}
+                </p>
 
                 <input
                   ref={imageInputRef}
@@ -231,11 +235,13 @@ const MediaContentStep: React.FC<MediaContentStepProps> = ({
               </div>
               <div>
                 <h3 className="font-semibold text-gray-900">
-                  Promotional Video
-                  <span className="text-gray-500 text-sm ml-2">(Optional)</span>
+                  {t("instructor.createCourse.mediaContent.promotionalVideo")}
+                  <span className="text-gray-500 text-sm ml-2">
+                    ({t("common.optional")})
+                  </span>
                 </h3>
                 <p className="text-sm text-gray-600">
-                  A short video introducing your course
+                  {t("instructor.createCourse.mediaContent.shortVideoIntro")}
                 </p>
               </div>
             </div>
@@ -254,13 +260,13 @@ const MediaContentStep: React.FC<MediaContentStepProps> = ({
               >
                 <FaPlay className="mx-auto text-4xl text-gray-400 mb-4" />
                 <h4 className="text-lg font-medium text-gray-900 mb-2">
-                  Click to upload or drag and drop
+                  {t("instructor.createCourse.mediaContent.clickToUpload")}
                 </h4>
                 <p className="text-sm text-gray-600 mb-4">
-                  Keep it short and engaging (30-120 seconds recommended)
+                  {t("instructor.createCourse.mediaContent.keepItShort")}
                 </p>
                 <p className="text-xs text-gray-500">
-                  MP4, MOV, AVI up to 100MB
+                  {t("instructor.createCourse.mediaContent.videoFormats")}
                 </p>
 
                 <input
@@ -313,25 +319,49 @@ const MediaContentStep: React.FC<MediaContentStepProps> = ({
               <FaExclamationTriangle className="text-amber-500 mt-1" />
               <div>
                 <h4 className="font-semibold text-amber-800 mb-3">
-                  Media Guidelines
+                  {t("instructor.createCourse.mediaContent.mediaGuidelines")}
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-amber-700">
                   <div>
-                    <h5 className="font-medium mb-2">Course Image:</h5>
+                    <h5 className="font-medium mb-2">
+                      {t(
+                        "instructor.createCourse.mediaContent.courseImageGuidelines"
+                      )}
+                    </h5>
                     <ul className="space-y-1">
-                      <li>• Use high-quality, clear images</li>
-                      <li>• Avoid text-heavy designs</li>
-                      <li>• Keep it professional and relevant</li>
-                      <li>• 1280x720 px recommended</li>
+                      <li>
+                        • {t("instructor.createCourse.mediaContent.guideline1")}
+                      </li>
+                      <li>
+                        • {t("instructor.createCourse.mediaContent.guideline2")}
+                      </li>
+                      <li>
+                        • {t("instructor.createCourse.mediaContent.guideline3")}
+                      </li>
+                      <li>
+                        • {t("instructor.createCourse.mediaContent.guideline4")}
+                      </li>
                     </ul>
                   </div>
                   <div>
-                    <h5 className="font-medium mb-2">Promotional Video:</h5>
+                    <h5 className="font-medium mb-2">
+                      {t(
+                        "instructor.createCourse.mediaContent.videoGuidelines"
+                      )}
+                    </h5>
                     <ul className="space-y-1">
-                      <li>• Keep it under 2 minutes</li>
-                      <li>• Introduce yourself and the course</li>
-                      <li>• Show what students will learn</li>
-                      <li>• Use good audio quality</li>
+                      <li>
+                        • {t("instructor.createCourse.mediaContent.guideline5")}
+                      </li>
+                      <li>
+                        • {t("instructor.createCourse.mediaContent.guideline6")}
+                      </li>
+                      <li>
+                        • {t("instructor.createCourse.mediaContent.guideline7")}
+                      </li>
+                      <li>
+                        • {t("instructor.createCourse.mediaContent.guideline8")}
+                      </li>
                     </ul>
                   </div>
                 </div>

@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import {
   FaEye,
   FaBook,
@@ -40,6 +41,7 @@ const ReviewCreateStep: React.FC<ReviewCreateStepProps> = ({
   formData,
   isSubmitting,
 }) => {
+  const { t } = useTranslation();
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -60,57 +62,82 @@ const ReviewCreateStep: React.FC<ReviewCreateStepProps> = ({
 
   const reviewSections = [
     {
-      title: "Basic Information",
+      title: t(
+        "instructor.createCourse.reviewCreate.sections.basicInformation"
+      ),
       icon: FaBook,
       color: "blue",
       items: [
-        { label: "Course Title", value: formData.title },
         {
-          label: "Short Description",
-          value: formData.shortDescription || "Not provided",
+          label: t("instructor.createCourse.reviewCreate.labels.courseTitle"),
+          value: formData.title,
         },
-        { label: "Category", value: formData.category },
         {
-          label: "Subcategory",
-          value: formData.subcategory || "Not specified",
+          label: t(
+            "instructor.createCourse.reviewCreate.labels.shortDescription"
+          ),
+          value:
+            formData.shortDescription ||
+            t("instructor.createCourse.reviewCreate.values.notProvided"),
+        },
+        {
+          label: t("instructor.createCourse.reviewCreate.labels.category"),
+          value: formData.category,
+        },
+        {
+          label: t("instructor.createCourse.reviewCreate.labels.subcategory"),
+          value:
+            formData.subcategory ||
+            t("instructor.createCourse.reviewCreate.values.notSpecified"),
         },
       ],
     },
     {
-      title: "Course Details",
+      title: t("instructor.createCourse.reviewCreate.sections.courseDetails"),
       icon: FaList,
       color: "green",
       items: [
-        { label: "Course Level", value: formData.level },
         {
-          label: "Learning Objectives",
-          value: `${
-            formData.learningObjectives.filter((obj) => obj.trim()).length
-          } objectives`,
+          label: t("instructor.createCourse.reviewCreate.labels.courseLevel"),
+          value: formData.level,
         },
         {
-          label: "Requirements",
-          value: `${
-            formData.requirements.filter((req) => req.trim()).length
-          } requirements`,
+          label: t(
+            "instructor.createCourse.reviewCreate.labels.learningObjectives"
+          ),
+          value: t("instructor.createCourse.reviewCreate.values.objectives", {
+            count: formData.learningObjectives.filter((obj) => obj.trim())
+              .length,
+          }),
         },
         {
-          label: "Target Audience",
-          value: `${
-            formData.targetAudience.filter((aud) => aud.trim()).length
-          } audience groups`,
+          label: t("instructor.createCourse.reviewCreate.labels.requirements"),
+          value: t("instructor.createCourse.reviewCreate.values.requirements", {
+            count: formData.requirements.filter((req) => req.trim()).length,
+          }),
+        },
+        {
+          label: t(
+            "instructor.createCourse.reviewCreate.labels.targetAudience"
+          ),
+          value: t(
+            "instructor.createCourse.reviewCreate.values.audienceGroups",
+            {
+              count: formData.targetAudience.filter((aud) => aud.trim()).length,
+            }
+          ),
         },
       ],
     },
     {
-      title: "Pricing & Settings",
+      title: t("instructor.createCourse.reviewCreate.sections.pricingSettings"),
       icon: FaDollarSign,
       color: "purple",
       items: [
         {
-          label: "Pricing",
+          label: t("instructor.createCourse.reviewCreate.labels.pricing"),
           value: formData.isFree
-            ? "Free Course"
+            ? t("instructor.createCourse.reviewCreate.values.freeCourse")
             : formData.discountPrice > 0
             ? `${formatPrice(
                 formData.discountPrice
@@ -119,27 +146,38 @@ const ReviewCreateStep: React.FC<ReviewCreateStepProps> = ({
               )})`
             : formatPrice(formData.originalPrice),
         },
-        { label: "Language", value: formData.language },
         {
-          label: "Certificate",
-          value: formData.certificateProvided ? "Provided" : "Not provided",
+          label: t("instructor.createCourse.reviewCreate.labels.language"),
+          value: formData.language,
+        },
+        {
+          label: t("instructor.createCourse.reviewCreate.labels.certificate"),
+          value: formData.certificateProvided
+            ? t("instructor.createCourse.reviewCreate.values.provided")
+            : t("instructor.createCourse.reviewCreate.values.notProvided"),
         },
       ],
     },
     {
-      title: "Media Content",
+      title: t("instructor.createCourse.reviewCreate.sections.mediaContent"),
       icon: FaImage,
       color: "indigo",
       items: [
         {
-          label: "Course Image",
-          value: formData.image ? "✅ Uploaded" : "❌ Not uploaded",
+          label: t("instructor.createCourse.reviewCreate.labels.courseImage"),
+          value: formData.image
+            ? t("instructor.createCourse.reviewCreate.values.uploaded")
+            : t("instructor.createCourse.reviewCreate.values.notUploaded"),
         },
         {
-          label: "Promotional Video",
+          label: t(
+            "instructor.createCourse.reviewCreate.labels.promotionalVideo"
+          ),
           value: formData.videoPromo
-            ? "✅ Uploaded"
-            : "📷 Optional - Not uploaded",
+            ? t("instructor.createCourse.reviewCreate.values.uploaded")
+            : t(
+                "instructor.createCourse.reviewCreate.values.optionalNotUploaded"
+              ),
         },
       ],
     },
@@ -157,11 +195,10 @@ const ReviewCreateStep: React.FC<ReviewCreateStepProps> = ({
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Review & Create
+            {t("instructor.createCourse.reviewCreate.title")}
           </h2>
           <p className="text-gray-600">
-            Review all the details before creating your course. You can edit any
-            section by going back to previous steps.
+            {t("instructor.createCourse.reviewCreate.description")}
           </p>
         </div>
 
@@ -186,11 +223,13 @@ const ReviewCreateStep: React.FC<ReviewCreateStepProps> = ({
             {/* Course Info */}
             <div className="flex-1">
               <h3 className="text-xl font-bold text-gray-900 mb-2">
-                {formData.title || "Course Title"}
+                {formData.title || t("course.title")}
               </h3>
               <p className="text-gray-600 mb-3 line-clamp-2">
                 {formData.shortDescription ||
-                  formData.description.slice(0, 100) + "..."}
+                  (formData.description
+                    ? formData.description.slice(0, 100) + "..."
+                    : t("course.shortDescription"))}
               </p>
               <div className="flex items-center space-x-4 text-sm">
                 <span className="flex items-center space-x-1 text-gray-600">
@@ -208,7 +247,7 @@ const ReviewCreateStep: React.FC<ReviewCreateStepProps> = ({
                 {formData.certificateProvided && (
                   <span className="flex items-center space-x-1 text-green-600">
                     <FaCertificate className="text-xs" />
-                    <span>Certificate</span>
+                    <span>{t("common.certificate")}</span>
                   </span>
                 )}
               </div>
@@ -217,7 +256,9 @@ const ReviewCreateStep: React.FC<ReviewCreateStepProps> = ({
             {/* Pricing */}
             <div className="text-right">
               {formData.isFree ? (
-                <span className="text-2xl font-bold text-green-600">FREE</span>
+                <span className="text-2xl font-bold text-green-600">
+                  {t("common.free").toUpperCase()}
+                </span>
               ) : (
                 <div>
                   {formData.discountPrice > 0 ? (
@@ -302,7 +343,9 @@ const ReviewCreateStep: React.FC<ReviewCreateStepProps> = ({
               <div className="p-2 bg-yellow-50 border border-yellow-100 text-yellow-600 rounded-lg">
                 <FaTag />
               </div>
-              <h3 className="font-semibold text-gray-900">Course Tags</h3>
+              <h3 className="font-semibold text-gray-900">
+                {t("instructor.createCourse.basicInformation.tags")}
+              </h3>
             </div>
             <div className="flex flex-wrap gap-2">
               {formData.tags.map((tag, index) => (
@@ -320,7 +363,7 @@ const ReviewCreateStep: React.FC<ReviewCreateStepProps> = ({
         {/* Course Description */}
         <div className="mt-6 bg-white rounded-xl border border-gray-200 p-6">
           <h3 className="font-semibold text-gray-900 mb-4">
-            Full Course Description
+            {t("courseDetails.description")}
           </h3>
           <div className="prose prose-sm max-w-none text-gray-700">
             {formData.description.split("\n").map((paragraph, index) => (
@@ -336,7 +379,7 @@ const ReviewCreateStep: React.FC<ReviewCreateStepProps> = ({
           {/* Learning Objectives */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <h4 className="font-semibold text-gray-900 mb-4">
-              What You'll Learn
+              {t("courseDetails.whatYoullLearn")}
             </h4>
             <ul className="space-y-2">
               {formData.learningObjectives
@@ -355,7 +398,9 @@ const ReviewCreateStep: React.FC<ReviewCreateStepProps> = ({
 
           {/* Requirements */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h4 className="font-semibold text-gray-900 mb-4">Requirements</h4>
+            <h4 className="font-semibold text-gray-900 mb-4">
+              {t("courseDetails.requirements")}
+            </h4>
             <ul className="space-y-2">
               {formData.requirements
                 .filter((req) => req.trim())
@@ -374,7 +419,7 @@ const ReviewCreateStep: React.FC<ReviewCreateStepProps> = ({
           {/* Target Audience */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <h4 className="font-semibold text-gray-900 mb-4">
-              Who This Course Is For
+              {t("courseDetails.whoThisCourseIsFor")}
             </h4>
             <ul className="space-y-2">
               {formData.targetAudience
@@ -398,17 +443,17 @@ const ReviewCreateStep: React.FC<ReviewCreateStepProps> = ({
             <FaCheckCircle className="text-green-500 text-xl mt-1" />
             <div>
               <h4 className="font-semibold text-gray-900 mb-2">
-                Ready to Create Your Course?
+                {t("instructor.createCourse.reviewCreate.readyToCreate")}
               </h4>
               <p className="text-gray-700 mb-4">
-                Once you create your course, you'll be able to add sections and
-                lessons to build your curriculum. You can always edit course
-                details later from your instructor dashboard.
+                {t("instructor.createCourse.reviewCreate.nextStepsDescription")}
               </p>
               <div className="flex items-center space-x-4 text-sm text-gray-600">
                 <span className="flex items-center space-x-1">
                   <FaEye />
-                  <span>Preview available after creation</span>
+                  <span>
+                    {t("instructor.createCourse.reviewCreate.previewAvailable")}
+                  </span>
                 </span>
                 <span className="flex items-center space-x-1">
                   <span>All details can be edited later</span>
@@ -424,7 +469,7 @@ const ReviewCreateStep: React.FC<ReviewCreateStepProps> = ({
             <div className="flex items-center justify-center space-x-3">
               <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
               <span className="text-blue-700 font-medium">
-                Creating your course...
+                {t("instructor.createCourse.submitting")}
               </span>
             </div>
           </div>

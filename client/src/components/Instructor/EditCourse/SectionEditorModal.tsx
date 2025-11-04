@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import {
   FaTimes,
   FaUpload,
@@ -30,6 +31,7 @@ const SectionEditorModal = ({
   section,
   isLoading = false,
 }: SectionEditorModalProps) => {
+  const { t } = useTranslation();
   const [title, setTitle] = useState(section?.title || "");
   const [description, setDescription] = useState(section?.description || "");
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
@@ -41,12 +43,12 @@ const SectionEditorModal = ({
 
   const handleFileSelect = (file: File) => {
     if (!file.type.startsWith("image/")) {
-      toast.error("Please select an image file");
+      toast.error(t("instructor.editCourse.sectionEditor.errors.selectImage"));
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("Image size should be less than 5MB");
+      toast.error(t("instructor.editCourse.sectionEditor.errors.imageSize"));
       return;
     }
 
@@ -149,14 +151,16 @@ const SectionEditorModal = ({
             {/* Title */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Section Title
+                {t("instructor.editCourse.sectionEditor.sectionTitle")}
               </label>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
-                placeholder="Enter section title..."
+                placeholder={t(
+                  "instructor.editCourse.sectionEditor.sectionTitlePlaceholder"
+                )}
                 required
               />
             </div>
@@ -164,28 +168,30 @@ const SectionEditorModal = ({
             {/* Description */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Description
+                {t("instructor.editCourse.sectionEditor.description")}
               </label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={4}
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 resize-none"
-                placeholder="Describe what students will learn in this section..."
+                placeholder={t(
+                  "instructor.editCourse.sectionEditor.descriptionPlaceholder"
+                )}
               />
             </div>
 
             {/* Thumbnail Upload */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Section Thumbnail
+                {t("instructor.editCourse.sectionEditor.sectionThumbnail")}
               </label>
 
               {thumbnailPreview ? (
                 <div className="relative group">
                   <img
                     src={thumbnailPreview}
-                    alt="Section thumbnail"
+                    alt={t("instructor.editCourse.sectionEditor.thumbnailAlt")}
                     className="w-full h-40 object-cover rounded-xl border border-gray-200"
                   />
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center">
@@ -196,7 +202,7 @@ const SectionEditorModal = ({
                         className="px-4 py-2 bg-white text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
                       >
                         <FaUpload className="inline mr-2" />
-                        Change
+                        {t("instructor.editCourse.sectionEditor.change")}
                       </button>
                       <button
                         type="button"
@@ -204,7 +210,7 @@ const SectionEditorModal = ({
                         className="px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600 transition-colors"
                       >
                         <FaTrash className="inline mr-2" />
-                        Remove
+                        {t("instructor.editCourse.sectionEditor.remove")}
                       </button>
                     </div>
                   </div>
@@ -226,17 +232,17 @@ const SectionEditorModal = ({
                   <FaFileImage className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                   <div className="space-y-2">
                     <p className="text-sm text-gray-600">
-                      Drop an image here, or{" "}
+                      {t("instructor.editCourse.sectionEditor.dropImageHere")}{" "}
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
                         className="text-indigo-600 hover:text-indigo-700 font-medium"
                       >
-                        browse
+                        {t("instructor.editCourse.sectionEditor.browse")}
                       </button>
                     </p>
                     <p className="text-xs text-gray-400">
-                      PNG, JPG, GIF up to 5MB
+                      {t("instructor.editCourse.sectionEditor.imageFormats")}
                     </p>
                   </div>
                 </div>
@@ -258,7 +264,7 @@ const SectionEditorModal = ({
                 onClick={onClose}
                 className="px-6 py-3 border border-gray-200 rounded-xl text-gray-700 font-medium hover:bg-gray-50 transition-colors"
               >
-                Cancel
+                {t("common.cancel")}
               </button>
               <button
                 type="submit"
@@ -270,7 +276,9 @@ const SectionEditorModal = ({
                 ) : (
                   <FaSave className="mr-2" />
                 )}
-                {section ? "Update Section" : "Create Section"}
+                {section
+                  ? t("instructor.editCourse.sectionEditor.updateSection")
+                  : t("instructor.editCourse.sectionEditor.createSectionBtn")}
               </button>
             </div>
           </form>

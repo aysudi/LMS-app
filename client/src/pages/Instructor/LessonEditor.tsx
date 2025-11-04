@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import {
   FaArrowLeft,
   FaSave,
@@ -41,6 +42,7 @@ const LessonEditor = () => {
   const [searchParams] = useSearchParams();
   const sectionId = searchParams.get("sectionId");
   const { showToast } = useToast();
+  const { t } = useTranslation();
 
   const { data: courseData, isLoading: courseLoading } = useCourse(courseId!);
 
@@ -79,7 +81,10 @@ const LessonEditor = () => {
 
     if (!file.type.startsWith("video/")) {
       showToast(
-        generalToasts.warning("Select a video", "Please select a video file")
+        generalToasts.warning(
+          t("instructor.editCourse.lessonCreate.toasts.selectVideo"),
+          t("instructor.editCourse.lessonCreate.validation.selectVideoFile")
+        )
       );
       return;
     }
@@ -87,8 +92,8 @@ const LessonEditor = () => {
     if (file.size > 500 * 1024 * 1024) {
       showToast(
         generalToasts.error(
-          "File too large",
-          "Video size should be less than 500MB"
+          t("instructor.editCourse.lessonCreate.toasts.fileTooLarge"),
+          t("instructor.editCourse.lessonCreate.validation.videoTooLarge")
         )
       );
       return;
@@ -98,8 +103,12 @@ const LessonEditor = () => {
 
     showToast(
       generalToasts.success(
-        "Video Uploaded",
-        `Video "${file.name}" uploaded successfully!`
+        t("instructor.editCourse.lessonCreate.toasts.videoUploaded", {
+          name: file.name,
+        }),
+        t("instructor.editCourse.lessonCreate.toasts.videoUploaded", {
+          name: file.name,
+        })
       )
     );
 
@@ -137,8 +146,8 @@ const LessonEditor = () => {
       // 50MB
       showToast(
         generalToasts.error(
-          "File too large",
-          "File size should be less than 50MB"
+          t("instructor.editCourse.lessonCreate.toasts.fileTooLarge"),
+          t("instructor.editCourse.lessonCreate.validation.resourceTooLarge")
         )
       );
       return;
@@ -181,7 +190,10 @@ const LessonEditor = () => {
   const handleSave = async () => {
     if (!title.trim()) {
       showToast(
-        generalToasts.error("Title is required", "Please enter a lesson title")
+        generalToasts.error(
+          t("instructor.editCourse.lessonCreate.validation.titleRequired"),
+          t("instructor.editCourse.lessonCreate.validation.titleRequired")
+        )
       );
       return;
     }
@@ -189,8 +201,8 @@ const LessonEditor = () => {
     if (!videoFile && !videoPreview) {
       showToast(
         generalToasts.error(
-          "Video is required",
-          "Please upload a video for this lesson"
+          t("instructor.editCourse.lessonCreate.validation.videoRequired"),
+          t("instructor.editCourse.lessonCreate.validation.videoRequired")
         )
       );
       return;
@@ -223,8 +235,8 @@ const LessonEditor = () => {
 
       showToast(
         generalToasts.success(
-          "Lesson created",
-          "🎉 Lesson created successfully!"
+          t("instructor.editCourse.lessonCreate.lessonCreated"),
+          t("instructor.editCourse.lessonCreate.lessonCreated")
         )
       );
       navigate(`/instructor/courses/${courseId}/edit?tab=curriculum`);
@@ -232,9 +244,9 @@ const LessonEditor = () => {
       console.error("Error creating lesson:", error);
       showToast(
         generalToasts.error(
-          "Creation failed",
+          t("instructor.editCourse.lessonCreate.creationFailed"),
           (error as any)?.response?.data?.message ||
-            "❌ Failed to create lesson. Please try again."
+            t("instructor.editCourse.lessonCreate.creationFailed")
         )
       );
     }
@@ -267,7 +279,7 @@ const LessonEditor = () => {
               </button>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">
-                  Create New Lesson
+                  {t("instructor.editCourse.lessonCreate.title")}
                 </h1>
                 <p className="text-sm text-gray-500">
                   {currentSection?.title} • {courseData?.data.title}
@@ -285,7 +297,9 @@ const LessonEditor = () => {
               ) : (
                 <FaSave className="mr-2" />
               )}
-              Create Lesson
+              {isLoading
+                ? t("instructor.editCourse.lessonCreate.creating")
+                : t("instructor.editCourse.lessonCreate.createLesson")}
             </button>
           </div>
         </div>
@@ -303,31 +317,35 @@ const LessonEditor = () => {
               className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6"
             >
               <h2 className="text-lg font-semibold text-gray-900 mb-6">
-                Basic Information
+                {t("instructor.editCourse.lessonCreate.basicInformation")}
               </h2>
 
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Lesson Title
+                    {t("instructor.editCourse.lessonCreate.lessonTitle")}
                   </label>
                   <input
                     type="text"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    placeholder="Enter lesson title..."
+                    placeholder={t(
+                      "instructor.editCourse.lessonCreate.lessonTitlePlaceholder"
+                    )}
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Description
+                    {t("instructor.editCourse.lessonCreate.description")}
                   </label>
                   <RichTextEditor
                     content={description}
                     onChange={setDescription}
-                    placeholder="Describe what students will learn in this lesson..."
+                    placeholder={t(
+                      "instructor.editCourse.lessonCreate.descriptionPlaceholder"
+                    )}
                   />
                 </div>
               </div>
@@ -342,7 +360,7 @@ const LessonEditor = () => {
             >
               <h2 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
                 <FaVideo className="mr-2 text-indigo-600" />
-                Lesson Video
+                {t("instructor.editCourse.lessonCreate.lessonVideo")}
               </h2>
 
               {videoPreview ? (
@@ -355,7 +373,9 @@ const LessonEditor = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                       <span className="text-sm text-gray-600">
-                        Duration: {duration} minutes
+                        {t("instructor.editCourse.lessonCreate.duration", {
+                          minutes: duration,
+                        })}
                       </span>
                     </div>
                     <button
@@ -366,7 +386,7 @@ const LessonEditor = () => {
                       }}
                       className="text-red-600 hover:text-red-700 text-sm font-medium"
                     >
-                      Remove Video
+                      {t("instructor.editCourse.lessonCreate.removeVideo")}
                     </button>
                   </div>
                 </div>
@@ -375,7 +395,9 @@ const LessonEditor = () => {
                   <FaVideo className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                   <div className="space-y-2">
                     <p className="text-sm text-gray-600">
-                      Upload your lesson video
+                      {t(
+                        "instructor.editCourse.lessonCreate.uploadYourLessonVideo"
+                      )}
                     </p>
                     <input
                       type="file"
@@ -398,14 +420,14 @@ const LessonEditor = () => {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-semibold text-gray-900 flex items-center">
                   <FaFileUpload className="mr-2 text-indigo-600" />
-                  Lesson Resources
+                  {t("instructor.editCourse.lessonCreate.lessonResources")}
                 </h2>
                 <button
                   onClick={addResource}
                   className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium cursor-pointer"
                 >
                   <FaPlus className="mr-2" />
-                  Add Resource
+                  {t("instructor.editCourse.lessonCreate.addResource")}
                 </button>
               </div>
 
@@ -423,7 +445,9 @@ const LessonEditor = () => {
                           updateResource(resource.id, { name: e.target.value })
                         }
                         className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
-                        placeholder="Resource name..."
+                        placeholder={t(
+                          "instructor.editCourse.lessonCreate.customNamePlaceholder"
+                        )}
                       />
                     </div>
                     <select
@@ -435,10 +459,26 @@ const LessonEditor = () => {
                       }
                       className="px-3 py-2 border border-gray-200 rounded-lg text-sm"
                     >
-                      <option value="pdf">PDF</option>
-                      <option value="zip">ZIP</option>
-                      <option value="doc">Document</option>
-                      <option value="other">Other</option>
+                      <option value="pdf">
+                        {t(
+                          "instructor.editCourse.lessonCreate.resourceTypes.pdf"
+                        )}
+                      </option>
+                      <option value="zip">
+                        {t(
+                          "instructor.editCourse.lessonCreate.resourceTypes.zip"
+                        )}
+                      </option>
+                      <option value="doc">
+                        {t(
+                          "instructor.editCourse.lessonCreate.resourceTypes.doc"
+                        )}
+                      </option>
+                      <option value="other">
+                        {t(
+                          "instructor.editCourse.lessonCreate.resourceTypes.other"
+                        )}
+                      </option>
                     </select>
                     <input
                       type="file"
@@ -460,7 +500,9 @@ const LessonEditor = () => {
                 {resources.length === 0 && (
                   <div className="text-center py-8 text-gray-500">
                     <FaFileUpload className="mx-auto h-12 w-12 text-gray-300 mb-2" />
-                    <p>No resources added yet</p>
+                    <p>
+                      {t("instructor.editCourse.lessonCreate.noResourcesAdded")}
+                    </p>
                   </div>
                 )}
               </div>
@@ -476,14 +518,14 @@ const LessonEditor = () => {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-semibold text-gray-900 flex items-center">
                   <FaQuestionCircle className="mr-2 text-indigo-600" />
-                  Lesson Quiz
+                  {t("instructor.editCourse.lessonCreate.lessonQuiz")}
                 </h2>
                 <button
                   onClick={addQuizQuestion}
                   className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium cursor-pointer"
                 >
                   <FaPlus className="mr-2" />
-                  Add Question
+                  {t("instructor.editCourse.lessonCreate.addQuestion")}
                 </button>
               </div>
 
@@ -495,7 +537,9 @@ const LessonEditor = () => {
                   >
                     <div className="flex items-start justify-between mb-4">
                       <h3 className="font-medium text-gray-900">
-                        Question {qIndex + 1}
+                        {t("instructor.editCourse.lessonCreate.question", {
+                          index: qIndex + 1,
+                        })}
                       </h3>
                       <button
                         onClick={() => removeQuizQuestion(question.id)}
@@ -514,7 +558,9 @@ const LessonEditor = () => {
                           })
                         }
                         className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
-                        placeholder="Enter question..."
+                        placeholder={t(
+                          "instructor.editCourse.lessonCreate.enterQuestion"
+                        )}
                         rows={2}
                       />
 
@@ -546,7 +592,12 @@ const LessonEditor = () => {
                                 )
                               }
                               className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm"
-                              placeholder={`Option ${oIndex + 1}...`}
+                              placeholder={t(
+                                "instructor.editCourse.lessonCreate.option",
+                                {
+                                  index: oIndex + 1,
+                                }
+                              )}
                             />
                           </div>
                         ))}
@@ -558,7 +609,9 @@ const LessonEditor = () => {
                 {quiz.length === 0 && (
                   <div className="text-center py-8 text-gray-500">
                     <FaQuestionCircle className="mx-auto h-12 w-12 text-gray-300 mb-2" />
-                    <p>No quiz questions added yet</p>
+                    <p>
+                      {t("instructor.editCourse.lessonCreate.noQuizQuestions")}
+                    </p>
                   </div>
                 )}
               </div>
@@ -573,13 +626,13 @@ const LessonEditor = () => {
               className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-24"
             >
               <h2 className="text-lg font-semibold text-gray-900 mb-6">
-                Lesson Settings
+                {t("instructor.editCourse.lessonCreate.lessonSettings")}
               </h2>
 
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Duration (minutes)
+                    {t("instructor.editCourse.lessonCreate.durationMinutes")}
                   </label>
                   <input
                     type="number"
@@ -593,10 +646,10 @@ const LessonEditor = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <label className="text-sm font-medium text-gray-700">
-                      Preview Lesson
+                      {t("instructor.editCourse.lessonCreate.previewLesson")}
                     </label>
                     <p className="text-xs text-gray-500 mt-1">
-                      Allow free preview of this lesson
+                      {t("instructor.editCourse.lessonCreate.allowFreePreview")}
                     </p>
                   </div>
                   <button
@@ -621,8 +674,8 @@ const LessonEditor = () => {
                       <FaEyeSlash className="mr-2 text-gray-400" />
                     )}
                     {isPreview
-                      ? "Visible to all students"
-                      : "Only for enrolled students"}
+                      ? t("instructor.editCourse.lessonCreate.visibleToAll")
+                      : t("instructor.editCourse.lessonCreate.onlyForEnrolled")}
                   </div>
                 </div>
               </div>

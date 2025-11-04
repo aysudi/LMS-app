@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
+import { useTranslation } from "react-i18next";
 import { CATEGORIES, SUBCATEGORIES } from "../../../constants/courseCategories";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
@@ -52,6 +53,7 @@ const BasicInfoPanel = ({
   isSaving,
   hasChanges,
 }: BasicInfoPanelProps) => {
+  const { t } = useTranslation();
   const [tagInput, setTagInput] = useState("");
   const [formData, setFormData] = useState<FormState>({
     title: course.title || "",
@@ -101,7 +103,9 @@ const BasicInfoPanel = ({
         },
       }),
       Placeholder.configure({
-        placeholder: "Write a detailed description of your course...",
+        placeholder: t(
+          "instructor.editCourse.basicInfo.detailedDescriptionPlaceholder"
+        ),
       }),
       Link.configure({
         openOnClick: false,
@@ -296,28 +300,34 @@ const BasicInfoPanel = ({
         {/* Title */}
         <FormInput
           id="title"
-          label="Course Title"
+          label={t("instructor.editCourse.basicInfo.courseTitle")}
           value={formData.title}
           onChange={(e) => handleInputChange("title", e.target.value)}
-          placeholder="Enter a descriptive title for your course"
+          placeholder={t(
+            "instructor.editCourse.basicInfo.courseTitlePlaceholder"
+          )}
         />{" "}
         {/* Short Description */}
         <FormTextArea
           id="shortDescription"
-          label="Short Description"
+          label={t("instructor.editCourse.basicInfo.shortDescription")}
           value={formData.shortDescription}
           onChange={(e) =>
             handleInputChange("shortDescription", e.target.value)
           }
-          placeholder="Write a compelling summary of your course..."
+          placeholder={t(
+            "instructor.editCourse.basicInfo.shortDescriptionPlaceholder"
+          )}
           rows={3}
-          helperText="Brief description for course listings. Max 200 characters."
+          helperText={t(
+            "instructor.editCourse.basicInfo.shortDescriptionHelper"
+          )}
         />{" "}
         {/* Category & Subcategory */}
         <div className={`${sectionStyles.grid} ${sectionStyles.gridCols2}`}>
           <FormSelect
             id="category"
-            label="Category"
+            label={t("instructor.editCourse.basicInfo.category")}
             value={formData.category}
             onChange={(e) => {
               // Reset subcategory when category changes
@@ -325,7 +335,9 @@ const BasicInfoPanel = ({
               handleInputChange("subcategory", "");
             }}
           >
-            <option value="">Select a category</option>
+            <option value="">
+              {t("instructor.editCourse.basicInfo.categoryPlaceholder")}
+            </option>
             {CATEGORIES.map((category) => (
               <option key={category} value={category}>
                 {category}
@@ -335,12 +347,14 @@ const BasicInfoPanel = ({
 
           <FormSelect
             id="subcategory"
-            label="Subcategory"
+            label={t("instructor.editCourse.basicInfo.subcategory")}
             value={formData.subcategory}
             onChange={(e) => handleInputChange("subcategory", e.target.value)}
             disabled={!formData.category}
           >
-            <option value="">Select a subcategory</option>
+            <option value="">
+              {t("instructor.editCourse.basicInfo.subcategoryPlaceholder")}
+            </option>
             {formData.category &&
               SUBCATEGORIES[formData.category]?.map((subcategory) => (
                 <option key={subcategory} value={subcategory}>
@@ -352,7 +366,7 @@ const BasicInfoPanel = ({
         {/* Rich Text Editor */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Detailed Description
+            {t("instructor.editCourse.basicInfo.detailedDescription")}
           </label>
           <div className={richTextEditorStyles.container}>
             <MenuBar />
@@ -365,10 +379,10 @@ const BasicInfoPanel = ({
         {/* Tags */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Tags
+            {t("instructor.editCourse.basicInfo.tags")}
           </label>
           <p className="text-sm text-gray-500 mb-2">
-            Add relevant tags to help students find your course (max 10 tags)
+            {t("instructor.editCourse.basicInfo.tagsHelper")}
           </p>
           <div className="flex space-x-2">
             <input
@@ -376,7 +390,7 @@ const BasicInfoPanel = ({
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
               onKeyDown={handleTagKeyPress}
-              placeholder="Enter a tag and press Enter"
+              placeholder={t("instructor.editCourse.basicInfo.tagPlaceholder")}
               className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
               maxLength={30}
               disabled={formData.tags.length >= 10}
@@ -387,7 +401,7 @@ const BasicInfoPanel = ({
               disabled={!tagInput.trim() || formData.tags.length >= 10}
               className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
-              <span>Add Tag</span>
+              <span>{t("instructor.editCourse.basicInfo.addTag")}</span>
             </button>
           </div>
           <div className="mt-2 flex flex-wrap gap-2">
@@ -409,17 +423,17 @@ const BasicInfoPanel = ({
           </div>
           {formData.tags.length >= 10 && (
             <p className="mt-2 text-sm text-amber-600">
-              Maximum number of tags reached (10/10)
+              {t("instructor.editCourse.basicInfo.maxTagsReached")}
             </p>
           )}
         </div>
         {/* Learning Objectives */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Learning Objectives
+            {t("instructor.editCourse.basicInfo.learningObjectives")}
           </label>
           <p className="text-sm text-gray-500 mb-3">
-            What will students learn in this course? (Add at least 4 objectives)
+            {t("instructor.editCourse.basicInfo.learningObjectivesHelper")}
           </p>
           <div className="space-y-2">
             {formData.learningObjectives.map((objective, index) => (
@@ -436,7 +450,10 @@ const BasicInfoPanel = ({
                     }));
                     onUpdate({ learningObjectives: newObjectives });
                   }}
-                  placeholder={`Learning objective ${index + 1}`}
+                  placeholder={t(
+                    "instructor.editCourse.basicInfo.learningObjectivePlaceholder",
+                    { index: index + 1 }
+                  )}
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
                 />
                 <button
@@ -469,17 +486,17 @@ const BasicInfoPanel = ({
               }}
               className="w-full px-4 py-2 border-2 border-dashed border-gray-300 text-gray-600 rounded-lg hover:border-indigo-500 hover:text-indigo-600 transition-all duration-200"
             >
-              + Add Learning Objective
+              {t("instructor.editCourse.basicInfo.addLearningObjective")}
             </button>
           </div>
         </div>
         {/* Requirements */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Requirements
+            {t("instructor.editCourse.basicInfo.requirements")}
           </label>
           <p className="text-sm text-gray-500 mb-3">
-            What do students need to know or have before taking this course?
+            {t("instructor.editCourse.basicInfo.requirementsHelper")}
           </p>
           <div className="space-y-2">
             {formData.requirements.map((requirement, index) => (
@@ -496,7 +513,10 @@ const BasicInfoPanel = ({
                     }));
                     onUpdate({ requirements: newRequirements });
                   }}
-                  placeholder={`Requirement ${index + 1}`}
+                  placeholder={t(
+                    "instructor.editCourse.basicInfo.requirementPlaceholder",
+                    { index: index + 1 }
+                  )}
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
                 />
                 <button
@@ -529,17 +549,17 @@ const BasicInfoPanel = ({
               }}
               className="w-full px-4 py-2 border-2 border-dashed border-gray-300 text-gray-600 rounded-lg hover:border-indigo-500 hover:text-indigo-600 transition-all duration-200"
             >
-              + Add Requirement
+              {t("instructor.editCourse.basicInfo.addRequirement")}
             </button>
           </div>
         </div>
         {/* Target Audience */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Target Audience
+            {t("instructor.editCourse.basicInfo.targetAudience")}
           </label>
           <p className="text-sm text-gray-500 mb-3">
-            Who is this course for? Define your ideal student.
+            {t("instructor.editCourse.basicInfo.targetAudienceHelper")}
           </p>
           <div className="space-y-2">
             {formData.targetAudience.map((audience, index) => (
@@ -556,7 +576,10 @@ const BasicInfoPanel = ({
                     }));
                     onUpdate({ targetAudience: newAudience });
                   }}
-                  placeholder={`Target audience ${index + 1}`}
+                  placeholder={t(
+                    "instructor.editCourse.basicInfo.targetAudiencePlaceholder",
+                    { index: index + 1 }
+                  )}
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
                 />
                 <button
@@ -589,7 +612,7 @@ const BasicInfoPanel = ({
               }}
               className="w-full px-4 py-2 border-2 border-dashed border-gray-300 text-gray-600 rounded-lg hover:border-indigo-500 hover:text-indigo-600 transition-all duration-200"
             >
-              + Add Target Audience
+              {t("instructor.editCourse.basicInfo.addTargetAudience")}
             </button>
           </div>
         </div>
@@ -604,12 +627,12 @@ const BasicInfoPanel = ({
               {isSaving ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-                  Saving...
+                  {t("instructor.editCourse.basicInfo.saving")}
                 </>
               ) : (
                 <>
                   <FaSave className="mr-2" />
-                  Save Basic Information
+                  {t("instructor.editCourse.basicInfo.saveBasicInfo")}
                 </>
               )}
             </button>

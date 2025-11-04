@@ -106,13 +106,26 @@ export const getInstructorOverviewService = async (instructorId) => {
 };
 // Get instructor courses with detailed stats
 export const getInstructorCoursesWithStatsService = async (instructorId, queryParams = {}) => {
-    const { page = 1, limit = 10, status = "all", search, category, level, minPrice, maxPrice, sortBy = "createdAt", sortOrder = "desc", } = queryParams;
+    const { page = 1, limit = 10, status = "all", search, category, level, minPrice, maxPrice, minRating, sortBy = "createdAt", sortOrder = "desc", } = queryParams;
     const skip = (page - 1) * limit;
     let filter = { instructor: instructorId };
-    if (status === "published")
+    if (status === "published") {
         filter.isPublished = true;
-    if (status === "draft")
-        filter.isPublished = false;
+        filter.status = { $ne: "rejected" };
+    }
+    else if (status === "draft") {
+        filter.$and = [
+            { isPublished: false },
+            { $or: [{ status: { $exists: false } }, { status: "draft" }] },
+        ];
+    }
+    else if (status === "pending") {
+        filter.status = "pending";
+    }
+    else if (status === "rejected") {
+        filter.status = "rejected";
+    }
+    // If status is "all", no additional filtering needed
     if (search) {
         filter.$or = [
             { title: { $regex: search, $options: "i" } },
@@ -132,6 +145,9 @@ export const getInstructorCoursesWithStatsService = async (instructorId, queryPa
             filter.originalPrice.$gte = minPrice;
         if (maxPrice !== undefined)
             filter.originalPrice.$lte = maxPrice;
+    }
+    if (minRating !== undefined) {
+        filter.rating = { $gte: minRating };
     }
     let sort = {};
     switch (sortBy) {

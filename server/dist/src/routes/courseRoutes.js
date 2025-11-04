@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { authenticateToken, authorizeRoles, } from "../middlewares/auth.middleware";
 import { UserRole } from "../types/user.types";
-import { createCourse, deleteCourse, getAllCourses, getCourseById, getInstructorCourses, getUserCourses, updateCourse, toggleCourseStatus, } from "../controllers/courseController";
+import { createCourse, deleteCourse, getAllCourses, getCourseById, getInstructorCourses, getUserCourses, updateCourse, toggleCourseStatus, submitCourseForApproval, addReview, getCourseReviews, updateReview, deleteReview, } from "../controllers/courseController";
 import { courseUploadMiddleware, courseUploadErrorHandler, processCourseUploads, } from "../middlewares/course-upload.middleware.js";
 const courseRouter = Router();
 courseRouter.get("/", (req, res) => getAllCourses(req, res));
@@ -13,4 +13,10 @@ courseRouter.post("/", authorizeRoles(UserRole.INSTRUCTOR), courseUploadMiddlewa
 courseRouter.put("/:id", authorizeRoles(UserRole.INSTRUCTOR), courseUploadMiddleware, courseUploadErrorHandler, processCourseUploads, (req, res) => updateCourse(req, res));
 courseRouter.delete("/:id", authorizeRoles(UserRole.INSTRUCTOR), (req, res) => deleteCourse(req, res));
 courseRouter.patch("/:id/toggle-status", authorizeRoles(UserRole.INSTRUCTOR), (req, res) => toggleCourseStatus(req, res));
+courseRouter.patch("/:id/submit-for-approval", authorizeRoles(UserRole.INSTRUCTOR), (req, res) => submitCourseForApproval(req, res));
+// Review routes
+courseRouter.get("/:id/reviews", (req, res) => getCourseReviews(req, res));
+courseRouter.post("/:id/reviews", authenticateToken, (req, res) => addReview(req, res));
+courseRouter.put("/:id/reviews/:reviewId", authenticateToken, (req, res) => updateReview(req, res));
+courseRouter.delete("/:id/reviews/:reviewId", authenticateToken, (req, res) => deleteReview(req, res));
 export default courseRouter;

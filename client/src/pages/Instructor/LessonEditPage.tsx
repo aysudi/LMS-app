@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import {
   FaArrowLeft,
   FaSave,
@@ -42,6 +43,7 @@ const LessonEditPage = () => {
   const sectionId = searchParams.get("sectionId");
   const { lessonId } = useParams();
   const { showToast } = useToast();
+  const { t } = useTranslation();
 
   const { data: courseData, isLoading: courseLoading } = useCourse(courseId!);
 
@@ -112,7 +114,10 @@ const LessonEditPage = () => {
 
     if (!file.type.startsWith("video/")) {
       showToast(
-        generalToasts.error("Invalid file type", "Please select a video file")
+        generalToasts.error(
+          t("instructor.editCourse.lessonEdit.toasts.selectVideo"),
+          t("instructor.editCourse.lessonEdit.validation.selectVideoFile")
+        )
       );
       return;
     }
@@ -120,8 +125,8 @@ const LessonEditPage = () => {
     if (file.size > 500 * 1024 * 1024) {
       showToast(
         generalToasts.error(
-          "File too large",
-          "Video size should be less than 500MB"
+          t("instructor.editCourse.lessonEdit.toasts.fileTooLarge"),
+          t("instructor.editCourse.lessonEdit.validation.videoTooLarge")
         )
       );
       return;
@@ -131,8 +136,12 @@ const LessonEditPage = () => {
 
     showToast(
       generalToasts.success(
-        "Video Uploaded",
-        `Video "${file.name}" uploaded successfully!`
+        t("instructor.editCourse.lessonEdit.toasts.videoUploaded", {
+          name: file.name,
+        }),
+        t("instructor.editCourse.lessonEdit.toasts.videoUploaded", {
+          name: file.name,
+        })
       )
     );
 
@@ -171,8 +180,8 @@ const LessonEditPage = () => {
     if (file.size > 50 * 1024 * 1024) {
       showToast(
         generalToasts.error(
-          "File too large",
-          "File size should be less than 50MB"
+          t("instructor.editCourse.lessonEdit.toasts.fileTooLarge"),
+          t("instructor.editCourse.lessonEdit.validation.resourceTooLarge")
         )
       );
       return;
@@ -215,7 +224,10 @@ const LessonEditPage = () => {
   const handleSave = async () => {
     if (!title.trim()) {
       showToast(
-        generalToasts.error("Title is required", "Please enter a lesson title")
+        generalToasts.error(
+          t("instructor.editCourse.lessonEdit.validation.titleRequired"),
+          t("instructor.editCourse.lessonEdit.validation.titleRequired")
+        )
       );
       return;
     }
@@ -278,8 +290,8 @@ const LessonEditPage = () => {
 
       showToast(
         generalToasts.success(
-          "Lesson updated",
-          "✨ Lesson updated successfully!"
+          t("instructor.editCourse.lessonEdit.lessonUpdated"),
+          t("instructor.editCourse.lessonEdit.lessonUpdated")
         )
       );
 
@@ -290,9 +302,9 @@ const LessonEditPage = () => {
       console.error("Error updating lesson:", error);
       showToast(
         generalToasts.error(
-          "Update failed",
+          t("instructor.editCourse.lessonEdit.updateFailed"),
           (error as any)?.response?.data?.message ||
-            "❌ Failed to update lesson. Please try again."
+            t("instructor.editCourse.lessonEdit.updateFailed")
         )
       );
     }
@@ -348,7 +360,7 @@ const LessonEditPage = () => {
               </button>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">
-                  Edit Lesson
+                  {t("instructor.editCourse.lessonEdit.title")}
                 </h1>
                 <p className="text-sm text-gray-500">
                   {currentSection?.title} • {courseData?.data.title}
@@ -366,7 +378,9 @@ const LessonEditPage = () => {
               ) : (
                 <FaSave className="mr-2" />
               )}
-              Update Lesson
+              {isLoading
+                ? t("instructor.editCourse.lessonEdit.saving")
+                : t("instructor.editCourse.lessonEdit.saveChanges")}
             </button>
           </div>
         </div>
@@ -384,31 +398,35 @@ const LessonEditPage = () => {
               className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6"
             >
               <h2 className="text-lg font-semibold text-gray-900 mb-6">
-                Basic Information
+                {t("instructor.editCourse.lessonEdit.basicInformation")}
               </h2>
 
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Lesson Title
+                    {t("instructor.editCourse.lessonEdit.lessonTitle")}
                   </label>
                   <input
                     type="text"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    placeholder="Enter lesson title..."
+                    placeholder={t(
+                      "instructor.editCourse.lessonEdit.lessonTitlePlaceholder"
+                    )}
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Description
+                    {t("instructor.editCourse.lessonEdit.description")}
                   </label>
                   <RichTextEditor
                     content={description}
                     onChange={setDescription}
-                    placeholder="Describe what students will learn in this lesson..."
+                    placeholder={t(
+                      "instructor.editCourse.lessonEdit.descriptionPlaceholder"
+                    )}
                   />
                 </div>
               </div>
@@ -423,7 +441,7 @@ const LessonEditPage = () => {
             >
               <h2 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
                 <FaVideo className="mr-2 text-indigo-600" />
-                Lesson Video
+                {t("instructor.editCourse.lessonEdit.lessonVideo")}
               </h2>
 
               {videoPreview ? (
@@ -436,17 +454,19 @@ const LessonEditPage = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                       <span className="text-sm text-gray-600">
-                        Duration: {duration} minutes
+                        {t("instructor.editCourse.lessonEdit.duration", {
+                          minutes: duration,
+                        })}
                       </span>
                       {!videoFile && (
                         <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
-                          Current Video
+                          {t("instructor.editCourse.lessonEdit.currentVideo")}
                         </span>
                       )}
                     </div>
                     <div className="space-x-2">
                       <label className="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 text-sm">
-                        Change Video
+                        {t("instructor.editCourse.lessonEdit.changeVideo")}
                         <input
                           type="file"
                           accept="video/*"
@@ -465,7 +485,7 @@ const LessonEditPage = () => {
                         }}
                         className="text-red-600 hover:text-red-700 px-4 py-2 text-sm"
                       >
-                        Reset
+                        {t("instructor.editCourse.lessonEdit.reset")}
                       </button>
                     </div>
                   </div>
@@ -475,7 +495,9 @@ const LessonEditPage = () => {
                   <FaVideo className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                   <div className="space-y-2">
                     <p className="text-sm text-gray-600">
-                      Upload replacement video
+                      {t(
+                        "instructor.editCourse.lessonEdit.uploadReplacementVideo"
+                      )}
                     </p>
                     <input
                       type="file"
@@ -498,14 +520,14 @@ const LessonEditPage = () => {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-semibold text-gray-900 flex items-center">
                   <FaFileUpload className="mr-2 text-indigo-600" />
-                  Lesson Resources
+                  {t("instructor.editCourse.lessonEdit.lessonResources")}
                 </h2>
                 <button
                   onClick={addResource}
                   className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
                 >
                   <FaPlus className="mr-2" />
-                  Add Resource
+                  {t("instructor.editCourse.lessonEdit.addResource")}
                 </button>
               </div>
 
@@ -518,7 +540,9 @@ const LessonEditPage = () => {
                     >
                       <div className="flex items-center justify-between mb-3">
                         <h3 className="font-medium text-gray-900">
-                          Resource {index + 1}
+                          {t("instructor.editCourse.lessonEdit.resource", {
+                            index: index + 1,
+                          })}
                         </h3>
                         <button
                           onClick={() => removeResource(resource.id)}
@@ -531,12 +555,14 @@ const LessonEditPage = () => {
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
-                            File
+                            {t("instructor.editCourse.lessonEdit.file")}
                           </label>
                           {resource.url ? (
                             <div className="space-y-2">
                               <div className="text-sm text-gray-600 p-2 bg-white rounded border">
-                                Current: {resource.name}
+                                {t("instructor.editCourse.lessonEdit.current", {
+                                  name: resource.name,
+                                })}
                               </div>
                               <input
                                 type="file"
@@ -549,7 +575,9 @@ const LessonEditPage = () => {
                                 accept=".pdf,.doc,.docx,.zip,.txt,.ppt,.pptx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.mp3,.mp4,.avi,.mov,.rar,.7z"
                               />
                               <div className="text-xs text-gray-500">
-                                Leave empty to keep current file
+                                {t(
+                                  "instructor.editCourse.lessonEdit.leaveEmptyToKeepCurrent"
+                                )}
                               </div>
                             </div>
                           ) : (
@@ -568,7 +596,7 @@ const LessonEditPage = () => {
 
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Type
+                            {t("instructor.editCourse.lessonEdit.type")}
                           </label>
                           <select
                             value={resource.type}
@@ -579,16 +607,32 @@ const LessonEditPage = () => {
                             }
                             className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                           >
-                            <option value="pdf">PDF Document</option>
-                            <option value="zip">ZIP Archive</option>
-                            <option value="doc">Document</option>
-                            <option value="other">Other</option>
+                            <option value="pdf">
+                              {t(
+                                "instructor.editCourse.lessonEdit.resourceTypes.pdf"
+                              )}
+                            </option>
+                            <option value="zip">
+                              {t(
+                                "instructor.editCourse.lessonEdit.resourceTypes.zip"
+                              )}
+                            </option>
+                            <option value="doc">
+                              {t(
+                                "instructor.editCourse.lessonEdit.resourceTypes.doc"
+                              )}
+                            </option>
+                            <option value="other">
+                              {t(
+                                "instructor.editCourse.lessonEdit.resourceTypes.other"
+                              )}
+                            </option>
                           </select>
                         </div>
 
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Name (Optional)
+                            {t("instructor.editCourse.lessonEdit.name")}
                           </label>
                           <input
                             type="text"
@@ -598,7 +642,9 @@ const LessonEditPage = () => {
                                 name: e.target.value,
                               })
                             }
-                            placeholder="Custom name for this resource"
+                            placeholder={t(
+                              "instructor.editCourse.lessonEdit.customNamePlaceholder"
+                            )}
                             className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                           />
                         </div>
@@ -610,11 +656,10 @@ const LessonEditPage = () => {
                 <div className="text-center py-12 text-gray-500">
                   <FaFileUpload className="mx-auto h-16 w-16 text-gray-300 mb-4" />
                   <h3 className="text-lg font-medium text-gray-400 mb-2">
-                    No Resources Added
+                    {t("instructor.editCourse.lessonEdit.noResourcesAdded")}
                   </h3>
                   <p className="text-gray-400">
-                    Add supplementary materials like PDFs, documents, or other
-                    files to enhance your lesson.
+                    {t("instructor.editCourse.lessonEdit.noResourcesDesc")}
                   </p>
                 </div>
               )}
@@ -630,14 +675,14 @@ const LessonEditPage = () => {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-semibold text-gray-900 flex items-center">
                   <FaQuestionCircle className="mr-2 text-indigo-600" />
-                  Lesson Quiz
+                  {t("instructor.editCourse.lessonEdit.lessonQuiz")}
                 </h2>
                 <button
                   onClick={addQuizQuestion}
                   className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
                 >
                   <FaPlus className="mr-2" />
-                  Add Question
+                  {t("instructor.editCourse.lessonEdit.addQuestion")}
                 </button>
               </div>
 
@@ -649,7 +694,9 @@ const LessonEditPage = () => {
                   >
                     <div className="flex items-start justify-between mb-4">
                       <h3 className="font-medium text-gray-900">
-                        Question {qIndex + 1}
+                        {t("instructor.editCourse.lessonEdit.question", {
+                          index: qIndex + 1,
+                        })}
                       </h3>
                       <button
                         onClick={() => removeQuizQuestion(question.id)}
@@ -668,7 +715,9 @@ const LessonEditPage = () => {
                           })
                         }
                         className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
-                        placeholder="Enter question..."
+                        placeholder={t(
+                          "instructor.editCourse.lessonEdit.enterQuestion"
+                        )}
                         rows={2}
                       />
 
@@ -700,7 +749,12 @@ const LessonEditPage = () => {
                                 )
                               }
                               className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm"
-                              placeholder={`Option ${oIndex + 1}...`}
+                              placeholder={t(
+                                "instructor.editCourse.lessonEdit.option",
+                                {
+                                  index: oIndex + 1,
+                                }
+                              )}
                             />
                           </div>
                         ))}
@@ -712,7 +766,9 @@ const LessonEditPage = () => {
                 {quiz.length === 0 && (
                   <div className="text-center py-8 text-gray-500">
                     <FaQuestionCircle className="mx-auto h-12 w-12 text-gray-300 mb-2" />
-                    <p>No quiz questions added yet</p>
+                    <p>
+                      {t("instructor.editCourse.lessonEdit.noQuizQuestions")}
+                    </p>
                   </div>
                 )}
               </div>
@@ -727,13 +783,13 @@ const LessonEditPage = () => {
               className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-24"
             >
               <h2 className="text-lg font-semibold text-gray-900 mb-6">
-                Lesson Settings
+                {t("instructor.editCourse.lessonEdit.lessonSettings")}
               </h2>
 
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Duration (minutes)
+                    {t("instructor.editCourse.lessonEdit.durationMinutes")}
                   </label>
                   <input
                     type="number"
@@ -747,10 +803,10 @@ const LessonEditPage = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <label className="text-sm font-medium text-gray-700">
-                      Preview Lesson
+                      {t("instructor.editCourse.lessonEdit.previewLesson")}
                     </label>
                     <p className="text-xs text-gray-500 mt-1">
-                      Allow free preview of this lesson
+                      {t("instructor.editCourse.lessonEdit.allowFreePreview")}
                     </p>
                   </div>
                   <button
@@ -775,8 +831,8 @@ const LessonEditPage = () => {
                       <FaEyeSlash className="mr-2 text-gray-400" />
                     )}
                     {isPreview
-                      ? "Visible to all students"
-                      : "Only for enrolled students"}
+                      ? t("instructor.editCourse.lessonEdit.visibleToAll")
+                      : t("instructor.editCourse.lessonEdit.onlyForEnrolled")}
                   </div>
                 </div>
               </div>
