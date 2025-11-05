@@ -1,5 +1,6 @@
 {
   "common": {
+    "allCourses": "All Courses",
     "loading": "Loading...",
     "error": "Error",
     "success": "Success",
