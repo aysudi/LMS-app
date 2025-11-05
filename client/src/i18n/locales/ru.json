@@ -1,5 +1,6 @@
 {
   "common": {
+    "allCourses": "Все курсы",
     "loading": "Загрузка...",
     "error": "Ошибка",
     "success": "Успешно",

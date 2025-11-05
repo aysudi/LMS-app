@@ -1,5 +1,6 @@
 {
   "common": {
+    "allCourses": "Bütün kurslar",
     "loading": "Yüklənir...",
     "error": "Xəta",
     "success": "Uğurlu",
