@@ -40,7 +40,6 @@ import {
 import type { Course, Lesson } from "../../types/course.type";
 import { useToast } from "../../components/UI/ToastProvider";
 import { cartToasts, generalToasts } from "../../utils/toastUtils";
-import ReviewsList from "../../components/CourseDetails/ReviewsList";
 
 const CoursePreviewCard: React.FC<{
   course: Course;
@@ -77,7 +76,7 @@ const CoursePreviewCard: React.FC<{
 }) => {
   const { t } = useTranslation();
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl shadow-lg overflow-hidden">
+    <div className="bg-white border border-gray-200 rounded-2xl shadow-lg overflow-hidden max-w-sm xl:max-w-none mx-auto xl:mx-0">
       {/* Video Preview */}
       <div className="relative aspect-video bg-gray-100">
         {course.image ? (
@@ -151,24 +150,24 @@ const CoursePreviewCard: React.FC<{
         </div>
       </div>
 
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         {/* Price Section */}
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           {course.isFree ? (
-            <div className="text-3xl font-bold text-gray-900">
+            <div className="text-2xl sm:text-3xl font-bold text-gray-900">
               {t("courseDetails.free")}
             </div>
           ) : (
-            <div className="flex items-baseline gap-3 flex-wrap">
-              <span className="text-3xl font-bold text-gray-900">
+            <div className="flex items-baseline gap-2 sm:gap-3 flex-wrap">
+              <span className="text-2xl sm:text-3xl font-bold text-gray-900">
                 ${course.currentPrice || course.originalPrice}
               </span>
               {calculateDiscountPercentage() > 0 && (
                 <>
-                  <span className="text-lg text-gray-500 line-through">
+                  <span className="text-base sm:text-lg text-gray-500 line-through">
                     ${course.originalPrice}
                   </span>
-                  <span className="px-2 py-1 bg-red-100 text-red-800 text-sm font-medium rounded">
+                  <span className="px-2 py-1 bg-red-100 text-red-800 text-xs sm:text-sm font-medium rounded">
                     {calculateDiscountPercentage()}% {t("courseDetails.off")}
                   </span>
                 </>
@@ -184,7 +183,7 @@ const CoursePreviewCard: React.FC<{
         </div>
 
         {/* Action Buttons */}
-        <div className="space-y-3 mb-6">
+        <div className="space-y-3 mb-4 sm:mb-6">
           {isEnrolled ? (
             <button
               onClick={(e) => {
@@ -327,8 +326,40 @@ const CoursePreviewCard: React.FC<{
             className="group relative flex items-center gap-2 px-6 py-3 rounded-xl font-medium bg-gray-50 text-gray-600 border border-gray-200 hover:bg-purple-50 hover:text-purple-600 hover:border-purple-200 transition-all duration-300 cursor-pointer"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => {
-              navigator.clipboard.writeText(window.location.href);
+            onClick={async () => {
+              const shareData = {
+                title: course.title,
+                text:
+                  course.shortDescription ||
+                  course.description.substring(0, 100) + "...",
+                url: window.location.href,
+              };
+
+              // Try Web Share API first
+              if (navigator.share) {
+                try {
+                  await navigator.share(shareData);
+                  return;
+                } catch (err) {
+                  // User cancelled or error occurred, fall back to clipboard
+                }
+              }
+
+              // Fallback to clipboard
+              try {
+                await navigator.clipboard.writeText(window.location.href);
+                // You might want to show a toast notification here
+                console.log("Link copied to clipboard!");
+              } catch (err) {
+                // Fallback for older browsers
+                const textArea = document.createElement("textarea");
+                textArea.value = window.location.href;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand("copy");
+                document.body.removeChild(textArea);
+                console.log("Link copied to clipboard!");
+              }
             }}
           >
             <motion.div
@@ -341,7 +372,9 @@ const CoursePreviewCard: React.FC<{
 
             {/* Tooltip */}
             <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
-              {t("courseDetails.copyLink")}
+              {"share" in navigator
+                ? t("courseDetails.shareOrCopy")
+                : t("courseDetails.copyLink")}
             </div>
           </motion.button>
         </div>
@@ -551,7 +584,7 @@ const CourseDetails = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
       <div className="bg-gray-900 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           <div className="max-w-4xl">
             {/* Breadcrumb */}
             <nav className="flex items-center space-x-2 text-sm text-purple-200 mb-4">
@@ -576,12 +609,12 @@ const CourseDetails = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="mb-6"
+              className="mb-4 sm:mb-6"
             >
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-4">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-3 sm:mb-4">
                 {course.title}
               </h1>
-              <p className="text-xl text-gray-300 leading-relaxed mb-6 max-w-3xl">
+              <div className="text-lg sm:text-xl text-gray-300 leading-relaxed mb-4 sm:mb-6 max-w-3xl">
                 {course.shortDescription ? (
                   <HTMLRenderer
                     content={course.shortDescription}
@@ -595,7 +628,7 @@ const CourseDetails = () => {
                     maxLength={200}
                   />
                 )}
-              </p>
+              </div>
             </motion.div>
 
             {/* Course Meta Info */}
@@ -603,30 +636,30 @@ const CourseDetails = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="flex flex-wrap items-center gap-6 mb-6"
+              className="flex flex-wrap items-center gap-3 sm:gap-6 mb-4 sm:mb-6"
             >
               {/* Rating */}
               <div className="flex items-center gap-2">
-                <span className="text-orange-400 font-bold text-lg">
+                <span className="text-orange-400 font-bold text-base sm:text-lg">
                   {course.rating.toFixed(1)}
                 </span>
                 <div className="flex items-center gap-1">
                   {renderStars(course.rating)}
                 </div>
-                <span className="text-orange-300 text-sm underline cursor-pointer">
+                <span className="text-orange-300 text-xs sm:text-sm underline cursor-pointer">
                   ({course.ratingsCount.toLocaleString()}{" "}
                   {t("courseDetails.ratings")})
                 </span>
               </div>
 
               {/* Students */}
-              <div className="text-gray-300">
+              <div className="text-gray-300 text-sm sm:text-base">
                 {course.studentsEnrolled.length.toLocaleString()}{" "}
                 {t("courseDetails.students")}
               </div>
 
               {/* Level */}
-              <div className="px-3 py-1 bg-yellow-500 text-yellow-900 text-sm font-medium rounded">
+              <div className="px-2 sm:px-3 py-1 bg-yellow-500 text-yellow-900 text-xs sm:text-sm font-medium rounded">
                 {course.level}
               </div>
             </motion.div>
@@ -636,7 +669,7 @@ const CourseDetails = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="flex flex-wrap items-center gap-6 text-sm text-gray-300"
+              className="flex flex-wrap items-center gap-3 sm:gap-6 text-xs sm:text-sm text-gray-300"
             >
               <div className="flex items-center gap-2">
                 <span>{t("courseDetails.createdBy")}</span>
@@ -665,12 +698,12 @@ const CourseDetails = () => {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="lg:grid lg:grid-cols-3 lg:gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
           {/* Left Column - Course Content */}
-          <div className="lg:col-span-2">
-            {/* Course Preview Card (Mobile Only) */}
-            <div className="lg:hidden mb-8">
+          <div className="xl:col-span-2 order-2 xl:order-1">
+            {/* Course Preview Card (Mobile/Tablet) - Hidden on XL+ */}
+            <div className="xl:hidden mb-6 lg:mb-8">
               <CoursePreviewCard
                 course={course}
                 calculateDiscountPercentage={calculateDiscountPercentage}
@@ -694,7 +727,7 @@ const CourseDetails = () => {
             <div className="bg-white border border-gray-200 rounded-lg">
               {/* Tabs */}
               <div className="border-b border-gray-200">
-                <nav className="flex">
+                <nav className="flex overflow-x-auto scrollbar-hide">
                   {[
                     { id: "overview", label: t("courseDetails.tabs.overview") },
                     {
@@ -710,7 +743,7 @@ const CourseDetails = () => {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id as any)}
-                      className={`py-4 px-6 border-b-2 font-medium text-sm transition-colors cursor-pointer ${
+                      className={`py-4 px-3 sm:px-6 border-b-2 font-medium text-sm whitespace-nowrap flex-shrink-0 transition-colors cursor-pointer ${
                         activeTab === tab.id
                           ? "border-purple-600 text-purple-600"
                           : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
@@ -728,7 +761,7 @@ const CourseDetails = () => {
               </div>
 
               {/* Tab Content */}
-              <div className="p-6 lg:p-8">
+              <div className="p-4 sm:p-6 lg:p-8">
                 <AnimatePresence mode="wait">
                   {activeTab === "overview" && (
                     <motion.div
@@ -776,10 +809,29 @@ const CourseDetails = () => {
                       exit={{ opacity: 0, y: -20 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <ReviewsList
-                        courseId={course.id}
-                        hasUserEnrolled={isEnrolled}
-                      />
+                      <div className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-2xl font-bold text-gray-900">
+                            {t("courseDetails.studentReviews")}
+                          </h3>
+                          <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1">
+                              {renderStars(course.rating)}
+                            </div>
+                            <span className="font-bold text-lg">
+                              {course.rating.toFixed(1)}
+                            </span>
+                            <span className="text-gray-600">
+                              ({course.ratingsCount}{" "}
+                              {t("courseDetails.reviews")})
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="text-center py-12 text-gray-500">
+                          <p>{t("courseDetails.reviewsComingSoon")}</p>
+                        </div>
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -787,9 +839,9 @@ const CourseDetails = () => {
             </div>
           </div>
 
-          {/* Right Column - Course Preview (Desktop Only) */}
-          <div className="hidden lg:block lg:col-span-1">
-            <div className="sticky top-8">
+          {/* Right Column - Course Preview */}
+          <div className="xl:col-span-1 order-1 xl:order-2">
+            <div className="sticky top-4 lg:top-8">
               <CoursePreviewCard
                 course={course}
                 calculateDiscountPercentage={calculateDiscountPercentage}
