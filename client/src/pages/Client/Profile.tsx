@@ -527,7 +527,7 @@ const Profile: React.FC = () => {
               className="flex-1 w-full"
             >
               {/* Enhanced Stats Cards */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-8">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -586,8 +586,8 @@ const Profile: React.FC = () => {
               </div>
 
               {/* Meta Information */}
-              <div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 border border-gray-200">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-gray-200">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
                       <FaCalendarAlt className="text-purple-600 text-sm" />
@@ -664,49 +664,58 @@ const Profile: React.FC = () => {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="lg:grid lg:grid-cols-3 lg:gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Left Column - Main Content */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 order-2 lg:order-1">
             {/* Course Content */}
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
-              {/* Tabs */}
+              {/* Tabs - Mobile Responsive */}
               <div className="border-b border-gray-200">
-                <nav className="flex">
-                  {[
-                    {
-                      id: "overview",
-                      label: t("profile.tabs.overview"),
-                      icon: FaUser,
-                    },
-                    {
-                      id: "courses",
-                      label: t("profile.tabs.myLearning"),
-                      icon: FaGraduationCap,
-                    },
-                    {
-                      id: "achievements",
-                      label: t("profile.tabs.achievements"),
-                      icon: FaTrophy,
-                    },
-                    {
-                      id: "settings",
-                      label: t("profile.tabs.settings"),
-                      icon: FaCog,
-                    },
-                  ].map((tab) => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`py-4 px-6 border-b-2 font-medium text-sm transition-colors cursor-pointer flex items-center gap-2 ${
-                        activeTab === tab.id
-                          ? "border-purple-600 text-purple-700 bg-purple-50"
-                          : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                      }`}
-                    >
-                      <tab.icon className="text-sm" />
-                      {tab.label}
-                    </button>
-                  ))}
+                <nav className="flex overflow-x-auto overflow-y-hidden scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 sm:scrollbar-none">
+                  <div className="flex min-w-max px-2 sm:px-0">
+                    {[
+                      {
+                        id: "overview",
+                        label: t("profile.tabs.overview"),
+                        shortLabel: "Overview",
+                        icon: FaUser,
+                      },
+                      {
+                        id: "courses",
+                        label: t("profile.tabs.myLearning"),
+                        shortLabel: "Courses",
+                        icon: FaGraduationCap,
+                      },
+                      {
+                        id: "achievements",
+                        label: t("profile.tabs.achievements"),
+                        shortLabel: "Awards",
+                        icon: FaTrophy,
+                      },
+                      {
+                        id: "settings",
+                        label: t("profile.tabs.settings"),
+                        shortLabel: "Settings",
+                        icon: FaCog,
+                      },
+                    ].map((tab) => (
+                      <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`py-3 sm:py-4 px-3 sm:px-6 border-b-2 font-medium text-xs sm:text-sm transition-all duration-200 cursor-pointer flex items-center gap-1 sm:gap-2 whitespace-nowrap min-w-0 ${
+                          activeTab === tab.id
+                            ? "border-purple-600 text-purple-700 bg-purple-50"
+                            : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50"
+                        }`}
+                      >
+                        <tab.icon className="text-xs sm:text-sm flex-shrink-0" />
+                        <span className="hidden sm:inline">{tab.label}</span>
+                        <span className="sm:hidden text-xs">
+                          {tab.shortLabel}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
                 </nav>
               </div>
 
@@ -722,7 +731,7 @@ const Profile: React.FC = () => {
                       className="space-y-6"
                     >
                       {/* Quick Info */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                         {/* Personal Info */}
                         <div className="bg-gray-50 rounded-lg p-6">
                           <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
@@ -876,7 +885,7 @@ const Profile: React.FC = () => {
                           <FaChartLine className="text-purple-600" />
                           {t("profile.learning.progressOverview")}
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                           <div className="text-center">
                             <div className="text-2xl font-bold text-purple-600 mb-1">
                               {stats?.totalEnrolledCourses || 0}
@@ -912,7 +921,7 @@ const Profile: React.FC = () => {
                         <h3 className="text-lg font-semibold text-gray-900 mb-4">
                           {t("profile.learning.currentCourses")}
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           {enrolledCourses
                             .filter(
                               (enrollment: any) =>
@@ -1078,7 +1087,7 @@ const Profile: React.FC = () => {
                           <FaTrophy className="text-yellow-500" />
                           {t("profile.achievements.overview")}
                         </h3>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                           <div className="text-center">
                             <div className="text-2xl font-bold text-yellow-600 mb-1">
                               {achievements.length}
@@ -1122,7 +1131,7 @@ const Profile: React.FC = () => {
                         <h3 className="text-lg font-semibold text-gray-900 mb-4">
                           {t("profile.achievements.recent")}
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                           {achievements.length > 0 ? (
                             achievements.map((achievement, index) => (
                               <div
@@ -1250,7 +1259,7 @@ const Profile: React.FC = () => {
                           onSubmit={handleUpdateProfile}
                           className="space-y-4"
                         >
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-1">
                                 {t("profile.settings.firstName")}
@@ -1400,7 +1409,7 @@ const Profile: React.FC = () => {
                                     />
                                   </div>
 
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                       <label className="block text-sm font-medium text-gray-700 mb-2">
                                         {t("profile.settings.newPassword")}
@@ -1613,7 +1622,7 @@ const Profile: React.FC = () => {
           </div>
 
           {/* Right Sidebar */}
-          <div className="lg:col-span-1 space-y-6 mt-8 lg:mt-0">
+          <div className="lg:col-span-1 space-y-6 order-1 lg:order-2">
             {/* Quick Actions */}
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
@@ -1718,15 +1727,15 @@ const Profile: React.FC = () => {
 
       {/* Enhanced Edit Profile Modal */}
       {isEditing && (
-        <div className="fixed inset-0 bg-black/39 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/39 flex items-center justify-center z-50 p-2 sm:p-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+            className="bg-white rounded-xl sm:rounded-2xl w-full max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto"
           >
             {/* Modal Header */}
-            <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-6 rounded-t-2xl">
+            <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-4 sm:p-6 rounded-t-xl sm:rounded-t-2xl">
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-bold text-white">
                   {t("profile.editProfile")}
@@ -1750,11 +1759,11 @@ const Profile: React.FC = () => {
             </div>
 
             {/* Modal Content */}
-            <div className="p-6 space-y-6">
+            <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
               {/* Avatar Section */}
               <div className="text-center">
                 <div className="relative inline-block">
-                  <div className="w-24 h-24 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4 overflow-hidden">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center text-white text-lg sm:text-2xl font-bold mx-auto mb-4 overflow-hidden">
                     {user.avatar ? (
                       <img
                         src={user.avatar}
@@ -1768,106 +1777,102 @@ const Profile: React.FC = () => {
                   <button
                     onClick={() => fileInputRef.current?.click()}
                     disabled={updateAvatarMutation.isPending}
-                    className="absolute bottom-4 right-0 w-8 h-8 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white rounded-full flex items-center justify-center shadow-lg transition-colors disabled:cursor-not-allowed cursor-pointer"
+                    className="absolute -bottom-1 -right-1 sm:bottom-4 sm:right-0 w-7 h-7 sm:w-8 sm:h-8 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white rounded-full flex items-center justify-center shadow-lg transition-colors disabled:cursor-not-allowed cursor-pointer"
                   >
-                    <FaCamera className="text-sm" />
+                    <FaCamera className="text-xs sm:text-sm" />
                   </button>
                 </div>
-                {/* <button
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={updateAvatarMutation.isPending}
-                  className="text-purple-600 hover:text-purple-700 disabled:text-gray-400 text-sm font-medium disabled:cursor-not-allowed"
-                >
-                  {updateAvatarMutation.isPending
-                    ? "Uploading..."
-                    : "Upload New Photo"}
-                </button> */}
               </div>
 
               {/* Personal Information */}
               <div>
-                <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
                   Personal Information
                 </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        First Name
+                      </label>
+                      <input
+                        type="text"
+                        name="firstName"
+                        value={profileForm.firstName}
+                        onChange={handleProfileChange}
+                        className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm sm:text-base"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Last Name
+                      </label>
+                      <input
+                        type="text"
+                        name="lastName"
+                        value={profileForm.lastName}
+                        onChange={handleProfileChange}
+                        className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm sm:text-base"
+                      />
+                    </div>
+                  </div>
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      First Name
+                      Username
                     </label>
                     <input
                       type="text"
-                      name="firstName"
-                      value={profileForm.firstName}
+                      name="username"
+                      value={profileForm.username}
                       onChange={handleProfileChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm sm:text-base"
                     />
                   </div>
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Last Name
+                      Email
                     </label>
-                    <input
-                      type="text"
-                      name="lastName"
-                      value={profileForm.lastName}
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                      <input
+                        type="email"
+                        defaultValue={user.email}
+                        className="flex-1 px-3 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm sm:text-base"
+                      />
+                      {user.isEmailVerified ? (
+                        <span className="px-3 py-2 bg-green-100 text-green-800 text-xs sm:text-sm rounded-lg flex items-center justify-center gap-1 whitespace-nowrap">
+                          <FaCheck className="text-xs" />
+                          Verified
+                        </span>
+                      ) : (
+                        <button className="px-3 py-2 bg-yellow-500 hover:bg-yellow-600 text-white text-xs sm:text-sm rounded-lg whitespace-nowrap">
+                          Verify
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Bio
+                    </label>
+                    <textarea
+                      rows={3}
+                      name="bio"
+                      value={profileForm.bio}
                       onChange={handleProfileChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      placeholder="Tell us about yourself, your interests, and learning goals..."
+                      className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none text-sm sm:text-base"
                     />
                   </div>
-                </div>
-                <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Username
-                  </label>
-                  <input
-                    type="text"
-                    name="username"
-                    value={profileForm.username}
-                    onChange={handleProfileChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  />
-                </div>
-                <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Email
-                  </label>
-                  <div className="flex gap-3">
-                    <input
-                      type="email"
-                      defaultValue={user.email}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    />
-                    {user.isEmailVerified ? (
-                      <span className="px-3 py-2 bg-green-100 text-green-800 text-sm rounded-lg flex items-center gap-1">
-                        <FaCheck className="text-xs" />
-                        Verified
-                      </span>
-                    ) : (
-                      <button className="px-3 py-2 bg-yellow-500 hover:bg-yellow-600 text-white text-sm rounded-lg">
-                        Verify
-                      </button>
-                    )}
-                  </div>
-                </div>
-                <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Bio
-                  </label>
-                  <textarea
-                    rows={3}
-                    name="bio"
-                    value={profileForm.bio}
-                    onChange={handleProfileChange}
-                    placeholder="Tell us about yourself, your interests, and learning goals..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
-                  />
                 </div>
               </div>
             </div>
 
             {/* Modal Footer */}
             <form onSubmit={handleUpdateProfile}>
-              <div className="bg-gray-50 px-6 py-4 rounded-b-2xl flex justify-end gap-3">
+              <div className="bg-gray-50 px-4 sm:px-6 py-3 sm:py-4 rounded-b-xl sm:rounded-b-2xl flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
                 <button
                   type="button"
                   onClick={() => {
@@ -1880,14 +1885,14 @@ const Profile: React.FC = () => {
                       bio: user?.bio || "",
                     });
                   }}
-                  className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                  className="w-full sm:w-auto px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={updateProfileMutation.isPending}
-                  className="px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 text-white rounded-lg transition-all duration-300 flex items-center gap-2 disabled:cursor-not-allowed cursor-pointer"
+                  className="w-full sm:w-auto px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 text-white rounded-lg transition-all duration-300 flex items-center justify-center gap-2 disabled:cursor-not-allowed cursor-pointer"
                 >
                   <FaCheck className="text-sm" />
                   {updateProfileMutation.isPending
