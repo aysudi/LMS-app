@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 interface TrafficSourcesProps {
   data: Array<{
@@ -9,6 +10,8 @@ interface TrafficSourcesProps {
 }
 
 const TrafficSources: React.FC<TrafficSourcesProps> = ({ data }) => {
+  const { t } = useTranslation();
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -16,7 +19,9 @@ const TrafficSources: React.FC<TrafficSourcesProps> = ({ data }) => {
       transition={{ delay: 0.4 }}
       className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
     >
-      <h2 className="text-xl font-bold text-gray-900 mb-6">Traffic Sources</h2>
+      <h2 className="text-xl font-bold text-gray-900 mb-6">
+        {t("instructor.trafficSources")}
+      </h2>
 
       {/* Simple Bar Chart */}
       <div className="space-y-4 mb-6">

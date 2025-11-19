@@ -2,24 +2,16 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import {
-  FaArrowLeft,
-  FaSave,
-  FaVideo,
-  FaFileUpload,
-  FaPlus,
-  FaTrash,
-  FaQuestionCircle,
-  FaEye,
-  FaEyeSlash,
-  FaSpinner,
-} from "react-icons/fa";
+import { FaArrowLeft, FaSave, FaVideo, FaSpinner } from "react-icons/fa";
 import type { Section } from "../../types/course.type";
 import RichTextEditor from "../../components/UI/RichTextEditor";
 import { useCourse } from "../../hooks/useCourseHooks";
 import { useCreateLesson } from "../../hooks/useLessonMutations";
 import { useToast } from "../../components/UI/ToastProvider";
 import { generalToasts } from "../../utils/toastUtils";
+import Resources from "../../components/Instructor/Lesson/CreateLesson/Resources";
+import QuizSection from "../../components/Instructor/Lesson/CreateLesson/QuizSection";
+import Settings from "../../components/Instructor/Lesson/CreateLesson/Settings";
 
 interface QuizQuestion {
   id: string;
@@ -46,7 +38,6 @@ const LessonEditor = () => {
 
   const { data: courseData, isLoading: courseLoading } = useCourse(courseId!);
 
-  // Mutation hook for creation only
   const createLessonMutation = useCreateLesson(courseId!, sectionId!);
 
   const [title, setTitle] = useState("");
@@ -120,71 +111,6 @@ const LessonEditor = () => {
     };
     videoElement.src = URL.createObjectURL(file);
     setVideoPreview(videoElement.src);
-  };
-
-  const addResource = () => {
-    const newResource: LessonResource = {
-      id: `resource-${Date.now()}`,
-      name: "",
-      type: "pdf",
-    };
-    setResources([...resources, newResource]);
-  };
-
-  const updateResource = (id: string, updates: Partial<LessonResource>) => {
-    setResources(
-      resources.map((r) => (r.id === id ? { ...r, ...updates } : r))
-    );
-  };
-
-  const removeResource = (id: string) => {
-    setResources(resources.filter((r) => r.id !== id));
-  };
-
-  const handleResourceFileChange = (id: string, file: File) => {
-    if (file.size > 50 * 1024 * 1024) {
-      // 50MB
-      showToast(
-        generalToasts.error(
-          t("instructor.editCourse.lessonCreate.toasts.fileTooLarge"),
-          t("instructor.editCourse.lessonCreate.validation.resourceTooLarge")
-        )
-      );
-      return;
-    }
-
-    updateResource(id, { file, name: file.name });
-  };
-
-  const addQuizQuestion = () => {
-    const newQuestion: QuizQuestion = {
-      id: `question-${Date.now()}`,
-      question: "",
-      options: ["", "", "", ""],
-      correctAnswer: 0,
-    };
-    setQuiz([...quiz, newQuestion]);
-  };
-
-  const updateQuizQuestion = (id: string, updates: Partial<QuizQuestion>) => {
-    setQuiz(quiz.map((q) => (q.id === id ? { ...q, ...updates } : q)));
-  };
-
-  const removeQuizQuestion = (id: string) => {
-    setQuiz(quiz.filter((q) => q.id !== id));
-  };
-
-  const updateQuizOption = (
-    questionId: string,
-    optionIndex: number,
-    value: string
-  ) => {
-    const question = quiz.find((q) => q.id === questionId);
-    if (question) {
-      const newOptions = [...question.options];
-      newOptions[optionIndex] = value;
-      updateQuizQuestion(questionId, { options: newOptions });
-    }
   };
 
   const handleSave = async () => {
@@ -411,276 +337,19 @@ const LessonEditor = () => {
             </motion.div>
 
             {/* Resources */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                  <FaFileUpload className="mr-2 text-indigo-600" />
-                  {t("instructor.editCourse.lessonCreate.lessonResources")}
-                </h2>
-                <button
-                  onClick={addResource}
-                  className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium cursor-pointer"
-                >
-                  <FaPlus className="mr-2" />
-                  {t("instructor.editCourse.lessonCreate.addResource")}
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                {resources.map((resource) => (
-                  <div
-                    key={resource.id}
-                    className="flex items-center space-x-4 p-4 border border-gray-200 rounded-xl"
-                  >
-                    <div className="flex-1">
-                      <input
-                        type="text"
-                        value={resource.name}
-                        onChange={(e) =>
-                          updateResource(resource.id, { name: e.target.value })
-                        }
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
-                        placeholder={t(
-                          "instructor.editCourse.lessonCreate.customNamePlaceholder"
-                        )}
-                      />
-                    </div>
-                    <select
-                      value={resource.type}
-                      onChange={(e) =>
-                        updateResource(resource.id, {
-                          type: e.target.value as any,
-                        })
-                      }
-                      className="px-3 py-2 border border-gray-200 rounded-lg text-sm"
-                    >
-                      <option value="pdf">
-                        {t(
-                          "instructor.editCourse.lessonCreate.resourceTypes.pdf"
-                        )}
-                      </option>
-                      <option value="zip">
-                        {t(
-                          "instructor.editCourse.lessonCreate.resourceTypes.zip"
-                        )}
-                      </option>
-                      <option value="doc">
-                        {t(
-                          "instructor.editCourse.lessonCreate.resourceTypes.doc"
-                        )}
-                      </option>
-                      <option value="other">
-                        {t(
-                          "instructor.editCourse.lessonCreate.resourceTypes.other"
-                        )}
-                      </option>
-                    </select>
-                    <input
-                      type="file"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleResourceFileChange(resource.id, file);
-                      }}
-                      className="text-sm"
-                    />
-                    <button
-                      onClick={() => removeResource(resource.id)}
-                      className="text-red-600 hover:text-red-700 p-2 cursor-pointer"
-                    >
-                      <FaTrash />
-                    </button>
-                  </div>
-                ))}
-
-                {resources.length === 0 && (
-                  <div className="text-center py-8 text-gray-500">
-                    <FaFileUpload className="mx-auto h-12 w-12 text-gray-300 mb-2" />
-                    <p>
-                      {t("instructor.editCourse.lessonCreate.noResourcesAdded")}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </motion.div>
+            <Resources resources={resources} setResources={setResources} />
 
             {/* Quiz Section */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                  <FaQuestionCircle className="mr-2 text-indigo-600" />
-                  {t("instructor.editCourse.lessonCreate.lessonQuiz")}
-                </h2>
-                <button
-                  onClick={addQuizQuestion}
-                  className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium cursor-pointer"
-                >
-                  <FaPlus className="mr-2" />
-                  {t("instructor.editCourse.lessonCreate.addQuestion")}
-                </button>
-              </div>
-
-              <div className="space-y-6">
-                {quiz.map((question, qIndex) => (
-                  <div
-                    key={question.id}
-                    className="border border-gray-200 rounded-xl p-6"
-                  >
-                    <div className="flex items-start justify-between mb-4">
-                      <h3 className="font-medium text-gray-900">
-                        {t("instructor.editCourse.lessonCreate.question", {
-                          index: qIndex + 1,
-                        })}
-                      </h3>
-                      <button
-                        onClick={() => removeQuizQuestion(question.id)}
-                        className="text-red-600 hover:text-red-700 p-1 cursor-pointer"
-                      >
-                        <FaTrash />
-                      </button>
-                    </div>
-
-                    <div className="space-y-4">
-                      <textarea
-                        value={question.question}
-                        onChange={(e) =>
-                          updateQuizQuestion(question.id, {
-                            question: e.target.value,
-                          })
-                        }
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
-                        placeholder={t(
-                          "instructor.editCourse.lessonCreate.enterQuestion"
-                        )}
-                        rows={2}
-                      />
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {question.options.map((option, oIndex) => (
-                          <div
-                            key={oIndex}
-                            className="flex items-center space-x-2"
-                          >
-                            <input
-                              type="radio"
-                              name={`correct-${question.id}`}
-                              checked={question.correctAnswer === oIndex}
-                              onChange={() =>
-                                updateQuizQuestion(question.id, {
-                                  correctAnswer: oIndex,
-                                })
-                              }
-                              className="text-green-600 focus:ring-green-500"
-                            />
-                            <input
-                              type="text"
-                              value={option}
-                              onChange={(e) =>
-                                updateQuizOption(
-                                  question.id,
-                                  oIndex,
-                                  e.target.value
-                                )
-                              }
-                              className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm"
-                              placeholder={t(
-                                "instructor.editCourse.lessonCreate.option",
-                                {
-                                  index: oIndex + 1,
-                                }
-                              )}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-
-                {quiz.length === 0 && (
-                  <div className="text-center py-8 text-gray-500">
-                    <FaQuestionCircle className="mx-auto h-12 w-12 text-gray-300 mb-2" />
-                    <p>
-                      {t("instructor.editCourse.lessonCreate.noQuizQuestions")}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </motion.div>
+            <QuizSection quiz={quiz} setQuiz={setQuiz} />
           </div>
 
           {/* Right Column - Settings */}
-          <div className="space-y-6">
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-24"
-            >
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">
-                {t("instructor.editCourse.lessonCreate.lessonSettings")}
-              </h2>
-
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t("instructor.editCourse.lessonCreate.durationMinutes")}
-                  </label>
-                  <input
-                    type="number"
-                    value={duration}
-                    onChange={(e) => setDuration(parseInt(e.target.value) || 0)}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    min="0"
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <label className="text-sm font-medium text-gray-700">
-                      {t("instructor.editCourse.lessonCreate.previewLesson")}
-                    </label>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {t("instructor.editCourse.lessonCreate.allowFreePreview")}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setIsPreview(!isPreview)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      isPreview ? "bg-indigo-600" : "bg-gray-200"
-                    }`}
-                  >
-                    <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        isPreview ? "translate-x-6" : "translate-x-1"
-                      }`}
-                    />
-                  </button>
-                </div>
-
-                <div className="pt-4 border-t border-gray-200">
-                  <div className="flex items-center text-sm text-gray-600">
-                    {isPreview ? (
-                      <FaEye className="mr-2 text-green-600" />
-                    ) : (
-                      <FaEyeSlash className="mr-2 text-gray-400" />
-                    )}
-                    {isPreview
-                      ? t("instructor.editCourse.lessonCreate.visibleToAll")
-                      : t("instructor.editCourse.lessonCreate.onlyForEnrolled")}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
+          <Settings
+            isPreview={isPreview}
+            setIsPreview={setIsPreview}
+            duration={duration}
+            setDuration={setDuration}
+          />
         </div>
       </div>
     </div>

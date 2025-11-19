@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { FaUsers, FaStar } from "react-icons/fa";
 
 interface CoursePerformanceProps {
@@ -15,6 +16,8 @@ const CoursePerformance: React.FC<CoursePerformanceProps> = ({
   courses,
   formatCurrency,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <motion.div
       initial={{ opacity: 0, x: -20 }}
@@ -23,7 +26,7 @@ const CoursePerformance: React.FC<CoursePerformanceProps> = ({
       className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
     >
       <h2 className="text-xl font-bold text-gray-900 mb-6">
-        Top Performing Courses
+        {t("instructor.topPerformingCourses")}
       </h2>
       <div className="space-y-4">
         {courses.map((course, index) => (
