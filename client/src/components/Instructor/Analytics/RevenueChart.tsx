@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 interface RevenueChartProps {
   data: Array<{
@@ -13,6 +14,8 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
   data,
   formatCurrency,
 }) => {
+  const { t } = useTranslation();
+
   const maxRevenue = Math.max(...data.map((d) => d.revenue));
   const maxStudents = Math.max(...data.map((d) => d.students));
 
@@ -25,7 +28,7 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
     >
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold text-gray-900">
-          Revenue & Enrollments
+          {t("instructor.revenueAndEnrollments")}
         </h2>
         <div className="flex items-center space-x-4 text-sm">
           <div className="flex items-center space-x-2">

@@ -483,6 +483,21 @@
   },
   "instructor": {
     "totalCourses": "Всего курсов",
+    "trackRevenueManagePayouts": "Отслеживайте ваш доход и управляйте выплатами здесь.",
+    "requestPayout": "Запросить выплату",
+    "trackPerformanceMetrics": "Отслеживайте ключевые показатели эффективности ваших курсов и вовлеченности студентов.",
+    "exportReport": "Экспорт отчетов",
+    "totalRevenue": "Общий доход",
+    "totalStudents": "Всего студентов",
+    "courseViews": "Просмотры курсов",
+    "averageRating": "Средний рейтинг",
+    "vsLastMonth": "по сравнению с прошлым месяцем",
+    "topPerformingCourses": "Лучшие курсы",
+    "trafficSources": "Источники трафика",
+    "revenueAndEnrollments": "Доход и записи",
+    "manageTrackStudentsProgress": "Управляйте и отслеживайте прогресс ваших студентов.",
+    "courseDashboard": "Панель курса",
+    "createNewCourse": "Создать новый курс",
     "createCourse": {
       "title": "Создать новый курс",
       "subtitle": "Создайте увлекательный опыт обучения для ваших студентов",
@@ -672,6 +687,47 @@
         "nextStepsDescription": "После создания курса вы сможете добавить разделы и уроки для построения учебной программы. Вы всегда можете отредактировать детали курса позже из панели инструктора.",
         "previewAvailable": "Предварительный просмотр доступен после создания"
       }
+    },
+    "earnings": {
+      "platformFee": "Комиссия платформы (30%)",
+      "totalEarnings": "Общий доход",
+      "grossRevenue": "Валовой доход",
+      "beforePlatformFees": "До вычета комиссии платформы",
+      "pendingEarnings": "Ожидающий доход",
+      "processingPeriod": "Период обработки",
+      "paidEarnings": "Выплаченный доход",
+      "completedPayouts": "Завершенные выплаты",
+      "monthlyEarningsTrend": "Тренд месячных доходов",
+      "earnings": "Доходы",
+      "earningsByCourse": "Доходы по курсам",
+      "recentPayouts": "Недавние выплаты",
+      "noEarningsData": "Данные о доходах недоступны",
+      "noPayoutsYet": "Выплат пока нет",
+      "payoutsWillAppear": "Выплаты появятся здесь после обработки",
+      "payoutInformation": "Информация о выплатах",
+      "payoutSchedule": "График выплат",
+      "payoutsProcessedMonthly": "Выплаты обрабатываются ежемесячно",
+      "minimumPayout": "Минимальная сумма выплаты: $50",
+      "processingTime": "Время обработки: 3-5 рабочих дней",
+      "revenueShare": "Распределение дохода",
+      "instructorShare": "Доля преподавателя: 70%",
+      "platformFeePercent": "Комиссия платформы: 30%",
+      "noHiddenCharges": "Без скрытых платежей",
+      "vsLastPeriod": "по сравнению с прошлым периодом",
+      "gross": "Валовой"
+    },
+    "analytics": {
+      "organicSearch": "Органический поиск",
+      "socialMedia": "Социальные сети",
+      "direct": "Прямой трафик",
+      "referrals": "Рефералы",
+      "completionRate": "Процент завершения",
+      "averageAcrossAllCourses": "Среднее по всем курсам",
+      "avgWatchTime": "Среднее время просмотра",
+      "perStudentSession": "За сессию студента",
+      "vsLastMonth": "по сравнению с прошлым месяцем",
+      "certificatesIssued": "Выданных сертификатов",
+      "thisMonth": "В этом месяце"
     },
     "editCourse": {
       "courseSubmitted": "Курс отправлен",
@@ -976,47 +1032,6 @@
         "previous": "Предыдущий",
         "next": "Следующий",
         "never": "Никогда"
-      },
-      "earnings": {
-        "platformFee": "Комиссия платформы (30%)",
-        "totalEarnings": "Общий доход",
-        "grossRevenue": "Валовой доход",
-        "beforePlatformFees": "До вычета комиссии платформы",
-        "pendingEarnings": "Ожидающий доход",
-        "processingPeriod": "Период обработки",
-        "paidEarnings": "Выплаченный доход",
-        "completedPayouts": "Завершенные выплаты",
-        "monthlyEarningsTrend": "Тренд месячных доходов",
-        "earnings": "Доходы",
-        "earningsByCourse": "Доходы по курсам",
-        "recentPayouts": "Недавние выплаты",
-        "noEarningsData": "Данные о доходах недоступны",
-        "noPayoutsYet": "Выплат пока нет",
-        "payoutsWillAppear": "Выплаты появятся здесь после обработки",
-        "payoutInformation": "Информация о выплатах",
-        "payoutSchedule": "График выплат",
-        "payoutsProcessedMonthly": "Выплаты обрабатываются ежемесячно",
-        "minimumPayout": "Минимальная сумма выплаты: $50",
-        "processingTime": "Время обработки: 3-5 рабочих дней",
-        "revenueShare": "Распределение дохода",
-        "instructorShare": "Доля преподавателя: 70%",
-        "platformFeePercent": "Комиссия платформы: 30%",
-        "noHiddenCharges": "Без скрытых платежей",
-        "vsLastPeriod": "по сравнению с прошлым периодом",
-        "gross": "Валовой"
-      },
-      "analytics": {
-        "organicSearch": "Органический поиск",
-        "socialMedia": "Социальные сети",
-        "direct": "Прямой трафик",
-        "referrals": "Рефералы",
-        "completionRate": "Процент завершения",
-        "averageAcrossAllCourses": "Среднее по всем курсам",
-        "avgWatchTime": "Среднее время просмотра",
-        "perStudentSession": "За сессию студента",
-        "vsLastMonth": "по сравнению с прошлым месяцем",
-        "certificatesIssued": "Выданных сертификатов",
-        "thisMonth": "В этом месяце"
       }
     },
     "dashboard": {
@@ -1055,6 +1070,28 @@
       "studentsCount_plural": "{{count}} студентов",
       "recentMessages": "Недавние сообщения",
       "noMessages": "Пока нет сообщений"
+    },
+    "students": {
+      "exportData": "Экспорт данных",
+      "totalStudents": "Всего студентов",
+      "averageProgress": "Средний прогресс",
+      "activeToday": "Активны сегодня",
+      "searchStudents": "Поиск студентов...",
+      "allCourses": "Все курсы",
+      "sortByName": "Сортировать по имени",
+      "sortByProgress": "Сортировать по прогрессу",
+      "sortByEnrollmentDate": "Сортировать по дате записи",
+      "sortByLastActive": "Сортировать по последней активности",
+      "noStudentsFound": "Студенты не найдены",
+      "tryAdjustingSearch": "Попробуйте изменить поиск",
+      "studentsWillAppear": "Студенты появятся здесь после записи на ваши курсы",
+      "student": "Студент",
+      "course": "Курс",
+      "progress": "Прогресс",
+      "enrolled": "Записан",
+      "lastActive": "Последняя активность",
+      "errorLoadingStudents": "Ошибка загрузки студентов",
+      "pleaseReTryLater": "Пожалуйста, попробуйте позже"
     }
   },
   "home": {
@@ -1443,28 +1480,6 @@
       "monthlyEarningsTrend": "Тренд месячных доходов",
       "earnings": "Доходы"
     },
-    "students": {
-      "exportData": "Экспорт данных",
-      "totalStudents": "Всего студентов",
-      "averageProgress": "Средний прогресс",
-      "activeToday": "Активны сегодня",
-      "searchStudents": "Поиск студентов...",
-      "allCourses": "Все курсы",
-      "sortByName": "Сортировать по имени",
-      "sortByProgress": "Сортировать по прогрессу",
-      "sortByEnrollmentDate": "Сортировать по дате записи",
-      "sortByLastActive": "Сортировать по последней активности",
-      "noStudentsFound": "Студенты не найдены",
-      "tryAdjustingSearch": "Попробуйте изменить поиск",
-      "studentsWillAppear": "Студенты появятся здесь после записи на ваши курсы",
-      "student": "Студент",
-      "course": "Курс",
-      "progress": "Прогресс",
-      "enrolled": "Записан",
-      "lastActive": "Последняя активность",
-      "errorLoadingStudents": "Ошибка загрузки студентов",
-      "pleaseReTryLater": "Пожалуйста, попробуйте позже"
-    },
     "courses": {
       "deleteCourse": "Удалить курс",
       "deleteConfirmation": "Вы уверены, что хотите удалить <strong>\"{{courseTitle}}\"</strong>?<br><br>Это действие нельзя отменить и оно удалит все связанные уроки, разделы и прогресс студентов.",
@@ -1574,5 +1589,11 @@
         "maxItemsAllowed": "Максимум 10 элементов"
       }
     }
+  },
+  "filters": {
+    "last30Days": "Последние 30 дней",
+    "last7Days": "Последние 7 дней",
+    "last90Days": "Последние 90 дней",
+    "lastYear": "Последний год"
   }
 }

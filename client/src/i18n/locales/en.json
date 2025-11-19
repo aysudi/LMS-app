@@ -530,6 +530,8 @@
     "never": "Never",
     "errorLoadingStudents": "Error loading students",
     "pleaseReTryLater": "Please try again later",
+    "trafficSources": "Traffic Sources",
+    "revenueAndEnrollments": "Revenue and Enrollments",
     "dashboard": {
       "title": "Dashboard",
       "welcomeMessage": "Welcome back! Here's what's happening with your courses.",
