@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaUsers, FaStar, FaDollarSign, FaClock, FaBook } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 
 interface CourseCardProps {
   course: any;
@@ -22,6 +23,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
   delay = 0,
 }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <motion.div
@@ -85,11 +87,13 @@ const CourseCard: React.FC<CourseCardProps> = ({
         <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
           <div className="flex items-center space-x-1 text-gray-600">
             <FaUsers className="text-xs" />
-            <span>{course.studentsEnrolled?.length || 0} students</span>
+            <span>
+              {course.studentsEnrolled?.length || 0} {t("course.students")}
+            </span>
           </div>
           <div className="flex items-center space-x-1 text-gray-600">
             <FaStar className="text-xs text-yellow-400" />
-            <span>{course.rating?.toFixed(1) || "No ratings"}</span>
+            <span>{course.rating?.toFixed(1) || t("common.noRatings")}</span>
           </div>
           <div className="flex items-center space-x-1 text-gray-600">
             <FaDollarSign className="text-xs" />
@@ -97,7 +101,10 @@ const CourseCard: React.FC<CourseCardProps> = ({
           </div>
           <div className="flex items-center space-x-1 text-gray-600">
             <FaClock className="text-xs" />
-            <span>{course.totalDuration || 0}h</span>
+            <span>
+              {course.totalDuration || 0}
+              {t("common.h")}
+            </span>
           </div>
         </div>
 
@@ -107,7 +114,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
             onClick={onEdit}
             className="flex-1 px-3 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors duration-200 cursor-pointer"
           >
-            Edit
+            {t("common.edit")}
           </button>
           <button
             onClick={() =>
@@ -115,7 +122,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
             }
             className="flex-1 px-3 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
           >
-            View
+            {t("common.view")}
           </button>
         </div>
       </div>

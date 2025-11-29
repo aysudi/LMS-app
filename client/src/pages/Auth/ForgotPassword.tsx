@@ -138,7 +138,7 @@ const ForgotPassword = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-4 sm:p-6 lg:p-8">
       {/* Background Decorations */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-cyan-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
@@ -152,13 +152,13 @@ const ForgotPassword = () => {
         transition={{ duration: 0.6 }}
         className="relative z-10 w-full max-w-5xl mx-auto"
       >
-        <div className="grid lg:grid-cols-2 gap-8 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 items-center">
           {/* Left Side - Information */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="hidden lg:block"
+            className="hidden lg:block order-2 lg:order-1"
           >
             <div className="text-center space-y-6">
               <div className="flex items-center justify-center space-x-3 mb-8">
@@ -233,25 +233,51 @@ const ForgotPassword = () => {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="w-full"
+            className="w-full order-1 lg:order-2"
           >
-            <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-8">
+            {/* Mobile Header - Only visible on mobile/tablet */}
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="lg:hidden text-center mb-6 sm:mb-8"
+            >
+              <div className="flex items-center justify-center space-x-3 mb-4 sm:mb-6">
+                <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-2 sm:p-3 rounded-lg sm:rounded-xl">
+                  <FaGraduationCap className="text-xl sm:text-2xl text-white" />
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  Skillify
+                </h1>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">
+                {t("auth.forgotYourPassword")}
+              </h2>
+              <p className="text-sm sm:text-base text-gray-600">
+                {t("auth.noWorries")}
+              </p>
+            </motion.div>
+
+            <div className="bg-white/80 backdrop-blur-xl rounded-xl sm:rounded-2xl shadow-xl sm:shadow-2xl border border-white/20 p-4 sm:p-6 lg:p-8">
               {forgotPasswordStatus !== "success" ? (
                 // Email Form
                 <>
-                  <div className="text-center mb-8">
-                    <div className="w-16 h-16 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <FaLockOpen className="text-2xl text-white" />
+                  <div className="text-center mb-6 sm:mb-8">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                      <FaLockOpen className="text-lg sm:text-2xl text-white" />
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-800 mb-2">
+                    <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">
                       {t("auth.resetPassword")}
                     </h3>
-                    <p className="text-gray-600">
+                    <p className="text-sm sm:text-base text-gray-600">
                       {t("auth.enterRegisteredEmail")}
                     </p>
                   </div>
 
-                  <form onSubmit={formik.handleSubmit} className="space-y-6">
+                  <form
+                    onSubmit={formik.handleSubmit}
+                    className="space-y-4 sm:space-y-6"
+                  >
                     {/* Email Input */}
                     <div className="relative">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -264,7 +290,7 @@ const ForgotPassword = () => {
                           value={formik.values.email}
                           onChange={formik.handleChange}
                           onBlur={formik.handleBlur}
-                          className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm ${
+                          className={`w-full pl-9 sm:pl-10 pr-4 py-2.5 sm:py-3 border rounded-lg sm:rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm text-sm sm:text-base ${
                             formik.touched.email && formik.errors.email
                               ? "border-red-300 focus:ring-red-500"
                               : "border-gray-300"
@@ -274,7 +300,7 @@ const ForgotPassword = () => {
                           )}
                         />
                         <FaEnvelope
-                          className={`absolute left-3 top-1/2 transform -translate-y-1/2 text-sm ${
+                          className={`absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 text-xs sm:text-sm ${
                             formik.touched.email && formik.errors.email
                               ? "text-red-400"
                               : "text-gray-400"
@@ -286,7 +312,7 @@ const ForgotPassword = () => {
                         <motion.div
                           initial={{ opacity: 0, y: -10 }}
                           animate={{ opacity: 1, y: 0 }}
-                          className="mt-1 text-sm text-red-600 flex items-center space-x-1"
+                          className="mt-1 text-xs sm:text-sm text-red-600 flex items-center space-x-1"
                         >
                           <FaExclamationTriangle className="text-xs" />
                           <span>{formik.errors.email}</span>
@@ -314,7 +340,7 @@ const ForgotPassword = () => {
                         forgotPasswordStatus === "loading" ||
                         !formik.values.email
                       }
-                      className={`w-full bg-gradient-to-r ${getSubmitButtonColor()} disabled:opacity-70 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform flex items-center justify-center space-x-2 cursor-pointer`}
+                      className={`w-full bg-gradient-to-r ${getSubmitButtonColor()} disabled:opacity-70 disabled:cursor-not-allowed text-white font-medium sm:font-semibold py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform flex items-center justify-center space-x-2 cursor-pointer text-sm sm:text-base`}
                     >
                       {getSubmitButtonContent()}
                     </motion.button>
@@ -326,14 +352,14 @@ const ForgotPassword = () => {
                           initial={{ opacity: 0, scale: 0.9 }}
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.9 }}
-                          className="bg-red-50 border border-red-200 rounded-xl p-4"
+                          className="bg-red-50 border border-red-200 rounded-lg sm:rounded-xl p-3 sm:p-4"
                         >
-                          <div className="flex items-center space-x-3">
+                          <div className="flex items-center space-x-2 sm:space-x-3">
                             <div className="flex-shrink-0">
-                              <FaExclamationTriangle className="text-red-500 text-lg" />
+                              <FaExclamationTriangle className="text-red-500 text-sm sm:text-lg" />
                             </div>
                             <div>
-                              <h4 className="text-sm font-medium text-red-800">
+                              <h4 className="text-xs sm:text-sm font-medium text-red-800">
                                 {t("auth.failedToSendReset")}
                               </h4>
                               <p className="text-xs text-red-600 mt-1">
@@ -349,9 +375,9 @@ const ForgotPassword = () => {
                     <div className="text-center">
                       <Link
                         to="/auth/login"
-                        className="inline-flex items-center space-x-2 text-gray-600 hover:text-indigo-600 transition-colors duration-200"
+                        className="inline-flex items-center space-x-1 sm:space-x-2 text-gray-600 hover:text-indigo-600 transition-colors duration-200 text-sm sm:text-base"
                       >
-                        <FaArrowLeft className="text-sm" />
+                        <FaArrowLeft className="text-xs sm:text-sm" />
                         <span>{t("auth.backToLogin")}</span>
                       </Link>
                     </div>
@@ -363,29 +389,29 @@ const ForgotPassword = () => {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.5 }}
-                  className="text-center space-y-6"
+                  className="text-center space-y-4 sm:space-y-6"
                 >
-                  <div className="w-20 h-20 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto">
-                    <FaCheckCircle className="text-3xl text-white" />
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto">
+                    <FaCheckCircle className="text-2xl sm:text-3xl text-white" />
                   </div>
 
                   <div>
-                    <h3 className="text-2xl font-bold text-gray-800 mb-2">
+                    <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">
                       {t("auth.checkYourEmailExclamation")}
                     </h3>
-                    <p className="text-gray-600 mb-4">
+                    <p className="text-sm sm:text-base text-gray-600 mb-4">
                       {t("auth.resetLinkSent")}
                     </p>
-                    <p className="font-semibold text-indigo-600 text-lg">
+                    <p className="font-semibold text-indigo-600 text-base sm:text-lg">
                       {submittedEmail}
                     </p>
                   </div>
 
-                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                    <div className="flex items-start space-x-3">
-                      <FaClock className="text-blue-500 mt-1" />
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg sm:rounded-xl p-3 sm:p-4">
+                    <div className="flex items-start space-x-2 sm:space-x-3">
+                      <FaClock className="text-blue-500 mt-0.5 sm:mt-1 text-sm sm:text-base" />
                       <div className="text-left">
-                        <h4 className="font-semibold text-blue-800 text-sm">
+                        <h4 className="font-semibold text-blue-800 text-xs sm:text-sm">
                           {t("auth.importantNotes")}
                         </h4>
                         <ul className="text-xs text-blue-600 mt-2 space-y-1">
@@ -402,14 +428,14 @@ const ForgotPassword = () => {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={handleSendAnother}
-                      className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer"
+                      className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium sm:font-semibold py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer text-sm sm:text-base"
                     >
                       {t("auth.sendAnotherEmail")}
                     </motion.button>
 
                     <Link
                       to="/auth/login"
-                      className="block w-full text-center py-3 px-6 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-all duration-200"
+                      className="block w-full text-center py-2.5 sm:py-3 px-4 sm:px-6 border border-gray-300 rounded-lg sm:rounded-xl text-gray-700 hover:bg-gray-50 transition-all duration-200 text-sm sm:text-base"
                     >
                       {t("auth.backToLogin")}
                     </Link>
@@ -419,13 +445,13 @@ const ForgotPassword = () => {
 
               {/* Help Section */}
               {forgotPasswordStatus !== "success" && (
-                <div className="text-center mt-8 pt-6 border-t border-gray-200">
-                  <p className="text-sm text-gray-500 mb-2">
+                <div className="text-center mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200">
+                  <p className="text-xs sm:text-sm text-gray-500 mb-2">
                     {t("auth.stillHavingTrouble")}
                   </p>
                   <Link
                     to="/support"
-                    className="text-indigo-600 hover:text-indigo-700 font-medium transition-colors duration-200"
+                    className="text-indigo-600 hover:text-indigo-700 font-medium transition-colors duration-200 text-xs sm:text-sm"
                   >
                     {t("auth.contactSupport")}
                   </Link>
@@ -434,12 +460,12 @@ const ForgotPassword = () => {
 
               {/* Register Link */}
               {forgotPasswordStatus !== "success" && (
-                <div className="text-center mt-6">
-                  <p className="text-gray-600">
+                <div className="text-center mt-4 sm:mt-6">
+                  <p className="text-sm sm:text-base text-gray-600">
                     {t("auth.dontHaveAccountCreate")}{" "}
                     <Link
                       to="/auth/register"
-                      className="text-indigo-600 hover:text-indigo-700 font-semibold transition-colors duration-200"
+                      className="text-indigo-600 hover:text-indigo-700 font-medium sm:font-semibold transition-colors duration-200"
                     >
                       {t("auth.createOneHere")}
                     </Link>

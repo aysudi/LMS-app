@@ -65,7 +65,9 @@ const TopCourses: React.FC<TopCoursesProps> = ({
       className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
     >
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-gray-900">Top Rated Courses</h2>
+        <h2 className="text-xl font-bold text-gray-900">
+          {t("instructor.dashboard.topRatedCourses")}
+        </h2>
         <button
           onClick={() => navigate("/instructor/courses")}
           className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
@@ -161,7 +163,7 @@ const TopCourses: React.FC<TopCoursesProps> = ({
                 <p className="font-semibold text-gray-900 text-sm">
                   {formatCurrency(course.originalPrice)}
                 </p>
-                <p className="text-xs text-gray-500">Price</p>
+                <p className="text-xs text-gray-500">{t("common.price")}</p>
               </div>
             </motion.div>
           ))}

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import CourseCard from "./CourseCard";
 import { FaList, FaTable, FaTh } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 
 interface CourseListProps {
   courses: any[];
@@ -27,6 +28,7 @@ const CourseList: React.FC<CourseListProps> = ({
   isAllSelected,
   formatCurrency,
 }) => {
+  const { t } = useTranslation();
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
 
   const handleEdit = (courseId: string) => {
@@ -52,7 +54,7 @@ const CourseList: React.FC<CourseListProps> = ({
           <FaTh className="text-6xl mx-auto" />
         </div>
         <h3 className="text-xl font-semibold text-gray-600 mb-2">
-          No courses found
+          {t("courses.noCoursesFound")}
         </h3>
         <p className="text-gray-500">
           Start by creating your first course to get started.
@@ -74,8 +76,8 @@ const CourseList: React.FC<CourseListProps> = ({
           />
           <span className="text-sm text-gray-600">
             {selectedCourses.length > 0
-              ? `${selectedCourses.length} selected`
-              : "Select all"}
+              ? `${selectedCourses.length} ${t("cart.selected")}`
+              : t("common.select")}
           </span>
         </div>
 

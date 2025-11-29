@@ -6,7 +6,6 @@ import {
   FaEnvelope,
   FaDollarSign,
   FaChartBar,
-  FaCog,
 } from "react-icons/fa";
 import { useLocation, useNavigate } from "react-router-dom";
 // @ts-ignore
@@ -69,12 +68,6 @@ const Sidebar = ({ sidebarOpen, user }: Props) => {
       icon: FaChartBar,
       path: "/instructor/analytics",
     },
-    {
-      id: "settings",
-      label: t("common.settings"),
-      icon: FaCog,
-      path: "/instructor/settings",
-    },
   ];
 
   const isActiveRoute = (path: string) => {
@@ -110,7 +103,7 @@ const Sidebar = ({ sidebarOpen, user }: Props) => {
               >
                 <h1 className="text-xl font-bold text-gray-800">Skillify</h1>
                 <p className="text-xs text-gray-500">
-                  {t("common.instructor")} Portal
+                  {t("common.instructor")} {t("common.portal")}
                 </p>
               </motion.div>
             )}
@@ -130,7 +123,7 @@ const Sidebar = ({ sidebarOpen, user }: Props) => {
                   onClick={() => navigate(item.path)}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 relative group ${
+                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 relative group cursor-pointer ${
                     isActive
                       ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg"
                       : "text-gray-600 hover:bg-gray-100 hover:text-indigo-600"

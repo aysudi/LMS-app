@@ -1,7 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useCallback } from "react";
 import {
-  FaCog,
   FaBars,
   FaTimes,
   FaBell,
@@ -72,7 +71,7 @@ const Header = ({
       <div className="flex items-center space-x-4">
         <button
           onClick={toggleSidebar}
-          className="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+          className="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 cursor-pointer"
         >
           {sidebarOpen ? (
             <FaTimes className="text-gray-600" />
@@ -84,7 +83,7 @@ const Header = ({
         <div className="flex items-center space-x-2">
           <button
             onClick={() => navigate("/")}
-            className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+            className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 cursor-pointer"
           >
             <FaHome className="text-gray-600" />
             <span className="text-sm text-gray-600">{t("common.home")}</span>
@@ -127,7 +126,7 @@ const Header = ({
         <div className="relative">
           <button
             onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-            className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+            className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 cursor-pointer"
           >
             <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
               <span className="text-white font-semibold text-sm">
@@ -170,7 +169,7 @@ const Header = ({
                     navigate("/instructor/profile");
                     setProfileDropdownOpen(false);
                   }}
-                  className="w-full flex items-center space-x-3 px-4 py-2 text-left hover:bg-gray-50 transition-colors duration-200"
+                  className="w-full flex items-center space-x-3 px-4 py-2 text-left hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
                 >
                   <FaUser className="text-gray-400" />
                   <span className="text-sm text-gray-700">
@@ -178,24 +177,11 @@ const Header = ({
                   </span>
                 </button>
 
-                <button
-                  onClick={() => {
-                    navigate("/instructor/settings");
-                    setProfileDropdownOpen(false);
-                  }}
-                  className="w-full flex items-center space-x-3 px-4 py-2 text-left hover:bg-gray-50 transition-colors duration-200"
-                >
-                  <FaCog className="text-gray-400" />
-                  <span className="text-sm text-gray-700">
-                    {t("common.settings")}
-                  </span>
-                </button>
-
                 <div className="border-t border-gray-200 mt-2"></div>
 
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center space-x-3 px-4 py-2 text-left hover:bg-red-50 transition-colors duration-200 text-red-600"
+                  className="w-full flex items-center space-x-3 px-4 py-2 text-left hover:bg-red-50 transition-colors duration-200 text-red-600 cursor-pointer"
                 >
                   <FaSignOutAlt className="text-red-500" />
                   <span className="text-sm">{t("auth.signOut")}</span>

@@ -191,21 +191,24 @@ const Login = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-4">
-      {/* Back to Home Button */}
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-4 sm:p-6 lg:p-8">
+      {/* Back to Home Button - Responsive */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="absolute top-6 left-6 z-20"
+        className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20"
       >
         <Link
           to="/"
-          className="group flex items-center space-x-2 bg-white/80 backdrop-blur-sm hover:bg-white border border-gray-200 hover:border-gray-300 text-gray-700 hover:text-indigo-600 px-4 py-2 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
+          className="group flex items-center space-x-1 sm:space-x-2 bg-white/80 backdrop-blur-sm hover:bg-white border border-gray-200 hover:border-gray-300 text-gray-700 hover:text-indigo-600 px-3 py-2 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
         >
-          <FaArrowLeft className="text-sm group-hover:transform group-hover:-translate-x-1 transition-transform duration-200" />
-          <FaHome className="text-sm" />
-          <span className="text-sm font-medium">{t("auth.backToHome")}</span>
+          <FaArrowLeft className="text-xs sm:text-sm group-hover:transform group-hover:-translate-x-1 transition-transform duration-200" />
+          <FaHome className="text-xs sm:text-sm" />
+          <span className="text-xs sm:text-sm font-medium hidden sm:inline">
+            {t("auth.backToHome")}
+          </span>
+          <span className="text-xs font-medium sm:hidden">Home</span>
         </Link>
       </motion.div>
       {/* Background Decorations */}
@@ -221,13 +224,13 @@ const Login = () => {
         transition={{ duration: 0.6 }}
         className="relative z-10 w-full max-w-5xl mx-auto"
       >
-        <div className="grid lg:grid-cols-2 gap-8 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 items-center">
           {/* Left Side - Welcome Back */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="hidden lg:block"
+            className="hidden lg:block order-2 lg:order-1"
           >
             <div className="text-center space-y-6">
               <div className="flex items-center justify-center space-x-3 mb-8">
@@ -297,10 +300,34 @@ const Login = () => {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="w-full"
+            className="w-full order-1 lg:order-2"
           >
-            <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-8">
-              <div className="text-center mb-8">
+            {/* Mobile Header - Only visible on mobile/tablet */}
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="lg:hidden text-center mb-6 sm:mb-8"
+            >
+              <div className="flex items-center justify-center space-x-3 mb-4 sm:mb-6">
+                <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-2 sm:p-3 rounded-lg sm:rounded-xl">
+                  <FaGraduationCap className="text-xl sm:text-2xl text-white" />
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  Skillify
+                </h1>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">
+                {t("auth.welcomeBack")}!
+              </h2>
+              <p className="text-sm sm:text-base text-gray-600">
+                {t("auth.signIn")} {t("auth.continueToLearning")}
+              </p>
+            </motion.div>
+
+            <div className="bg-white/80 backdrop-blur-xl rounded-xl sm:rounded-2xl shadow-xl sm:shadow-2xl border border-white/20 p-4 sm:p-6 lg:p-8">
+              {/* Desktop Header - Only visible on desktop */}
+              <div className="hidden lg:block text-center mb-8">
                 <h3 className="text-2xl font-bold text-gray-800 mb-2">
                   {t("auth.welcomeBack")}!
                 </h3>
@@ -309,7 +336,10 @@ const Login = () => {
                 </p>
               </div>
 
-              <form onSubmit={formik.handleSubmit} className="space-y-6">
+              <form
+                onSubmit={formik.handleSubmit}
+                className="space-y-4 sm:space-y-6"
+              >
                 {/* Email */}
                 <div className="relative">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -322,7 +352,7 @@ const Login = () => {
                       value={formik.values.email}
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
-                      className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm ${
+                      className={`w-full pl-9 sm:pl-10 pr-4 py-2.5 sm:py-3 border rounded-lg sm:rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm text-sm sm:text-base ${
                         formik.touched.email && formik.errors.email
                           ? "border-red-300 focus:ring-red-500"
                           : "border-gray-300"
@@ -330,7 +360,7 @@ const Login = () => {
                       placeholder={t("auth.enterEmail")}
                     />
                     <FaEnvelope
-                      className={`absolute left-3 top-1/2 transform -translate-y-1/2 text-sm ${
+                      className={`absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 text-xs sm:text-sm ${
                         formik.touched.email && formik.errors.email
                           ? "text-red-400"
                           : "text-gray-400"
@@ -341,7 +371,7 @@ const Login = () => {
                     <motion.div
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="mt-1 text-sm text-red-600 flex items-center space-x-1"
+                      className="mt-1 text-xs sm:text-sm text-red-600 flex items-center space-x-1"
                     >
                       <FaExclamationTriangle className="text-xs" />
                       <span>{formik.errors.email}</span>
@@ -361,7 +391,7 @@ const Login = () => {
                       value={formik.values.password}
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
-                      className={`w-full pl-10 pr-12 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm ${
+                      className={`w-full pl-9 sm:pl-10 pr-10 sm:pr-12 py-2.5 sm:py-3 border rounded-lg sm:rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm text-sm sm:text-base ${
                         formik.touched.password && formik.errors.password
                           ? "border-red-300 focus:ring-red-500"
                           : "border-gray-300"
@@ -369,7 +399,7 @@ const Login = () => {
                       placeholder={t("auth.enterPassword")}
                     />
                     <FaLock
-                      className={`absolute left-3 top-1/2 transform -translate-y-1/2 text-sm ${
+                      className={`absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 text-xs sm:text-sm ${
                         formik.touched.password && formik.errors.password
                           ? "text-red-400"
                           : "text-gray-400"
@@ -378,16 +408,20 @@ const Login = () => {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
+                      className="absolute right-2.5 sm:right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200 p-1"
                     >
-                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                      {showPassword ? (
+                        <FaEyeSlash className="text-xs sm:text-sm" />
+                      ) : (
+                        <FaEye className="text-xs sm:text-sm" />
+                      )}
                     </button>
                   </div>
                   {formik.touched.password && formik.errors.password && (
                     <motion.div
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="mt-1 text-sm text-red-600 flex items-center space-x-1"
+                      className="mt-1 text-xs sm:text-sm text-red-600 flex items-center space-x-1"
                     >
                       <FaExclamationTriangle className="text-xs" />
                       <span>{formik.errors.password}</span>
@@ -396,7 +430,7 @@ const Login = () => {
                 </div>
 
                 {/* Remember Me & Forgot Password */}
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0">
                   <div className="flex items-center space-x-2">
                     <input
                       type="checkbox"
@@ -405,14 +439,17 @@ const Login = () => {
                       onChange={(e) => setRememberMe(e.target.checked)}
                       className="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 focus:ring-2"
                     />
-                    <label htmlFor="remember" className="text-sm text-gray-600">
+                    <label
+                      htmlFor="remember"
+                      className="text-xs sm:text-sm text-gray-600"
+                    >
                       {t("auth.rememberMe")}
                     </label>
                   </div>
 
                   <Link
                     to="/auth/forgot-password"
-                    className="text-sm text-indigo-600 hover:text-indigo-700 font-medium transition-colors duration-200"
+                    className="text-xs sm:text-sm text-indigo-600 hover:text-indigo-700 font-medium transition-colors duration-200"
                   >
                     {t("auth.forgotPassword")}
                   </Link>
@@ -424,7 +461,7 @@ const Login = () => {
                   whileTap={{ scale: loginStatus === "loading" ? 1 : 0.98 }}
                   type="submit"
                   disabled={formik.isSubmitting || loginStatus === "loading"}
-                  className={`w-full bg-gradient-to-r ${getSubmitButtonColor()} disabled:opacity-70 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform flex items-center justify-center space-x-2 cursor-pointer`}
+                  className={`w-full bg-gradient-to-r ${getSubmitButtonColor()} disabled:opacity-70 disabled:cursor-not-allowed text-white font-medium sm:font-semibold py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform flex items-center justify-center space-x-2 cursor-pointer text-sm sm:text-base`}
                 >
                   {getSubmitButtonContent()}
                 </motion.button>
@@ -436,14 +473,14 @@ const Login = () => {
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.9 }}
-                      className="bg-green-50 border border-green-200 rounded-xl p-4"
+                      className="bg-green-50 border border-green-200 rounded-lg sm:rounded-xl p-3 sm:p-4"
                     >
-                      <div className="flex items-center space-x-3">
+                      <div className="flex items-center space-x-2 sm:space-x-3">
                         <div className="flex-shrink-0">
-                          <FaCheckCircle className="text-green-500 text-lg" />
+                          <FaCheckCircle className="text-green-500 text-sm sm:text-lg" />
                         </div>
                         <div>
-                          <h4 className="text-sm font-medium text-green-800">
+                          <h4 className="text-xs sm:text-sm font-medium text-green-800">
                             {t("auth.loginSuccess")}! 🎉
                           </h4>
                           <p className="text-xs text-green-600 mt-1">
@@ -459,14 +496,14 @@ const Login = () => {
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.9 }}
-                      className="bg-red-50 border border-red-200 rounded-xl p-4"
+                      className="bg-red-50 border border-red-200 rounded-lg sm:rounded-xl p-3 sm:p-4"
                     >
-                      <div className="flex items-center space-x-3">
+                      <div className="flex items-center space-x-2 sm:space-x-3">
                         <div className="flex-shrink-0">
-                          <FaExclamationTriangle className="text-red-500 text-lg" />
+                          <FaExclamationTriangle className="text-red-500 text-sm sm:text-lg" />
                         </div>
                         <div>
-                          <h4 className="text-sm font-medium text-red-800">
+                          <h4 className="text-xs sm:text-sm font-medium text-red-800">
                             {t("auth.loginFailed")}
                           </h4>
                           <p className="text-xs text-red-600 mt-1">
@@ -479,19 +516,19 @@ const Login = () => {
                 </AnimatePresence>
 
                 {/* Divider */}
-                <div className="relative my-6">
+                <div className="relative my-4 sm:my-6">
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-gray-300"></div>
                   </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-4 bg-white text-gray-500">
+                  <div className="relative flex justify-center text-xs sm:text-sm">
+                    <span className="px-3 sm:px-4 bg-white text-gray-500">
                       {t("auth.orContinueWith")}
                     </span>
                   </div>
                 </div>
 
                 {/* Social Login Buttons */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
@@ -500,9 +537,9 @@ const Login = () => {
                       window.location.href =
                         "http://localhost:4040/auth/google";
                     }}
-                    className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer"
+                    className="flex items-center justify-center px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer text-sm sm:text-base"
                   >
-                    <FaGoogle className="text-red-500 mr-2" />
+                    <FaGoogle className="text-red-500 mr-2 text-sm sm:text-base" />
                     Google
                   </motion.button>
 
@@ -514,22 +551,22 @@ const Login = () => {
                       window.location.href =
                         "http://localhost:4040/auth/github";
                     }}
-                    className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer"
+                    className="flex items-center justify-center px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer text-sm sm:text-base"
                   >
-                    <FaGithub className="text-gray-800 mr-2" />
+                    <FaGithub className="text-gray-800 mr-2 text-sm sm:text-base" />
                     GitHub
                   </motion.button>
                 </div>
 
                 {/* Account Verification Notice */}
                 {loginStatus !== "success" && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mt-6">
-                    <div className="flex items-start space-x-3">
-                      <div className="text-blue-500 mt-1">
-                        <FaCheckCircle />
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg sm:rounded-xl p-3 sm:p-4 mt-4 sm:mt-6">
+                    <div className="flex items-start space-x-2 sm:space-x-3">
+                      <div className="text-blue-500 mt-0.5 sm:mt-1">
+                        <FaCheckCircle className="text-sm sm:text-base" />
                       </div>
                       <div>
-                        <h4 className="text-sm font-medium text-blue-800">
+                        <h4 className="text-xs sm:text-sm font-medium text-blue-800">
                           {t("auth.emailVerificationRequired")}
                         </h4>
                         <p className="text-xs text-blue-600 mt-1">
@@ -542,12 +579,12 @@ const Login = () => {
               </form>
 
               {/* Register Link */}
-              <div className="text-center mt-8">
-                <p className="text-gray-600">
+              <div className="text-center mt-6 sm:mt-8">
+                <p className="text-sm sm:text-base text-gray-600">
                   {t("auth.dontHaveAccount")}{" "}
                   <Link
                     to="/auth/register"
-                    className="text-indigo-600 hover:text-indigo-700 font-semibold transition-colors duration-200"
+                    className="text-indigo-600 hover:text-indigo-700 font-medium sm:font-semibold transition-colors duration-200"
                   >
                     {t("auth.createAccount")}
                   </Link>
@@ -555,8 +592,8 @@ const Login = () => {
               </div>
 
               {/* Help Section */}
-              <div className="text-center mt-6 pt-6 border-t border-gray-200">
-                <p className="text-sm text-gray-500">
+              <div className="text-center mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200">
+                <p className="text-xs sm:text-sm text-gray-500">
                   {t("auth.needHelpContact")}{" "}
                   <Link
                     to="/support"

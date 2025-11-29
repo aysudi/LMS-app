@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   FaCompress,
   FaExpand,
@@ -53,6 +53,21 @@ const Controls = ({
 }: Props) => {
   const [volume, setVolume] = useState(1);
   const [playbackRate, setPlaybackRate] = useState(1);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [_, setIsTablet] = useState(
+    window.innerWidth >= 768 && window.innerWidth < 1024
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 768);
+      setIsTablet(width >= 768 && width < 1024);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const changeVolume = (newVolume: number) => {
     const video = videoRef.current;
@@ -99,14 +114,20 @@ const Controls = ({
 
   return (
     <div
-      className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 transition-opacity duration-300 ${
-        showControls || !isPlaying ? "opacity-100" : "opacity-0"
+      className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent ${
+        isMobile ? "p-3" : "p-4"
+      } transition-all duration-300 ${
+        showControls || !isPlaying
+          ? "opacity-100 translate-y-0"
+          : "opacity-0 translate-y-2"
       }`}
     >
-      {/* Progress Bar */}
-      <div className="mb-4">
+      {/* Progress Bar - Enhanced for Mobile */}
+      <div className={`${isMobile ? "mb-3" : "mb-4"}`}>
         <div
-          className="w-full h-2 bg-gray-600 rounded cursor-pointer hover:h-3 transition-all duration-200 group relative"
+          className={`w-full ${
+            isMobile ? "h-1 hover:h-1.5" : "h-2 hover:h-3"
+          } bg-gray-600/80 rounded-full cursor-pointer transition-all duration-200 group relative backdrop-blur-sm`}
           onClick={(e) => {
             handleProgressBarClick(e);
           }}
@@ -114,119 +135,210 @@ const Controls = ({
           {/* Completion threshold indicator */}
           {duration > 60 && (
             <div
-              className="absolute top-0 h-full w-0.5 bg-green-400 z-10"
+              className="absolute top-0 h-full w-0.5 bg-green-400 z-10 rounded-full"
               style={{ left: `${((duration - 60) / duration) * 100}%` }}
               title="Complete button becomes available here"
             />
           )}
 
+          {/* Progress Fill */}
           <div
-            className="h-full bg-gradient-to-r from-purple-500 to-purple-400 rounded relative"
+            className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full relative shadow-lg"
             style={{ width: `${(currentTime / duration) * 100}%` }}
           >
-            <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            {/* Progress Handle */}
+            <div
+              className={`absolute right-0 top-1/2 transform -translate-y-1/2 ${
+                isMobile ? "w-2.5 h-2.5" : "w-3 h-3"
+              } bg-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-200 border-2 border-blue-400`}
+            ></div>
           </div>
+
+          {/* Buffer indicator (if needed in future) */}
+          <div
+            className="absolute top-0 left-0 h-full bg-gray-400/30 rounded-full"
+            style={{ width: "85%" }}
+          ></div>
         </div>
       </div>
 
-      {/* Controls */}
+      {/* Controls - Responsive Layout */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+        {/* Left Controls */}
+        <div
+          className={`flex items-center ${
+            isMobile ? "space-x-2" : "space-x-3 lg:space-x-4"
+          }`}
+        >
+          {/* Previous Lesson Button */}
           <button
             onClick={goToPreviousLesson}
-            className="p-2 hover:bg-white/20 rounded transition-colors cursor-pointer"
+            className={`${
+              isMobile ? "p-1.5" : "p-2"
+            } hover:bg-white/20 rounded-lg transition-all duration-200 cursor-pointer transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100`}
             disabled={currentSection === 0 && currentLesson === 0}
             title="Previous Lesson"
           >
-            <FaStepBackward />
+            <FaStepBackward
+              className={`${isMobile ? "text-sm" : "text-base"}`}
+            />
           </button>
 
+          {/* Rewind 10s Button */}
           <button
             onClick={() => seek(currentTime - 10)}
-            className="p-2 hover:bg-white/20 rounded transition-colors cursor-pointer"
+            className={`${
+              isMobile ? "p-1.5" : "p-2"
+            } hover:bg-white/20 rounded-lg transition-all duration-200 cursor-pointer transform hover:scale-110 active:scale-95`}
             title="Rewind 10 seconds (←)"
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <svg
+              width={isMobile ? "20" : "24"}
+              height={isMobile ? "20" : "24"}
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className="drop-shadow-sm"
+            >
               <path d="M11.99 5V1l-5 5 5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6h-2c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z" />
               <text
                 x="12"
                 y="15"
                 textAnchor="middle"
-                fontSize="8"
+                fontSize={isMobile ? "7" : "8"}
                 fill="currentColor"
+                className="font-bold"
               >
                 10
               </text>
             </svg>
           </button>
 
+          {/* Play/Pause Button - Main Control */}
           <button
             onClick={togglePlayPause}
-            className="p-3 hover:bg-white/20 rounded-full transition-colors cursor-pointer"
+            className={`${
+              isMobile ? "p-2.5" : "p-3"
+            } hover:bg-white/20 rounded-full transition-all duration-200 cursor-pointer transform hover:scale-110 active:scale-95 bg-white/10 backdrop-blur-sm border border-white/20 shadow-lg`}
             title="Play/Pause (Spacebar)"
           >
             {isPlaying ? (
-              <FaPause className="text-xl" />
+              <FaPause
+                className={`${isMobile ? "text-lg" : "text-xl"} drop-shadow-sm`}
+              />
             ) : (
-              <FaPlay className="text-xl ml-1" />
+              <FaPlay
+                className={`${
+                  isMobile ? "text-lg ml-0.5" : "text-xl ml-1"
+                } drop-shadow-sm`}
+              />
             )}
           </button>
 
+          {/* Forward 10s Button */}
           <button
             onClick={() => seek(currentTime + 10)}
-            className="p-2 hover:bg-white/20 rounded transition-colors cursor-pointer"
+            className={`${
+              isMobile ? "p-1.5" : "p-2"
+            } hover:bg-white/20 rounded-lg transition-all duration-200 cursor-pointer transform hover:scale-110 active:scale-95`}
             title="Forward 10 seconds (→)"
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <svg
+              width={isMobile ? "20" : "24"}
+              height={isMobile ? "20" : "24"}
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className="drop-shadow-sm"
+            >
               <path d="M12 5V1l5 5-5 5V7c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8z" />
               <text
                 x="12"
                 y="15"
                 textAnchor="middle"
-                fontSize="8"
+                fontSize={isMobile ? "7" : "8"}
                 fill="currentColor"
+                className="font-bold"
               >
                 10
               </text>
             </svg>
           </button>
 
+          {/* Next Lesson Button */}
           <button
             onClick={goToNextLesson}
-            className="p-2 hover:bg-white/20 rounded transition-colors cursor-pointer"
+            className={`${
+              isMobile ? "p-1.5" : "p-2"
+            } hover:bg-white/20 rounded-lg transition-all duration-200 cursor-pointer transform hover:scale-110 active:scale-95`}
             title="Next Lesson"
           >
-            <FaStepForward />
+            <FaStepForward
+              className={`${isMobile ? "text-sm" : "text-base"}`}
+            />
           </button>
 
-          <div className="flex items-center space-x-2 cursor-pointer">
-            <button
-              onClick={toggleMute}
-              className="p-2 hover:bg-white/20 rounded cursor-pointer"
-            >
-              {isMuted ? <FaVolumeMute /> : <FaVolumeUp />}
-            </button>
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.1"
-              value={volume}
-              onChange={(e) => changeVolume(parseFloat(e.target.value))}
-              className="w-20 accent-purple-500 bg-gray-600 h-1 rounded-lg appearance-none cursor-pointer"
-            />
-          </div>
+          {/* Volume Controls - Hidden on Mobile */}
+          {!isMobile && (
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={toggleMute}
+                className="p-2 hover:bg-white/20 rounded-lg transition-all duration-200 cursor-pointer transform hover:scale-110 active:scale-95"
+                title={isMuted ? "Unmute" : "Mute"}
+              >
+                {isMuted ? <FaVolumeMute /> : <FaVolumeUp />}
+              </button>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.1"
+                value={volume}
+                onChange={(e) => changeVolume(parseFloat(e.target.value))}
+                className="w-16 lg:w-20 accent-purple-500 bg-gray-600/50 h-1 rounded-lg appearance-none cursor-pointer hover:bg-gray-500/50 transition-colors"
+                title="Volume"
+              />
+            </div>
+          )}
 
-          <span className="text-sm">
-            {formatTime(currentTime)} / {formatTime(duration)}
-          </span>
+          {/* Time Display */}
+          <div
+            className={`${
+              isMobile ? "text-xs" : "text-sm"
+            } font-mono bg-black/40 px-2 py-1 rounded backdrop-blur-sm border border-white/10`}
+          >
+            <span className="text-white">{formatTime(currentTime)}</span>
+            <span className="text-gray-400 mx-1">/</span>
+            <span className="text-gray-300">{formatTime(duration)}</span>
+          </div>
         </div>
 
-        <div className="flex items-center space-x-2">
+        {/* Right Controls */}
+        <div
+          className={`flex items-center ${
+            isMobile ? "space-x-1" : "space-x-2"
+          }`}
+        >
+          {/* Mobile Volume Control */}
+          {isMobile && (
+            <button
+              onClick={toggleMute}
+              className="p-2 hover:bg-white/20 rounded-lg transition-all duration-200 cursor-pointer transform hover:scale-110 active:scale-95"
+              title={isMuted ? "Unmute" : "Mute"}
+            >
+              {isMuted ? (
+                <FaVolumeMute className="text-sm" />
+              ) : (
+                <FaVolumeUp className="text-sm" />
+              )}
+            </button>
+          )}
+
+          {/* Playback Speed */}
           <select
             value={playbackRate}
             onChange={(e) => changePlaybackRate(parseFloat(e.target.value))}
-            className="bg-black/50 border border-gray-600 rounded px-2 py-1 text-sm"
+            className={`bg-black/60 border border-gray-600/50 rounded-lg ${
+              isMobile ? "px-1.5 py-1 text-xs" : "px-2 py-1 text-sm"
+            } backdrop-blur-sm hover:bg-black/80 transition-all cursor-pointer`}
             title="Playback Speed"
           >
             <option value="0.5">0.5x</option>
@@ -237,12 +349,19 @@ const Controls = ({
             <option value="2">2x</option>
           </select>
 
+          {/* Fullscreen Toggle */}
           <button
             onClick={toggleFullscreen}
-            className="p-2 hover:bg-white/20 rounded cursor-pointer"
+            className={`${
+              isMobile ? "p-1.5" : "p-2"
+            } hover:bg-white/20 rounded-lg transition-all duration-200 cursor-pointer transform hover:scale-110 active:scale-95`}
             title="Fullscreen (F)"
           >
-            {isFullscreen ? <FaCompress /> : <FaExpand />}
+            {isFullscreen ? (
+              <FaCompress className={`${isMobile ? "text-sm" : "text-base"}`} />
+            ) : (
+              <FaExpand className={`${isMobile ? "text-sm" : "text-base"}`} />
+            )}
           </button>
         </div>
       </div>
