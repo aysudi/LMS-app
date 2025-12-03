@@ -22,7 +22,7 @@ import {
   uploadMiddleware,
   uploadErrorHandler,
 } from "../middlewares/upload.middleware";
-import { validateRequest } from "../middlewares/validation.middleware";
+import { validateJoiRequest } from "../middlewares/validation.middleware.js";
 import { authenticateToken } from "../middlewares/auth.middleware";
 import {
   registerValidationSchema,
@@ -74,11 +74,11 @@ userRouter.post(
   "/register",
   uploadMiddleware,
   uploadErrorHandler,
-  validateRequest(registerValidationSchema),
+  validateJoiRequest(registerValidationSchema),
   registerUser
 );
 
-userRouter.post("/login", validateRequest(loginValidationSchema), loginUser);
+userRouter.post("/login", validateJoiRequest(loginValidationSchema), loginUser);
 
 userRouter.post("/refresh", refreshTokenController);
 
@@ -88,19 +88,19 @@ userRouter.get("/verify-email", verifyEmailController);
 
 userRouter.post(
   "/resend-verification",
-  validateRequest(resendVerificationSchema),
+  validateJoiRequest(resendVerificationSchema),
   resendVerificationEmailController
 );
 
 userRouter.post(
   "/forgot-password",
-  validateRequest(forgotPasswordSchema),
+  validateJoiRequest(forgotPasswordSchema),
   forgotPasswordController
 );
 
 userRouter.post(
   "/reset-password",
-  validateRequest(resetPasswordSchema),
+  validateJoiRequest(resetPasswordSchema),
   resetPasswordController
 );
 

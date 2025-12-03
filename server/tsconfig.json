@@ -10,7 +10,8 @@
     "outDir": "./dist/src",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "typeRoots": ["node_modules/@types"]
+    "typeRoots": ["node_modules/@types"],
+    "allowSyntheticDefaultImports": true
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "./types"]

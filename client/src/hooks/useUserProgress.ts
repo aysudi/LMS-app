@@ -1,7 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useSnackbar } from "notistack";
 import userProgressService from "../services/userProgress.service";
 import type { UpdateUserProgressRequest } from "../types/user-progress.type";
+import { useToast } from "../components/UI/ToastProvider";
+import { generalToasts } from "../utils/toastUtils";
 
 // Hook for getting user progress
 export const useUserProgress = (courseId?: string) => {
@@ -25,7 +26,7 @@ export const useCourseProgress = (courseId: string) => {
 // Hook for updating lesson progress
 export const useUpdateLessonProgress = () => {
   const queryClient = useQueryClient();
-  const { enqueueSnackbar } = useSnackbar();
+  const { showToast } = useToast();
 
   return useMutation({
     mutationFn: ({
@@ -47,19 +48,22 @@ export const useUpdateLessonProgress = () => {
       queryClient.invalidateQueries({ queryKey: ["learning-analytics"] });
 
       if (data.data?.enrollmentProgress.isCompleted) {
-        enqueueSnackbar("🎉 Course completed! Certificate available!", {
-          variant: "success",
-          autoHideDuration: 5000,
-        });
+        showToast(
+          generalToasts.success(
+            "🎉 Course completed!",
+            "Certificate available!"
+          )
+        );
       } else if (variables.progressData.completed) {
-        enqueueSnackbar("Lesson completed!", { variant: "success" });
+        showToast(generalToasts.success("Lesson completed!", ""));
       }
     },
 
     onError: (error: any) => {
       const message =
         error.response?.data?.message || "Failed to update progress";
-      enqueueSnackbar(message, { variant: "error" });
+
+      showToast(generalToasts.error("Fail", message));
     },
   });
 };
@@ -76,7 +80,7 @@ export const useLearningAnalytics = () => {
 // Hook for completing lesson progress (POST, only once)
 export const useCompleteLessonProgress = () => {
   const queryClient = useQueryClient();
-  const { enqueueSnackbar } = useSnackbar();
+  const { showToast } = useToast();
 
   return useMutation({
     mutationFn: ({
@@ -93,13 +97,13 @@ export const useCompleteLessonProgress = () => {
         queryKey: ["course-progress", variables.courseId],
       });
       if (data.success) {
-        enqueueSnackbar("Lesson completed!", { variant: "success" });
+        showToast(generalToasts.success("Lesson completed!", ""));
       }
     },
     onError: (error: any) => {
       const message =
         error.response?.data?.message || "Failed to complete lesson";
-      enqueueSnackbar(message, { variant: "error" });
+      showToast(generalToasts.error("Fail", message));
     },
   });
 };

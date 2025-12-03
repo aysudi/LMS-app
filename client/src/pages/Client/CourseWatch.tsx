@@ -17,7 +17,7 @@ import { CourseCompletionModal } from "../../components/Common/CourseCompletionM
 import { useAuthContext } from "../../context/AuthContext";
 import { useCertificateStatus } from "../../hooks/useCertificate";
 import QuizComponent from "../../components/Client/CourseWatch/QuizComponent";
-import AnnouncementsSection from "../../components/Client/AnnouncementsSection";
+import AnnouncementsSection from "../../components/Client/CourseWatch/AnnouncementsSection";
 import formatTime from "../../utils/formatTime";
 import LessonInfoSection from "../../components/Client/CourseWatch/LessonInfoSection";
 import NotesTab from "../../components/Client/CourseWatch/NotesTab";
@@ -143,16 +143,13 @@ const CourseWatch: React.FC = () => {
 
   useEffect(() => {
     if (course && course.sections.length > 0) {
-      console.log("Loading initial lesson:", course.sections[0]?.lessons[0]);
       loadLesson(0, 0);
     }
   }, [course]);
 
-  // Add a simple effect to ensure video gets loaded properly
   useEffect(() => {
     const video = videoRef.current;
     if (video && currentLessonObj && !video.src) {
-      console.log("Setting video source:", currentLessonObj.video?.url);
       video.src = currentLessonObj.video.url;
       video.load();
     }
@@ -275,13 +272,6 @@ const CourseWatch: React.FC = () => {
 
     const lesson = course.sections[sectionIndex].lessons[lessonIndex];
     const lessonId = lesson._id || lesson.id;
-
-    console.log(
-      "Loading lesson:",
-      lesson.title,
-      "Video URL:",
-      lesson.video?.url
-    );
 
     if (!lesson.video?.url) {
       console.error("No video URL found for lesson:", lesson.title);
@@ -472,27 +462,20 @@ const CourseWatch: React.FC = () => {
     const video = videoRef.current;
     if (!video || !currentLessonObj) return;
 
-    console.log("Refreshing video...");
-
     const currentVideoTime = video.currentTime || currentTime;
     const wasPlaying = !video.paused;
 
-    // Reset all states
     setIsPlaying(false);
     setDuration(0);
     setCurrentTime(0);
 
-    // Pause and reload
     video.pause();
 
-    // Force reload by setting source again
     const videoUrl = currentLessonObj.video.url;
     video.src = videoUrl;
     video.load();
 
-    // Restore state after loading
     const handleCanPlay = () => {
-      console.log("Video can play after refresh");
       if (currentVideoTime > 0 && video.duration > currentVideoTime) {
         video.currentTime = currentVideoTime;
       }
@@ -785,9 +768,6 @@ const CourseWatch: React.FC = () => {
                     // Auto-retry up to 3 times
                     if (retryCount < 3) {
                       setTimeout(() => {
-                        console.log(
-                          `Retrying video load (attempt ${retryCount + 1}/3)...`
-                        );
                         setRetryCount((prev) => prev + 1);
                         refreshVideo();
                       }, 2000);
@@ -875,7 +855,6 @@ const CourseWatch: React.FC = () => {
                       </p>
                       <button
                         onClick={() => {
-                          console.log("Manual refresh clicked");
                           refreshVideo();
                         }}
                         className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200"

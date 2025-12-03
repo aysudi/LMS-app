@@ -99,6 +99,25 @@ class SocketService {
     }
   }
 
+  // Join a course room
+  joinCourseRoom(courseId: string) {
+    if (this.socket?.connected) {
+      this.socket.emit("join:course", courseId);
+    } else {
+      console.log(
+        "❌ Socket not connected, cannot join course room:",
+        courseId
+      );
+    }
+  }
+
+  // Leave a course room
+  leaveCourseRoom(courseId: string) {
+    if (this.socket?.connected) {
+      this.socket.emit("leave:course", courseId);
+    }
+  }
+
   // Join specific conversation
   joinConversation(conversationId: string) {
     if (this.socket?.connected) {
@@ -274,6 +293,44 @@ class SocketService {
     callback?: (data: { userId: string; username: string }) => void
   ) {
     this.socket?.off("user:offline", callback);
+  }
+
+  // Course message event listeners
+  onNewCourseMessage(
+    callback: (data: { message: any; courseId: string }) => void
+  ) {
+    this.socket?.on("newCourseMessage", callback);
+  }
+
+  onCourseMessageEdited(
+    callback: (data: { message: any; courseId: string }) => void
+  ) {
+    this.socket?.on("messageEdited", callback);
+  }
+
+  onCourseMessageDeleted(
+    callback: (data: { messageId: string; courseId: string }) => void
+  ) {
+    this.socket?.on("messageDeleted", callback);
+  }
+
+  // Course message event listener removers
+  offNewCourseMessage(
+    callback?: (data: { message: any; courseId: string }) => void
+  ) {
+    this.socket?.off("newCourseMessage", callback);
+  }
+
+  offCourseMessageEdited(
+    callback?: (data: { message: any; courseId: string }) => void
+  ) {
+    this.socket?.off("messageEdited", callback);
+  }
+
+  offCourseMessageDeleted(
+    callback?: (data: { messageId: string; courseId: string }) => void
+  ) {
+    this.socket?.off("messageDeleted", callback);
   }
 
   // Get socket instance

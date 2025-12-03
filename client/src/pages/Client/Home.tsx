@@ -21,13 +21,13 @@ import { useTranslation } from "react-i18next";
 
 // Components
 import Loading from "../../components/Common/Loading";
-import AddToCartModal from "../../components/Common/AddToCartModal";
 import HeroSection from "../../components/Home/HeroSection";
 import CategoriesSection from "../../components/Home/CategoriesSection";
 import RecommendedCoursesSection from "../../components/Home/RecommendedCoursesSection";
 import FreeCoursesSection from "../../components/Home/FreeCoursesSection";
 import TrendingCourseSection from "../../components/Home/TrendingCourseSection";
 import CategoryCoursesSection from "../../components/Home/CategoryCoursesSection";
+import AddToCartModal from "../../components/Client/Cart/AddToCartModal";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -259,13 +259,13 @@ const Home = () => {
   }
 
   // Determine courses to display
-  const displayRecommendedCourses = recommendations.recommended.length > 0
-    ? recommendations.recommended
-    : featuredCourses;
+  const displayRecommendedCourses =
+    recommendations.recommended.length > 0
+      ? recommendations.recommended
+      : featuredCourses;
 
-  const freeCoursesToShow = recommendations.free.length > 0
-    ? recommendations.free
-    : freeCourses;
+  const freeCoursesToShow =
+    recommendations.free.length > 0 ? recommendations.free : freeCourses;
 
   const trendingCourseToShow = trendingCourse || featuredCourses[0];
 

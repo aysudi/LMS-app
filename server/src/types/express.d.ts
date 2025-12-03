@@ -5,7 +5,7 @@ declare global {
         userId: string;
         email: string;
         role: string;
-        id: string; // alias for userId
+        id: string;
       };
     }
   }

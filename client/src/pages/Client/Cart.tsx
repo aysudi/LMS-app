@@ -15,15 +15,15 @@ import {
 } from "../../hooks/useCart";
 import { useToggleWishlist, useWishlistHelpers } from "../../hooks/useWishlist";
 import { useAuthContext } from "../../context/AuthContext";
-import EmptyCartAnimation from "../../components/Client/EmptyCartAnimation";
-import CartLoadingAnimation from "../../components/Client/CartLoadingAnimation";
-import CartStats from "../../components/Client/CartStats";
+import EmptyCartAnimation from "../../components/Client/Cart/EmptyCartAnimation";
+import CartLoadingAnimation from "../../components/Client/Cart/CartLoadingAnimation";
 import { useToast } from "../../components/UI/ToastProvider";
 import { cartToasts, generalToasts } from "../../utils/toastUtils";
 // @ts-ignore
 import { useTranslation } from "react-i18next";
-import CartItem from "../../components/Client/CartItem";
 import CheckoutSidebar from "../../components/Client/CheckoutSidebar";
+import CartStats from "../../components/Client/Cart/CartStats";
+import CartItem from "../../components/Client/Cart/CartItem";
 
 const Cart = () => {
   const navigate = useNavigate();

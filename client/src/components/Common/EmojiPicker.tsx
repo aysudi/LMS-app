@@ -24,7 +24,7 @@ const EmojiAndStickerPicker: React.FC<EmojiAndStickerPickerProps> = ({
   const pickerRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<"emoji" | "sticker">("emoji");
   const [stickers, setStickers] = useState<any[]>([]);
-  const [stickerSearch, setStickerSearch] = useState("cute animals");
+  const [stickerSearch, setStickerSearch] = useState("");
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -44,8 +44,6 @@ const EmojiAndStickerPicker: React.FC<EmojiAndStickerPickerProps> = ({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen, onClose]);
-
-  if (!isOpen) return null;
 
   const handleEmojiClick = (emojiData: any) => {
     onEmojiSelect(emojiData.emoji);
@@ -105,10 +103,12 @@ const EmojiAndStickerPicker: React.FC<EmojiAndStickerPickerProps> = ({
       }
     };
 
-    if (activeTab === "sticker") {
+    if (activeTab === "sticker" && isOpen) {
       fetchStickers();
     }
-  }, [activeTab, stickerSearch]);
+  }, [activeTab, stickerSearch, isOpen]);
+
+  if (!isOpen) return null;
 
   return (
     <AnimatePresence>
@@ -124,7 +124,7 @@ const EmojiAndStickerPicker: React.FC<EmojiAndStickerPickerProps> = ({
         <div className="flex border-b border-gray-200">
           <button
             onClick={() => setActiveTab("emoji")}
-            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors ${
+            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
               activeTab === "emoji"
                 ? "text-blue-600 border-b-2 border-blue-600"
                 : "text-gray-500 hover:text-gray-700"
@@ -135,7 +135,7 @@ const EmojiAndStickerPicker: React.FC<EmojiAndStickerPickerProps> = ({
           </button>
           <button
             onClick={() => setActiveTab("sticker")}
-            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors ${
+            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
               activeTab === "sticker"
                 ? "text-blue-600 border-b-2 border-blue-600"
                 : "text-gray-500 hover:text-gray-700"

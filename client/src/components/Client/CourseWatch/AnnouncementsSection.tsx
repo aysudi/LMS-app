@@ -11,8 +11,8 @@ import {
 import {
   useAnnouncementsByCourse,
   useAnnouncementMutations,
-} from "../../hooks/useAnnouncements";
-import type { Announcement } from "../../types/announcement.type";
+} from "../../../hooks/useAnnouncements";
+import type { Announcement } from "../../../types/announcement.type";
 
 interface AnnouncementsSectionProps {
   courseId: string;

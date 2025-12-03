@@ -17,7 +17,7 @@ import {
   useConfirmPayment,
 } from "../../hooks/usePayment";
 import { stripePromise, stripeConfig } from "../../utils/stripe";
-import StripePaymentForm from "../../components/Common/StripePaymentForm";
+import StripePaymentForm from "../../components/Client/Cart/StripePaymentForm";
 import type { CreateOrderRequest } from "../../services/payment.service";
 import { getImageUrl } from "../../utils/mediaHelpers";
 

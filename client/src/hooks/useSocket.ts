@@ -210,6 +210,15 @@ export const useSocket = () => {
     socketService.leaveConversation(conversationId);
   }, []);
 
+  // Course room methods
+  const joinCourseRoom = useCallback((courseId: string) => {
+    socketService.joinCourseRoom(courseId);
+  }, []);
+
+  const leaveCourseRoom = useCallback((courseId: string) => {
+    socketService.leaveCourseRoom(courseId);
+  }, []);
+
   const sendMessage = useCallback(
     (data: {
       receiverId: string;
@@ -257,12 +266,15 @@ export const useSocket = () => {
   );
 
   return {
+    socket: socketService.getSocket(),
     isConnected,
     typingUsers,
     onlineUsers,
     joinConversations,
     joinConversation,
     leaveConversation,
+    joinCourseRoom,
+    leaveCourseRoom,
     sendMessage,
     startTyping,
     stopTyping,

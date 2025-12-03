@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaCheck, FaNotesMedical, FaQuestionCircle } from "react-icons/fa";
+import { FaCheck, FaQuestionCircle } from "react-icons/fa";
 import formatTime from "../../../utils/formatTime";
 
 type Props = {
@@ -29,8 +29,6 @@ const LessonInfoSection: React.FC<Props> = ({
   markLessonComplete,
   canCompleteLesson,
   canTakeQuiz,
-  showNotes,
-  setShowNotes,
   currentLessonObj,
   quizPassed,
   quizCompleted,

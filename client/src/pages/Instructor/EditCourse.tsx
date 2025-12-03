@@ -23,8 +23,6 @@ import { useToast } from "../../components/UI/ToastProvider";
 import { courseToasts } from "../../utils/toastUtils";
 import Swal from "sweetalert2";
 
-// TABS will be defined inside component to use translation
-
 const EditCourse = () => {
   const { courseId } = useParams();
   const navigate = useNavigate();

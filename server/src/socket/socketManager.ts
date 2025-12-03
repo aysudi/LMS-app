@@ -2,6 +2,7 @@ import { Server, Socket } from "socket.io";
 import jwt from "jsonwebtoken";
 import { JWTUtils } from "../utils/jwt.utils.js";
 import { messageHandlers } from "./messageHandlers.js";
+import Enrollment from "../models/Enrollment.js";
 
 interface SocketUser {
   userId: string;
@@ -23,7 +24,11 @@ interface AuthenticatedSocket extends Socket {
 const connectedUsers = new Map<string, SocketUser>();
 const userSockets = new Map<string, string>(); // userId -> socketId
 
+// Store IO instance
+let ioInstance: Server | null = null;
+
 export const initializeSocket = (io: Server) => {
+  ioInstance = io;
   // Middleware for authentication
   io.use(async (socket, next) => {
     try {
@@ -119,13 +124,49 @@ export const initializeSocket = (io: Server) => {
       });
     });
 
+    // Handle course room joining
+    authSocket.on("join:course", async (courseId: string) => {
+      try {
+        const allEnrollments = await Enrollment.find({
+          user: authSocket.userId,
+          course: courseId,
+        });
+
+        const enrollment = await Enrollment.findOne({
+          user: authSocket.userId,
+          course: courseId,
+          status: { $in: ["active", "completed"] },
+        });
+
+        if (enrollment) {
+          authSocket.join(`course-${courseId}`);
+
+          // Log current room members
+          const room = io.sockets.adapter.rooms.get(`course-${courseId}`);
+        } else {
+          console.log(
+            `❌ User ${authSocket.userId} not enrolled in course: ${courseId}`
+          );
+        }
+      } catch (error) {
+        console.error("Error joining course room:", error);
+      }
+    });
+
+    // Handle leaving course room
+    authSocket.on("leave:course", (courseId: string) => {
+      try {
+        authSocket.leave(`course-${courseId}`);
+      } catch (error) {
+        console.error("Error leaving course room:", error);
+      }
+    });
+
     // Handle disconnect
     authSocket.on("disconnect", (reason) => {
-      // Remove user from connected users
       connectedUsers.delete(authSocket.id);
       userSockets.delete(authSocket.userId);
 
-      // Notify others that user is offline
       authSocket.broadcast.emit("user:offline", {
         userId: authSocket.userId,
         username: authSocket.userEmail,
@@ -144,7 +185,8 @@ export const initializeSocket = (io: Server) => {
   });
 };
 
-// Helper functions to get user info
 export const getConnectedUsers = () => Array.from(connectedUsers.values());
 export const getUserSocketId = (userId: string) => userSockets.get(userId);
 export const isUserOnline = (userId: string) => userSockets.has(userId);
+
+export const getIO = () => ioInstance;
