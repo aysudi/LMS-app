@@ -6,9 +6,9 @@ import {
   FaStar,
   FaChartLine,
 } from "react-icons/fa";
-import type { Course } from "../../types/course.type";
 // @ts-ignore
 import { useTranslation } from "react-i18next";
+import type { Course } from "../../../types/course.type";
 
 interface CartStatsProps {
   courses: Course[];

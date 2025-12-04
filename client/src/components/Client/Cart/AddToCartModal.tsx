@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { FaTimes, FaStar, FaShoppingCart, FaArrowRight } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import type { Course } from "../../types/course.type";
+import type { Course } from "../../../types/course.type";
 
 interface AddToCartModalProps {
   isOpen: boolean;

@@ -2,7 +2,6 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import type { Course } from "../../types/course.type";
 import {
   FaClock,
   FaGift,
@@ -11,6 +10,7 @@ import {
   FaTrash,
   FaUsers,
 } from "react-icons/fa";
+import type { Course } from "../../../types/course.type";
 
 interface CartItemProps {
   course: Course;
