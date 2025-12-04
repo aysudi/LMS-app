@@ -12,6 +12,7 @@ export default function LanguageSwitcher() {
 
   const changeLanguage = (languageCode: string) => {
     i18n.changeLanguage(languageCode);
+    localStorage.setItem("selectedLanguage", languageCode);
   };
 
   return (

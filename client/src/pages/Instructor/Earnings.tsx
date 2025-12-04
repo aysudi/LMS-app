@@ -33,6 +33,7 @@ const InstructorEarnings = () => {
     useInstructorEarnings();
   const { data: courseEarningsData, isLoading: courseEarningsLoading } =
     useInstructorEarningsByCourse();
+  console.log("earnings :", courseEarningsData);
 
   if (earningsLoading || courseEarningsLoading) {
     return (

@@ -24,6 +24,7 @@ import {
   courseUploadErrorHandler,
   processCourseUploads,
 } from "../middlewares/course-upload.middleware.js";
+import { trackCourseView } from "../services/analyticsService.js";
 
 const courseRouter = Router();
 
@@ -82,5 +83,38 @@ courseRouter.put("/:id/reviews/:reviewId", (req, res) =>
 courseRouter.delete("/:id/reviews/:reviewId", (req, res) =>
   deleteReview(req as any, res)
 );
+
+// Track course view for analytics
+courseRouter.post("/track-view/:courseId", async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const userId = req.body.userId; // Optional - may not be provided for anonymous users
+
+    await trackCourseView(courseId, userId);
+
+    res.json({ success: true, message: "View tracked successfully" });
+  } catch (error: any) {
+    console.error("Error tracking course view:", error);
+    res.status(500).json({ success: false, message: "Failed to track view" });
+  }
+});
+
+// Track watch time for analytics
+courseRouter.post("/track-watch-time/:courseId", async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const { watchTimeSeconds, userId } = req.body;
+
+    const { trackWatchTime } = await import("../services/analyticsService.js");
+    await trackWatchTime(courseId, userId, watchTimeSeconds);
+
+    res.json({ success: true, message: "Watch time tracked successfully" });
+  } catch (error: any) {
+    console.error("Error tracking watch time:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to track watch time" });
+  }
+});
 
 export default courseRouter;

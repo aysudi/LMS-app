@@ -28,6 +28,7 @@ import ResourceTab from "../../components/Client/CourseWatch/ResourceTab";
 import OverviewTab from "../../components/Client/CourseWatch/OverviewTab";
 import ReviewTab from "../../components/Client/CourseWatch/ReviewTab";
 import Controls from "../../components/Client/CourseWatch/Controls";
+import { trackWatchTime } from "../../services/course.service";
 import Sidebar from "../../components/Client/CourseWatch/Sidebar";
 import "../../styles/courseWatch.css";
 
@@ -96,6 +97,8 @@ const CourseWatch: React.FC = () => {
   const [retryCount, setRetryCount] = useState(0);
   const [isVideoLoading, setIsVideoLoading] = useState(false);
   const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [watchTimeTracker, setWatchTimeTracker] = useState(0);
+  const lastWatchTimeUpdate = useRef(0);
 
   // Load quiz states from localStorage on component mount
   useEffect(() => {
@@ -263,6 +266,20 @@ const CourseWatch: React.FC = () => {
     showCompletionModal,
     courseId,
   ]);
+
+  // Track watch time for analytics (send every 30 seconds)
+  useEffect(() => {
+    if (watchTimeTracker > 0 && courseId) {
+      const interval = setInterval(async () => {
+        if (watchTimeTracker >= 30) {
+          await trackWatchTime(courseId, watchTimeTracker, user?.id);
+          setWatchTimeTracker(0); // Reset after sending
+        }
+      }, 30000);
+
+      return () => clearInterval(interval);
+    }
+  }, [watchTimeTracker, courseId, user?.id]);
 
   const loadLesson = (sectionIndex: number, lessonIndex: number) => {
     if (!course || !course.sections[sectionIndex]?.lessons[lessonIndex]) return;
@@ -726,6 +743,16 @@ const CourseWatch: React.FC = () => {
                     if (video && !isNaN(video.currentTime)) {
                       setCurrentTime(video.currentTime);
                       setLastTimeUpdate(Date.now());
+
+                      // Track watch time every 10 seconds
+                      const now = Date.now();
+                      if (
+                        isPlaying &&
+                        now - lastWatchTimeUpdate.current >= 10000
+                      ) {
+                        lastWatchTimeUpdate.current = now;
+                        setWatchTimeTracker((prev) => prev + 10);
+                      }
 
                       // Clear any existing stuck check
                       if (stuckCheckRef.current) {

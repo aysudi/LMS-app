@@ -21,8 +21,6 @@ export const useRegister = () => {
       userData: RegisterRequest;
       avatar?: File;
     }) => register(userData, avatar),
-    // Remove automatic login on registration
-    // Users should verify email first
   });
 };
 

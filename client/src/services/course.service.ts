@@ -24,6 +24,33 @@ export const getCourseById = async (
   return response.data;
 };
 
+// Track course view for analytics
+export const trackCourseView = async (courseId: string, userId?: string) => {
+  try {
+    await api.post(`/api/courses/track-view/${courseId}`, {
+      userId: userId || null,
+    });
+  } catch (error) {
+    console.error("Failed to track course view:", error);
+  }
+};
+
+// Track watch time for analytics
+export const trackWatchTime = async (
+  courseId: string,
+  watchTimeSeconds: number,
+  userId?: string
+) => {
+  try {
+    await api.post(`/api/courses/track-watch-time/${courseId}`, {
+      watchTimeSeconds,
+      userId: userId || null,
+    });
+  } catch (error) {
+    console.error("Failed to track watch time:", error);
+  }
+};
+
 // Get user's enrolled courses
 export const getUserCourses = async (): Promise<CourseListResponse> => {
   const response = await api.get("/api/courses/user/enrolled");

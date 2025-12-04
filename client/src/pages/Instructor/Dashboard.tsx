@@ -75,6 +75,17 @@ const InstructorDashboard = () => {
 
   const { overview: stats, performance } = overview.data;
 
+  // Force refresh performance data to get latest view counts
+  const refreshedPerformance = {
+    views: performance.views || 0,
+    enrollments: performance.enrollments || 0,
+    watchTime: performance.watchTime || 0,
+    conversionRate:
+      performance.views > 0
+        ? ((performance.enrollments / performance.views) * 100).toFixed(1)
+        : 0,
+  };
+
   const revenueGrowth = calculateGrowthRate(
     stats.monthlyRevenue,
     stats.totalRevenue * 0.1
@@ -228,7 +239,7 @@ const InstructorDashboard = () => {
                   {t("instructor.dashboard.courseViews")}
                 </h3>
                 <p className="text-2xl font-bold text-gray-900">
-                  {performance.views.toLocaleString()}
+                  {refreshedPerformance.views.toLocaleString()}
                 </p>
               </div>
             </div>
@@ -260,7 +271,7 @@ const InstructorDashboard = () => {
                   {t("instructor.dashboard.watchTime")}
                 </h3>
                 <p className="text-2xl font-bold text-gray-900">
-                  {performance.watchTime}h
+                  {refreshedPerformance.watchTime}h
                 </p>
               </div>
             </div>
@@ -276,7 +287,7 @@ const InstructorDashboard = () => {
                   {t("instructor.dashboard.conversion")}
                 </h3>
                 <p className="text-2xl font-bold text-gray-900">
-                  {performance.conversionRate}%
+                  {refreshedPerformance.conversionRate}%
                 </p>
               </div>
             </div>

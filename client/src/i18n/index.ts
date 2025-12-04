@@ -24,6 +24,7 @@ i18n
   .init({
     resources,
     fallbackLng: "en",
+    supportedLngs: ["en", "ru", "az"],
     debug: false,
 
     interpolation: {
@@ -32,6 +33,7 @@ i18n
 
     detection: {
       order: ["localStorage", "navigator", "htmlTag"],
+      lookupLocalStorage: "selectedLanguage",
       caches: ["localStorage"],
     },
   });

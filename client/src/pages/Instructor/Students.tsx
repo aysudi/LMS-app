@@ -187,7 +187,7 @@ const InstructorStudents = () => {
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-500">
-                  {t("common.completed")}
+                  {t("student.completedCourses")}
                 </p>
                 <p className="text-2xl font-bold text-gray-900">
                   {completedStudents}

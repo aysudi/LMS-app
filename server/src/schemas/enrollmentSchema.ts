@@ -167,20 +167,34 @@ enrollmentSchema.virtual("isInProgress").get(function () {
   );
 });
 
-enrollmentSchema.methods.updateProgress = function (
+enrollmentSchema.methods.updateProgress = async function (
   completedLessonsCount: number,
   totalLessonsCount: number
 ) {
+  const wasCompleted = this.progressPercentage === 100;
+
   this.progressPercentage = Math.round(
     (completedLessonsCount / totalLessonsCount) * 100
   );
 
   if (
     this.progressPercentage === 100 &&
-    this.status === EnrollmentStatus.ACTIVE
+    this.status === EnrollmentStatus.ACTIVE &&
+    !wasCompleted
   ) {
     this.status = EnrollmentStatus.COMPLETED;
     this.completedAt = new Date();
+
+    // Track course completion for analytics
+    try {
+      const { trackCourseCompletion } = await import(
+        "../services/analyticsService.js"
+      );
+      await trackCourseCompletion(this.course.toString(), this.user.toString());
+    } catch (error) {
+      console.error("Error tracking course completion:", error);
+      // Don't fail the update if analytics fails
+    }
   }
 
   this.lastAccessedAt = new Date();

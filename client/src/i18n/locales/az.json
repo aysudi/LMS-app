@@ -2,6 +2,7 @@
   "common": {
     "allCourses": "Bütün kurslar",
     "loading": "Yüklənir...",
+    "discussions": "Müzakirələr",
     "error": "Xəta",
     "success": "Uğurlu",
     "cancel": "Ləğv et",
@@ -1038,7 +1039,7 @@
       "thisMonth": "Bu ay"
     },
     "earnings": {
-      "platformFee": "Platforma haqqı (30%)",
+      "platformFee": "Platforma haqqı (28%)",
       "totalEarnings": "Ümumi qazanc",
       "grossRevenue": "Ümumi gəlir",
       "beforePlatformFees": "Platforma haqqından əvvəl",
@@ -1059,14 +1060,15 @@
       "minimumPayout": "Minimum ödəniş məbləği: $50",
       "processingTime": "Emal vaxtı: 3-5 iş günü",
       "revenueShare": "Gəlir bölgüsü",
-      "instructorShare": "Müəllim payı: 70%",
-      "platformFeePercent": "Platforma haqqı: 30%",
+      "instructorShare": "Müəllim payı: 72%",
+      "platformFeePercent": "Platforma haqqı: 28%",
       "noHiddenCharges": "Gizli ödənişlər yoxdur",
       "vsLastPeriod": "keçən dövrə nisbətən",
       "gross": "Ümumi"
     },
     "students": {
       "exportData": "Məlumatları ixrac edin",
+      "actions": "Əməliyyatlar",
       "totalStudents": "Ümumi tələbələr",
       "averageProgress": "Orta irəliləyiş",
       "activeToday": "Bu gün aktiv",
@@ -1086,6 +1088,40 @@
       "lastActive": "Son aktivlik",
       "errorLoadingStudents": "Tələbələr yüklənərkən xəta",
       "pleaseReTryLater": "Zəhmət olmasa daha sonra cəhd edin"
+    },
+    "messages": {
+      "errorLoadingMessages": "Mesajlar yüklənərkən xəta",
+      "description": "Tələbələrinizlə ünsiyyət qurun və sorğuları idarə edin",
+      "studentMessages": "Tələbə Mesajları",
+      "messagesOverview": "Mesajlara Baxış",
+      "totalMessages": "Ümumi Mesajlar",
+      "unread": "Oxunmamış",
+      "pendingReply": "Cavab Gözlənilir",
+      "resolved": "Həll edilmiş",
+      "searchMessages": "Mesajları axtar...",
+      "allMessages": "Bütün Mesajlar",
+      "conversations": "danışıqlar",
+      "allStatuses": "Bütün Vəziyyətlər",
+      "unreadMessages": "Oxunmamış",
+      "readMessages": "Oxunmuş",
+      "resolvedMessages": "Həll edilmiş",
+      "noMessagesFound": "Mesaj tapılmadı",
+      "tryAdjustingSearch": "Axtarış sorğunuzu dəyişdirməyə çalışın",
+      "messagesFromStudents": "Tələbələrdən gələn mesajlar burada göstəriləcək",
+      "replyToMessage": "Mesaja Cavab Ver",
+      "yourReply": "Sizin Cavabınız",
+      "typeReplyHere": "Cavabınızı burada yazın...",
+      "cancel": "Ləğv et",
+      "sendReply": "Cavab Göndər",
+      "sending": "Göndərilir...",
+      "markAsRead": "Oxunmuş kimi qeyd et",
+      "markAsResolved": "Həll edilmiş kimi qeyd et",
+      "reply": "Cavab ver",
+      "actions": "Əməliyyatlar",
+      "failedToLoadStatistics": "Statistikaları yükləmək alınmadı",
+      "failedToSendReply": "Cavab göndərmək alınmadı",
+      "noMessages": "Hələ mesaj yoxdur",
+      "messagesAppear": "Tələbələr sizə mesaj göndərdikdən sonra burada görünəcək"
     }
   },
   "student": {
@@ -1258,7 +1294,6 @@
     "fieldRequired": "{{field}} tələb olunur",
     "fieldInvalid": "{{field}} yanlışdır"
   },
-
   "home": {
     "hero": {
       "joinBadge": "🎉 Dünya genelində 50,000+ öyrənənlərə qoşulun",
@@ -1628,10 +1663,6 @@
       "bulkDeleteConfirmation": "<strong>{{count}} seçilmiş kursu</strong> silmək istədiyinizə əminsiniz?<br><br>Bu əməliyyatı geri qaytarmaq olmaz.",
       "yesDeleteCourses": "Bəli, {{count}} kursu silin",
       "errorLoadingCourses": "Kurslar yüklənərkən xəta"
-    },
-    "messages": {
-      "errorLoadingMessages": "Mesajlar yüklənərkən xəta",
-      "description": "Tələbələrinizlə ünsiyyət qurun və sorğuları idarə edin"
     },
     "createCourse": {
       "title": "Yeni Kurs Yarat",

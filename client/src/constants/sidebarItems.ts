@@ -1,8 +1,6 @@
 import {
   FaBookOpen,
   FaChartBar,
-  FaClipboardList,
-  FaCog,
   FaEnvelope,
   FaHome,
   FaTrophy,
@@ -42,12 +40,6 @@ const sidebarItems = [
     path: "/admin/analytics",
   },
   {
-    id: "reports",
-    label: "Reports & Support",
-    icon: FaClipboardList,
-    path: "/admin/reports",
-  },
-  {
     id: "certificates",
     label: "Certificates",
     icon: FaTrophy,
@@ -58,12 +50,6 @@ const sidebarItems = [
     label: "Contact Messages",
     icon: FaEnvelope,
     path: "/admin/contacts",
-  },
-  {
-    id: "settings",
-    label: "Platform Settings",
-    icon: FaCog,
-    path: "/admin/settings",
   },
 ];
 

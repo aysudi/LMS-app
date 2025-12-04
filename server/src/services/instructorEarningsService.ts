@@ -1,4 +1,5 @@
 import InstructorEarnings from "../models/InstructorEarnings.js";
+import mongoose from "mongoose";
 import Course from "../models/Course.js";
 
 // Create instructor earnings for an order
@@ -13,9 +14,13 @@ export const createInstructorEarningsForOrder = async (order: any) => {
       }
 
       const grossAmount = item.actualPrice;
-      // Platform takes 30% commission, instructor gets 70%
-      const platformFeePercentage = 0.3;
-      const platformFee = grossAmount * platformFeePercentage;
+      // Platform takes 25% commission + 3% payment processing = 28% total, instructor gets 72%
+      const platformCommissionRate = 0.25; // 25% platform commission
+      const paymentProcessingRate = 0.03; // 3% payment processing fee
+      const totalPlatformFeeRate =
+        platformCommissionRate + paymentProcessingRate; // 28%
+
+      const platformFee = grossAmount * totalPlatformFeeRate;
       const instructorShare = grossAmount - platformFee;
 
       // Check if earnings already exist to prevent duplicates
@@ -67,7 +72,7 @@ export const createInstructorEarningsForOrder = async (order: any) => {
 // Get instructor total earnings
 export const getInstructorTotalEarnings = async (instructorId: string) => {
   const earnings = await InstructorEarnings.aggregate([
-    { $match: { instructor: instructorId } },
+    { $match: { instructor: new mongoose.Types.ObjectId(instructorId) } },
     {
       $group: {
         _id: null,
@@ -114,7 +119,9 @@ export const getInstructorEarningsByCourse = async (
   instructorId: string,
   courseId?: string
 ) => {
-  const matchFilter: any = { instructor: instructorId };
+  const matchFilter: any = {
+    instructor: new mongoose.Types.ObjectId(instructorId),
+  };
   if (courseId) matchFilter.course = courseId;
 
   return await InstructorEarnings.find(matchFilter)
@@ -133,7 +140,7 @@ export const updatePayoutStatus = async (
   return await InstructorEarnings.updateMany(
     {
       _id: { $in: earningIds },
-      instructor: instructorId,
+      instructor: new mongoose.Types.ObjectId(instructorId),
     },
     {
       payoutStatus: status,

@@ -25,6 +25,7 @@ import { useToast } from "../../components/UI/ToastProvider";
 import { generalToasts } from "../../utils/toastUtils";
 // @ts-ignore
 import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "../../components/Common/LanguageSwitcher";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -123,6 +124,17 @@ const Register = () => {
           <span className="text-xs font-medium sm:hidden">Home</span>
         </Link>
       </motion.div>
+
+      {/* Language Switcher - Top Right */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20"
+      >
+        <LanguageSwitcher />
+      </motion.div>
+
       {/* Background Decorations */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>

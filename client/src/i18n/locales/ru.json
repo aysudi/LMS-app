@@ -2,6 +2,7 @@
   "common": {
     "allCourses": "Все курсы",
     "loading": "Загрузка...",
+    "discussions": "Обсуждения",
     "error": "Ошибка",
     "success": "Успешно",
     "cancel": "Отмена",
@@ -470,6 +471,7 @@
     "myLearning": "Мое обучение",
     "continueLearning": "Продолжить обучение",
     "completed": "Завершено",
+    "completedCourses": "Завершенные курсы",
     "inProgress": "В процессе",
     "watchTime": "Время просмотра",
     "browseCategories": "Просмотреть категории",
@@ -713,8 +715,8 @@
       "minimumPayout": "Минимальная сумма выплаты: $50",
       "processingTime": "Время обработки: 3-5 рабочих дней",
       "revenueShare": "Распределение дохода",
-      "instructorShare": "Доля преподавателя: 70%",
-      "platformFeePercent": "Комиссия платформы: 30%",
+      "instructorShare": "Доля преподавателя: 72%",
+      "platformFeePercent": "Комиссия платформы: 28%",
       "noHiddenCharges": "Без скрытых платежей",
       "vsLastPeriod": "по сравнению с прошлым периодом",
       "gross": "Валовой"
@@ -1076,6 +1078,7 @@
     },
     "students": {
       "exportData": "Экспорт данных",
+      "actions": "Действия",
       "totalStudents": "Всего студентов",
       "averageProgress": "Средний прогресс",
       "activeToday": "Активны сегодня",
@@ -1095,6 +1098,40 @@
       "lastActive": "Последняя активность",
       "errorLoadingStudents": "Ошибка загрузки студентов",
       "pleaseReTryLater": "Пожалуйста, попробуйте позже"
+    },
+    "messages": {
+      "errorLoadingMessages": "Ошибка загрузки сообщений",
+      "description": "Общайтесь со студентами и управляйте запросами",
+      "studentMessages": "Сообщения студентов",
+      "messagesOverview": "Обзор сообщений",
+      "totalMessages": "Всего сообщений",
+      "unread": "Непрочитанные",
+      "pendingReply": "Ожидают ответа",
+      "resolved": "Решенные",
+      "searchMessages": "Поиск сообщений...",
+      "allMessages": "Все сообщения",
+      "conversations": "разговоры",
+      "unreadMessages": "Непрочитанные",
+      "allStatuses": "Все статусы",
+      "readMessages": "Прочитанные",
+      "resolvedMessages": "Решенные",
+      "noMessagesFound": "Сообщения не найдены",
+      "tryAdjustingSearch": "Попробуйте изменить поисковый запрос",
+      "messagesFromStudents": "Сообщения от студентов будут отображаться здесь",
+      "replyToMessage": "Ответить на сообщение",
+      "yourReply": "Ваш ответ",
+      "typeReplyHere": "Введите ваш ответ здесь...",
+      "cancel": "Отмена",
+      "sendReply": "Отправить ответ",
+      "sending": "Отправка...",
+      "markAsRead": "Отметить как прочитанное",
+      "markAsResolved": "Отметить как решенное",
+      "reply": "Ответить",
+      "actions": "Действия",
+      "failedToLoadStatistics": "Не удалось загрузить статистику",
+      "failedToSendReply": "Не удалось отправить ответ",
+      "noMessages": "Пока нет сообщений",
+      "messagesAppear": "Сообщения от студентов появятся здесь"
     }
   },
   "home": {
@@ -1492,10 +1529,6 @@
       "bulkDeleteConfirmation": "Вы уверены, что хотите удалить <strong>{{count}} выбранных курсов</strong>?<br><br>Это действие нельзя отменить.",
       "yesDeleteCourses": "Да, удалить {{count}} курсов",
       "errorLoadingCourses": "Ошибка загрузки курсов"
-    },
-    "messages": {
-      "errorLoadingMessages": "Ошибка загрузки сообщений",
-      "description": "Общайтесь со студентами и управляйте запросами"
     },
     "createCourse": {
       "title": "Создать новый курс",

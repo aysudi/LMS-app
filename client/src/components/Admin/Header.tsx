@@ -1,6 +1,6 @@
 import sidebarItems from "../../constants/sidebarItems";
 import { useAuthContext } from "../../context/AuthContext";
-import { FaBars, FaBell } from "react-icons/fa";
+import { FaBars } from "react-icons/fa";
 
 type HeaderProps = {
   sidebarOpen: boolean;
@@ -28,12 +28,6 @@ const Header = ({ setSidebarOpen, isActive, sidebarOpen }: HeaderProps) => {
         </div>
 
         <div className="flex items-center space-x-4">
-          {/* Notifications */}
-          <button className="relative p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors">
-            <FaBell />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-          </button>
-
           {/* User Menu */}
           <div className="flex items-center space-x-3 pl-4 border-l border-slate-200">
             <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">

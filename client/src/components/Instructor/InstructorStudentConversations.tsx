@@ -13,6 +13,7 @@ import LoadingSpinner from "../UI/LoadingSpinner";
 import ConversationView from "../Client/ConversationView";
 import type { ConversationSummary } from "../../services/studentInstructorMessage.service";
 import HTMLRenderer from "../../utils/htmlRenderer";
+import { t } from "i18next";
 
 const InstructorStudentConversations: React.FC = () => {
   const [selectedConversation, setSelectedConversation] =
@@ -80,11 +81,12 @@ const InstructorStudentConversations: React.FC = () => {
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold text-gray-900">
-            Student Messages
+            {t("instructor.messages.studentMessages")}
           </h2>
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">
-              {conversations?.length || 0} conversations
+              {conversations?.length || 0}{" "}
+              {t("instructor.messages.conversations")}
             </span>
           </div>
         </div>
@@ -95,7 +97,9 @@ const InstructorStudentConversations: React.FC = () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <input
               type="text"
-              placeholder="Search conversations..."
+              placeholder={
+                t("instructor.messages.searchMessages") || "Search messages..."
+              }
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -106,9 +110,11 @@ const InstructorStudentConversations: React.FC = () => {
             onChange={(e) => setStatusFilter(e.target.value as any)}
             className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
-            <option value="all">All Status</option>
-            <option value="unread">Unread</option>
-            <option value="resolved">Resolved</option>
+            <option value="all">{t("instructor.messages.allStatuses")}</option>
+            <option value="unread">{t("instructor.messages.unread")}</option>
+            <option value="resolved">
+              {t("instructor.messages.resolved")}
+            </option>
           </select>
         </div>
       </div>
@@ -122,10 +128,10 @@ const InstructorStudentConversations: React.FC = () => {
           <div className="text-center py-12">
             <MessageCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No student messages
+              {t("instructor.messages.noMessages")}
             </h3>
             <p className="text-gray-600">
-              Student messages from your courses will appear here
+              {t("instructor.messages.messagesAppear")}
             </p>
           </div>
         ) : !filteredConversations?.length ? (

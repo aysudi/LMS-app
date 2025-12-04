@@ -94,6 +94,7 @@ export const getInstructorEarningsByCourse = async (
   courseId?: string
 ): Promise<InstructorEarningsByCourseResponse> => {
   const params = courseId ? { courseId } : {};
+  console.log("course id: ", courseId);
   const response = await api.get("/api/instructor/earnings/by-course", {
     params,
   });

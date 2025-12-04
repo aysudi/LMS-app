@@ -28,8 +28,6 @@ import qaRouter from "./routes/qaRoutes.js";
 import certificateRouter from "./routes/certificateRoutes.js";
 import announcementRouter from "./routes/announcementRoutes.js";
 import contactRouter from "./routes/contactRoutes.js";
-import messageRouter from "./routes/messageRoutes.js";
-import conversationRouter from "./routes/conversationRoutes.js";
 import courseMessageRouter from "./routes/courseMessageRoutes.js";
 import studentInstructorMessageRouter from "./routes/studentInstructorMessageRoutes.js";
 
@@ -90,8 +88,6 @@ app.use("/api/qa", qaRouter);
 app.use("/api/certificates", certificateRouter);
 app.use("/api/announcements", announcementRouter);
 app.use("/api/contact", contactRouter);
-app.use("/api/messages", messageRouter);
-app.use("/api/conversations", conversationRouter);
 app.use("/api/course-messages", courseMessageRouter);
 app.use("/api/student-instructor-messages", studentInstructorMessageRouter);
 

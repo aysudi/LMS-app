@@ -5,11 +5,9 @@ export const useInstructorMessageStats = () => {
   return useQuery({
     queryKey: ["instructorMessageStats"],
     queryFn: async () => {
-      // Get all conversations for the instructor
       const conversations =
         await studentInstructorMessageService.getInstructorConversations();
 
-      // Calculate statistics
       const totalMessages = conversations.length;
       const resolvedMessages = conversations.filter(
         (conv: any) => conv.status === "resolved"

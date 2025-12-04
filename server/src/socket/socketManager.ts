@@ -1,7 +1,6 @@
 import { Server, Socket } from "socket.io";
 import jwt from "jsonwebtoken";
 import { JWTUtils } from "../utils/jwt.utils.js";
-import { messageHandlers } from "./messageHandlers.js";
 import Enrollment from "../models/Enrollment.js";
 
 interface SocketUser {
@@ -106,7 +105,6 @@ export const initializeSocket = (io: Server) => {
     });
 
     // Initialize message handlers
-    messageHandlers(authSocket, io, connectedUsers, userSockets);
 
     // Handle joining conversation rooms
     authSocket.on("conversation:join", (conversationId: string) => {
