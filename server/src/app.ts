@@ -42,11 +42,7 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "http://localhost:5174",
-      "https://lms-app-fawn-three.vercel.app",
-    ],
+    origin: "*",
     credentials: true,
   })
 );
