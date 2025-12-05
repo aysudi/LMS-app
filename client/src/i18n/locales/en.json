@@ -34,6 +34,7 @@
     "confirmPassword": "Confirm Password",
     "firstName": "First Name",
     "lastName": "Last Name",
+    "fullName": "Full Name",
     "phone": "Phone",
     "address": "Address",
     "portal": "Portal",
@@ -384,7 +385,21 @@
     "learningOverview": "Learning Overview",
     "aboutToJoinStudents": "You're about to join {{count}} students in these amazing courses!",
     "certificate": "Certificate",
-    "availableFor": "Available for"
+    "availableFor": "Available for",
+    "completeInformation": "Complete billing information to proceed to payment.",
+    "secureCheckout": "Secure Checkout",
+    "completePurchase": "Complete your purchase for {{count}} course",
+    "paymentInformation": "Payment Information",
+    "billingInformation": "Billing Information",
+    "waitPayment": "Please wait while we confirm your payment",
+    "processingPayment": "Processing Payment...",
+    "paymentSuccessful": "Payment Successful!",
+    "welcomeToCourse": "Welcome to your new courses! Redirecting to My Learning...",
+    "securePaymentInfo": "Your payment information is secure and encrypted by Stripe",
+    "securePaymentPoweredBy": "Secure payment powered by Stripe",
+    "30DayMoneyBackGuarantee": "30-Day Money-Back Guarantee",
+    "pay": "Pay",
+    "paymentSecure": "Your payment information is secure and encrypted by Stripe"
   },
   "course": {
     "title": "Course Title",
@@ -490,6 +505,7 @@
     "requestPayout": "Request Payout",
     "grossRevenue": "Gross Revenue",
     "pendingEarnings": "Pending Earnings",
+    "downloadReport": "Download Report",
     "paidEarnings": "Paid Earnings",
     "beforePlatformFees": "Before platform fees",
     "processingPeriod": "Processing period",
@@ -640,7 +656,11 @@
       "viewProfile": "View Profile",
       "previous": "Previous",
       "next": "Next",
-      "never": "Never"
+      "never": "Never",
+      "notStarted": "Not Started",
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "allProgress": "All Progress"
     },
     "courses": {
       "deleteCourse": "Delete Course",
@@ -1227,8 +1247,12 @@
     "filterBy": "Filter by",
     "clearFilters": "Clear Filters",
     "priceRange": "Price Range",
+    "allPrices": "All Prices",
     "minPrice": "Min Price",
     "maxPrice": "Max Price",
+    "sortDirection": "Sort Direction",
+    "ascending": "Ascending",
+    "descending": "Descending",
     "courseLevel": "Course Level",
     "courseDuration": "Course Duration",
     "courseRating": "Course Rating",
@@ -1242,7 +1266,16 @@
     "sortBy": "Sort by",
     "relevance": "Relevance",
     "mostPopular": "Most Popular",
+    "oldest": "Oldest",
+    "under": "Under",
+    "over": "Over",
+    "titleAZ": "Title: A-Z",
+    "titleZA": "Title: Z-A",
+    "under50": "Under $50",
+    "50to100": "$50 to $100",
+    "over100": "Over $100",
     "highestRated": "Highest Rated",
+    "lowestRated": "Lowest Rated",
     "newest": "Newest",
     "priceLowToHigh": "Price: Low to High",
     "priceHighToLow": "Price: High to Low",
@@ -1729,6 +1762,224 @@
       "priceHighToLow": "Price: High to Low",
       "newestFirst": "Newest First",
       "mostPopular": "Most Popular"
+    }
+  },
+  "becomeInstructor": {
+    "title": "Become an Instructor",
+    "subtitle": "Share your expertise, inspire students worldwide, and build a rewarding teaching career on Skillify",
+    "getStarted": "Start Teaching Today",
+    "goToDashboard": "Go to Dashboard",
+    "checkApplicationStatus": "Check Application Status",
+    "applicationStatus": "Application Status",
+    "benefits": {
+      "earnMoney": {
+        "title": "Earn Money Teaching",
+        "description": "Generate passive income by sharing your expertise with students worldwide",
+        "stat": "Up to 70% revenue share"
+      },
+      "globalReach": {
+        "title": "Global Reach",
+        "description": "Connect with students from around the world and build an international audience",
+        "stat": "190+ countries"
+      },
+      "flexibleSchedule": {
+        "title": "Flexible Schedule",
+        "description": "Create courses on your own time and work at your own pace",
+        "stat": "24/7 availability"
+      },
+      "buildBrand": {
+        "title": "Build Your Brand",
+        "description": "Establish yourself as an expert and grow your professional reputation",
+        "stat": "Expert recognition"
+      },
+      "makeImpact": {
+        "title": "Make an Impact",
+        "description": "Help others learn new skills and advance their careers",
+        "stat": "Change lives"
+      },
+      "analytics": {
+        "title": "Analytics & Insights",
+        "description": "Track your performance with detailed analytics and student feedback",
+        "stat": "Real-time data"
+      }
+    },
+    "features": {
+      "easyCourseCreation": {
+        "title": "Easy Course Creation",
+        "description": "Intuitive tools to create engaging video courses"
+      },
+      "studentCommunity": {
+        "title": "Student Community",
+        "description": "Build a community of learners around your content"
+      },
+      "certification": {
+        "title": "Certification Tools",
+        "description": "Provide certificates to students upon completion"
+      },
+      "marketingSupport": {
+        "title": "Marketing Support",
+        "description": "We help promote your courses to the right audience"
+      }
+    },
+    "stats": {
+      "activeStudents": "Active Students",
+      "instructorsEarning": "Instructors Earning",
+      "paidToInstructors": "Paid to Instructors",
+      "satisfactionRate": "Satisfaction Rate"
+    },
+    "requirements": {
+      "title": "Requirements to Become an Instructor",
+      "list": [
+        "Expertise in a subject area",
+        "Passion for teaching and helping others",
+        "Basic computer and internet skills",
+        "Commitment to creating quality content",
+        "Professional communication skills"
+      ]
+    },
+    "howItWorks": {
+      "title": "How It Works",
+      "steps": {
+        "apply": {
+          "title": "Apply to Teach",
+          "description": "Submit your instructor application with your background and expertise"
+        },
+        "getApproved": {
+          "title": "Get Approved",
+          "description": "Our team reviews your application and approves qualified instructors"
+        },
+        "createCourses": {
+          "title": "Create Courses",
+          "description": "Use our course creation tools to build engaging content"
+        },
+        "earnMoney": {
+          "title": "Earn Money",
+          "description": "Start earning as students enroll in your courses"
+        }
+      }
+    },
+    "powerfulTools": {
+      "title": "Powerful Tools for Instructors",
+      "subtitle": "Everything you need to create, market, and sell your courses"
+    },
+    "requirementsSection": {
+      "title": "What You Need to Get Started",
+      "subtitle": "Basic requirements to become a successful instructor"
+    },
+    "ctaSection": {
+      "title": "Ready to Start Your Teaching Journey?",
+      "subtitle": "Join our community of expert instructors and start earning money while making a positive impact on students' lives.",
+      "applyNow": "Apply Now",
+      "createAccount": "Create Free Account",
+      "footerNote": "No upfront costs • Free to get started • Earn money from day one"
+    }
+  },
+  "instructorApplication": {
+    "title": "Instructor Application",
+    "subtitle": "Join our community of educators and start sharing your knowledge",
+    "steps": {
+      "personalInfo": "Personal Information",
+      "background": "Background & Experience",
+      "expertise": "Expertise & Motivation",
+      "additionalInfo": "Additional Information"
+    },
+    "form": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email Address",
+      "phone": "Phone Number (Optional)",
+      "bio": "Professional Bio",
+      "bioPlaceholder": "Tell us about yourself, your professional background, and what makes you passionate about teaching...",
+      "expertise": "Areas of Expertise",
+      "expertiseHelp": "Select up to 10 areas where you have expertise",
+      "experience": "Teaching/Professional Experience",
+      "experiencePlaceholder": "Describe your teaching experience, professional background, achievements, and qualifications...",
+      "education": "Education Background",
+      "educationPlaceholder": "Your educational background, degrees, certifications...",
+      "motivation": "Why do you want to teach on Skillify?",
+      "motivationPlaceholder": "Share your motivation for teaching and how you plan to help students...",
+      "sampleCourseTitle": "Sample Course Title (Optional)",
+      "sampleCourseTitlePlaceholder": "What would be the title of your first course?",
+      "sampleCourseDescription": "Sample Course Description (Optional)",
+      "sampleCourseDescriptionPlaceholder": "Briefly describe what students would learn in your first course...",
+      "portfolio": "Portfolio URL (Optional)",
+      "portfolioPlaceholder": "Link to your portfolio, website, or work samples",
+      "linkedIn": "LinkedIn Profile (Optional)",
+      "linkedInPlaceholder": "Your LinkedIn profile URL",
+      "website": "Personal Website (Optional)",
+      "websitePlaceholder": "Your personal website or blog URL"
+    },
+    "validation": {
+      "firstNameRequired": "First name is required",
+      "lastNameRequired": "Last name is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Invalid email address",
+      "bioRequired": "Bio is required",
+      "bioMinLength": "Bio must be at least 50 characters",
+      "bioMaxLength": "Bio must not exceed 500 characters",
+      "expertiseRequired": "Select at least one area of expertise",
+      "expertiseMin": "Select at least one area of expertise",
+      "expertiseMax": "Select maximum 10 areas of expertise",
+      "experienceRequired": "Experience description is required",
+      "experienceMinLength": "Experience description must be at least 100 characters",
+      "experienceMaxLength": "Experience description must not exceed 1000 characters",
+      "educationRequired": "Education is required",
+      "educationMinLength": "Education must be at least 20 characters",
+      "educationMaxLength": "Education must not exceed 500 characters",
+      "motivationRequired": "Motivation is required",
+      "motivationMinLength": "Motivation must be at least 50 characters",
+      "motivationMaxLength": "Motivation must not exceed 500 characters",
+      "courseTitleMaxLength": "Course title must not exceed 100 characters",
+      "courseDescriptionMaxLength": "Course description must not exceed 500 characters",
+      "portfolioInvalid": "Please enter a valid URL",
+      "linkedInInvalid": "Please enter a valid LinkedIn URL",
+      "websiteInvalid": "Please enter a valid website URL"
+    },
+    "buttons": {
+      "next": "Next Step",
+      "previous": "Previous Step",
+      "submit": "Submit Application",
+      "submitting": "Submitting..."
+    }
+  },
+  "applicationSuccess": {
+    "title": "Application Submitted Successfully!",
+    "subtitle": "Thank you for your interest in becoming an instructor on Skillify",
+    "message": "We've received your instructor application and our team will review it carefully.",
+    "nextSteps": {
+      "title": "What Happens Next?",
+      "checkEmail": {
+        "title": "Check Your Email",
+        "description": "We've sent a confirmation email with your application details."
+      },
+      "reviewProcess": {
+        "title": "Review Process",
+        "description": "Our team will review your application within 3-5 business days."
+      },
+      "getReady": {
+        "title": "Get Ready to Teach",
+        "description": "Start planning your first course while you wait for approval."
+      }
+    },
+    "tips": {
+      "title": "Tips While You Wait",
+      "prepareCourse": {
+        "title": "Prepare Your Course Content",
+        "description": "Start outlining your course structure and gathering materials"
+      },
+      "studyPlatform": {
+        "title": "Study Our Platform",
+        "description": "Explore successful courses to understand what works best"
+      },
+      "joinCommunity": {
+        "title": "Join Our Community",
+        "description": "Connect with other instructors and share experiences"
+      }
+    },
+    "buttons": {
+      "backToHome": "Back to Home",
+      "browseGourses": "Browse Courses",
+      "checkStatus": "Check Application Status"
     }
   }
 }

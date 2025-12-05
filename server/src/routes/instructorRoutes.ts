@@ -17,6 +17,11 @@ import {
   getInstructorEarnings,
   getInstructorEarningsByCourseController,
   updateInstructorPayoutStatus,
+  getInstructorMonthlyAnalyticsController,
+  requestInstructorPayout,
+  exportEarningsReportController,
+  exportAnalyticsReportController,
+  exportStudentsDataController,
 } from "../controllers/instructorEarningsController";
 
 const instructorRouter = Router();
@@ -77,6 +82,31 @@ instructorRouter.patch(
   "/earnings/payout-status",
   authenticateToken,
   (req, res) => updateInstructorPayoutStatus(req as AuthRequest, res)
+);
+
+// New Analytics & Export Routes
+instructorRouter.get("/analytics/monthly", authenticateToken, (req, res) =>
+  getInstructorMonthlyAnalyticsController(req as AuthRequest, res)
+);
+
+instructorRouter.post(
+  "/earnings/request-payout",
+  authenticateToken,
+  (req, res) => requestInstructorPayout(req as AuthRequest, res)
+);
+
+instructorRouter.get("/earnings/export", authenticateToken, (req, res) =>
+  exportEarningsReportController(req as AuthRequest, res)
+);
+
+instructorRouter.get("/analytics/export", authenticateToken, (req, res) =>
+  exportAnalyticsReportController(req as AuthRequest, res)
+);
+
+instructorRouter.get(
+  "/courses/:courseId/students/export",
+  authenticateToken,
+  (req, res) => exportStudentsDataController(req as AuthRequest, res)
 );
 
 export default instructorRouter;

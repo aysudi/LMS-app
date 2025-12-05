@@ -76,15 +76,13 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
 
   const sortOptions = [
     { value: "newest", label: t("filters.newest") },
-    { value: "oldest", label: t("filters.newest") },
-    { value: "title-asc", label: t("filters.relevance") },
-    { value: "title-desc", label: t("filters.relevance") },
-    { value: "students-desc", label: t("filters.mostPopular") },
-    { value: "students-asc", label: t("filters.mostPopular") },
+    { value: "oldest", label: t("filters.oldest") },
+    { value: "title-asc", label: t("filters.titleAZ") },
+    { value: "title-desc", label: t("filters.titleZA") },
     { value: "price-desc", label: t("filters.priceHighToLow") },
     { value: "price-asc", label: t("filters.priceLowToHigh") },
     { value: "rating-desc", label: t("filters.highestRated") },
-    { value: "rating-asc", label: t("filters.highestRated") },
+    { value: "rating-asc", label: t("filters.lowestRated") },
   ];
 
   const statusOptions = [
@@ -96,12 +94,12 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
   ];
 
   const priceOptions = [
-    { value: "all", label: t("filters.priceRange") },
+    { value: "all", label: t("filters.allPrices") },
     { value: "free", label: t("common.free") },
-    { value: "paid", label: t("common.paid") },
-    { value: "under-50", label: "< $50" },
+    { value: "under-50", label: t("filters.under") + " 50$" },
     { value: "50-100", label: "$50 - $100" },
-    { value: "over-100", label: "> $100" },
+    { value: "over-100", label: t("filters.over") + " 100$" },
+    { value: "paid", label: t("common.paid") },
   ];
 
   const ratingOptions = [
@@ -286,10 +284,9 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
                 </div>
               )}
 
-              {/* Sort Order Toggle */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t("common.sort")}
+                  {t("filters.sortDirection")}
                 </label>
                 <div className="flex items-center space-x-2">
                   <button
@@ -297,7 +294,6 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
                       const currentSort = sortBy;
                       let newSort: SortOption;
 
-                      // Handle specific cases
                       switch (currentSort) {
                         case "newest":
                           newSort = "oldest";

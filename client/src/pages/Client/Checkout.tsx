@@ -20,6 +20,7 @@ import { stripePromise, stripeConfig } from "../../utils/stripe";
 import StripePaymentForm from "../../components/Client/Cart/StripePaymentForm";
 import type { CreateOrderRequest } from "../../services/payment.service";
 import { getImageUrl } from "../../utils/mediaHelpers";
+import { t } from "i18next";
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -148,11 +149,10 @@ const Checkout = () => {
             <div>
               <h1 className="text-3xl font-bold text-gray-800 flex items-center space-x-3">
                 <FaLock className="text-green-600" />
-                <span>Secure Checkout</span>
+                <span>{t("cart.secureCheckout")}</span>
               </h1>
               <p className="text-gray-600 mt-1">
-                Complete your purchase for {selectedCourses.length} course
-                {selectedCourses.length > 1 ? "s" : ""}
+                {t("cart.completePurchase", { count: selectedCourses.length })}
               </p>
             </div>
           </div>
@@ -167,20 +167,20 @@ const Checkout = () => {
               className="bg-white rounded-xl shadow-xl p-8 border border-gray-200"
             >
               <h2 className="text-2xl font-bold text-gray-800 mb-6">
-                Payment Information
+                {t("cart.paymentInformation")}
               </h2>
 
               {/* Billing Information Form */}
               {paymentStep === "order" && (
                 <div className="space-y-6">
                   <h3 className="text-lg font-semibold text-gray-700 mb-4">
-                    Billing Information
+                    {t("cart.paymentInformation")}
                   </h3>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Full Name
+                        {t("common.fullName")}
                       </label>
                       <input
                         type="text"
@@ -197,7 +197,7 @@ const Checkout = () => {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Email
+                        {t("common.email")}
                       </label>
                       <input
                         type="email"
@@ -217,7 +217,7 @@ const Checkout = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Country
+                        {t("common.country")}
                       </label>
                       <input
                         type="text"
@@ -234,7 +234,7 @@ const Checkout = () => {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        State/Province
+                        {t("common.stateProvince")}
                       </label>
                       <input
                         type="text"
@@ -254,7 +254,7 @@ const Checkout = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        City
+                        {t("common.city")}
                       </label>
                       <input
                         type="text"
@@ -271,7 +271,7 @@ const Checkout = () => {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Postal Code
+                        {t("common.postalCode")}
                       </label>
                       <input
                         type="text"
@@ -309,7 +309,7 @@ const Checkout = () => {
                     ) : (
                       <>
                         <FaCreditCard className="text-lg" />
-                        <span>Proceed to Payment</span>
+                        <span>{t("student.proceedToPayment")}</span>
                       </>
                     )}
                   </button>
@@ -347,11 +347,9 @@ const Checkout = () => {
                     className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"
                   />
                   <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                    Processing Payment...
+                    {t("cart.processingPayment")}
                   </h3>
-                  <p className="text-gray-600">
-                    Please wait while we confirm your payment
-                  </p>
+                  <p className="text-gray-600">{t("cart.waitPayment")}</p>
                 </div>
               )}
 
@@ -360,10 +358,10 @@ const Checkout = () => {
                 <div className="text-center py-12">
                   <FaCheckCircle className="text-6xl text-green-600 mx-auto mb-4" />
                   <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                    Payment Successful!
+                    {t("cart.paymentSuccessful")}
                   </h3>
                   <p className="text-gray-600 mb-4">
-                    Welcome to your new courses! Redirecting to My Learning...
+                    {t("cart.welcomeToCourse")}
                   </p>
                   <motion.div
                     animate={{ rotate: 360 }}
@@ -382,7 +380,7 @@ const Checkout = () => {
                 <div className="flex items-center space-x-2 text-green-700">
                   <FaLock className="text-sm" />
                   <span className="text-sm font-medium">
-                    Your payment information is secure and encrypted by Stripe
+                    {t("cart.securePaymentInfo")}
                   </span>
                 </div>
               </div>
@@ -398,7 +396,7 @@ const Checkout = () => {
                 className="bg-white rounded-xl shadow-xl p-6 border border-gray-200"
               >
                 <h2 className="text-xl font-bold text-gray-800 mb-6">
-                  Order Summary
+                  {t("cart.orderSummary")}
                 </h2>
 
                 {/* Course List */}
@@ -429,7 +427,7 @@ const Checkout = () => {
                 {/* Total */}
                 <div className="border-t border-gray-200 pt-4">
                   <div className="flex justify-between items-center text-xl font-bold text-gray-900">
-                    <span>Total:</span>
+                    <span>{t("cart.total")}:</span>
                     <span>${subtotal.toFixed(2)}</span>
                   </div>
                 </div>
@@ -438,15 +436,15 @@ const Checkout = () => {
                 <div className="mt-6 space-y-2">
                   <div className="flex items-center space-x-2 text-sm text-green-600">
                     <FaCheckCircle className="text-xs" />
-                    <span>Lifetime access</span>
+                    <span>{t("course.lifetimeAccess")}</span>
                   </div>
                   <div className="flex items-center space-x-2 text-sm text-green-600">
                     <FaCheckCircle className="text-xs" />
-                    <span>Mobile and TV access</span>
+                    <span>{t("cart.mobileAndTVAccess")}</span>
                   </div>
                   <div className="flex items-center space-x-2 text-sm text-green-600">
                     <FaCheckCircle className="text-xs" />
-                    <span>Certificate of completion</span>
+                    <span>{t("course.certificateOfCompletion")}</span>
                   </div>
                 </div>
 
@@ -455,9 +453,7 @@ const Checkout = () => {
                   <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
                     <div className="flex items-center space-x-2 text-blue-700 text-sm">
                       <FaInfoCircle />
-                      <span>
-                        Complete billing information to proceed to payment
-                      </span>
+                      <span>{t("cart.completeInformation")}</span>
                     </div>
                   </div>
                 )}
@@ -466,14 +462,14 @@ const Checkout = () => {
                   <div className="mt-8 p-4 bg-green-50 rounded-lg border border-green-200">
                     <div className="flex items-center space-x-2 text-green-700 text-sm">
                       <FaLock />
-                      <span>Secure payment powered by Stripe</span>
+                      <span>{t("cart.securePaymentPoweredBy")}</span>
                     </div>
                   </div>
                 )}
 
                 <div className="mt-4 flex items-center justify-center space-x-2 text-xs text-gray-500">
                   <FaInfoCircle />
-                  <span>30-Day Money-Back Guarantee</span>
+                  <span>{t("cart.30DayMoneyBackGuarantee")}</span>
                 </div>
               </motion.div>
             </div>

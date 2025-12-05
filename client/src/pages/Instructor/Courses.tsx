@@ -66,7 +66,7 @@ const InstructorCourses = () => {
       case "paid":
         return { minPrice: 1 };
       case "under-50":
-        return { minPrice: 1, maxPrice: 49.99 };
+        return { minPrice: 0, maxPrice: 49.99 };
       case "50-100":
         return { minPrice: 50, maxPrice: 100 };
       case "over-100":

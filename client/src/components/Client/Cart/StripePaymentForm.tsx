@@ -6,6 +6,7 @@ import {
 } from "@stripe/react-stripe-js";
 import { motion } from "framer-motion";
 import { FaCreditCard, FaLock, FaSpinner } from "react-icons/fa";
+import { t } from "i18next";
 
 interface StripePaymentFormProps {
   clientSecret: string;
@@ -146,7 +147,9 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
         ) : (
           <>
             <FaCreditCard className="text-lg" />
-            <span>Pay ${amount.toFixed(2)}</span>
+            <span>
+              {t("cart.pay")} ${amount.toFixed(2)}
+            </span>
           </>
         )}
       </button>
@@ -154,7 +157,7 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
       {/* Security Notice */}
       <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
         <FaLock className="text-xs" />
-        <span>Your payment information is secure and encrypted</span>
+        <span>{t("cart.paymentSecure")}</span>
       </div>
     </motion.form>
   );

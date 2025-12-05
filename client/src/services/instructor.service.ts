@@ -94,7 +94,6 @@ export const getInstructorEarningsByCourse = async (
   courseId?: string
 ): Promise<InstructorEarningsByCourseResponse> => {
   const params = courseId ? { courseId } : {};
-  console.log("course id: ", courseId);
   const response = await api.get("/api/instructor/earnings/by-course", {
     params,
   });
@@ -271,5 +270,62 @@ export const toggleCourseStatus = async (
   courseId: string
 ): Promise<{ success: boolean; message: string; data?: any }> => {
   const response = await api.patch(`/api/courses/${courseId}/toggle-status`);
+  return response.data;
+};
+
+// Analytics & Reports
+export const getMonthlyAnalytics = async (
+  period: string = "6m"
+): Promise<{ success: boolean; data: any[] }> => {
+  const response = await api.get(`/api/instructor/analytics/monthly`, {
+    params: { period },
+  });
+  return response.data;
+};
+
+export const exportEarningsReport = async (
+  format: "pdf" | "csv" = "pdf",
+  period?: string
+): Promise<Blob> => {
+  const response = await api.get(`/api/instructor/earnings/export`, {
+    params: { format, period },
+    responseType: "blob",
+  });
+  return response.data;
+};
+
+export const exportAnalyticsReport = async (
+  format: "pdf" | "csv" = "pdf",
+  period?: string
+): Promise<Blob> => {
+  const response = await api.get(`/api/instructor/analytics/export`, {
+    params: { format, period },
+    responseType: "blob",
+  });
+  return response.data;
+};
+
+export const exportStudentsData = async (
+  courseId: string,
+  format: "pdf" | "csv" = "csv"
+): Promise<Blob> => {
+  const response = await api.get(
+    `/api/instructor/courses/${courseId}/students/export`,
+    {
+      params: { format },
+      responseType: "blob",
+    }
+  );
+  return response.data;
+};
+
+export const requestPayout = async (
+  amount: number,
+  paymentMethod?: string
+): Promise<{ success: boolean; message: string; data?: any }> => {
+  const response = await api.post(`/api/instructor/earnings/request-payout`, {
+    amount,
+    paymentMethod,
+  });
   return response.data;
 };

@@ -1,10 +1,13 @@
 import jwt from "jsonwebtoken";
 import { JWTUtils } from "../utils/jwt.utils.js";
-import { messageHandlers } from "./messageHandlers.js";
+import Enrollment from "../models/Enrollment.js";
 // Store connected users
 const connectedUsers = new Map();
 const userSockets = new Map(); // userId -> socketId
+// Store IO instance
+let ioInstance = null;
 export const initializeSocket = (io) => {
+    ioInstance = io;
     // Middleware for authentication
     io.use(async (socket, next) => {
         try {
@@ -65,7 +68,6 @@ export const initializeSocket = (io) => {
             username: authSocket.userEmail,
         });
         // Initialize message handlers
-        messageHandlers(authSocket, io, connectedUsers, userSockets);
         // Handle joining conversation rooms
         authSocket.on("conversation:join", (conversationId) => {
             authSocket.join(`conversation:${conversationId}`);
@@ -79,12 +81,44 @@ export const initializeSocket = (io) => {
                 authSocket.join(`conversation:${id}`);
             });
         });
+        // Handle course room joining
+        authSocket.on("join:course", async (courseId) => {
+            try {
+                const allEnrollments = await Enrollment.find({
+                    user: authSocket.userId,
+                    course: courseId,
+                });
+                const enrollment = await Enrollment.findOne({
+                    user: authSocket.userId,
+                    course: courseId,
+                    status: { $in: ["active", "completed"] },
+                });
+                if (enrollment) {
+                    authSocket.join(`course-${courseId}`);
+                    // Log current room members
+                    const room = io.sockets.adapter.rooms.get(`course-${courseId}`);
+                }
+                else {
+                    console.log(`❌ User ${authSocket.userId} not enrolled in course: ${courseId}`);
+                }
+            }
+            catch (error) {
+                console.error("Error joining course room:", error);
+            }
+        });
+        // Handle leaving course room
+        authSocket.on("leave:course", (courseId) => {
+            try {
+                authSocket.leave(`course-${courseId}`);
+            }
+            catch (error) {
+                console.error("Error leaving course room:", error);
+            }
+        });
         // Handle disconnect
         authSocket.on("disconnect", (reason) => {
-            // Remove user from connected users
             connectedUsers.delete(authSocket.id);
             userSockets.delete(authSocket.userId);
-            // Notify others that user is offline
             authSocket.broadcast.emit("user:offline", {
                 userId: authSocket.userId,
                 username: authSocket.userEmail,
@@ -100,7 +134,7 @@ export const initializeSocket = (io) => {
         console.error("Socket.IO connection error:", err);
     });
 };
-// Helper functions to get user info
 export const getConnectedUsers = () => Array.from(connectedUsers.values());
 export const getUserSocketId = (userId) => userSockets.get(userId);
 export const isUserOnline = (userId) => userSockets.has(userId);
+export const getIO = () => ioInstance;

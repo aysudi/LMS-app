@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 // @ts-ignore
 import { useTranslation } from "react-i18next";
@@ -14,17 +14,22 @@ import {
   useInstructorCoursesWithStats,
   useCourseStudents,
 } from "../../hooks/useInstructor";
+import { exportStudentsData } from "../../services/instructor.service";
+import { useSnackbar } from "notistack";
 import Loading from "../../components/Common/Loading";
 import StudentRow from "../../components/Instructor/Students/StudentRow";
 
 const InstructorStudents = () => {
   const { t } = useTranslation();
+  const { enqueueSnackbar } = useSnackbar();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCourse, setSelectedCourse] = useState("all");
+  const [progressFilter, setProgressFilter] = useState("all");
   const [sortBy, setSortBy] = useState<
     "name" | "progress" | "enrolled" | "lastActive"
   >("name");
   const [page, setPage] = useState(1);
+  const [isExporting, setIsExporting] = useState(false);
 
   const { data: coursesData, isLoading: coursesLoading } =
     useInstructorCoursesWithStats({
@@ -51,43 +56,157 @@ const InstructorStudents = () => {
     }
   );
 
-  console.log("students", studentsData);
-  const students = studentsData?.data?.students || [];
+  const allStudents = studentsData?.data?.students || [];
   const totalPages = studentsData?.data?.pagination?.totalPages || 1;
+
+  // Filter students based on search term and progress
+  const filteredStudents = allStudents.filter((student) => {
+    // Search filter
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      const fullName =
+        `${student.student.firstName} ${student.student.lastName}`.toLowerCase();
+      const email = student.student.email.toLowerCase();
+
+      if (!fullName.includes(searchLower) && !email.includes(searchLower)) {
+        return false;
+      }
+    }
+
+    // Progress filter
+    if (progressFilter !== "all") {
+      const progress = student.progress?.progressPercentage || 0;
+
+      switch (progressFilter) {
+        case "not-started":
+          return progress === 0;
+        case "in-progress":
+          return progress > 0 && progress < 100;
+        case "completed":
+          return progress === 100;
+        default:
+          return true;
+      }
+    }
+
+    return true;
+  });
+
+  // Sort students based on sort option
+  const sortedStudents = [...filteredStudents].sort((a, b) => {
+    switch (sortBy) {
+      case "name":
+        const nameA =
+          `${a.student.firstName} ${a.student.lastName}`.toLowerCase();
+        const nameB =
+          `${b.student.firstName} ${b.student.lastName}`.toLowerCase();
+        return nameA.localeCompare(nameB);
+
+      case "progress":
+        const progressA = a.progress?.progressPercentage || 0;
+        const progressB = b.progress?.progressPercentage || 0;
+        return progressB - progressA; // Higher progress first
+
+      case "enrolled":
+        const enrolledA = new Date(a.enrollment?.enrolledAt || 0).getTime();
+        const enrolledB = new Date(b.enrollment?.enrolledAt || 0).getTime();
+        return enrolledB - enrolledA; // Most recent first
+
+      case "lastActive":
+        const lastActiveA = new Date(
+          a.enrollment?.lastAccessedAt || 0
+        ).getTime();
+        const lastActiveB = new Date(
+          b.enrollment?.lastAccessedAt || 0
+        ).getTime();
+        return lastActiveB - lastActiveA; // Most recent first
+
+      default:
+        return 0;
+    }
+  });
+
+  const students = sortedStudents;
 
   const totalStudents = instructorCourses.reduce(
     (acc, course) => acc + (course.studentsEnrolled?.length || 0),
     0
   );
-  const completedStudents = students.filter(
-    (s) => s.enrollment?.progressPercentage === 100
+  const completedStudents = allStudents.filter(
+    (s) => s.progress?.progressPercentage === 100
   ).length;
-  const activeToday = students.filter((s) => {
+  const activeToday = allStudents.filter((s) => {
     const lastActive = new Date(s.enrollment?.lastAccessedAt || 0);
     const today = new Date();
     return lastActive.toDateString() === today.toDateString();
   }).length;
 
   const averageProgress =
-    students.length > 0
+    allStudents.length > 0
       ? Math.round(
-          students.reduce(
-            (acc, s) => acc + (s.enrollment?.progressPercentage || 0),
+          allStudents.reduce(
+            (acc, s) => acc + (s.progress?.progressPercentage || 0),
             0
-          ) / students.length
+          ) / allStudents.length
         )
       : 0;
 
-  const isLoading = coursesLoading || studentsLoading;
+  // Reset pagination when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm, selectedCourse, progressFilter, sortBy]);
 
-  const handleExportData = () => {
-    console.log("Exporting student data...");
-    // TODO: Implement export functionality
+  const clearFilters = () => {
+    setSearchTerm("");
+    setSelectedCourse("all");
+    setProgressFilter("all");
+    setSortBy("name");
   };
 
-  const handleSendMessage = (studentId: string) => {
-    console.log("Sending message to student:", studentId);
-    // TODO: Implement messaging functionality
+  const hasActiveFilters =
+    searchTerm ||
+    selectedCourse !== "all" ||
+    progressFilter !== "all" ||
+    sortBy !== "name";
+
+  const isLoading = coursesLoading || studentsLoading;
+
+  const handleExportData = async () => {
+    const courseId =
+      selectedCourse === "all" ? instructorCourses[0]?._id : selectedCourse;
+
+    if (!courseId) {
+      enqueueSnackbar("Please select a course to export data", {
+        variant: "warning",
+      });
+      return;
+    }
+
+    setIsExporting(true);
+    try {
+      const blob = await exportStudentsData(courseId, "csv");
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.style.display = "none";
+      a.href = url;
+      a.download = `students-data-${courseId}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      enqueueSnackbar("Students data exported successfully!", {
+        variant: "success",
+      });
+    } catch (error: any) {
+      enqueueSnackbar(
+        error.response?.data?.message || "Failed to export students data",
+        {
+          variant: "error",
+        }
+      );
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   if (isLoading) {
@@ -134,10 +253,19 @@ const InstructorStudents = () => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleExportData}
-            className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200 font-medium flex items-center space-x-2"
+            disabled={isExporting || instructorCourses.length === 0}
+            className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200 font-medium flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <FaDownload className="text-sm" />
-            <span>{t("instructor.students.exportData")}</span>
+            {isExporting ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+            ) : (
+              <FaDownload className="text-sm" />
+            )}
+            <span>
+              {isExporting
+                ? "Exporting..."
+                : t("instructor.students.exportData")}
+            </span>
           </motion.button>
         </motion.div>
 
@@ -220,7 +348,7 @@ const InstructorStudents = () => {
           transition={{ delay: 0.2 }}
           className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8"
         >
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
             {/* Search */}
             <div className="relative flex-1 max-w-md">
               <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -251,6 +379,25 @@ const InstructorStudents = () => {
               </select>
 
               <select
+                value={progressFilter}
+                onChange={(e) => setProgressFilter(e.target.value)}
+                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              >
+                <option value="all">
+                  {t("instructor.students.allProgress")}
+                </option>
+                <option value="not-started">
+                  {t("instructor.students.notStarted")}
+                </option>
+                <option value="in-progress">
+                  {t("instructor.students.inProgress")}
+                </option>
+                <option value="completed">
+                  {t("instructor.students.completed")}
+                </option>
+              </select>
+
+              <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
                 className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
@@ -268,6 +415,15 @@ const InstructorStudents = () => {
                   {t("instructor.students.sortByLastActive")}
                 </option>
               </select>
+
+              {hasActiveFilters && (
+                <button
+                  onClick={clearFilters}
+                  className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+                >
+                  Clear Filters
+                </button>
+              )}
             </div>
           </div>
         </motion.div>
@@ -311,20 +467,11 @@ const InstructorStudents = () => {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       {t("instructor.students.lastActive")}
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      {t("instructor.students.actions")}
-                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {students.map((student: any) => (
-                    <StudentRow
-                      key={student.student._id}
-                      student={student}
-                      onSendMessage={() =>
-                        handleSendMessage(student.student._id)
-                      }
-                    />
+                    <StudentRow key={student.student._id} student={student} />
                   ))}
                 </tbody>
               </table>

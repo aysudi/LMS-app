@@ -17,14 +17,20 @@ import {
   useInstructorAnalytics,
   useInstructorEarnings,
   useInstructorEarningsByCourse,
+  useMonthlyAnalytics,
 } from "../../hooks/useInstructor";
+import { exportEarningsReport } from "../../services/instructor.service";
 import EarningsCard from "../../components/Instructor/Earnings/EarningsCard";
+import { useSnackbar } from "notistack";
 
 const InstructorEarnings = () => {
   const { t } = useTranslation();
+  const { enqueueSnackbar } = useSnackbar();
   const [selectedPeriod, setSelectedPeriod] = useState<"30d" | "90d" | "1y">(
     "30d"
   );
+  const [isExporting, setIsExporting] = useState(false);
+  const [isRequestingPayout, _] = useState(false);
 
   const { formatCurrency } = useInstructorAnalytics();
 
@@ -33,9 +39,10 @@ const InstructorEarnings = () => {
     useInstructorEarnings();
   const { data: courseEarningsData, isLoading: courseEarningsLoading } =
     useInstructorEarningsByCourse();
-  console.log("earnings :", courseEarningsData);
+  const { data: monthlyData, isLoading: monthlyLoading } =
+    useMonthlyAnalytics("6m");
 
-  if (earningsLoading || courseEarningsLoading) {
+  if (earningsLoading || courseEarningsLoading || monthlyLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loading size="lg" />
@@ -54,14 +61,32 @@ const InstructorEarnings = () => {
 
   const courseEarnings = courseEarningsData?.data || [];
 
-  const handleRequestPayout = () => {
-    console.log("Requesting payout...");
-    // TODO: Implement payout request functionality
-  };
-
-  const handleDownloadReport = () => {
-    console.log("Downloading earnings report...");
-    // TODO: Implement report download functionality
+  const handleDownloadReport = async () => {
+    setIsExporting(true);
+    try {
+      const blob = await exportEarningsReport("csv", selectedPeriod);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.style.display = "none";
+      a.href = url;
+      a.download = `earnings-report-${selectedPeriod}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      enqueueSnackbar("Report downloaded successfully!", {
+        variant: "success",
+      });
+    } catch (error: any) {
+      enqueueSnackbar(
+        error.response?.data?.message || "Failed to download report",
+        {
+          variant: "error",
+        }
+      );
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   return (
@@ -97,20 +122,36 @@ const InstructorEarnings = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleDownloadReport}
-              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium flex items-center space-x-2"
+              disabled={isExporting}
+              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <FaDownload className="text-sm" />
-              <span>{t("common.export")}</span>
+              {isExporting ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-400 border-t-transparent" />
+              ) : (
+                <FaDownload className="text-sm" />
+              )}
+              <span>{isExporting ? "Exporting..." : t("common.export")}</span>
             </motion.button>
 
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={handleRequestPayout}
-              className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200 font-medium flex items-center space-x-2"
+              onClick={handleDownloadReport}
+              disabled={
+                isRequestingPayout || earnings.totalInstructorShare < 50
+              }
+              className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200 font-medium flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <FaCreditCard className="text-sm" />
-              <span>{t("instructor.requestPayout")}</span>
+              {isRequestingPayout ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+              ) : (
+                <FaCreditCard className="text-sm" />
+              )}
+              <span>
+                {isRequestingPayout
+                  ? "Processing..."
+                  : t("instructor.downloadReport")}
+              </span>
             </motion.button>
           </div>
         </motion.div>
@@ -197,60 +238,57 @@ const InstructorEarnings = () => {
           </div>
 
           <div className="h-80 flex items-end justify-between space-x-4 px-4">
-            {
-              // Generate mock monthly data from current earnings
-              Array.from({ length: 6 }, (_, i) => ({
-                month: new Date(Date.now() - (5 - i) * 30 * 24 * 60 * 60 * 1000)
-                  .toISOString()
-                  .slice(0, 7),
-                amount: Math.round(
-                  (earnings.totalInstructorShare / 6 || 0) *
-                    (0.8 + Math.random() * 0.4)
-                ),
-              })).map((data: any, index: number) => (
-                <div
-                  key={index}
-                  className="flex flex-col items-center space-y-2 flex-1"
-                >
-                  <div className="flex items-end w-full h-64">
-                    <div
-                      className="bg-indigo-500 rounded-t-lg transition-all duration-500 hover:bg-indigo-600 cursor-pointer relative group w-full"
-                      style={{
-                        height: `${Math.max(
-                          5,
-                          (data.amount /
-                            Math.max(
-                              // Use the same mock data for bar chart
-                              ...Array.from({ length: 6 }, (_, i) => ({
-                                month: new Date(
-                                  Date.now() -
-                                    (5 - i) * 30 * 24 * 60 * 60 * 1000
-                                )
-                                  .toISOString()
-                                  .slice(0, 7),
-                                amount: Math.round(
-                                  (earnings.totalInstructorShare / 6 || 0) *
-                                    (0.8 + Math.random() * 0.4)
-                                ),
-                              })).map((d: any) => d.amount)
-                            )) *
-                            100
-                        )}%`,
-                      }}
-                    >
-                      <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded px-2 py-1 transition-opacity">
-                        {formatCurrency(data.amount)}
+            {monthlyData?.data && monthlyData.data.length > 0 ? (
+              monthlyData.data.map((data: any, index: number) => {
+                const maxAmount = Math.max(
+                  ...monthlyData.data.map((d: any) => d.earnings || 0)
+                );
+                return (
+                  <div
+                    key={index}
+                    className="flex flex-col items-center space-y-2 flex-1"
+                  >
+                    <div className="flex items-end w-full h-64">
+                      <div
+                        className="bg-indigo-500 rounded-t-lg transition-all duration-500 hover:bg-indigo-600 cursor-pointer relative group w-full"
+                        style={{
+                          height: `${Math.max(
+                            5,
+                            maxAmount > 0
+                              ? ((data.earnings || 0) / maxAmount) * 100
+                              : 5
+                          )}%`,
+                        }}
+                      >
+                        <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded px-2 py-1 transition-opacity">
+                          {formatCurrency(data.earnings || 0)}
+                        </div>
                       </div>
                     </div>
+                    <span className="text-sm text-gray-600 font-medium">
+                      {data.month ||
+                        new Date(
+                          Date.now() -
+                            (monthlyData.data.length - 1 - index) *
+                              30 *
+                              24 *
+                              60 *
+                              60 *
+                              1000
+                        ).toLocaleDateString("en-US", { month: "short" })}
+                    </span>
                   </div>
-                  <span className="text-sm text-gray-600 font-medium">
-                    {new Date(data.month).toLocaleDateString("en-US", {
-                      month: "short",
-                    })}
-                  </span>
+                );
+              })
+            ) : (
+              // Fallback display when no data
+              <div className="flex items-center justify-center w-full h-64 text-gray-500">
+                <div className="text-center">
+                  <FaDollarSign className="text-4xl mx-auto mb-2 text-gray-300" />
+                  <p>No earnings data available</p>
                 </div>
-              )) || []
-            }
+              </div>
+            )}
           </div>
         </motion.div>
 

@@ -1,6 +1,8 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+// @ts-ignore
+import { useTranslation } from "react-i18next";
 import {
   FaChalkboardTeacher,
   FaDollarSign,
@@ -21,6 +23,7 @@ import { useAuthContext } from "../../context/AuthContext";
 import { useMyInstructorApplication } from "../../hooks/useInstructorApplication";
 
 const BecomeInstructor: React.FC = () => {
+  const { t } = useTranslation();
   const { user, isAuthenticated } = useAuthContext();
   const navigate = useNavigate();
   const { data: existingApplication, isLoading } = useMyInstructorApplication();
@@ -28,88 +31,86 @@ const BecomeInstructor: React.FC = () => {
   const benefits = [
     {
       icon: FaDollarSign,
-      title: "Earn Money Teaching",
-      description:
-        "Generate passive income by sharing your expertise with students worldwide",
+      title: t("becomeInstructor.benefits.earnMoney.title"),
+      description: t("becomeInstructor.benefits.earnMoney.description"),
       color: "from-green-500 to-emerald-600",
-      stat: "Up to 70% revenue share",
+      stat: t("becomeInstructor.benefits.earnMoney.stat"),
     },
     {
       icon: FaGlobeAmericas,
-      title: "Global Reach",
-      description:
-        "Connect with students from around the world and build an international audience",
+      title: t("becomeInstructor.benefits.globalReach.title"),
+      description: t("becomeInstructor.benefits.globalReach.description"),
       color: "from-blue-500 to-cyan-600",
-      stat: "190+ countries",
+      stat: t("becomeInstructor.benefits.globalReach.stat"),
     },
     {
       icon: FaClock,
-      title: "Flexible Schedule",
-      description: "Create courses on your own time and work at your own pace",
+      title: t("becomeInstructor.benefits.flexibleSchedule.title"),
+      description: t("becomeInstructor.benefits.flexibleSchedule.description"),
       color: "from-purple-500 to-violet-600",
-      stat: "24/7 availability",
+      stat: t("becomeInstructor.benefits.flexibleSchedule.stat"),
     },
     {
       icon: FaTrophy,
-      title: "Build Your Brand",
-      description:
-        "Establish yourself as an expert and grow your professional reputation",
+      title: t("becomeInstructor.benefits.buildBrand.title"),
+      description: t("becomeInstructor.benefits.buildBrand.description"),
       color: "from-orange-500 to-red-600",
-      stat: "Expert recognition",
+      stat: t("becomeInstructor.benefits.buildBrand.stat"),
     },
     {
       icon: FaHeart,
-      title: "Make an Impact",
-      description: "Help others learn new skills and advance their careers",
+      title: t("becomeInstructor.benefits.makeImpact.title"),
+      description: t("becomeInstructor.benefits.makeImpact.description"),
       color: "from-pink-500 to-rose-600",
-      stat: "Change lives",
+      stat: t("becomeInstructor.benefits.makeImpact.stat"),
     },
     {
       icon: FaChartLine,
-      title: "Analytics & Insights",
-      description:
-        "Track your performance with detailed analytics and student feedback",
+      title: t("becomeInstructor.benefits.analytics.title"),
+      description: t("becomeInstructor.benefits.analytics.description"),
       color: "from-indigo-500 to-purple-600",
-      stat: "Real-time data",
+      stat: t("becomeInstructor.benefits.analytics.stat"),
     },
   ];
 
   const features = [
     {
       icon: FaRocket,
-      title: "Easy Course Creation",
-      description: "Intuitive tools to create engaging video courses",
+      title: t("becomeInstructor.features.easyCourseCreation.title"),
+      description: t(
+        "becomeInstructor.features.easyCourseCreation.description"
+      ),
     },
     {
       icon: FaUsers,
-      title: "Student Community",
-      description: "Build a community of learners around your content",
+      title: t("becomeInstructor.features.studentCommunity.title"),
+      description: t("becomeInstructor.features.studentCommunity.description"),
     },
     {
       icon: FaCertificate,
-      title: "Certification Tools",
-      description: "Provide certificates to students upon completion",
+      title: t("becomeInstructor.features.certification.title"),
+      description: t("becomeInstructor.features.certification.description"),
     },
     {
       icon: FaLightbulb,
-      title: "Marketing Support",
-      description: "We help promote your courses to the right audience",
+      title: t("becomeInstructor.features.marketingSupport.title"),
+      description: t("becomeInstructor.features.marketingSupport.description"),
     },
   ];
 
   const stats = [
-    { number: "50K+", label: "Active Students" },
-    { number: "10K+", label: "Instructors Earning" },
-    { number: "$2M+", label: "Paid to Instructors" },
-    { number: "95%", label: "Satisfaction Rate" },
+    { number: "50K+", label: t("becomeInstructor.stats.activeStudents") },
+    { number: "10K+", label: t("becomeInstructor.stats.instructorsEarning") },
+    { number: "$2M+", label: t("becomeInstructor.stats.paidToInstructors") },
+    { number: "95%", label: t("becomeInstructor.stats.satisfactionRate") },
   ];
 
   const requirements = [
-    "Expertise in a subject area",
-    "Passion for teaching and helping others",
-    "Basic computer and internet skills",
-    "Commitment to creating quality content",
-    "Professional communication skills",
+    t("becomeInstructor.requirements.list.0"),
+    t("becomeInstructor.requirements.list.1"),
+    t("becomeInstructor.requirements.list.2"),
+    t("becomeInstructor.requirements.list.3"),
+    t("becomeInstructor.requirements.list.4"),
   ];
 
   const handleGetStarted = () => {
@@ -158,11 +159,10 @@ const BecomeInstructor: React.FC = () => {
             className="text-center"
           >
             <h1 className="text-6xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 bg-clip-text text-transparent leading-tight">
-              Become an Instructor
+              {t("becomeInstructor.title")}
             </h1>
             <p className="text-xl md:text-2xl text-gray-700 mb-8 max-w-3xl mx-auto leading-relaxed">
-              Share your expertise, inspire students worldwide, and build a
-              rewarding teaching career on Skillify
+              {t("becomeInstructor.subtitle")}
             </p>
 
             <motion.button
@@ -174,10 +174,10 @@ const BecomeInstructor: React.FC = () => {
               <FaChalkboardTeacher className="text-xl" />
               <span>
                 {user?.role === "instructor"
-                  ? "Go to Dashboard"
+                  ? t("becomeInstructor.goToDashboard")
                   : existingApplication
-                  ? "Check Application Status"
-                  : "Start Teaching Today"}
+                  ? t("becomeInstructor.checkApplicationStatus")
+                  : t("becomeInstructor.getStarted")}
               </span>
               <FaArrowRight className="text-lg" />
             </motion.button>
@@ -189,7 +189,7 @@ const BecomeInstructor: React.FC = () => {
                 transition={{ delay: 0.5 }}
                 className="mt-4 text-sm text-gray-600"
               >
-                Application Status:{" "}
+                {t("becomeInstructor.applicationStatus")}:{" "}
                 <span
                   className={`font-semibold ${
                     existingApplication.status === "pending"
@@ -292,10 +292,10 @@ const BecomeInstructor: React.FC = () => {
             className="text-center mb-16"
           >
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Powerful Tools for Instructors
+              {t("becomeInstructor.powerfulTools.title")}
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Everything you need to create, market, and sell your courses
+              {t("becomeInstructor.powerfulTools.subtitle")}
             </p>
           </motion.div>
 
@@ -333,10 +333,10 @@ const BecomeInstructor: React.FC = () => {
             className="text-center mb-16"
           >
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              What You Need to Get Started
+              {t("becomeInstructor.requirementsSection.title")}
             </h2>
             <p className="text-xl text-gray-600">
-              Basic requirements to become a successful instructor
+              {t("becomeInstructor.requirementsSection.subtitle")}
             </p>
           </motion.div>
 
@@ -371,11 +371,10 @@ const BecomeInstructor: React.FC = () => {
           >
             <FaGraduationCap className="text-6xl mx-auto opacity-90" />
             <h2 className="text-4xl md:text-5xl font-bold leading-tight">
-              Ready to Start Your Teaching Journey?
+              {t("becomeInstructor.ctaSection.title")}
             </h2>
             <p className="text-xl opacity-90 max-w-2xl mx-auto">
-              Join our community of expert instructors and start earning money
-              while making a positive impact on students' lives.
+              {t("becomeInstructor.ctaSection.subtitle")}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -387,10 +386,10 @@ const BecomeInstructor: React.FC = () => {
               >
                 <span>
                   {user?.role === "instructor"
-                    ? "Go to Dashboard"
+                    ? t("becomeInstructor.goToDashboard")
                     : existingApplication
-                    ? "Check Application Status"
-                    : "Apply Now"}
+                    ? t("becomeInstructor.checkApplicationStatus")
+                    : t("becomeInstructor.ctaSection.applyNow")}
                 </span>
                 <FaArrowRight />
               </motion.button>
@@ -400,13 +399,13 @@ const BecomeInstructor: React.FC = () => {
                   to="/auth/register"
                   className="text-white border-2 border-white hover:bg-white hover:text-indigo-600 font-semibold px-8 py-4 rounded-2xl transition-all duration-300"
                 >
-                  Create Account First
+                  {t("becomeInstructor.ctaSection.createAccount")}
                 </Link>
               )}
             </div>
 
             <p className="text-sm opacity-75">
-              No upfront costs • Free to get started • Earn money from day one
+              {t("becomeInstructor.ctaSection.footerNote")}
             </p>
           </motion.div>
         </div>

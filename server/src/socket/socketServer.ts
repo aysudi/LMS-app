@@ -3,7 +3,6 @@ import http from "http";
 import jwt from "jsonwebtoken";
 import UserModel from "../models/User.js";
 import { AuthenticatedSocket } from "../types/socket.type.js";
-import { registerMessageHandlers } from "../utils/messageHandlers.js";
 import Enrollment from "../models/Enrollment.js";
 
 const connectedUsers = new Map<string, AuthenticatedSocket>();
@@ -112,7 +111,7 @@ export const initializeSocket = (server: http.Server) => {
     });
 
     // Register message handlers
-    registerMessageHandlers(io, authSocket);
+    // registerMessageHandlers(io, authSocket);
 
     // Handle user online status
     authSocket.on("status:online", () => {

@@ -275,21 +275,6 @@ const Courses: React.FC = () => {
                     {t("courses.levels.advanced")}
                   </option>
                 </select>
-
-                {/* Free Toggle */}
-                <label className="flex items-center space-x-3 cursor-pointer bg-gray-50 px-4 py-3 rounded-xl border border-gray-200 hover:bg-gray-100 transition-all duration-200">
-                  <input
-                    type="checkbox"
-                    checked={filters.isFree}
-                    onChange={(e) =>
-                      handleFilterChange("isFree", e.target.checked)
-                    }
-                    className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                  />
-                  <span className="text-sm font-medium text-gray-700">
-                    {t("courses.freeOnly")}
-                  </span>
-                </label>
               </div>
 
               {/* Sort */}
@@ -322,9 +307,6 @@ const Courses: React.FC = () => {
                   </option>
                   <option value="createdAt-desc">
                     {t("courses.sortOptions.newestFirst")}
-                  </option>
-                  <option value="studentsCount-desc">
-                    {t("courses.sortOptions.mostPopular")}
                   </option>
                 </select>
               </div>

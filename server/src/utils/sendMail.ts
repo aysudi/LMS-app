@@ -18,6 +18,16 @@ export const sendEmail = async (
   textContent?: string
 ): Promise<void> => {
   try {
+    // Skip email sending in development if credentials are not configured
+    if (
+      process.env.NODE_ENV !== "production" &&
+      (!config.GMAIL_USER || !config.GMAIL_PASS)
+    ) {
+      console.log(
+        `[DEV] Email would be sent to ${to} with subject: ${subject}`
+      );
+      return;
+    }
     const mailOptions = {
       from: `"${process.env.EMAIL_FROM_NAME || "Skillify"}" <${
         process.env.EMAIL_FROM || process.env.EMAIL_USER

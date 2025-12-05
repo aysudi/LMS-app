@@ -1,6 +1,8 @@
 import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
+// @ts-ignore
+import { useTranslation } from "react-i18next";
 import {
   FaCheckCircle,
   FaEnvelope,
@@ -17,6 +19,7 @@ import {
 import { useAuthContext } from "../../context/AuthContext";
 
 const InstructorApplicationSuccess: React.FC = () => {
+  const { t } = useTranslation();
   const { user } = useAuthContext();
   const navigate = useNavigate();
 
@@ -30,23 +33,20 @@ const InstructorApplicationSuccess: React.FC = () => {
   const nextSteps = [
     {
       icon: FaEnvelope,
-      title: "Check Your Email",
-      description:
-        "We've sent a confirmation email with your application details.",
+      title: t("applicationSuccess.nextSteps.checkEmail.title"),
+      description: t("applicationSuccess.nextSteps.checkEmail.description"),
       color: "blue",
     },
     {
       icon: FaClock,
-      title: "Review Process",
-      description:
-        "Our team will review your application within 3-5 business days.",
+      title: t("applicationSuccess.nextSteps.reviewProcess.title"),
+      description: t("applicationSuccess.nextSteps.reviewProcess.description"),
       color: "orange",
     },
     {
       icon: FaChalkboardTeacher,
-      title: "Get Ready to Teach",
-      description:
-        "Start planning your first course while you wait for approval.",
+      title: t("applicationSuccess.nextSteps.getReady.title"),
+      description: t("applicationSuccess.nextSteps.getReady.description"),
       color: "green",
     },
   ];
@@ -54,18 +54,18 @@ const InstructorApplicationSuccess: React.FC = () => {
   const benefits = [
     {
       icon: FaUsers,
-      title: "Reach Global Audience",
-      description: "Connect with thousands of eager learners worldwide",
+      title: t("applicationSuccess.tips.joinCommunity.title"),
+      description: t("applicationSuccess.tips.joinCommunity.description"),
     },
     {
       icon: FaTrophy,
-      title: "Earn While Teaching",
-      description: "Generate income by sharing your expertise",
+      title: t("applicationSuccess.tips.prepareCourse.title"),
+      description: t("applicationSuccess.tips.prepareCourse.description"),
     },
     {
       icon: FaStar,
-      title: "Build Your Reputation",
-      description: "Establish yourself as an expert in your field",
+      title: t("applicationSuccess.tips.studyPlatform.title"),
+      description: t("applicationSuccess.tips.studyPlatform.description"),
     },
     {
       icon: FaGraduationCap,
@@ -105,7 +105,7 @@ const InstructorApplicationSuccess: React.FC = () => {
           </motion.div>
 
           <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-            Application Submitted! 🎉
+            {t("applicationSuccess.title")}
           </h1>
           <p className="text-xl text-gray-600 mb-2">
             Thank you,{" "}
@@ -115,9 +115,7 @@ const InstructorApplicationSuccess: React.FC = () => {
             !
           </p>
           <p className="text-lg text-gray-500 max-w-2xl mx-auto">
-            Your instructor application has been successfully submitted. We're
-            excited to review your qualifications and potentially welcome you to
-            our teaching community.
+            {t("applicationSuccess.message")}
           </p>
         </motion.div>
 
@@ -185,7 +183,7 @@ const InstructorApplicationSuccess: React.FC = () => {
           className="bg-white rounded-2xl shadow-xl p-8 mb-12 border border-gray-200"
         >
           <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-            What Happens Next?
+            {t("applicationSuccess.nextSteps.title")}
           </h2>
 
           <div className="space-y-6">
@@ -282,7 +280,7 @@ const InstructorApplicationSuccess: React.FC = () => {
             className="flex items-center gap-2 px-8 py-4 bg-white text-gray-700 border-2 border-gray-300 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all duration-300 font-semibold shadow-lg"
           >
             <FaHome className="text-lg" />
-            Return to Home
+            {t("applicationSuccess.buttons.backToHome")}
           </Link>
 
           <Link
@@ -290,7 +288,7 @@ const InstructorApplicationSuccess: React.FC = () => {
             className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl transition-all duration-300 font-semibold shadow-lg"
           >
             <FaBook className="text-lg" />
-            Browse Courses
+            {t("applicationSuccess.buttons.browseGourses")}
             <FaArrowRight className="text-sm" />
           </Link>
         </motion.div>

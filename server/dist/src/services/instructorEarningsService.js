@@ -1,4 +1,5 @@
 import InstructorEarnings from "../models/InstructorEarnings.js";
+import mongoose from "mongoose";
 import Course from "../models/Course.js";
 // Create instructor earnings for an order
 export const createInstructorEarningsForOrder = async (order) => {
@@ -11,9 +12,11 @@ export const createInstructorEarningsForOrder = async (order) => {
                 return;
             }
             const grossAmount = item.actualPrice;
-            // Platform takes 30% commission, instructor gets 70%
-            const platformFeePercentage = 0.3;
-            const platformFee = grossAmount * platformFeePercentage;
+            // Platform takes 25% commission + 3% payment processing = 28% total, instructor gets 72%
+            const platformCommissionRate = 0.25; // 25% platform commission
+            const paymentProcessingRate = 0.03; // 3% payment processing fee
+            const totalPlatformFeeRate = platformCommissionRate + paymentProcessingRate; // 28%
+            const platformFee = grossAmount * totalPlatformFeeRate;
             const instructorShare = grossAmount - platformFee;
             // Check if earnings already exist to prevent duplicates
             const existingEarning = await InstructorEarnings.findOne({
@@ -53,7 +56,7 @@ export const createInstructorEarningsForOrder = async (order) => {
 // Get instructor total earnings
 export const getInstructorTotalEarnings = async (instructorId) => {
     const earnings = await InstructorEarnings.aggregate([
-        { $match: { instructor: instructorId } },
+        { $match: { instructor: new mongoose.Types.ObjectId(instructorId) } },
         {
             $group: {
                 _id: null,
@@ -93,7 +96,9 @@ export const getInstructorTotalEarnings = async (instructorId) => {
 };
 // Get instructor earnings by course
 export const getInstructorEarningsByCourse = async (instructorId, courseId) => {
-    const matchFilter = { instructor: instructorId };
+    const matchFilter = {
+        instructor: new mongoose.Types.ObjectId(instructorId),
+    };
     if (courseId)
         matchFilter.course = courseId;
     return await InstructorEarnings.find(matchFilter)
@@ -106,9 +111,75 @@ export const getInstructorEarningsByCourse = async (instructorId, courseId) => {
 export const updatePayoutStatus = async (instructorId, earningIds, status) => {
     return await InstructorEarnings.updateMany({
         _id: { $in: earningIds },
-        instructor: instructorId,
+        instructor: new mongoose.Types.ObjectId(instructorId),
     }, {
         payoutStatus: status,
         ...(status === "completed" && { paidAt: new Date() }),
     });
+};
+// Get monthly analytics data for instructor
+export const getInstructorMonthlyAnalytics = async (instructorId, period = "6m") => {
+    const months = period === "1y" ? 12 : period === "3m" ? 3 : 6;
+    const startDate = new Date();
+    startDate.setMonth(startDate.getMonth() - months);
+    const analyticsData = await InstructorEarnings.aggregate([
+        {
+            $match: {
+                instructor: new mongoose.Types.ObjectId(instructorId),
+                createdAt: { $gte: startDate },
+            },
+        },
+        {
+            $group: {
+                _id: {
+                    year: { $year: "$createdAt" },
+                    month: { $month: "$createdAt" },
+                },
+                earnings: { $sum: "$instructorShare" },
+                revenue: { $sum: "$grossAmount" },
+                enrollments: { $sum: 1 },
+            },
+        },
+        {
+            $sort: { "_id.year": 1, "_id.month": 1 },
+        },
+        {
+            $project: {
+                _id: 0,
+                month: {
+                    $let: {
+                        vars: {
+                            monthNames: [
+                                "",
+                                "Jan",
+                                "Feb",
+                                "Mar",
+                                "Apr",
+                                "May",
+                                "Jun",
+                                "Jul",
+                                "Aug",
+                                "Sep",
+                                "Oct",
+                                "Nov",
+                                "Dec",
+                            ],
+                        },
+                        in: { $arrayElemAt: ["$$monthNames", "$_id.month"] },
+                    },
+                },
+                earnings: 1,
+                revenue: 1,
+                enrollments: 1,
+                date: {
+                    $dateFromParts: {
+                        year: "$_id.year",
+                        month: "$_id.month",
+                        day: 1,
+                    },
+                },
+            },
+        },
+    ]);
+    return analyticsData;
 };

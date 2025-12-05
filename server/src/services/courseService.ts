@@ -84,7 +84,10 @@ export const getCourseByIdService = async (id: string) => {
   const filter: FilterQuery<ICourse> = { _id: id };
 
   const course = await Course.findOne(filter)
-    .populate("instructor", "firstName lastName email avatar bio")
+    .populate(
+      "instructor",
+      "firstName lastName email avatar bio instructorApplication instructorProfile"
+    )
     .populate("sections")
     .populate("reviews.user", "firstName lastName avatar")
     .lean();

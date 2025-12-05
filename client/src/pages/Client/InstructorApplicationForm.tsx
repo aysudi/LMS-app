@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+// @ts-ignore
+import { useTranslation } from "react-i18next";
 import {
   FaChalkboardTeacher,
   FaUser,
@@ -24,45 +26,59 @@ import { EXPERTISE_OPTIONS } from "../../types/instructorApplication.type";
 import { useSubmitInstructorApplication } from "../../hooks/useInstructorApplication";
 import { useAuthContext } from "../../context/AuthContext";
 
-const validationSchema = Yup.object({
-  firstName: Yup.string().required("First name is required"),
-  lastName: Yup.string().required("Last name is required"),
-  email: Yup.string().email("Invalid email").required("Email is required"),
-  phone: Yup.string(),
-  bio: Yup.string()
-    .min(50, "Bio must be at least 50 characters")
-    .max(500, "Bio must not exceed 500 characters")
-    .required("Bio is required"),
-  expertise: Yup.array()
-    .min(1, "Select at least one area of expertise")
-    .max(10, "Select maximum 10 areas of expertise")
-    .required("Areas of expertise are required"),
-  experience: Yup.string()
-    .min(100, "Experience description must be at least 100 characters")
-    .max(1000, "Experience description must not exceed 1000 characters")
-    .required("Experience is required"),
-  education: Yup.string()
-    .min(20, "Education must be at least 20 characters")
-    .max(500, "Education must not exceed 500 characters")
-    .required("Education is required"),
-  motivation: Yup.string()
-    .min(50, "Motivation must be at least 50 characters")
-    .max(500, "Motivation must not exceed 500 characters")
-    .required("Motivation is required"),
-  sampleCourseTitle: Yup.string().max(
-    100,
-    "Course title must not exceed 100 characters"
-  ),
-  sampleCourseDescription: Yup.string().max(
-    500,
-    "Course description must not exceed 500 characters"
-  ),
-  portfolio: Yup.string().url("Please enter a valid URL"),
-  linkedIn: Yup.string().url("Please enter a valid LinkedIn URL"),
-  website: Yup.string().url("Please enter a valid website URL"),
-});
+const createValidationSchema = (t: any) =>
+  Yup.object({
+    firstName: Yup.string().required(
+      t("instructorApplication.validation.firstNameRequired")
+    ),
+    lastName: Yup.string().required(
+      t("instructorApplication.validation.lastNameRequired")
+    ),
+    email: Yup.string()
+      .email(t("instructorApplication.validation.emailInvalid"))
+      .required(t("instructorApplication.validation.emailRequired")),
+    phone: Yup.string(),
+    bio: Yup.string()
+      .min(50, t("instructorApplication.validation.bioMinLength"))
+      .max(500, t("instructorApplication.validation.bioMaxLength"))
+      .required(t("instructorApplication.validation.bioRequired")),
+    expertise: Yup.array()
+      .min(1, t("instructorApplication.validation.expertiseMin"))
+      .max(10, t("instructorApplication.validation.expertiseMax"))
+      .required(t("instructorApplication.validation.expertiseRequired")),
+    experience: Yup.string()
+      .min(100, t("instructorApplication.validation.experienceMinLength"))
+      .max(1000, t("instructorApplication.validation.experienceMaxLength"))
+      .required(t("instructorApplication.validation.experienceRequired")),
+    education: Yup.string()
+      .min(20, t("instructorApplication.validation.educationMinLength"))
+      .max(500, t("instructorApplication.validation.educationMaxLength"))
+      .required(t("instructorApplication.validation.educationRequired")),
+    motivation: Yup.string()
+      .min(50, t("instructorApplication.validation.motivationMinLength"))
+      .max(500, t("instructorApplication.validation.motivationMaxLength"))
+      .required(t("instructorApplication.validation.motivationRequired")),
+    sampleCourseTitle: Yup.string().max(
+      100,
+      t("instructorApplication.validation.courseTitleMaxLength")
+    ),
+    sampleCourseDescription: Yup.string().max(
+      500,
+      t("instructorApplication.validation.courseDescriptionMaxLength")
+    ),
+    portfolio: Yup.string().url(
+      t("instructorApplication.validation.portfolioInvalid")
+    ),
+    linkedIn: Yup.string().url(
+      t("instructorApplication.validation.linkedInInvalid")
+    ),
+    website: Yup.string().url(
+      t("instructorApplication.validation.websiteInvalid")
+    ),
+  });
 
 const InstructorApplicationForm: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuthContext();
   const [currentStep, setCurrentStep] = useState(1);
@@ -87,7 +103,7 @@ const InstructorApplicationForm: React.FC = () => {
       linkedIn: "",
       website: "",
     },
-    validationSchema,
+    validationSchema: createValidationSchema(t),
     onSubmit: async (values) => {
       try {
         await submitMutation.mutateAsync(values);
@@ -165,7 +181,7 @@ const InstructorApplicationForm: React.FC = () => {
           <FaUser className="text-white text-2xl" />
         </div>
         <h2 className="text-3xl font-bold text-gray-900 mb-2">
-          Personal Information
+          {t("instructorApplication.steps.personalInfo")}
         </h2>
         <p className="text-gray-600">Let's start with your basic details</p>
       </div>
@@ -173,7 +189,7 @@ const InstructorApplicationForm: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            First Name *
+            {t("instructorApplication.form.firstName")} *
           </label>
           <input
             type="text"
@@ -197,7 +213,7 @@ const InstructorApplicationForm: React.FC = () => {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Last Name *
+            {t("instructorApplication.form.lastName")} *
           </label>
           <input
             type="text"
@@ -221,7 +237,7 @@ const InstructorApplicationForm: React.FC = () => {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Email Address *
+            {t("instructorApplication.form.email")} *
           </label>
           <div className="relative">
             <input
@@ -247,7 +263,7 @@ const InstructorApplicationForm: React.FC = () => {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Phone Number (Optional)
+            {t("instructorApplication.form.phone")}
           </label>
           <div className="relative">
             <input
@@ -278,7 +294,7 @@ const InstructorApplicationForm: React.FC = () => {
           <FaChalkboardTeacher className="text-white text-2xl" />
         </div>
         <h2 className="text-3xl font-bold text-gray-900 mb-2">
-          Teaching Profile
+          {t("instructorApplication.steps.background")}
         </h2>
         <p className="text-gray-600">
           Tell us about yourself and your expertise
@@ -287,7 +303,7 @@ const InstructorApplicationForm: React.FC = () => {
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Bio *
+          {t("instructorApplication.form.bio")} *
           <span className="text-xs text-gray-500 ml-2">
             ({formik.values.bio.length}/500)
           </span>
@@ -303,7 +319,7 @@ const InstructorApplicationForm: React.FC = () => {
               ? "border-red-300 focus:ring-red-500"
               : "border-gray-300"
           }`}
-          placeholder="Write a compelling bio that highlights your teaching style, personality, and what makes you unique as an instructor..."
+          placeholder={t("instructorApplication.form.bioPlaceholder")}
         />
         {formik.touched.bio && formik.errors.bio && (
           <p className="mt-1 text-sm text-red-600">{formik.errors.bio}</p>
@@ -312,7 +328,7 @@ const InstructorApplicationForm: React.FC = () => {
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Areas of Expertise *
+          {t("instructorApplication.form.expertise")} *
           <span className="text-xs text-gray-500 ml-2">
             ({formik.values.expertise.length}/10 selected)
           </span>
@@ -359,7 +375,7 @@ const InstructorApplicationForm: React.FC = () => {
           <FaGraduationCap className="text-white text-2xl" />
         </div>
         <h2 className="text-3xl font-bold text-gray-900 mb-2">
-          Background & Motivation
+          {t("instructorApplication.steps.expertise")}
         </h2>
         <p className="text-gray-600">
           Share your experience and passion for teaching
@@ -368,7 +384,7 @@ const InstructorApplicationForm: React.FC = () => {
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Professional Experience *
+          {t("instructorApplication.form.experience")} *
           <span className="text-xs text-gray-500 ml-2">
             ({formik.values.experience.length}/1000)
           </span>
@@ -384,7 +400,7 @@ const InstructorApplicationForm: React.FC = () => {
               ? "border-red-300 focus:ring-red-500"
               : "border-gray-300"
           }`}
-          placeholder="Describe your professional experience, including relevant work history, projects, achievements, and any teaching or training experience you may have..."
+          placeholder={t("instructorApplication.form.experiencePlaceholder")}
         />
         {formik.touched.experience && formik.errors.experience && (
           <p className="mt-1 text-sm text-red-600">
@@ -395,7 +411,7 @@ const InstructorApplicationForm: React.FC = () => {
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Education *
+          {t("instructorApplication.form.education")} *
           <span className="text-xs text-gray-500 ml-2">
             ({formik.values.education.length}/500)
           </span>
@@ -411,7 +427,7 @@ const InstructorApplicationForm: React.FC = () => {
               ? "border-red-300 focus:ring-red-500"
               : "border-gray-300"
           }`}
-          placeholder="Describe your educational background, including degrees, certifications, relevant coursework, and any self-directed learning..."
+          placeholder={t("instructorApplication.form.educationPlaceholder")}
         />
         {formik.touched.education && formik.errors.education && (
           <p className="mt-1 text-sm text-red-600">{formik.errors.education}</p>
@@ -420,7 +436,7 @@ const InstructorApplicationForm: React.FC = () => {
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Teaching Motivation *
+          {t("instructorApplication.form.motivation")} *
           <span className="text-xs text-gray-500 ml-2">
             ({formik.values.motivation.length}/500)
           </span>
@@ -436,7 +452,7 @@ const InstructorApplicationForm: React.FC = () => {
               ? "border-red-300 focus:ring-red-500"
               : "border-gray-300"
           }`}
-          placeholder="Why do you want to become an instructor? What drives your passion for teaching and sharing knowledge with others?"
+          placeholder={t("instructorApplication.form.motivationPlaceholder")}
         />
         {formik.touched.motivation && formik.errors.motivation && (
           <p className="mt-1 text-sm text-red-600">
@@ -459,7 +475,7 @@ const InstructorApplicationForm: React.FC = () => {
           <FaLightbulb className="text-white text-2xl" />
         </div>
         <h2 className="text-3xl font-bold text-gray-900 mb-2">
-          Additional Information
+          {t("instructorApplication.steps.additionalInfo")}
         </h2>
         <p className="text-gray-600">
           Optional details to strengthen your application
@@ -483,7 +499,7 @@ const InstructorApplicationForm: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Sample Course Title
+            {t("instructorApplication.form.sampleCourseTitle")}
             <span className="text-xs text-gray-500 ml-2">
               ({formik.values.sampleCourseTitle.length}/100)
             </span>
@@ -495,13 +511,15 @@ const InstructorApplicationForm: React.FC = () => {
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-            placeholder="e.g., Complete Python Programming for Beginners"
+            placeholder={t(
+              "instructorApplication.form.sampleCourseTitlePlaceholder"
+            )}
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Portfolio URL
+            {t("instructorApplication.form.portfolio")}
           </label>
           <div className="relative">
             <input
@@ -515,7 +533,7 @@ const InstructorApplicationForm: React.FC = () => {
                   ? "border-red-300 focus:ring-red-500"
                   : "border-gray-300"
               }`}
-              placeholder="https://yourportfolio.com"
+              placeholder={t("instructorApplication.form.portfolioPlaceholder")}
             />
             <FaExternalLinkAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           </div>
@@ -528,7 +546,7 @@ const InstructorApplicationForm: React.FC = () => {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            LinkedIn Profile
+            {t("instructorApplication.form.linkedIn")}
           </label>
           <div className="relative">
             <input
@@ -542,7 +560,7 @@ const InstructorApplicationForm: React.FC = () => {
                   ? "border-red-300 focus:ring-red-500"
                   : "border-gray-300"
               }`}
-              placeholder="https://linkedin.com/in/yourprofile"
+              placeholder={t("instructorApplication.form.linkedInPlaceholder")}
             />
             <FaLinkedin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           </div>
@@ -555,7 +573,7 @@ const InstructorApplicationForm: React.FC = () => {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Personal Website
+            {t("instructorApplication.form.website")}
           </label>
           <div className="relative">
             <input
@@ -569,7 +587,7 @@ const InstructorApplicationForm: React.FC = () => {
                   ? "border-red-300 focus:ring-red-500"
                   : "border-gray-300"
               }`}
-              placeholder="https://yourwebsite.com"
+              placeholder={t("instructorApplication.form.websitePlaceholder")}
             />
             <FaGlobe className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           </div>
@@ -581,7 +599,7 @@ const InstructorApplicationForm: React.FC = () => {
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Sample Course Description
+          {t("instructorApplication.form.sampleCourseDescription")}
           <span className="text-xs text-gray-500 ml-2">
             ({formik.values.sampleCourseDescription.length}/500)
           </span>
@@ -593,7 +611,9 @@ const InstructorApplicationForm: React.FC = () => {
           onBlur={formik.handleBlur}
           rows={4}
           className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
-          placeholder="Provide a brief description of a course you would like to create, including learning objectives and target audience..."
+          placeholder={t(
+            "instructorApplication.form.sampleCourseDescriptionPlaceholder"
+          )}
         />
       </div>
     </motion.div>
@@ -620,11 +640,10 @@ const InstructorApplicationForm: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">
-            Instructor Application
+            {t("instructorApplication.title")}
           </h1>
           <p className="text-xl text-gray-600">
-            Join our community of expert instructors and start sharing your
-            knowledge
+            {t("instructorApplication.subtitle")}
           </p>
         </div>
 
@@ -682,7 +701,7 @@ const InstructorApplicationForm: React.FC = () => {
               }`}
             >
               <FaArrowLeft />
-              <span>Previous</span>
+              <span>{t("instructorApplication.buttons.previous")}</span>
             </motion.button>
 
             {currentStep < totalSteps ? (
@@ -698,7 +717,7 @@ const InstructorApplicationForm: React.FC = () => {
                     : "bg-gray-300 text-gray-500 cursor-not-allowed"
                 }`}
               >
-                <span>Next</span>
+                <span>{t("instructorApplication.buttons.next")}</span>
                 <FaArrowRight />
               </motion.button>
             ) : (
@@ -720,12 +739,12 @@ const InstructorApplicationForm: React.FC = () => {
                 {submitMutation.isPending ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
-                    <span>Submitting...</span>
+                    <span>{t("instructorApplication.buttons.submitting")}</span>
                   </>
                 ) : (
                   <>
                     <FaHeart />
-                    <span>Submit Application</span>
+                    <span>{t("instructorApplication.buttons.submit")}</span>
                   </>
                 )}
               </motion.button>

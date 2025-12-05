@@ -155,12 +155,23 @@ enrollmentSchema.virtual("isInProgress").get(function () {
         this.progressPercentage < 100 &&
         this.status === EnrollmentStatus.ACTIVE);
 });
-enrollmentSchema.methods.updateProgress = function (completedLessonsCount, totalLessonsCount) {
+enrollmentSchema.methods.updateProgress = async function (completedLessonsCount, totalLessonsCount) {
+    const wasCompleted = this.progressPercentage === 100;
     this.progressPercentage = Math.round((completedLessonsCount / totalLessonsCount) * 100);
     if (this.progressPercentage === 100 &&
-        this.status === EnrollmentStatus.ACTIVE) {
+        this.status === EnrollmentStatus.ACTIVE &&
+        !wasCompleted) {
         this.status = EnrollmentStatus.COMPLETED;
         this.completedAt = new Date();
+        // Track course completion for analytics
+        try {
+            const { trackCourseCompletion } = await import("../services/analyticsService.js");
+            await trackCourseCompletion(this.course.toString(), this.user.toString());
+        }
+        catch (error) {
+            console.error("Error tracking course completion:", error);
+            // Don't fail the update if analytics fails
+        }
     }
     this.lastAccessedAt = new Date();
     return this.save();

@@ -148,3 +148,75 @@ export const updatePayoutStatus = async (
     }
   );
 };
+
+// Get monthly analytics data for instructor
+export const getInstructorMonthlyAnalytics = async (
+  instructorId: string,
+  period: string = "6m"
+) => {
+  const months = period === "1y" ? 12 : period === "3m" ? 3 : 6;
+  const startDate = new Date();
+  startDate.setMonth(startDate.getMonth() - months);
+
+  const analyticsData = await InstructorEarnings.aggregate([
+    {
+      $match: {
+        instructor: new mongoose.Types.ObjectId(instructorId),
+        createdAt: { $gte: startDate },
+      },
+    },
+    {
+      $group: {
+        _id: {
+          year: { $year: "$createdAt" },
+          month: { $month: "$createdAt" },
+        },
+        earnings: { $sum: "$instructorShare" },
+        revenue: { $sum: "$grossAmount" },
+        enrollments: { $sum: 1 },
+      },
+    },
+    {
+      $sort: { "_id.year": 1, "_id.month": 1 },
+    },
+    {
+      $project: {
+        _id: 0,
+        month: {
+          $let: {
+            vars: {
+              monthNames: [
+                "",
+                "Jan",
+                "Feb",
+                "Mar",
+                "Apr",
+                "May",
+                "Jun",
+                "Jul",
+                "Aug",
+                "Sep",
+                "Oct",
+                "Nov",
+                "Dec",
+              ],
+            },
+            in: { $arrayElemAt: ["$$monthNames", "$_id.month"] },
+          },
+        },
+        earnings: 1,
+        revenue: 1,
+        enrollments: 1,
+        date: {
+          $dateFromParts: {
+            year: "$_id.year",
+            month: "$_id.month",
+            day: 1,
+          },
+        },
+      },
+    },
+  ]);
+
+  return analyticsData;
+};

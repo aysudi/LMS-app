@@ -23,7 +23,6 @@ const AdminInstructors: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 10;
 
-  // Fetch instructor applications
   const { data, isLoading, error } = useInstructorApplications({
     page: currentPage,
     limit,
@@ -42,7 +41,9 @@ const AdminInstructors: React.FC = () => {
       title: "Approve Instructor Application",
       html: `
         <div class="text-left">
-          <p class="mb-4">You are about to approve <strong>${application.firstName} ${application.lastName}</strong> as an instructor.</p>
+          <p class="mb-4">You are about to approve <strong>${
+            application.user?.firstName || ""
+          } ${application.user?.lastName || ""}</strong> as an instructor.</p>
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-2">
               Admin Feedback (Optional)
@@ -84,7 +85,11 @@ const AdminInstructors: React.FC = () => {
       title: "Reject Instructor Application",
       html: `
         <div class="text-left">
-          <p class="mb-4">You are about to reject <strong>${application.firstName} ${application.lastName}</strong>'s instructor application.</p>
+          <p class="mb-4">You are about to reject <strong>${
+            application.user?.firstName || ""
+          } ${
+        application.user?.lastName || ""
+      }</strong>'s instructor application.</p>
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-2">
               Rejection Reason <span class="text-red-500">*</span>
@@ -316,22 +321,25 @@ const AdminInstructors: React.FC = () => {
                           {application.user?.avatar ? (
                             <img
                               src={application.user.avatar}
-                              alt={`${application.firstName} ${application.lastName}`}
+                              alt={`${application.user?.firstName || ""} ${
+                                application.user?.lastName || ""
+                              }`}
                               className="w-10 h-10 rounded-full object-cover"
                             />
                           ) : (
                             <span className="text-white font-bold text-sm">
-                              {application.firstName[0]}
-                              {application.lastName[0]}
+                              {application.user?.firstName?.[0] || "U"}
+                              {application.user?.lastName?.[0] || "N"}
                             </span>
                           )}
                         </div>
                         <div>
                           <div className="font-medium text-slate-900">
-                            {application.firstName} {application.lastName}
+                            {application.user?.firstName || "Unknown"}{" "}
+                            {application.user?.lastName || "User"}
                           </div>
                           <div className="text-sm text-slate-500">
-                            {application.email}
+                            {application.user?.email || "No email"}
                           </div>
                         </div>
                       </div>
@@ -411,8 +419,8 @@ const AdminInstructors: React.FC = () => {
         <div className="bg-white rounded-2xl p-6 shadow-lg border border-slate-200/50">
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-700">
-              Showing page {pagination.currentPage} of {pagination.totalPages}{" "}
-              ({pagination.totalApplications} total applications)
+              Showing page {pagination.currentPage} of {pagination.totalPages} (
+              {pagination.totalApplications} total applications)
             </div>
             <div className="flex space-x-2">
               <button
@@ -480,8 +488,8 @@ const AdminInstructors: React.FC = () => {
                           Name:
                         </span>
                         <p className="text-slate-900">
-                          {selectedApplication.firstName}{" "}
-                          {selectedApplication.lastName}
+                          {selectedApplication.user?.firstName || "Unknown"}{" "}
+                          {selectedApplication.user?.lastName || "User"}
                         </p>
                       </div>
                       <div>

@@ -2,7 +2,8 @@ import Enrollment from "../models/Enrollment";
 import Course from "../models/Course";
 import User from "../models/User";
 import { EnrollmentStatus } from "../types/enrollment.types";
-import { findOrCreateConversation } from "../services/conversationService.js";
+// import { findOrCreateConversation } from "../services/conversationService.js";
+import { trackEnrollment, } from "../services/analyticsService.js";
 import formatMongoData from "../utils/formatMongoData";
 export const getUserEnrollments = async (req, res) => {
     try {
@@ -566,22 +567,32 @@ export const enrollInFreeCourse = async (req, res) => {
         await Course.findByIdAndUpdate(courseId, {
             $push: { studentsEnrolled: userId },
         });
+        // Track enrollment for analytics
+        try {
+            await trackEnrollment(courseId, userId, course.originalPrice || 0);
+        }
+        catch (analyticsError) {
+            console.error("Error tracking enrollment analytics:", analyticsError);
+            // Don't fail enrollment if analytics tracking fails
+        }
         // Automatically create a conversation between student and instructor
         try {
             const courseWithInstructor = await Course.findById(courseId).populate("instructor", "_id firstName lastName");
             if (courseWithInstructor && courseWithInstructor.instructor) {
                 console.log("Creating conversation between student and instructor...");
-                const conversationResult = await findOrCreateConversation({
-                    studentId: userId,
-                    instructorId: courseWithInstructor.instructor._id,
-                    courseId: courseId,
-                });
-                if (conversationResult.success) {
-                    console.log("✅ Conversation created successfully:", conversationResult.data?._id);
-                }
-                else {
-                    console.log("❌ Failed to create conversation");
-                }
+                // const conversationResult = await findOrCreateConversation({
+                //   studentId: userId,
+                //   instructorId: (courseWithInstructor.instructor as any)._id,
+                //   courseId: courseId,
+                // });
+                // if (conversationResult.success) {
+                //   console.log(
+                //     "✅ Conversation created successfully:",
+                //     conversationResult.data?._id
+                //   );
+                // } else {
+                //   console.log("❌ Failed to create conversation");
+                // }
             }
         }
         catch (conversationError) {

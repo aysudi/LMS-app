@@ -11,6 +11,12 @@ const transporter = nodemailer.createTransport({
 });
 export const sendEmail = async (to, subject, htmlContent, textContent) => {
     try {
+        // Skip email sending in development if credentials are not configured
+        if (process.env.NODE_ENV !== "production" &&
+            (!config.GMAIL_USER || !config.GMAIL_PASS)) {
+            console.log(`[DEV] Email would be sent to ${to} with subject: ${subject}`);
+            return;
+        }
         const mailOptions = {
             from: `"${process.env.EMAIL_FROM_NAME || "Skillify"}" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
             to,

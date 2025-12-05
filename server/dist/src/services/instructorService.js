@@ -69,7 +69,7 @@ export const getInstructorOverviewService = async (instructorId) => {
                 totalViews: { $sum: "$courseViews" },
                 totalEnrollments: { $sum: "$newEnrollments" },
                 totalWatchTime: { $sum: "$totalWatchTime" },
-                avgConversion: { $avg: "$conversionRate" },
+                totalCompletions: { $sum: "$completions" },
             },
         },
     ]);
@@ -77,8 +77,12 @@ export const getInstructorOverviewService = async (instructorId) => {
         totalViews: 0,
         totalEnrollments: 0,
         totalWatchTime: 0,
-        avgConversion: 0,
+        totalCompletions: 0,
     };
+    // Calculate conversion rate: (enrollments / views) * 100
+    const conversionRate = performance.totalViews > 0
+        ? (performance.totalEnrollments / performance.totalViews) * 100
+        : 0;
     return {
         overview: {
             totalCourses: courses.length,
@@ -93,7 +97,7 @@ export const getInstructorOverviewService = async (instructorId) => {
             views: performance.totalViews,
             enrollments: performance.totalEnrollments,
             watchTime: Math.round(performance.totalWatchTime / 3600), // Convert to hours
-            conversionRate: Number(performance.avgConversion.toFixed(1)),
+            conversionRate: Number(conversionRate.toFixed(1)),
         },
         courses: courses.map((course) => ({
             _id: course._id,

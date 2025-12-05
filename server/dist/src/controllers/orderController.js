@@ -1,9 +1,9 @@
 import { Types } from "mongoose";
-// import Order from "../models/Order";
 import Course from "../models/Course";
 import User from "../models/User";
 import Enrollment from "../models/Enrollment";
 import { createInstructorEarningsForOrder } from "../services/instructorEarningsService.js";
+import { trackEnrollment } from "../services/analyticsService.js";
 import { OrderStatus, PaymentStatus, PaymentMethod, } from "../types/order.types";
 import { EnrollmentStatus } from "../types/enrollment.types";
 import Order from "../models/Order";
@@ -256,11 +256,17 @@ export const completeOrder = async (orderId, paymentDetails) => {
             $inc: { totalSpent: order.total },
             lastPurchaseAt: new Date(),
         });
-        // Update each course's studentsEnrolled array
-        for (const courseId of courseIds) {
-            await Course.findByIdAndUpdate(courseId, {
-                $addToSet: { studentsEnrolled: order.user }, // $addToSet prevents duplicates
+        for (const item of order.items) {
+            await Course.findByIdAndUpdate(item.course, {
+                $addToSet: { studentsEnrolled: order.user },
             });
+            console.log("item: ", item);
+            try {
+                await trackEnrollment(item.course.toString(), order.user.toString(), item.actualPrice);
+            }
+            catch (analyticsError) {
+                console.error("Error tracking enrollment analytics:", analyticsError);
+            }
         }
         return order;
     }

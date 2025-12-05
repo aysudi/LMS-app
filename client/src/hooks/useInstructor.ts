@@ -14,6 +14,7 @@ import {
   getMessageStats,
   getInstructorEarnings,
   getInstructorEarningsByCourse,
+  getMonthlyAnalytics,
 } from "../services/instructor.service";
 import type {
   InstructorOverviewResponse,
@@ -46,6 +47,7 @@ export const instructorQueryKeys = {
   earnings: () => [...instructorQueryKeys.all, "earnings"] as const,
   earningsByCourse: (courseId?: string) =>
     [...instructorQueryKeys.earnings(), "by-course", courseId] as const,
+  analytics: () => [...instructorQueryKeys.all, "analytics"] as const,
   sections: () => [...instructorQueryKeys.all, "sections"] as const,
   sectionsByCourse: (courseId: string) =>
     [...instructorQueryKeys.sections(), courseId] as const,
@@ -417,6 +419,23 @@ export const useInstructorEarningsByCourse = (
         return false;
       return failureCount < 3;
     },
+    ...options,
+  });
+};
+
+// New Analytics Hook
+export const useMonthlyAnalytics = (
+  period: string = "6m",
+  options?: Omit<
+    UseQueryOptions<{ success: boolean; data: any[] }, Error>,
+    "queryKey" | "queryFn"
+  >
+) => {
+  return useQuery({
+    queryKey: [...instructorQueryKeys.analytics(), "monthly", period],
+    queryFn: () => getMonthlyAnalytics(period),
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes
     ...options,
   });
 };

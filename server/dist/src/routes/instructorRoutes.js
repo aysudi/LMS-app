@@ -2,7 +2,7 @@ import { Router } from "express";
 import { authenticateToken } from "../middlewares/auth.middleware.js";
 import { getInstructorOverview, getInstructorCoursesWithStats, getCourseStudents, } from "../controllers/instructorController";
 import { getInstructorMessages, replyToMessage, markMessageAsRead, markMessageAsResolved, getMessageStats, } from "../controllers/instructorCommunicationController";
-import { getInstructorEarnings, getInstructorEarningsByCourseController, updateInstructorPayoutStatus, } from "../controllers/instructorEarningsController";
+import { getInstructorEarnings, getInstructorEarningsByCourseController, updateInstructorPayoutStatus, getInstructorMonthlyAnalyticsController, requestInstructorPayout, exportEarningsReportController, exportAnalyticsReportController, exportStudentsDataController, } from "../controllers/instructorEarningsController";
 const instructorRouter = Router();
 // Dashboard & Overview
 instructorRouter.get("/overview", authenticateToken, (req, res) => getInstructorOverview(req, res));
@@ -19,4 +19,10 @@ instructorRouter.get("/messages/stats", authenticateToken, (req, res) => getMess
 instructorRouter.get("/earnings", authenticateToken, (req, res) => getInstructorEarnings(req, res));
 instructorRouter.get("/earnings/by-course", authenticateToken, (req, res) => getInstructorEarningsByCourseController(req, res));
 instructorRouter.patch("/earnings/payout-status", authenticateToken, (req, res) => updateInstructorPayoutStatus(req, res));
+// New Analytics & Export Routes
+instructorRouter.get("/analytics/monthly", authenticateToken, (req, res) => getInstructorMonthlyAnalyticsController(req, res));
+instructorRouter.post("/earnings/request-payout", authenticateToken, (req, res) => requestInstructorPayout(req, res));
+instructorRouter.get("/earnings/export", authenticateToken, (req, res) => exportEarningsReportController(req, res));
+instructorRouter.get("/analytics/export", authenticateToken, (req, res) => exportAnalyticsReportController(req, res));
+instructorRouter.get("/courses/:courseId/students/export", authenticateToken, (req, res) => exportStudentsDataController(req, res));
 export default instructorRouter;

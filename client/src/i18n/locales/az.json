@@ -39,6 +39,9 @@
     "address": "Ünvan",
     "city": "Şəhər",
     "country": "Ölkə",
+    "stateProvince": "Dövlət/Əyalət",
+    "postalCode": "Poçt indeksi",
+    "fullName": "Tam ad",
     "price": "Qiymət",
     "free": "Pulsuz",
     "paid": "Ödənişli",
@@ -387,7 +390,21 @@
     "learningOverview": "Öyrənmə icmalı",
     "aboutToJoinStudents": "Bu möhtəşəm kurslarda {{count}} tələbəyə qoşulmaq üzrəsiniz!",
     "certificate": "Sertifikat",
-    "availableFor": "üçün mövcuddur"
+    "availableFor": "üçün mövcuddur",
+    "completeInformation": "Ödəməyə davam etmək üçün faktura məlumatını tamamlayın",
+    "completePurchase": "{{count}} kurs üçün alışınızı tamamlayın",
+    "paymentInformation": "Ödəniş məlumatı",
+    "billingInformation": "Faktura məlumatı",
+    "secureCheckout": "Təhlükəsiz ödəniş",
+    "waitPayment": "Ödənişinizi təsdiqləyənə qədər gözləyin",
+    "processingPayment": "Ödəniş işlənir...",
+    "paymentSuccessful": "Ödəniş uğurlu oldu!",
+    "welcomeToCourse": "Yeni kurslarınıza xoş gəlmisiniz! Öyrənməmə yönləndirilir...",
+    "securePaymentInfo": "Ödəniş məlumatlarınız təhlükəsizdir və Stripe tərəfindən şifrələnir",
+    "securePaymentPoweredBy": "Stripe tərəfindən dəstəklənən təhlükəsiz ödəniş",
+    "30DayMoneyBackGuarantee": "30 günlük pul geri qaytarma zəmanəti",
+    "'pay": "Ödəniş et",
+    "paymentSecure": "Ödəniş məlumatlarınız təhlükəsiz və şifrələnmişdir"
   },
   "course": {
     "title": "Kurs adı",
@@ -473,6 +490,7 @@
     "youtube": "YouTube",
     "trackRevenueManagePayouts": "Gəlirləri izləyin və ödənişləri idarə edin",
     "requestPayout": "Ödəniş tələb et",
+    "downloadReport": "Hesabatı yüklə",
     "exportReport": "Hesabatları ixrac et",
     "totalRevenue": "Ümumi gəlir",
     "courseViews": "Kurs baxışları",
@@ -1087,7 +1105,11 @@
       "enrolled": "Qeydiyyatlı",
       "lastActive": "Son aktivlik",
       "errorLoadingStudents": "Tələbələr yüklənərkən xəta",
-      "pleaseReTryLater": "Zəhmət olmasa daha sonra cəhd edin"
+      "pleaseReTryLater": "Zəhmət olmasa daha sonra cəhd edin",
+      "notStarted": "Başlamayıb",
+      "inProgress": "Davam edir",
+      "completed": "Tamamlandı",
+      "allProgress": "Bütün İrəliləyiş"
     },
     "messages": {
       "errorLoadingMessages": "Mesajlar yüklənərkən xəta",
@@ -1201,14 +1223,26 @@
     "priceRange": "Qiymət aralığı",
     "minPrice": "Min qiymət",
     "maxPrice": "Maks qiymət",
+    "oldest": "Ən köhnə",
+    "sortDirection": "Sıralama istiqaməti",
+    "ascending": "Artan",
+    "descending": "Azalan",
+    "lowestRated": "Ən aşağı reytinqli",
+    "titleAZ": "Başlıq: A-Z",
+    "titleZA": "Başlıq: Z-A",
     "courseLevel": "Kurs səviyyəsi",
     "courseDuration": "Kurs müddəti",
+    "allPrices": "Bütün qiymətlər",
+    "freeCourses": "Pulsuz kurslar",
+    "paidCourses": "Ödənişli kurslar",
     "courseRating": "Kurs reytinqi",
     "courseLanguage": "Kurs dili",
     "subtitleLanguage": "Alt yazı dili",
     "features": "Xüsusiyyətlər",
     "closedCaptions": "Qapalı alt yazılar",
     "quizzesIncluded": "Testlər daxildir",
+    "under": "Altında",
+    "over": "Üzərində",
     "codingExercises": "Kodlaşdırma məşqləri",
     "practiceTests": "Təcrübə testləri",
     "sortBy": "Sırala",
@@ -1806,5 +1840,223 @@
     "stickerError": "Stiker göndərilə bilmədi. Yenidən cəhd edin.",
     "noMessagesYet": "Hələ mesaj yoxdur",
     "firstMessage": "Müzakirəni başlatan ilk olun!"
+  },
+  "becomeInstructor": {
+    "title": "Müəllim Olun",
+    "subtitle": "Təcrübənizi paylaşın, bütün dünyada tələbələrə ilham verin və Skillify-də faydalı tədris karyerası yaradın",
+    "getStarted": "Bu gün dərs deyməyə başlayın",
+    "goToDashboard": "Panelə keç",
+    "checkApplicationStatus": "Müraciət vəziyyətini yoxla",
+    "applicationStatus": "Müraciət vəziyyəti",
+    "benefits": {
+      "earnMoney": {
+        "title": "Öyrədərək Qazanın",
+        "description": "Təcrübənizi bütün dünyada tələbələrlə paylaşaraq passiv gəlir əldə edin",
+        "stat": "Gəlirlərin 70%-dək"
+      },
+      "globalReach": {
+        "title": "Qlobal Əhatə",
+        "description": "Bütün dünyadan tələbələrlə əlaqə qurun və beynəlxalq auditoriya yaradın",
+        "stat": "190+ ölkə"
+      },
+      "flexibleSchedule": {
+        "title": "Çevik Cədvəl",
+        "description": "Öz vaxtınızda kurslar yaradın və öz templərinizdə işləyin",
+        "stat": "24/7 əlçatanlıq"
+      },
+      "buildBrand": {
+        "title": "Brendinizi Qurun",
+        "description": "Özünüzü ekspert kimi təsdiq edin və peşəkar reputasiyanızı inkişaf etdirin",
+        "stat": "Ekspert tanınması"
+      },
+      "makeImpact": {
+        "title": "Təsir Göstərin",
+        "description": "Digərlərinə yeni bacarıqlar öyrənməkdə və karyeralarında irəliləməkdə kömək edin",
+        "stat": "Həyatları dəyişin"
+      },
+      "analytics": {
+        "title": "Analitika və Anlayışlar",
+        "description": "Ətraflı analitika və tələbə rəyləri ilə performansınızı izləyin",
+        "stat": "Real vaxt məlumatları"
+      }
+    },
+    "features": {
+      "easyCourseCreation": {
+        "title": "Asan Kurs Yaradılması",
+        "description": "Cəlbedici video kursları yaratmaq üçün intuitiv alətlər"
+      },
+      "studentCommunity": {
+        "title": "Tələbə İcması",
+        "description": "Kontentiniz ətrafında öyrənənlər icması yaradın"
+      },
+      "certification": {
+        "title": "Sertifikasiya Alətləri",
+        "description": "Tamamlandıqdan sonra tələbələrə sertifikatlar təqdim edin"
+      },
+      "marketingSupport": {
+        "title": "Marketinq Dəstəyi",
+        "description": "Kurslarınızı düzgün auditoriyaya tanıtmaqda sizə kömək edirik"
+      }
+    },
+    "stats": {
+      "activeStudents": "Aktiv tələbələr",
+      "instructorsEarning": "Qazanan müəllimlər",
+      "paidToInstructors": "Müəllimlərə ödənilən",
+      "satisfactionRate": "Məmnunluq dərəcəsi"
+    },
+    "requirements": {
+      "title": "Müəllim olmaq üçün tələblər",
+      "list": [
+        "Mövzu sahəsində ekspertiza",
+        "Tədris və başqalarına kömək etmə ehtirası",
+        "Əsas kompüter və internet bacarıqları",
+        "Keyfiyyətli məzmun yaratmaq öhdəliyi",
+        "Peşəkar ünsiyyət bacarıqları"
+      ]
+    },
+    "howItWorks": {
+      "title": "Necə işləyir",
+      "steps": {
+        "apply": {
+          "title": "Tədris üçün müraciət edin",
+          "description": "Təcrübəniz və ekspertizanızla müəllim müraciəti göndərin"
+        },
+        "getApproved": {
+          "title": "Təsdiq alın",
+          "description": "Komandamız müraciətinizi nəzərdən keçirir və kvalifikasiyalı müəllimləri təsdiq edir"
+        },
+        "createCourses": {
+          "title": "Kurslar yaradın",
+          "description": "Cəlbedici məzmun yaratmaq üçün kurs yaradılması alətlərimizdən istifadə edin"
+        },
+        "earnMoney": {
+          "title": "Pul qazanın",
+          "description": "Tələbələr kurslarınıza qeydiyyatdan keçdikləri zaman qazanmağa başlayın"
+        }
+      }
+    },
+    "powerfulTools": {
+      "title": "Müəllimlər üçün güclü alətlər",
+      "subtitle": "Kurslarınızı yaratmaq, tanıtmaq və satmaq üçün lazım olan hər şey"
+    },
+    "requirementsSection": {
+      "title": "Başlamaq üçün nəyə ehtiyacınız var",
+      "subtitle": "Uğurlu müəllim olmaq üçün əsas tələblər"
+    },
+    "ctaSection": {
+      "title": "Tədris səyahətinizə başlamağa hazırsınız?",
+      "subtitle": "Ekspert müəllimlər icmamıza qoşulun və tələbələrin həyatlarına müsbət təsir göstərərək pul qazanmağa başlayın.",
+      "applyNow": "İndi müraciət et",
+      "createAccount": "Pulsuz hesab yaradın",
+      "footerNote": "Əvvəlcədən heç bir xərc yoxdur • Başlamaq üçün pulsuz • İlk gündən pul qazanın"
+    }
+  },
+  "instructorApplication": {
+    "title": "Müəllim Müraciəti",
+    "subtitle": "Müəllimlər icmamıza qoşulun və biliklərini paylaşmağa başlayın",
+    "steps": {
+      "personalInfo": "Şəxsi Məlumatlar",
+      "background": "Təcrübə və Təhsil",
+      "expertise": "Ekspertiza və Motivasiya",
+      "additionalInfo": "Əlavə Məlumatlar"
+    },
+    "form": {
+      "firstName": "Ad",
+      "lastName": "Soyad",
+      "email": "E-poçt ünvanı",
+      "phone": "Telefon nömrəsi (İxtiyari)",
+      "bio": "Peşəkar bioqrafiya",
+      "bioPlaceholder": "Özünüz, peşəkar təcrübəniz və nəyin sizə tədris etməkdə ehtiras verib barədə bizə danışın...",
+      "expertise": "Ekspertiza sahələri",
+      "expertiseHelp": "Ekspertizanız olan 10-a qədər sahə seçin",
+      "experience": "Tədris/Peşəkar təcrübə",
+      "experiencePlaceholder": "Tədris təcrübənizi, peşəkar təcrübənizi, nailiyyətlərinizi və kvalifikasiyalarınızı təsvir edin...",
+      "education": "Təhsil",
+      "educationPlaceholder": "Təhsiliniz, dərəcələriniz, sertifikatlarınız...",
+      "motivation": "Niyə Skillify-də dərs demek istəyirsiniz?",
+      "motivationPlaceholder": "Tədris motivasiyanızı və tələbələrə necə kömək etməyi planlaşdırdığınızı paylaşın...",
+      "sampleCourseTitle": "Nümunə kurs başlığı (İxtiyari)",
+      "sampleCourseTitlePlaceholder": "İlk kursunuzun başlığı nə olardı?",
+      "sampleCourseDescription": "Nümunə kurs təsviri (İxtiyari)",
+      "sampleCourseDescriptionPlaceholder": "İlk kursunuzda tələbələrin nə öyrənəcəyini qısaca təsvir edin...",
+      "portfolio": "Portfolio URL (İxtiyari)",
+      "portfolioPlaceholder": "Portfolionuza, veb saytınıza və ya iş nümunələrinizə keçid",
+      "linkedIn": "LinkedIn profili (İxtiyari)",
+      "linkedInPlaceholder": "LinkedIn profil URL-niz",
+      "website": "Şəxsi veb sayt (İxtiyari)",
+      "websitePlaceholder": "Şəxsi veb saytınızın və ya blogunuzun URL-i"
+    },
+    "validation": {
+      "firstNameRequired": "Ad tələb olunur",
+      "lastNameRequired": "Soyad tələb olunur",
+      "emailRequired": "E-poçt tələb olunur",
+      "emailInvalid": "Etibarsız e-poçt ünvanı",
+      "bioRequired": "Bioqrafiya tələb olunur",
+      "bioMinLength": "Bioqrafiya ən azı 50 simvol olmalıdır",
+      "bioMaxLength": "Bioqrafiya 500 simvoldan çox olmamalıdır",
+      "expertiseRequired": "Ən azı bir ekspertiza sahəsi seçin",
+      "expertiseMin": "Ən azı bir ekspertiza sahəsi seçin",
+      "expertiseMax": "Maksimum 10 ekspertiza sahəsi seçin",
+      "experienceRequired": "Təcrübə təsviri tələb olunur",
+      "experienceMinLength": "Təcrübə təsviri ən azı 100 simvol olmalıdır",
+      "experienceMaxLength": "Təcrübə təsviri 1000 simvoldan çox olmamalıdır",
+      "educationRequired": "Təhsil tələb olunur",
+      "educationMinLength": "Təhsil ən azı 20 simvol olmalıdır",
+      "educationMaxLength": "Təhsil 500 simvoldan çox olmamalıdır",
+      "motivationRequired": "Motivasiya tələb olunur",
+      "motivationMinLength": "Motivasiya ən azı 50 simvol olmalıdır",
+      "motivationMaxLength": "Motivasiya 500 simvoldan çox olmamalıdır",
+      "courseTitleMaxLength": "Kurs başlığı 100 simvoldan çox olmamalıdır",
+      "courseDescriptionMaxLength": "Kurs təsviri 500 simvoldan çox olmamalıdır",
+      "portfolioInvalid": "Zəhmət olmasa etibarlı URL daxil edin",
+      "linkedInInvalid": "Zəhmət olmasa etibarlı LinkedIn URL daxil edin",
+      "websiteInvalid": "Zəhmət olmasa etibarlı veb sayt URL-i daxil edin"
+    },
+    "buttons": {
+      "next": "Növbəti addım",
+      "previous": "Əvvəlki addım",
+      "submit": "Müraciəti göndər",
+      "submitting": "Göndərilir..."
+    }
+  },
+  "applicationSuccess": {
+    "title": "Müraciət uğurla göndərildi!",
+    "subtitle": "Skillify-də müəllim olmaq marağınıza görə təşəkkür edirik",
+    "message": "Müəllim müraciətinizi aldıq və komandamız onu diqqətlə nəzərdən keçirəcək.",
+    "nextSteps": {
+      "title": "Sonra nə baş verir?",
+      "checkEmail": {
+        "title": "E-poçtu yoxlayın",
+        "description": "Müraciət detalları ilə təsdiq e-poçtu göndərdik."
+      },
+      "reviewProcess": {
+        "title": "Baxış prosesi",
+        "description": "Komandamız müraciətinizi 3-5 iş günü ərzində nəzərdən keçirəcək."
+      },
+      "getReady": {
+        "title": "Tədrisə hazırlaşın",
+        "description": "Təsdiq gözləyərkən ilk kursunuzu planlaşdırmağa başlayın."
+      }
+    },
+    "tips": {
+      "title": "Gözləyərkən məsləhətlər",
+      "prepareCourse": {
+        "title": "Kurs məzmunu hazırlayın",
+        "description": "Kurs strukturunu müəyyənləşdirməyə və materialları toplamağa başlayın"
+      },
+      "studyPlatform": {
+        "title": "Platformamızı öyrənin",
+        "description": "Ən yaxşı nəyin işlədiyini anlamaq üçün uğurlu kursları araşdırın"
+      },
+      "joinCommunity": {
+        "title": "İcmamıza qoşulun",
+        "description": "Digər müəllimlərlə əlaqə qurun və təcrübələri paylaşın"
+      }
+    },
+    "buttons": {
+      "backToHome": "Ana səhifəyə qayıt",
+      "browseGourses": "Kurslara bax",
+      "checkStatus": "Müraciət vəziyyətini yoxla"
+    }
   }
 }

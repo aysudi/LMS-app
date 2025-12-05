@@ -225,10 +225,33 @@ export const getCourseReviews = async (req, res) => {
         const limit = parseInt(req.query.limit) || 10;
         const { getCourseReviewsService } = await import("../services/courseService");
         const result = await getCourseReviewsService(id, page, limit);
-        res.status(200).json({
-            success: true,
-            data: result,
-        });
+        // Transform the response to match client expectations
+        const response = {
+            reviews: result.reviews.map((review) => ({
+                _id: review._id,
+                user: {
+                    _id: review.user._id,
+                    name: `${review.user.firstName} ${review.user.lastName}`,
+                    profilePicture: review.user.avatar,
+                },
+                rating: review.rating,
+                comment: review.comment,
+                date: review.date,
+                updatedAt: review.updatedAt,
+            })),
+            stats: {
+                totalReviews: result.totalReviews,
+                averageRating: result.averageRating || 0,
+                ratingBreakdown: calculateRatingBreakdown(result.reviews),
+            },
+            pagination: {
+                currentPage: result.pagination.current,
+                totalPages: result.pagination.pages,
+                hasNext: result.pagination.hasNext,
+                hasPrevious: result.pagination.hasPrev,
+            },
+        };
+        res.status(200).json(response);
     }
     catch (error) {
         res.status(404).json({
@@ -236,6 +259,16 @@ export const getCourseReviews = async (req, res) => {
             message: error.message,
         });
     }
+};
+// Helper function to calculate rating breakdown
+const calculateRatingBreakdown = (reviews) => {
+    const breakdown = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    reviews.forEach((review) => {
+        if (review.rating >= 1 && review.rating <= 5) {
+            breakdown[review.rating]++;
+        }
+    });
+    return breakdown;
 };
 // Update user's review
 export const updateReview = async (req, res) => {

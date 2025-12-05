@@ -1,12 +1,10 @@
 import { useTranslation } from "react-i18next";
-import { FaEnvelope, FaEye } from "react-icons/fa";
 
 interface StudentRowProps {
   student: any;
-  onSendMessage: () => void;
 }
 
-const StudentRow: React.FC<StudentRowProps> = ({ student, onSendMessage }) => {
+const StudentRow: React.FC<StudentRowProps> = ({ student }) => {
   const { t } = useTranslation();
   const progressPercent = student.enrollment?.progressPercentage || 0;
 
@@ -56,23 +54,6 @@ const StudentRow: React.FC<StudentRowProps> = ({ student, onSendMessage }) => {
         {student.enrollment?.lastAccessedAt
           ? new Date(student.enrollment.lastAccessedAt).toLocaleDateString()
           : t("instructor.students.never")}
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={onSendMessage}
-            className="p-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors duration-200"
-            title={t("instructor.students.sendMessage")}
-          >
-            <FaEnvelope />
-          </button>
-          <button
-            className="p-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors duration-200"
-            title={t("instructor.students.viewProfile")}
-          >
-            <FaEye />
-          </button>
-        </div>
       </td>
     </tr>
   );

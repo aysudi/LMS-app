@@ -49,6 +49,28 @@ export interface IUser extends Document {
   emailVerificationExpires?: Date;
   passwordResetToken?: string;
   passwordResetExpires?: Date;
+  instructorInfo?: {
+    bio?: string;
+    experience?: string;
+    education?: string;
+    motivation?: string;
+    expertise?: string[];
+    headline?: string;
+    yearsOfExperience?: number;
+    totalStudents: number;
+    averageRating: number;
+    totalReviews: number;
+    totalCourses: number;
+    totalEarnings: number;
+    isVerifiedInstructor: boolean;
+    joinedAsInstructorAt?: Date;
+    paymentInfo?: {
+      bankName?: string;
+      accountNumber?: string;
+      routingNumber?: string;
+      paypalEmail?: string;
+    };
+  };
   createdAt: Date;
   updatedAt: Date;
 }

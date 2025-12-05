@@ -6,17 +6,17 @@ import {
   FaDollarSign,
   FaUsers,
   FaEye,
-  FaClock,
   FaStar,
   FaDownload,
-  FaTrophy,
-  FaGraduationCap,
 } from "react-icons/fa";
 import {
   useInstructorOverview,
   useInstructorCoursesWithStats,
   useInstructorAnalytics,
+  useMonthlyAnalytics,
 } from "../../hooks/useInstructor";
+import { exportAnalyticsReport } from "../../services/instructor.service";
+import { useSnackbar } from "notistack";
 import Loading from "../../components/Common/Loading";
 import MetricCard from "../../components/Instructor/Analytics/MetricCard";
 import RevenueChart from "../../components/Instructor/Analytics/RevenueChart";
@@ -25,9 +25,9 @@ import TrafficSources from "../../components/Instructor/Analytics/TrafficSources
 
 const InstructorAnalytics = () => {
   const { t } = useTranslation();
-  const [dateRange, setDateRange] = useState<"7d" | "30d" | "90d" | "1y">(
-    "30d"
-  );
+  const { enqueueSnackbar } = useSnackbar();
+  const [dateRange] = useState<"7d" | "30d" | "90d" | "1y">("30d");
+  const [isExporting, setIsExporting] = useState(false);
 
   const { data: overview, isLoading: overviewLoading } =
     useInstructorOverview();
@@ -37,10 +37,40 @@ const InstructorAnalytics = () => {
       limit: 50,
       status: "published",
     });
+  const { data: monthlyAnalytics, isLoading: monthlyLoading } =
+    useMonthlyAnalytics("6m");
 
   const { formatCurrency } = useInstructorAnalytics();
 
-  if (overviewLoading || coursesLoading) {
+  const handleExportAnalytics = async () => {
+    setIsExporting(true);
+    try {
+      const blob = await exportAnalyticsReport("csv", dateRange);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.style.display = "none";
+      a.href = url;
+      a.download = `analytics-report-${dateRange}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      enqueueSnackbar("Analytics report downloaded successfully!", {
+        variant: "success",
+      });
+    } catch (error: any) {
+      enqueueSnackbar(
+        error.response?.data?.message || "Failed to download report",
+        {
+          variant: "error",
+        }
+      );
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  if (overviewLoading || coursesLoading || monthlyLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loading size="lg" />
@@ -50,41 +80,17 @@ const InstructorAnalytics = () => {
 
   const stats = overview?.data?.overview;
   const courses = coursesData?.data?.courses || [];
-  const totalRevenue = stats?.totalRevenue || 0;
-  const totalStudents = stats?.totalStudents || 0;
 
-  const revenueData = [
-    {
-      month: "Jan",
-      revenue: Math.round(totalRevenue * 0.1),
-      students: Math.round(totalStudents * 0.1),
-    },
-    {
-      month: "Feb",
-      revenue: Math.round(totalRevenue * 0.12),
-      students: Math.round(totalStudents * 0.12),
-    },
-    {
-      month: "Mar",
-      revenue: Math.round(totalRevenue * 0.15),
-      students: Math.round(totalStudents * 0.15),
-    },
-    {
-      month: "Apr",
-      revenue: Math.round(totalRevenue * 0.13),
-      students: Math.round(totalStudents * 0.13),
-    },
-    {
-      month: "May",
-      revenue: Math.round(totalRevenue * 0.18),
-      students: Math.round(totalStudents * 0.18),
-    },
-    {
-      month: "Jun",
-      revenue: Math.round(totalRevenue * 0.2),
-      students: Math.round(totalStudents * 0.2),
-    },
-  ];
+  const revenueData =
+    monthlyAnalytics?.data && monthlyAnalytics.data.length > 0
+      ? monthlyAnalytics.data.map((item: any) => ({
+          month:
+            item.month ||
+            new Date(item.date).toLocaleDateString("en-US", { month: "short" }),
+          revenue: item.revenue || item.earnings || 0,
+          students: item.enrollments || item.students || 0,
+        }))
+      : [];
 
   const coursePerformanceData = courses.slice(0, 5).map((course) => ({
     name: course.title,
@@ -108,9 +114,8 @@ const InstructorAnalytics = () => {
     { name: t("instructor.analytics.referrals"), value: 12, color: "#EF4444" },
   ];
 
-  const handleExportReport = () => {
-    console.log("Exporting analytics report...");
-    // TODO: Implement export functionality
+  const handleExportReport = async () => {
+    await handleExportAnalytics();
   };
 
   return (
@@ -131,26 +136,21 @@ const InstructorAnalytics = () => {
             </p>
           </div>
           <div className="flex items-center space-x-4">
-            {/* Date Range Selector */}
-            <select
-              value={dateRange}
-              onChange={(e) => setDateRange(e.target.value as any)}
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-            >
-              <option value="7d">{t("filters.last7Days")}</option>
-              <option value="30d">{t("filters.last30Days")}</option>
-              <option value="90d">{t("filters.last90Days")}</option>
-              <option value="1y">{t("filters.lastYear")}</option>
-            </select>
-
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleExportReport}
-              className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200 font-medium flex items-center space-x-2"
+              disabled={isExporting}
+              className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200 font-medium flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <FaDownload className="text-sm" />
-              <span>{t("instructor.exportReport")}</span>
+              {isExporting ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+              ) : (
+                <FaDownload className="text-sm" />
+              )}
+              <span>
+                {isExporting ? "Exporting..." : t("instructor.exportReport")}
+              </span>
             </motion.button>
           </div>
         </motion.div>
@@ -212,71 +212,6 @@ const InstructorAnalytics = () => {
           {/* Traffic Sources */}
           <TrafficSources data={trafficSourceData} />
         </div>
-
-        {/* Additional Metrics */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6"
-        >
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">
-                {t("instructor.analytics.completionRate")}
-              </h3>
-              <FaTrophy className="text-2xl text-yellow-500" />
-            </div>
-            <div className="text-3xl font-bold text-gray-900 mb-2">78.5%</div>
-            <p className="text-sm text-gray-600">
-              {t("instructor.analytics.averageAcrossAllCourses")}
-            </p>
-            <div className="mt-4 bg-gray-200 rounded-full h-2">
-              <div
-                className="bg-green-500 h-2 rounded-full"
-                style={{ width: "78.5%" }}
-              ></div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">
-                {t("instructor.analytics.avgWatchTime")}
-              </h3>
-              <FaClock className="text-2xl text-blue-500" />
-            </div>
-            <div className="text-3xl font-bold text-gray-900 mb-2">24.3m</div>
-            <p className="text-sm text-gray-600">
-              {t("instructor.analytics.perStudentSession")}
-            </p>
-            <div className="flex items-center mt-4 text-sm">
-              <span className="text-green-600 font-medium">+12.4%</span>
-              <span className="text-gray-600 ml-2">
-                {t("instructor.analytics.vsLastMonth")}
-              </span>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">
-                {t("instructor.analytics.certificatesIssued")}
-              </h3>
-              <FaGraduationCap className="text-2xl text-purple-500" />
-            </div>
-            <div className="text-3xl font-bold text-gray-900 mb-2">342</div>
-            <p className="text-sm text-gray-600">
-              {t("instructor.analytics.thisMonth")}
-            </p>
-            <div className="flex items-center mt-4 text-sm">
-              <span className="text-green-600 font-medium">+18.2%</span>
-              <span className="text-gray-600 ml-2">
-                {t("instructor.analytics.vsLastMonth")}
-              </span>
-            </div>
-          </div>
-        </motion.div>
       </div>
     </div>
   );
