@@ -325,7 +325,16 @@ const EditCourse = () => {
             />
           )}
           {activeTab === "media" && (
-            <MediaPanel course={courseData.data} onUpdate={handlePanelUpdate} />
+            <MediaPanel
+              course={courseData.data}
+              onUpdate={handlePanelUpdate}
+              onSave={handleTabSave}
+              isSaving={updateCourseMutation.isPending}
+              hasChanges={
+                !!tabChanges[activeTab] &&
+                Object.keys(tabChanges[activeTab]).length > 0
+              }
+            />
           )}
           {activeTab === "announcements" && (
             <AnnouncementsPanel

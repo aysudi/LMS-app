@@ -198,7 +198,6 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
     title: string;
     description?: string;
     duration?: number;
-    isPreview?: boolean;
   }) => {
     try {
       if (!formData.title.trim()) {
@@ -245,7 +244,6 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
             title: formData.title.trim(),
             description: formData.description?.trim(),
             duration: formData.duration || 0,
-            isPreview: formData.isPreview || false,
           };
           await handleUpdateSection(section._id || section.id, {
             ...section,
@@ -265,7 +263,6 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
             video: { url: "", publicId: "" },
             duration: formData.duration || 0,
             order: section.lessons?.length || 0,
-            isPreview: formData.isPreview || false,
             course: course.id,
             section: editModal.sectionId,
             resources: [],
@@ -454,13 +451,6 @@ const CurriculumPanel = ({ course, onUpdate }: CurriculumPanelProps) => {
                                                         <h4 className="font-medium text-gray-900">
                                                           {lesson.title}
                                                         </h4>
-                                                        {lesson.isPreview && (
-                                                          <span className="ml-2 px-2 py-1 text-xs font-medium text-green-800 bg-green-100 rounded-full">
-                                                            {t(
-                                                              "instructor.editCourse.curriculum.preview"
-                                                            )}
-                                                          </span>
-                                                        )}
                                                       </div>
                                                       <div className="mt-1 flex items-center text-sm text-gray-500">
                                                         <span className="flex items-center">

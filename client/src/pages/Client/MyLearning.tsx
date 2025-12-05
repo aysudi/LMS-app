@@ -208,120 +208,124 @@ const MyLearning = () => {
         ) : (
           // Course Grid
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {enrolledCourses.map((enrollment: any, index: number) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="bg-white rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200 hover:border-gray-300 cursor-pointer group"
-                onClick={() =>
-                  navigate(`/course/${enrollment.course._id}/learn`)
-                }
-              >
-                {/* Image with Progress Overlay */}
-                <div className="relative h-40 sm:h-48 overflow-hidden">
-                  <img
-                    src={enrollment.course.image.url}
-                    alt={enrollment.course.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-
-                  {/* Play Button Overlay */}
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white/90 rounded-full flex items-center justify-center">
-                      <FaPlay className="text-lg sm:text-2xl text-blue-600 ml-1" />
-                    </div>
-                  </div>
-
-                  {/* Progress Bar */}
-                  <div className="absolute bottom-0 left-0 right-0 h-2 bg-black/20">
-                    <div
-                      className="h-full bg-gradient-to-r from-green-400 to-blue-500"
-                      style={{ width: `${enrollment.progressPercentage}%` }}
+            {enrolledCourses.map((enrollment: any, index: number) => {
+              console.log(enrollment);
+              return (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="bg-white rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200 hover:border-gray-300 cursor-pointer group"
+                  onClick={() =>
+                    navigate(`/course/${enrollment.course._id}/learn`)
+                  }
+                >
+                  {/* Image with Progress Overlay */}
+                  <div className="relative h-40 sm:h-48 overflow-hidden">
+                    <img
+                      src={enrollment.course.image.url}
+                      alt={enrollment.course.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
+
+                    {/* Play Button Overlay */}
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                      <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white/90 rounded-full flex items-center justify-center">
+                        <FaPlay className="text-lg sm:text-2xl text-blue-600 ml-1" />
+                      </div>
+                    </div>
+
+                    {/* Progress Bar */}
+                    <div className="absolute bottom-0 left-0 right-0 h-2 bg-black/20">
+                      <div
+                        className="h-full bg-gradient-to-r from-green-400 to-blue-500"
+                        style={{ width: `${enrollment.progressPercentage}%` }}
+                      />
+                    </div>
+
+                    {/* Progress Percentage */}
+                    <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-black/70 text-white px-2 py-1 rounded-full text-xs sm:text-sm font-bold">
+                      {enrollment.progressPercentage}%
+                    </div>
                   </div>
 
-                  {/* Progress Percentage */}
-                  <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-black/70 text-white px-2 py-1 rounded-full text-xs sm:text-sm font-bold">
-                    {enrollment.progressPercentage}%
-                  </div>
-                </div>
+                  {/* Content */}
+                  <div className="p-4 sm:p-6">
+                    <div className="mb-3 sm:mb-4">
+                      <h3 className="font-bold text-gray-900 text-base sm:text-lg line-clamp-2 group-hover:text-blue-600 transition-colors leading-tight">
+                        {enrollment.course.title}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-gray-600 mt-1 truncate">
+                        {t("course.by")}{" "}
+                        {enrollment.course.instructor?.firstName}{" "}
+                        {enrollment.course.instructor?.lastName}
+                      </p>
+                    </div>
 
-                {/* Content */}
-                <div className="p-4 sm:p-6">
-                  <div className="mb-3 sm:mb-4">
-                    <h3 className="font-bold text-gray-900 text-base sm:text-lg line-clamp-2 group-hover:text-blue-600 transition-colors leading-tight">
-                      {enrollment.course.title}
-                    </h3>
-                    <p className="text-xs sm:text-sm text-gray-600 mt-1 truncate">
-                      {t("course.by")} {enrollment.course.instructor?.firstName}{" "}
-                      {enrollment.course.instructor?.lastName}
-                    </p>
-                  </div>
-
-                  {/* Stats */}
-                  <div className="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4">
-                    <div className="flex items-center justify-between text-xs sm:text-sm text-gray-600">
-                      <div className="flex items-center space-x-1 min-w-0 flex-1 mr-2">
-                        <FaBook className="text-xs text-blue-500 flex-shrink-0" />
+                    {/* Stats */}
+                    <div className="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4">
+                      <div className="flex items-center justify-between text-xs sm:text-sm text-gray-600">
+                        <div className="flex items-center space-x-1 min-w-0 flex-1 mr-2">
+                          <FaBook className="text-xs text-blue-500 flex-shrink-0" />
+                          <span className="truncate">
+                            {enrollment.completedLessons.length}/
+                            {enrollment.course.totalLessons || 0}{" "}
+                            {t("course.lessons")}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-1 flex-shrink-0">
+                          <FaStar className="text-xs text-yellow-400" />
+                          <span>
+                            {enrollment.rating ||
+                              enrollment.course.rating ||
+                              "N/A"}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-1 text-xs sm:text-sm text-gray-500">
+                        <FaClock className="text-xs flex-shrink-0" />
                         <span className="truncate">
-                          {enrollment.completedLessons.length}/
-                          {enrollment.course.totalLessons || 0}{" "}
-                          {t("course.lessons")}
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-1 flex-shrink-0">
-                        <FaStar className="text-xs text-yellow-400" />
-                        <span>
-                          {enrollment.rating ||
-                            enrollment.course.rating ||
-                            "N/A"}
+                          {t("student.lastAccessed")}{" "}
+                          {enrollment.lastAccessedAt
+                            ? new Date(
+                                enrollment.lastAccessedAt
+                              ).toLocaleDateString()
+                            : t("student.never")}
                         </span>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-1 text-xs sm:text-sm text-gray-500">
-                      <FaClock className="text-xs flex-shrink-0" />
+
+                    {/* Continue Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/course/${enrollment.course._id}/learn`);
+                      }}
+                      className="w-full py-2.5 sm:py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center space-x-1 sm:space-x-2 cursor-pointer text-sm sm:text-base"
+                    >
+                      <FaPlay className="text-xs sm:text-sm flex-shrink-0" />
                       <span className="truncate">
-                        {t("student.lastAccessed")}{" "}
-                        {enrollment.lastAccessedAt
-                          ? new Date(
-                              enrollment.lastAccessedAt
-                            ).toLocaleDateString()
-                          : t("student.never")}
+                        {t("student.continueLearning")}
                       </span>
-                    </div>
+                      <FaArrowRight className="text-xs sm:text-sm flex-shrink-0" />
+                    </button>
+
+                    {/* Certificate Badge */}
+                    {enrollment.progressPercentage === 100 && (
+                      <div className="mt-2 sm:mt-3 flex items-center justify-center space-x-1 sm:space-x-2 text-xs sm:text-sm text-green-600 font-medium">
+                        <FaCertificate className="flex-shrink-0" />
+                        <span className="text-center">
+                          {enrollment.certificateIssued
+                            ? t("student.certificateAvailable")
+                            : t("student.certificatePending")}
+                        </span>
+                      </div>
+                    )}
                   </div>
-
-                  {/* Continue Button */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/course/${enrollment.course._id}/learn`);
-                    }}
-                    className="w-full py-2.5 sm:py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center space-x-1 sm:space-x-2 cursor-pointer text-sm sm:text-base"
-                  >
-                    <FaPlay className="text-xs sm:text-sm flex-shrink-0" />
-                    <span className="truncate">
-                      {t("student.continueLearning")}
-                    </span>
-                    <FaArrowRight className="text-xs sm:text-sm flex-shrink-0" />
-                  </button>
-
-                  {/* Certificate Badge */}
-                  {enrollment.progressPercentage === 100 && (
-                    <div className="mt-2 sm:mt-3 flex items-center justify-center space-x-1 sm:space-x-2 text-xs sm:text-sm text-green-600 font-medium">
-                      <FaCertificate className="flex-shrink-0" />
-                      <span className="text-center">
-                        {enrollment.certificateIssued
-                          ? t("student.certificateAvailable")
-                          : t("student.certificatePending")}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              );
+            })}
           </div>
         )}
       </div>

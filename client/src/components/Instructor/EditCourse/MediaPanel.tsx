@@ -6,9 +6,18 @@ import type { Course } from "../../../types/course.type";
 interface MediaPanelProps {
   course: Course;
   onUpdate: (changes: Partial<Course>) => void;
+  onSave?: () => void;
+  isSaving?: boolean;
+  hasChanges?: boolean;
 }
 
-const MediaPanel = ({ course, onUpdate }: MediaPanelProps) => {
+const MediaPanel = ({
+  course,
+  onUpdate,
+  onSave,
+  isSaving,
+  hasChanges,
+}: MediaPanelProps) => {
   const { t } = useTranslation();
   const [previewImage, setPreviewImage] = useState<string | null>(
     course.image?.url || null
@@ -225,6 +234,25 @@ const MediaPanel = ({ course, onUpdate }: MediaPanelProps) => {
             </div>
           </div>
         </div>
+
+        {/* Save Button */}
+        {hasChanges && onSave && (
+          <div className="mt-8 flex justify-end">
+            <button
+              onClick={onSave}
+              disabled={isSaving}
+              className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+                isSaving
+                  ? "bg-gray-400 text-gray-700 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700 text-white"
+              }`}
+            >
+              {isSaving
+                ? t("common.saving")
+                : t("instructor.editCourse.saveChanges")}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

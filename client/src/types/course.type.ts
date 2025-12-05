@@ -81,7 +81,6 @@ export interface Lesson {
   };
   duration: number; // in seconds
   order: number;
-  isPreview: boolean;
   course: string;
   section: string;
   resources: {

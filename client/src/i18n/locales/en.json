@@ -1,6 +1,7 @@
 {
   "common": {
     "allCourses": "All Courses",
+    "lastUpdated": "Last Updated",
     "loading": "Loading...",
     "discussions": "Discussions",
     "error": "Error",
@@ -897,6 +898,7 @@
     },
     "editCourse": {
       "courseSubmitted": "Course Submitted",
+      "saveChanges": "Save Changes",
       "courseSubmittedMessage": "Your course has been submitted for admin approval.",
       "submissionFailed": "Submission Failed",
       "submissionFailedMessage": "Failed to submit course for approval. Please try again.",

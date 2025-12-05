@@ -47,7 +47,7 @@ const LessonEditPage = () => {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoPreview, setVideoPreview] = useState<string>("");
   const [duration, setDuration] = useState(0);
-  const [isPreview, setIsPreview] = useState(false);
+  const [isPreview] = useState(false);
   const [resources, setResources] = useState<LessonResource[]>([]);
   const [quiz, setQuiz] = useState<QuizQuestion[]>([]);
 
@@ -71,7 +71,6 @@ const LessonEditPage = () => {
       setDuration(
         currentLesson.duration ? Math.floor(currentLesson.duration / 60) : 0
       );
-      setIsPreview(currentLesson.isPreview || false);
 
       if (currentLesson.resources && Array.isArray(currentLesson.resources)) {
         setResources(
@@ -331,12 +330,7 @@ const LessonEditPage = () => {
           </div>
 
           {/* Right Column - Settings */}
-          <Settings
-            duration={duration}
-            isPreview={isPreview}
-            setDuration={setDuration}
-            setIsPreview={setIsPreview}
-          />
+          <Settings duration={duration} setDuration={setDuration} />
         </div>
       </div>
     </div>

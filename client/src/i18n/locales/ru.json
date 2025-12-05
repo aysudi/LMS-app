@@ -1,6 +1,7 @@
 {
   "common": {
     "allCourses": "Все курсы",
+    "lastUpdated": "Последнее обновление",
     "loading": "Загрузка...",
     "discussions": "Обсуждения",
     "error": "Ошибка",
@@ -756,6 +757,7 @@
     },
     "editCourse": {
       "courseSubmitted": "Курс отправлен",
+      "saveChanges": "Сохранить изменения",
       "courseSubmittedMessage": "Ваш курс был отправлен на утверждение администратора.",
       "submissionFailed": "Отправка не удалась",
       "submissionFailedMessage": "Не удалось отправить курс на утверждение. Попробуйте еще раз.",
