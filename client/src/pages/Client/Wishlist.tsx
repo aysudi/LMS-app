@@ -3,25 +3,18 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FaRegHeart,
-  FaFilter,
   FaSearch,
-  FaTrash,
-  FaList,
-  FaChevronDown,
-  FaArrowLeft,
   FaExclamationCircle,
   FaCheckCircle,
-  FaSpinner,
 } from "react-icons/fa";
-import { FaGrip } from "react-icons/fa6";
-
-import { useWishlistHelpers, useToggleWishlist } from "../../hooks/useWishlist";
+import { useWishlistHelpers } from "../../hooks/useWishlist";
 import { useWishlistToast } from "../../hooks/useWishlistToast";
-
-import CourseCard from "../../components/Client/WishlistCourseCard";
+import CourseCard from "../../components/Client/Wishlist/WishlistCourseCard";
 import Loading from "../../components/Common/Loading";
 // @ts-ignore
 import { useTranslation } from "react-i18next";
+import WishlistFilters from "../../components/Client/Wishlist/WishlistFilters";
+import BulkActions from "../../components/Client/Wishlist/BulkActions";
 
 type ViewMode = "grid" | "list";
 type SortOption = "date" | "title" | "price" | "rating";
@@ -50,18 +43,16 @@ const Wishlist: React.FC = () => {
 
   const { wishlistItems, wishlistCount, isLoadingWishlist, error } =
     useWishlistHelpers();
-  const { isLoading: isToggling } = useToggleWishlist();
 
-  const { removeFromWishlistWithToast, removeBulkFromWishlistWithToast } =
-    useWishlistToast({
-      onRemoveSuccess: (courseId) => {
-        setSelectedCourses((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(courseId);
-          return newSet;
-        });
-      },
-    });
+  const { removeFromWishlistWithToast } = useWishlistToast({
+    onRemoveSuccess: (courseId) => {
+      setSelectedCourses((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(courseId);
+        return newSet;
+      });
+    },
+  });
 
   const filteredAndSortedCourses = useMemo(() => {
     let courses = [...wishlistItems];
@@ -140,31 +131,6 @@ const Wishlist: React.FC = () => {
     });
   };
 
-  const handleSelectAll = () => {
-    if (selectedCourses.size === filteredAndSortedCourses.length) {
-      setSelectedCourses(new Set());
-    } else {
-      setSelectedCourses(
-        new Set(filteredAndSortedCourses.map((course) => course.id))
-      );
-    }
-  };
-
-  const handleRemoveSelected = async () => {
-    const coursesToRemove = Array.from(selectedCourses).map((courseId) => {
-      const course = wishlistItems.find((c) => c.id === courseId);
-      return {
-        id: courseId,
-        title: course?.title || "Unknown Course",
-      };
-    });
-
-    await removeBulkFromWishlistWithToast(coursesToRemove);
-
-    setSelectedCourses(new Set());
-    setIsSelectionMode(false);
-  };
-
   if (isLoadingWishlist) {
     return <Loading variant="page" message={t("wishlist.loadingWishlist")} />;
   }
@@ -205,94 +171,15 @@ const Wishlist: React.FC = () => {
           transition={{ duration: 0.6 }}
           className="mb-8"
         >
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-4">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => navigate(-1)}
-                className="p-3 bg-white hover:bg-gray-50 border border-gray-200 rounded-xl shadow-sm transition-all duration-200"
-              >
-                <FaArrowLeft className="text-gray-600" />
-              </motion.button>
-              <div>
-                <div className="flex items-center space-x-3 mb-2">
-                  {/* <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl shadow-lg">
-                    <FaRegHeart className="text-xl text-white" />
-                  </div> */}
-                  <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent">
-                    {t("navigation.wishlist")}
-                  </h1>
-                </div>
-                <p className="text-gray-600 text-lg">
-                  {t("wishlist.coursesSavedForLater", { count: wishlistCount })}
-                </p>
-              </div>
-            </div>
-
-            {/* Bulk Actions */}
-            {wishlistCount > 0 && (
-              <div className="flex items-center space-x-3">
-                {!isSelectionMode ? (
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setIsSelectionMode(true)}
-                    className="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center space-x-2 cursor-pointer"
-                  >
-                    <FaCheckCircle className="text-sm" />
-                    <span>{t("common.select")}</span>
-                  </motion.button>
-                ) : (
-                  <div className="flex items-center space-x-2">
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={handleSelectAll}
-                      className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-all duration-200 cursor-pointer"
-                    >
-                      {selectedCourses.size === filteredAndSortedCourses.length
-                        ? t("wishlist.deselectAll")
-                        : t("wishlist.selectAll")}
-                    </motion.button>
-
-                    {selectedCourses.size > 0 && (
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={handleRemoveSelected}
-                        disabled={isToggling}
-                        className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-medium rounded-lg transition-all duration-200 flex items-center space-x-2 cursor-pointer"
-                      >
-                        {isToggling ? (
-                          <FaSpinner className="text-sm animate-spin" />
-                        ) : (
-                          <FaTrash className="text-sm" />
-                        )}
-                        <span>
-                          {t("wishlist.removeSelected", {
-                            count: selectedCourses.size,
-                          })}
-                        </span>
-                      </motion.button>
-                    )}
-
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => {
-                        setIsSelectionMode(false);
-                        setSelectedCourses(new Set());
-                      }}
-                      className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-all duration-200 cursor-pointer"
-                    >
-                      {t("common.cancel")}
-                    </motion.button>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+          <BulkActions
+            setIsSelectionMode={setIsSelectionMode}
+            setSelectedCourses={setSelectedCourses}
+            selectedCourses={selectedCourses}
+            filteredAndSortedCourses={filteredAndSortedCourses}
+            wishlistItems={wishlistItems}
+            wishlistCount={wishlistCount}
+            isSelectionMode={isSelectionMode}
+          />
 
           {/* Controls */}
           {wishlistCount > 0 && (
@@ -310,157 +197,18 @@ const Wishlist: React.FC = () => {
               </div>
 
               {/* Filters and View Controls */}
-              <div className="flex items-center space-x-3">
-                {/* Filter Dropdown */}
-                <div className="relative">
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setIsFilterOpen(!isFilterOpen)}
-                    className="flex items-center space-x-2 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all duration-200 cursor-pointer"
-                  >
-                    <FaFilter className="text-sm" />
-                    <span>{t("common.filter")}</span>
-                    <FaChevronDown
-                      className={`text-sm transition-transform duration-200 ${
-                        isFilterOpen ? "rotate-180" : ""
-                      }`}
-                    />
-                  </motion.button>
-
-                  <AnimatePresence>
-                    {isFilterOpen && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        transition={{ duration: 0.2 }}
-                        className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-10"
-                      >
-                        {[
-                          { value: "all", label: t("wishlist.allCourses") },
-                          { value: "free", label: t("wishlist.freeCourses") },
-                          { value: "paid", label: t("wishlist.paidCourses") },
-                          {
-                            value: "beginner",
-                            label: t("wishlist.beginnerLevel"),
-                          },
-                          {
-                            value: "intermediate",
-                            label: t("wishlist.intermediateLevel"),
-                          },
-                          {
-                            value: "advanced",
-                            label: t("wishlist.advancedLevel"),
-                          },
-                        ].map((option) => (
-                          <button
-                            key={option.value}
-                            onClick={() => {
-                              setFilterBy(option.value as FilterOption);
-                              setIsFilterOpen(false);
-                            }}
-                            className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors duration-200 ${
-                              filterBy === option.value
-                                ? "text-purple-600 font-semibold"
-                                : "text-gray-700"
-                            }`}
-                          >
-                            {option.label}
-                          </button>
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                {/* Sort Dropdown */}
-                <div className="relative">
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setIsSortOpen(!isSortOpen)}
-                    className="flex items-center space-x-2 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all duration-200 cursor-pointer"
-                  >
-                    <span>
-                      {sortBy === "date" && t("wishlist.newestFirst")}
-                      {sortBy === "title" && t("wishlist.titleAZ")}
-                      {sortBy === "price" && t("wishlist.priceLowHigh")}
-                      {sortBy === "rating" && t("wishlist.highestRated")}
-                    </span>
-                    <FaChevronDown
-                      className={`text-sm transition-transform duration-200 ${
-                        isSortOpen ? "rotate-180" : ""
-                      }`}
-                    />
-                  </motion.button>
-
-                  <AnimatePresence>
-                    {isSortOpen && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        transition={{ duration: 0.2 }}
-                        className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-10"
-                      >
-                        {[
-                          { value: "date", label: t("wishlist.newestFirst") },
-                          { value: "title", label: t("wishlist.titleAZ") },
-                          { value: "price", label: t("wishlist.priceLowHigh") },
-                          {
-                            value: "rating",
-                            label: t("wishlist.highestRated"),
-                          },
-                        ].map((option) => (
-                          <button
-                            key={option.value}
-                            onClick={() => {
-                              setSortBy(option.value as SortOption);
-                              setIsSortOpen(false);
-                            }}
-                            className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors duration-200 ${
-                              sortBy === option.value
-                                ? "text-purple-600 font-semibold"
-                                : "text-gray-700"
-                            }`}
-                          >
-                            {option.label}
-                          </button>
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                {/* View Mode Toggle */}
-                <div className="flex bg-gray-100 rounded-lg p-1">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setViewMode("grid")}
-                    className={`p-2 rounded-md transition-all duration-200 ${
-                      viewMode === "grid"
-                        ? "bg-white text-purple-600 shadow-sm"
-                        : "text-gray-500 hover:text-gray-700"
-                    }`}
-                  >
-                    <FaGrip />
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setViewMode("list")}
-                    className={`p-2 rounded-md transition-all duration-200 ${
-                      viewMode === "list"
-                        ? "bg-white text-purple-600 shadow-sm"
-                        : "text-gray-500 hover:text-gray-700"
-                    }`}
-                  >
-                    <FaList />
-                  </motion.button>
-                </div>
-              </div>
+              <WishlistFilters
+                setSortBy={setSortBy}
+                viewMode={viewMode}
+                setViewMode={setViewMode}
+                sortBy={sortBy}
+                filterBy={filterBy}
+                isFilterOpen={isFilterOpen}
+                setIsFilterOpen={setIsFilterOpen}
+                isSortOpen={isSortOpen}
+                setIsSortOpen={setIsSortOpen}
+                setFilterBy={setFilterBy}
+              />
             </div>
           )}
         </motion.div>

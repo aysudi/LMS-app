@@ -24,6 +24,8 @@ const CourseCard = ({
     navigate(`/course/${course.id}`);
   };
 
+  console.log(course);
+
   if (viewMode === "list") {
     return (
       <motion.div
@@ -100,7 +102,9 @@ const CourseCard = ({
                 <div className="flex items-center space-x-1">
                   <FaUsers className="text-indigo-500" />
                   <span className="text-gray-600">
-                    {Number(course.enrollmentCount || 0).toLocaleString()}
+                    {Number(
+                      course.studentsEnrolled.length || 0
+                    ).toLocaleString()}
                   </span>
                 </div>
                 <div className="flex items-center space-x-1">
@@ -226,7 +230,7 @@ const CourseCard = ({
             <div className="flex items-center space-x-1 text-gray-600">
               <FaUsers className="text-indigo-500" />
               <span className="font-medium">
-                {Number(course.enrollmentCount || 0).toLocaleString()}
+                {Number(course.studentsEnrolled.length || 0).toLocaleString()}
               </span>
             </div>
           </div>
@@ -249,7 +253,7 @@ const CourseCard = ({
           <div className="flex items-center space-x-1 text-gray-500">
             <FaClock className="text-xs" />
             <span className="text-xs font-medium">
-              {Math.round(course.totalDuration / 60) || 0}h
+              {Math.round(course.totalDuration / 60) || 0}m
             </span>
           </div>
         </div>

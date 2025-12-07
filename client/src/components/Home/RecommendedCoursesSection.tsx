@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { FaLightbulb, FaArrowRight } from "react-icons/fa";
+import { FaLightbulb } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import { ANIMATION_CONFIG } from "../../constants/homePageConstants";
 import type { Course } from "../../types/course.type";
@@ -60,13 +60,6 @@ const RecommendedCoursesSection: React.FC<RecommendedCoursesSectionProps> = ({
             {t("home.sections.coursesPickedForYou")}
           </p>
         </div>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="self-start sm:self-auto flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 text-indigo-600 hover:text-indigo-700 font-semibold rounded-xl hover:bg-indigo-50 transition-all duration-300 text-sm sm:text-base"
-        >
-          {t("common.viewAll")} <FaArrowRight className="text-xs sm:text-sm" />
-        </motion.button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 px-4">

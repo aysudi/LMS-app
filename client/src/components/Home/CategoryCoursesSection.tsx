@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { FaArrowRight, FaGraduationCap } from "react-icons/fa";
+import { FaGraduationCap } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import { COLOR_PALETTES } from "../../constants/homePageConstants";
 import type { Course } from "../../types/course.type";
@@ -21,7 +21,6 @@ interface CategoryCoursesSectionProps {
 const CategoryCoursesSection: React.FC<CategoryCoursesSectionProps> = ({
   allCourses,
   recommendations,
-  onCategoryClick,
   onWishlistToggle,
   onCartToggle,
   checkIfInWishlist,
@@ -102,13 +101,6 @@ const CategoryCoursesSection: React.FC<CategoryCoursesSectionProps> = ({
                     </p>
                   </div>
                 </div>
-                <button
-                  onClick={() => onCategoryClick(category.id)}
-                  className={`self-start sm:self-auto ${category.buttonColor} font-medium flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg ${category.hoverBg} transition-colors text-sm sm:text-base`}
-                >
-                  {t("common.viewAll")}{" "}
-                  <FaArrowRight className="text-xs sm:text-sm" />
-                </button>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 px-4">
                 {courses.map((course: Course, index: number) => (

@@ -24,6 +24,42 @@ const CertificateNotIssued = ({
   const { completeCourseWithCertificate, isGeneratingCertificate } =
     useCertificateGeneration();
 
+  // If course doesn't provide certificates, show appropriate message
+  if (!course?.certificateProvided) {
+    return (
+      <div className="text-center py-8">
+        <div className="w-16 h-16 bg-gradient-to-br from-gray-500 to-gray-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+          <svg
+            className="w-8 h-8 text-white"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+        </div>
+        <h4 className="text-xl font-bold text-white mb-2">
+          Course Completed! 🎉
+        </h4>
+        <p className="text-gray-300 mb-4">
+          Congratulations on completing this course!
+        </p>
+        <div className="bg-gradient-to-br from-blue-900/30 to-purple-900/20 border border-blue-500/30 rounded-xl p-6">
+          <p className="text-gray-300 text-sm">
+            📋 This course does not provide a completion certificate, but you
+            have successfully finished all the content and gained valuable
+            knowledge and skills.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="text-center mb-6">

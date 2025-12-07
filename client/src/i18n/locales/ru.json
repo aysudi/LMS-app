@@ -1,6 +1,7 @@
 {
   "common": {
     "allCourses": "Все курсы",
+    "optional": "Необязательно",
     "lastUpdated": "Последнее обновление",
     "loading": "Загрузка...",
     "discussions": "Обсуждения",
@@ -414,6 +415,7 @@
   },
   "course": {
     "enrollNow": "Записаться сейчас",
+    "lessons": "Уроки",
     "addToCart": "Добавить в корзину",
     "removeFromCart": "Удалить из корзины",
     "addToWishlist": "Добавить в список желаний",
@@ -1383,6 +1385,7 @@
   },
   "courseDetails": {
     "previewThisCourse": "Предварительный просмотр курса",
+    "studentReviews": "Отзывы студентов",
     "free": "Бесплатно",
     "off": "скидка",
     "daysLeftAtThisPrice": "3 дня осталось по этой цене!",

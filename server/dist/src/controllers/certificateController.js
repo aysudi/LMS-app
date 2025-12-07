@@ -2,6 +2,7 @@ import { validateCertificateGeneration } from "../validations/certificateValidat
 import { generateCertificate, sendCertificateEmail, } from "../services/certificateService";
 import Certificate from "../models/Certificate";
 import Enrollment from "../models/Enrollment";
+import Course from "../models/Course";
 import mongoose from "mongoose";
 // Generate and send certificate
 export const generateAndSendCertificate = async (req, res) => {
@@ -15,6 +16,20 @@ export const generateAndSendCertificate = async (req, res) => {
             });
         }
         const { courseId, userId, studentName, instructorName, userEmail, courseName, } = value;
+        // Check if course provides certificates
+        const course = await Course.findById(courseId);
+        if (!course) {
+            return res.status(404).json({
+                success: false,
+                message: "Course not found",
+            });
+        }
+        if (!course.certificateProvided) {
+            return res.status(400).json({
+                success: false,
+                message: "This course does not provide certificates",
+            });
+        }
         // Check if certificate already exists for this user and course
         const existingCertificate = await Certificate.findOne({
             userId: new mongoose.Types.ObjectId(userId),
@@ -75,7 +90,7 @@ export const generateAndSendCertificate = async (req, res) => {
             });
         }
         catch (error) {
-            console.error("Email sending failed (non-critical):", error);
+            console.error("Email sending failed:", error);
             emailError =
                 error instanceof Error ? error.message : "Email sending failed";
         }
@@ -129,6 +144,26 @@ export const getCertificateStatus = async (req, res) => {
                 message: "Invalid course ID or user ID format",
             });
         }
+        // Check if course provides certificates
+        const course = await Course.findById(courseId);
+        if (!course) {
+            return res.status(404).json({
+                success: false,
+                message: "Course not found",
+            });
+        }
+        if (!course.certificateProvided) {
+            return res.status(200).json({
+                success: true,
+                data: {
+                    hasCertificate: false,
+                    certificateId: null,
+                    issuedAt: null,
+                    emailSent: false,
+                    certificateProvided: false,
+                },
+            });
+        }
         // Check if certificate exists for this user and course
         const certificate = await Certificate.findOne({
             userId: new mongoose.Types.ObjectId(userId),
@@ -141,6 +176,7 @@ export const getCertificateStatus = async (req, res) => {
                 certificateId: certificate?.certificateId || null,
                 issuedAt: certificate?.issuedAt || null,
                 emailSent: certificate?.emailSent || false,
+                certificateProvided: course.certificateProvided,
             },
         });
     }

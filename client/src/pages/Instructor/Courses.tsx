@@ -20,6 +20,7 @@ import CourseFilters, {
   type RatingFilter,
 } from "../../components/Instructor/Courses/CourseFilters";
 import CourseList from "../../components/Instructor/Courses/CourseList";
+import Pagination from "../../components/Instructor/Courses/Pagination";
 
 const InstructorCourses = () => {
   const navigate = useNavigate();
@@ -261,7 +262,6 @@ const InstructorCourses = () => {
       try {
         for (const courseId of selectedCourses) {
           await deleteMutation.mutateAsync(courseId!);
-          // window.location.reload();
         }
         setSelectedCourses([]);
       } catch (error) {
@@ -381,46 +381,7 @@ const InstructorCourses = () => {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="flex items-center justify-center mt-12"
-            >
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => setPage(Math.max(1, page - 1))}
-                  disabled={page === 1}
-                  className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Previous
-                </button>
-
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                  (pageNum) => (
-                    <button
-                      key={pageNum}
-                      onClick={() => setPage(pageNum)}
-                      className={`px-3 py-2 text-sm font-medium rounded-md ${
-                        page === pageNum
-                          ? "text-white bg-indigo-600 border border-indigo-600"
-                          : "text-gray-500 bg-white border border-gray-300 hover:bg-gray-50"
-                      }`}
-                    >
-                      {pageNum}
-                    </button>
-                  )
-                )}
-
-                <button
-                  onClick={() => setPage(Math.min(totalPages, page + 1))}
-                  disabled={page === totalPages}
-                  className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Next
-                </button>
-              </div>
-            </motion.div>
+            <Pagination page={page} totalPages={totalPages} setPage={setPage} />
           )}
         </motion.div>
       </div>

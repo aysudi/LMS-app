@@ -125,7 +125,7 @@ const FreeCourseCard: React.FC<FreeCourseCardProps> = ({
             </div>
             <span className="text-gray-300">•</span>
             <span className="text-sm text-gray-600">
-              {course.enrollmentCount} students
+              {course.studentsEnrolled.length} students
             </span>
           </div>
         </div>

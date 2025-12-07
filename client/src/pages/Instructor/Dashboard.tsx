@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
@@ -30,17 +29,12 @@ import { useTranslation } from "react-i18next";
 
 const InstructorDashboard = () => {
   const navigate = useNavigate();
-  const [selectedPeriod, setSelectedPeriod] = useState<"7d" | "30d" | "90d">(
-    "30d"
-  );
   const { t } = useTranslation();
 
   const { data: overview, isLoading: overviewLoading } =
     useInstructorOverview();
   const { data: courses, isLoading: coursesLoading } =
     useInstructorCoursesWithStats({
-      // page: 1,
-      // limit: 5,
       status: "published",
     });
   const { data: messages } = useInstructorMessages({
@@ -143,34 +137,6 @@ const InstructorDashboard = () => {
           <p className="text-gray-600 mt-2">
             {t("instructor.dashboard.welcomeMessage")}
           </p>
-        </motion.div>
-
-        {/* Time Period Selector */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="mb-8"
-        >
-          <div className="flex space-x-2 bg-white rounded-xl p-2 border border-gray-200 w-fit">
-            {[
-              { key: "7d", label: t("instructor.dashboard.last7Days") },
-              { key: "30d", label: t("instructor.dashboard.last30Days") },
-              { key: "90d", label: t("instructor.dashboard.last90Days") },
-            ].map(({ key, label }) => (
-              <button
-                key={key}
-                onClick={() => setSelectedPeriod(key as any)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  selectedPeriod === key
-                    ? "bg-indigo-600 text-white shadow-sm"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
         </motion.div>
 
         {/* Stats Grid */}

@@ -2,13 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import {
-  FaFilter,
-  FaChevronDown,
-  FaList,
-  FaGraduationCap,
-  FaTh,
-} from "react-icons/fa";
+import { FaList, FaGraduationCap, FaTh } from "react-icons/fa";
 import { useCourses } from "../../hooks/useCourseHooks";
 import type { CourseQuery } from "../../types/course.type";
 import Loading from "../../components/Common/Loading";
@@ -24,7 +18,7 @@ const Courses: React.FC = () => {
   });
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters] = useState(false);
   const [filters, setFilters] = useState({
     category: "",
     level: "",
@@ -139,6 +133,8 @@ const Courses: React.FC = () => {
                 {(searchQuery ||
                   filters.category ||
                   filters.level ||
+                  filters.minPrice ||
+                  filters.maxPrice ||
                   filters.isFree) && (
                   <div className="flex flex-wrap items-center gap-2 mb-3">
                     {searchQuery && (
@@ -156,9 +152,15 @@ const Courses: React.FC = () => {
                         📊 {t("courses.level")}: {filters.level}
                       </span>
                     )}
+                    {(filters.minPrice || filters.maxPrice) && (
+                      <span className="inline-flex items-center px-3 py-1.5 bg-purple-100 text-purple-800 text-sm font-medium rounded-full">
+                        💰 Price: {filters.minPrice || "0"}$ -{" "}
+                        {filters.maxPrice || "∞"}$
+                      </span>
+                    )}
                     {filters.isFree && (
                       <span className="inline-flex items-center px-3 py-1.5 bg-yellow-100 text-yellow-800 text-sm font-medium rounded-full">
-                        💰 {t("courses.freeOnly")}
+                        🆓 {t("courses.freeOnly")}
                       </span>
                     )}
                   </div>
@@ -216,48 +218,9 @@ const Courses: React.FC = () => {
           <div className="py-6">
             <div className="flex flex-wrap items-center gap-6">
               {/* Filter Toggle */}
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center space-x-3 px-5 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all duration-200 font-medium"
-              >
-                <FaFilter className="w-4 h-4" />
-                <span>{t("courses.filters")}</span>
-                <FaChevronDown
-                  className={`w-3 h-3 transform transition-transform duration-200 ${
-                    showFilters ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
 
               {/* Quick Filters */}
               <div className="flex flex-wrap items-center gap-3">
-                {/* Category Filter */}
-                <select
-                  value={filters.category}
-                  onChange={(e) =>
-                    handleFilterChange("category", e.target.value)
-                  }
-                  className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
-                >
-                  <option value="">{t("courses.allCategories")}</option>
-                  <option value="development">
-                    {t("courses.categories.development")}
-                  </option>
-                  <option value="design">
-                    {t("courses.categories.design")}
-                  </option>
-                  <option value="business">
-                    {t("courses.categories.business")}
-                  </option>
-                  <option value="marketing">
-                    {t("courses.categories.marketing")}
-                  </option>
-                  <option value="photography">
-                    {t("courses.categories.photography")}
-                  </option>
-                  <option value="music">{t("courses.categories.music")}</option>
-                </select>
-
                 {/* Level Filter */}
                 <select
                   value={filters.level}
@@ -275,6 +238,33 @@ const Courses: React.FC = () => {
                     {t("courses.levels.advanced")}
                   </option>
                 </select>
+
+                {/* Price Range */}
+                <div className="flex items-center space-x-2 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3">
+                  <span className="text-sm text-gray-600 whitespace-nowrap">
+                    💰 Price:
+                  </span>
+                  <input
+                    type="number"
+                    placeholder="Min"
+                    value={filters.minPrice}
+                    onChange={(e) =>
+                      handleFilterChange("minPrice", e.target.value)
+                    }
+                    className="w-20 px-2 py-1 border-0 bg-transparent text-sm focus:outline-none focus:ring-0"
+                  />
+                  <span className="text-gray-400">-</span>
+                  <input
+                    type="number"
+                    placeholder="Max"
+                    value={filters.maxPrice}
+                    onChange={(e) =>
+                      handleFilterChange("maxPrice", e.target.value)
+                    }
+                    className="w-20 px-2 py-1 border-0 bg-transparent text-sm focus:outline-none focus:ring-0"
+                  />
+                  <span className="text-sm text-gray-500">$</span>
+                </div>
               </div>
 
               {/* Sort */}
@@ -327,7 +317,7 @@ const Courses: React.FC = () => {
               )}
             </div>
 
-            {/* Expanded Filters */}
+            {/* Additional Filter Options */}
             <AnimatePresence>
               {showFilters && (
                 <motion.div
@@ -337,99 +327,60 @@ const Courses: React.FC = () => {
                   transition={{ duration: 0.3 }}
                   className="overflow-hidden"
                 >
-                  <div className="pt-4 border-t border-gray-100 mt-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                      {/* Price Range */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          {t("courses.priceRange")}
-                        </label>
-                        <div className="flex space-x-2">
-                          <input
-                            type="number"
-                            placeholder={t("courses.min")}
-                            value={filters.minPrice}
-                            onChange={(e) =>
-                              handleFilterChange("minPrice", e.target.value)
-                            }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                          />
-                          <input
-                            type="number"
-                            placeholder={t("courses.max")}
-                            value={filters.maxPrice}
-                            onChange={(e) =>
-                              handleFilterChange("maxPrice", e.target.value)
-                            }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                          />
+                  <div className="pt-6 border-t border-gray-100 mt-4">
+                    <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                        Additional Filters
+                      </h3>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {/* Popular Price Ranges */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-3">
+                            Quick Price Ranges
+                          </label>
+                          <div className="space-y-2">
+                            <button
+                              onClick={() => {
+                                handleFilterChange("minPrice", "");
+                                handleFilterChange("maxPrice", "");
+                                handleFilterChange("isFree", true);
+                              }}
+                              className="w-full text-left px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                            >
+                              🆓 Free Courses
+                            </button>
+                            <button
+                              onClick={() => {
+                                handleFilterChange("minPrice", "0");
+                                handleFilterChange("maxPrice", "50");
+                                handleFilterChange("isFree", false);
+                              }}
+                              className="w-full text-left px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                            >
+                              💚 Under $50
+                            </button>
+                            <button
+                              onClick={() => {
+                                handleFilterChange("minPrice", "50");
+                                handleFilterChange("maxPrice", "100");
+                                handleFilterChange("isFree", false);
+                              }}
+                              className="w-full text-left px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                            >
+                              💛 $50 - $100
+                            </button>
+                            <button
+                              onClick={() => {
+                                handleFilterChange("minPrice", "100");
+                                handleFilterChange("maxPrice", "");
+                                handleFilterChange("isFree", false);
+                              }}
+                              className="w-full text-left px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                            >
+                              💎 Premium ($100+)
+                            </button>
+                          </div>
                         </div>
-                      </div>
-
-                      {/* Duration Filter */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          {t("courses.duration")}
-                        </label>
-                        <select className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                          <option value="">{t("courses.anyDuration")}</option>
-                          <option value="0-2">
-                            {t("courses.duration02Hours")}
-                          </option>
-                          <option value="2-6">
-                            {t("courses.duration26Hours")}
-                          </option>
-                          <option value="6-12">
-                            {t("courses.duration612Hours")}
-                          </option>
-                          <option value="12+">
-                            {t("courses.duration12PlusHours")}
-                          </option>
-                        </select>
-                      </div>
-
-                      {/* Rating Filter */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          {t("courses.minimumRating")}
-                        </label>
-                        <select className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                          <option value="">{t("courses.anyRating")}</option>
-                          <option value="4.5">
-                            {t("courses.rating45Plus")}
-                          </option>
-                          <option value="4.0">
-                            {t("courses.rating40Plus")}
-                          </option>
-                          <option value="3.5">
-                            {t("courses.rating35Plus")}
-                          </option>
-                          <option value="3.0">
-                            {t("courses.rating30Plus")}
-                          </option>
-                        </select>
-                      </div>
-
-                      {/* Language Filter */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          {t("courses.language")}
-                        </label>
-                        <select className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                          <option value="">{t("courses.anyLanguage")}</option>
-                          <option value="english">
-                            {t("courses.languages.english")}
-                          </option>
-                          <option value="spanish">
-                            {t("courses.languages.spanish")}
-                          </option>
-                          <option value="french">
-                            {t("courses.languages.french")}
-                          </option>
-                          <option value="german">
-                            {t("courses.languages.german")}
-                          </option>
-                        </select>
                       </div>
                     </div>
                   </div>

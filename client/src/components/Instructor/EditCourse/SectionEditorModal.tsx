@@ -1,14 +1,7 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import {
-  FaTimes,
-  FaUpload,
-  FaSave,
-  FaSpinner,
-  FaFileImage,
-  FaTrash,
-} from "react-icons/fa";
+import { FaTimes, FaSave, FaSpinner } from "react-icons/fa";
 import { toast } from "react-hot-toast";
 import type { Section } from "../../../types/course.type";
 
@@ -34,56 +27,7 @@ const SectionEditorModal = ({
   const { t } = useTranslation();
   const [title, setTitle] = useState(section?.title || "");
   const [description, setDescription] = useState(section?.description || "");
-  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
-  const [thumbnailPreview, setThumbnailPreview] = useState<string>(
-    section?.thumbnail?.url || ""
-  );
-  const [isDragging, setIsDragging] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleFileSelect = (file: File) => {
-    if (!file.type.startsWith("image/")) {
-      toast.error(t("instructor.editCourse.sectionEditor.errors.selectImage"));
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error(t("instructor.editCourse.sectionEditor.errors.imageSize"));
-      return;
-    }
-
-    setThumbnailFile(file);
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setThumbnailPreview(e.target?.result as string);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-
-    const files = Array.from(e.dataTransfer.files);
-    if (files.length > 0) {
-      handleFileSelect(files[0]);
-    }
-  };
-
-  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length > 0) {
-      handleFileSelect(files[0]);
-    }
-  };
-
-  const removeThumbnail = () => {
-    setThumbnailFile(null);
-    setThumbnailPreview("");
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
+  const [thumbnailFile] = useState<File | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -178,82 +122,6 @@ const SectionEditorModal = ({
                 placeholder={t(
                   "instructor.editCourse.sectionEditor.descriptionPlaceholder"
                 )}
-              />
-            </div>
-
-            {/* Thumbnail Upload */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t("instructor.editCourse.sectionEditor.sectionThumbnail")}
-              </label>
-
-              {thumbnailPreview ? (
-                <div className="relative group">
-                  <img
-                    src={thumbnailPreview}
-                    alt={t("instructor.editCourse.sectionEditor.thumbnailAlt")}
-                    className="w-full h-40 object-cover rounded-xl border border-gray-200"
-                  />
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center">
-                    <div className="flex space-x-2">
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="px-4 py-2 bg-white text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
-                      >
-                        <FaUpload className="inline mr-2" />
-                        {t("instructor.editCourse.sectionEditor.change")}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={removeThumbnail}
-                        className="px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600 transition-colors"
-                      >
-                        <FaTrash className="inline mr-2" />
-                        {t("instructor.editCourse.sectionEditor.remove")}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div
-                  className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 ${
-                    isDragging
-                      ? "border-indigo-400 bg-indigo-50"
-                      : "border-gray-200 hover:border-gray-300"
-                  }`}
-                  onDrop={handleDrop}
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    setIsDragging(true);
-                  }}
-                  onDragLeave={() => setIsDragging(false)}
-                >
-                  <FaFileImage className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                  <div className="space-y-2">
-                    <p className="text-sm text-gray-600">
-                      {t("instructor.editCourse.sectionEditor.dropImageHere")}{" "}
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="text-indigo-600 hover:text-indigo-700 font-medium"
-                      >
-                        {t("instructor.editCourse.sectionEditor.browse")}
-                      </button>
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      {t("instructor.editCourse.sectionEditor.imageFormats")}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleFileInputChange}
-                className="hidden"
               />
             </div>
 

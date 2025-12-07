@@ -26,17 +26,21 @@ const InstructorInfo: React.FC<{ course: Course }> = ({ course }) => {
           <h3 className="text-2xl font-bold text-gray-900 mb-2">
             {instructor.firstName} {instructor.lastName}
           </h3>
-          {instructor.instructorProfile?.headline ? (
+          {instructor.instructorInfo?.headline ||
+          instructor.instructorProfile?.headline ? (
             <p className="text-gray-600 mb-4 font-medium">
-              {instructor.instructorProfile.headline}
+              {instructor.instructorInfo?.headline ||
+                instructor.instructorProfile.headline}
             </p>
           ) : (
             <p className="text-gray-600 mb-4">
               {t("courseDetails.expertInstructor")}
             </p>
           )}
-          {instructor.bio ? (
-            <p className="text-gray-700 leading-relaxed">{instructor.bio}</p>
+          {instructor.instructorInfo?.bio || instructor.bio ? (
+            <p className="text-gray-700 leading-relaxed">
+              {instructor.instructorInfo?.bio || instructor.bio}
+            </p>
           ) : (
             <p className="text-gray-700 leading-relaxed">
               {t("courseDetails.experiencedProfessional", {
@@ -47,49 +51,69 @@ const InstructorInfo: React.FC<{ course: Course }> = ({ course }) => {
         </div>
       </div>
 
-      {instructor.instructorApplication?.applicationData && (
+      {(instructor.instructorInfo ||
+        instructor.instructorApplication?.applicationData) && (
         <div className="pt-6 border-t border-gray-200">
           <h4 className="font-semibold text-gray-900 mb-4">
             Background & Expertise
           </h4>
 
-          {instructor.instructorApplication.applicationData.expertise?.length >
-            0 && (
+          {(instructor.instructorInfo?.expertise?.length > 0 ||
+            instructor.instructorApplication?.applicationData?.expertise
+              ?.length > 0) && (
             <div className="mb-4">
               <h5 className="font-medium text-gray-900 mb-2">
                 Areas of Expertise
               </h5>
               <div className="flex flex-wrap gap-2">
-                {instructor.instructorApplication.applicationData.expertise.map(
-                  (skill: string, index: number) => (
-                    <span
-                      key={index}
-                      className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm"
-                    >
-                      {skill}
-                    </span>
-                  )
-                )}
+                {(
+                  instructor.instructorInfo?.expertise ||
+                  instructor.instructorApplication?.applicationData
+                    ?.expertise ||
+                  []
+                ).map((skill: string, index: number) => (
+                  <span
+                    key={index}
+                    className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm"
+                  >
+                    {skill}
+                  </span>
+                ))}
               </div>
             </div>
           )}
 
-          {instructor.instructorApplication.applicationData.experience && (
+          {(instructor.instructorInfo?.experience ||
+            instructor.instructorApplication?.applicationData?.experience) && (
             <div className="mb-4">
               <h5 className="font-medium text-gray-900 mb-2">
                 Professional Experience
               </h5>
               <p className="text-gray-700 leading-relaxed">
-                {instructor.instructorApplication.applicationData.experience}
+                {instructor.instructorInfo?.experience ||
+                  instructor.instructorApplication?.applicationData?.experience}
               </p>
             </div>
           )}
 
-          {instructor.instructorApplication.applicationData.education && (
-            <div>
+          {(instructor.instructorInfo?.education ||
+            instructor.instructorApplication?.applicationData?.education) && (
+            <div className="mb-4">
               <h5 className="font-medium text-gray-900 mb-2">Education</h5>
               <p className="text-gray-700 leading-relaxed">
-                {instructor.instructorApplication.applicationData.education}
+                {instructor.instructorInfo?.education ||
+                  instructor.instructorApplication?.applicationData?.education}
+              </p>
+            </div>
+          )}
+
+          {instructor.instructorInfo?.motivation && (
+            <div>
+              <h5 className="font-medium text-gray-900 mb-2">
+                Teaching Philosophy
+              </h5>
+              <p className="text-gray-700 leading-relaxed">
+                {instructor.instructorInfo.motivation}
               </p>
             </div>
           )}

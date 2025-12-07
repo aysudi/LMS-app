@@ -5,6 +5,8 @@ type Props = {
 };
 
 const CertificateIssued = ({ certificateStatus, course, user }: Props) => {
+  console.log(certificateStatus, course, user);
+  // if(!certificateStatus) {
   return (
     <div>
       <div className="flex items-center justify-center mb-6">

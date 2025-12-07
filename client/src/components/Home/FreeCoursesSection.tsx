@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { FaRocket, FaArrowRight } from "react-icons/fa";
+import { FaRocket } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import type { Course } from "../../types/course.type";
 import FreeCourseCard from "../Client/FreeCourseCard";
@@ -46,9 +46,6 @@ const FreeCoursesSection: React.FC<FreeCoursesSectionProps> = ({
           <FaRocket className="text-green-600 text-lg sm:text-xl" />
           {t("home.sections.freeCoursesToStart")}
         </h2>
-        <button className="self-start sm:self-auto text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1 text-sm sm:text-base">
-          {t("common.viewAll")} <FaArrowRight className="text-xs sm:text-sm" />
-        </button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 px-4">

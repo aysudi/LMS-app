@@ -366,35 +366,6 @@ const RichTextEditor = ({
 
         <div className="flex items-center space-x-1">
           <ToolbarButton
-            onClick={() =>
-              editor.chain().focus().toggleHeading({ level: 1 }).run()
-            }
-            isActive={editor.isActive("heading", { level: 1 })}
-            icon={<>H1</>}
-            tooltip="Heading 1"
-          />
-          <ToolbarButton
-            onClick={() =>
-              editor.chain().focus().toggleHeading({ level: 2 }).run()
-            }
-            isActive={editor.isActive("heading", { level: 2 })}
-            icon={<>H2</>}
-            tooltip="Heading 2"
-          />
-          <ToolbarButton
-            onClick={() =>
-              editor.chain().focus().toggleHeading({ level: 3 }).run()
-            }
-            isActive={editor.isActive("heading", { level: 3 })}
-            icon={<>H3</>}
-            tooltip="Heading 3"
-          />
-        </div>
-
-        <div className="h-6 w-px bg-gray-300" />
-
-        <div className="flex items-center space-x-1">
-          <ToolbarButton
             onClick={() => editor.chain().focus().toggleBulletList().run()}
             isActive={editor.isActive("bulletList")}
             icon={<FaListUl />}

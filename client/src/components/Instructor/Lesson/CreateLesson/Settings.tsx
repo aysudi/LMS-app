@@ -1,20 +1,12 @@
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 type Props = {
-  isPreview: boolean;
-  setIsPreview: (isPreview: boolean) => void;
   duration: number;
   setDuration: (duration: number) => void;
 };
 
-const Settings = ({
-  isPreview,
-  setIsPreview,
-  duration,
-  setDuration,
-}: Props) => {
+const Settings = ({ duration, setDuration }: Props) => {
   const { t } = useTranslation();
 
   return (
@@ -40,42 +32,6 @@ const Settings = ({
               className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               min="0"
             />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <label className="text-sm font-medium text-gray-700">
-                {t("instructor.editCourse.lessonCreate.previewLesson")}
-              </label>
-              <p className="text-xs text-gray-500 mt-1">
-                {t("instructor.editCourse.lessonCreate.allowFreePreview")}
-              </p>
-            </div>
-            <button
-              onClick={() => setIsPreview(!isPreview)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                isPreview ? "bg-indigo-600" : "bg-gray-200"
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  isPreview ? "translate-x-6" : "translate-x-1"
-                }`}
-              />
-            </button>
-          </div>
-
-          <div className="pt-4 border-t border-gray-200">
-            <div className="flex items-center text-sm text-gray-600">
-              {isPreview ? (
-                <FaEye className="mr-2 text-green-600" />
-              ) : (
-                <FaEyeSlash className="mr-2 text-gray-400" />
-              )}
-              {isPreview
-                ? t("instructor.editCourse.lessonCreate.visibleToAll")
-                : t("instructor.editCourse.lessonCreate.onlyForEnrolled")}
-            </div>
           </div>
         </div>
       </motion.div>

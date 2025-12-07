@@ -1,6 +1,7 @@
 {
   "common": {
     "allCourses": "Bütün kurslar",
+    "optional": "İstəyə bağlı",
     "lastUpdated": "Son yenilənmə",
     "loading": "Yüklənir...",
     "discussions": "Müzakirələr",
@@ -1555,6 +1556,7 @@
     "previewThisCourse": "Bu kursu önizləyin",
     "free": "Pulsuzdur",
     "off": "endirim",
+    "studentReviews": "Tələbə rəyləri",
     "daysLeftAtThisPrice": "Bu qiymətdə 3 gün qalıb!",
     "continueLearning": "Öyrənməni davam etdirin",
     "enrolling": "Qeydiyyatdan keçirik...",

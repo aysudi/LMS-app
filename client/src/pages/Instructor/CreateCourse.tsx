@@ -6,12 +6,11 @@ import { useTranslation } from "react-i18next";
 import {
   FaArrowLeft,
   FaArrowRight,
-  FaCheck,
   FaBook,
-  FaDollarSign,
   FaBullseye,
+  FaCheck,
+  FaDollarSign,
   FaImage,
-  FaSave,
 } from "react-icons/fa";
 import { toast } from "react-hot-toast";
 import { useCreateCourse } from "../../hooks/useCourseHooks";
@@ -21,14 +20,24 @@ import PricingSettingsStep from "../../components/Instructor/CreateCourse/Pricin
 import MediaContentStep from "../../components/Instructor/CreateCourse/MediaContentStep";
 import ReviewCreateStep from "../../components/Instructor/CreateCourse/ReviewCreateStep";
 import type { CourseFormData } from "../../types/course.type";
-
-// Steps will be defined inside component to use translation
+import SaveDraftButton from "../../components/Instructor/CreateCourse/SaveDraftButton";
 
 const CreateCourse = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const createCourseMutation = useCreateCourse({
+    onSuccess: () => {
+      toast.success(t("instructor.createCourse.courseCreatedSuccess"));
+      navigate("/instructor/courses");
+    },
+    onError: (error) => {
+      console.error("Error creating course:", error);
+      toast.error(t("instructor.createCourse.courseCreatedError"));
+    },
+  });
 
   const CREATION_STEPS = [
     {
@@ -66,17 +75,6 @@ const CreateCourse = () => {
       icon: FaCheck,
     },
   ];
-
-  const createCourseMutation = useCreateCourse({
-    onSuccess: () => {
-      toast.success(t("instructor.createCourse.courseCreatedSuccess"));
-      navigate("/instructor/courses");
-    },
-    onError: (error) => {
-      console.error("Error creating course:", error);
-      toast.error(t("instructor.createCourse.courseCreatedError"));
-    },
-  });
 
   const [formData, setFormData] = useState<CourseFormData>({
     title: "",
@@ -232,7 +230,6 @@ const CreateCourse = () => {
           const value = formData[key as keyof CourseFormData];
           if (Array.isArray(value)) {
             const processed = value.filter(Boolean).map(String);
-            // Append each item individually instead of JSON stringifying
             processed.forEach((item) => {
               formDataToSend.append(key, item);
             });
@@ -299,69 +296,10 @@ const CreateCourse = () => {
 
           {/* Save Draft Button */}
           {currentStep == 5 && (
-            <button
-              onClick={() => {
-                const formDataToSend = new FormData();
-
-                if (formData.image instanceof File) {
-                  formDataToSend.append("image", formData.image);
-                }
-                if (formData.videoPromo instanceof File) {
-                  formDataToSend.append("videoPromo", formData.videoPromo);
-                }
-
-                [
-                  "tags",
-                  "learningObjectives",
-                  "requirements",
-                  "targetAudience",
-                ].forEach((key) => {
-                  if (formData[key as keyof CourseFormData]) {
-                    const value = formData[key as keyof CourseFormData];
-                    if (Array.isArray(value)) {
-                      const processed = value.filter(Boolean).map(String);
-                      formDataToSend.append(key, JSON.stringify(processed));
-                    }
-                  }
-                });
-
-                if (formData.sections.length > 0) {
-                  formDataToSend.append(
-                    "sections",
-                    JSON.stringify(formData.sections)
-                  );
-                }
-
-                const simpleFields = [
-                  "title",
-                  "description",
-                  "shortDescription",
-                  "category",
-                  "subcategory",
-                  "level",
-                  "originalPrice",
-                  "discountPrice",
-                  "language",
-                  "certificateProvided",
-                  "isFree",
-                ];
-
-                simpleFields.forEach((field) => {
-                  const value = formData[field as keyof CourseFormData];
-                  if (value !== undefined && value !== null) {
-                    formDataToSend.append(field, String(value));
-                  }
-                });
-
-                formDataToSend.append("isPublished", "false");
-                formDataToSend.append("status", "draft");
-                createCourseMutation.mutate(formDataToSend);
-              }}
-              className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200 flex items-center space-x-2 cursor-pointer"
-            >
-              <FaSave className="text-sm" />
-              <span>{t("instructor.createCourse.saveDraft")}</span>
-            </button>
+            <SaveDraftButton
+              formData={formData}
+              createCourseMutation={createCourseMutation}
+            />
           )}
         </motion.div>
 
@@ -523,8 +461,8 @@ const CreateCourse = () => {
                 )}
               </button>
             )}
-            {/* Approval Process Note */}
           </div>
+
           <div className="m-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-sm text-blue-800">
               <strong>

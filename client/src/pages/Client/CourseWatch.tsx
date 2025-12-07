@@ -558,7 +558,10 @@ const CourseWatch: React.FC = () => {
   const { data: certificateStatus } = useCertificateStatus(
     courseId || "",
     user?.id || "",
-    !!courseId && !!user?.id && isCourseCompleted()
+    !!courseId &&
+      !!user?.id &&
+      isCourseCompleted() &&
+      !!course?.certificateProvided
   );
 
   const getLessonProgress = (lessonId: string) => {
@@ -992,7 +995,9 @@ const CourseWatch: React.FC = () => {
                 "qa",
                 "resources",
                 "announcements",
-                ...(isCourseCompleted() ? ["certificate" as const] : []),
+                ...(isCourseCompleted() && course?.certificateProvided
+                  ? ["certificate" as const]
+                  : []),
               ].map((tab, index) => {
                 return (
                   <button

@@ -1,12 +1,15 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { FaStar, FaUsers, FaArrowRight, FaHeart } from "react-icons/fa";
-import { useAuthContext } from "../../context/AuthContext";
-import { usePersonalization } from "../../hooks/usePersonalization";
-import { useToggleWishlist, useWishlistHelpers } from "../../hooks/useWishlist";
-import type { Course } from "../../types/course.type";
-import { useToast } from "../UI/ToastProvider";
-import { generalToasts } from "../../utils/toastUtils";
+import { useAuthContext } from "../../../context/AuthContext";
+import { usePersonalization } from "../../../hooks/usePersonalization";
+import {
+  useToggleWishlist,
+  useWishlistHelpers,
+} from "../../../hooks/useWishlist";
+import type { Course } from "../../../types/course.type";
+import { useToast } from "../../UI/ToastProvider";
+import { generalToasts } from "../../../utils/toastUtils";
 // @ts-ignore
 import { useTranslation } from "react-i18next";
 
@@ -175,20 +178,6 @@ const CourseCard: React.FC<CourseCardProps> = ({
         <h3 className="font-bold text-gray-900 text-base leading-tight line-clamp-1 group-hover:text-indigo-600 transition-colors duration-300">
           {course.title}
         </h3>
-
-        {/* Instructor */}
-        <div className="flex items-center space-x-2">
-          <div className="w-6 h-6 bg-gradient-to-r from-indigo-400 to-purple-500 rounded-full flex items-center justify-center">
-            <span className="text-white text-xs font-semibold">
-              {course.instructor?.firstName?.charAt(0) || "I"}
-            </span>
-          </div>
-          <p className="text-sm text-gray-600">
-            {course.instructor?.firstName
-              ? `${course.instructor.firstName} ${course.instructor.lastName}`
-              : t("course.expertInstructor")}
-          </p>
-        </div>
 
         {/* Stats Row */}
         <div className="flex items-center justify-between text-sm">

@@ -11,12 +11,13 @@ const transporter = nodemailer.createTransport({
 });
 export const sendEmail = async (to, subject, htmlContent, textContent) => {
     try {
-        // Skip email sending in development if credentials are not configured
+        // Only skip email sending in development if credentials are actually not configured
         if (process.env.NODE_ENV !== "production" &&
             (!config.GMAIL_USER || !config.GMAIL_PASS)) {
-            console.log(`[DEV] Email would be sent to ${to} with subject: ${subject}`);
+            console.log(`[DEV] Email skipped - no credentials configured. Would send to ${to} with subject: ${subject}`);
             return;
         }
+        console.log(`[EMAIL] Sending email to ${to} with subject: ${subject}`);
         const mailOptions = {
             from: `"${process.env.EMAIL_FROM_NAME || "Skillify"}" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
             to,
@@ -341,6 +342,13 @@ export const sendNotificationEmail = async (email, firstName, subject, message) 
 // Certificate email function with attachment
 export const sendCertificateEmail = async (email, studentName, courseName, certificateBuffer, fileName) => {
     try {
+        // Only skip email sending in development if credentials are actually not configured
+        if (process.env.NODE_ENV !== "production" &&
+            (!config.GMAIL_USER || !config.GMAIL_PASS)) {
+            console.log(`[DEV] Certificate email skipped - no credentials configured. Would send to ${email} for course: ${courseName}`);
+            return;
+        }
+        console.log(`[EMAIL] Sending certificate email to ${email} for course: ${courseName}`);
         const subject = `🎉 Your Certificate of Completion - ${courseName}`;
         const htmlContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">

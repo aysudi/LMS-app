@@ -209,7 +209,6 @@ const MyLearning = () => {
           // Course Grid
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {enrolledCourses.map((enrollment: any, index: number) => {
-              console.log(enrollment);
               return (
                 <motion.div
                   key={index}
@@ -312,7 +311,7 @@ const MyLearning = () => {
                     </button>
 
                     {/* Certificate Badge */}
-                    {enrollment.progressPercentage === 100 && (
+                    {enrollment.course.originalPrice > 0 && (
                       <div className="mt-2 sm:mt-3 flex items-center justify-center space-x-1 sm:space-x-2 text-xs sm:text-sm text-green-600 font-medium">
                         <FaCertificate className="flex-shrink-0" />
                         <span className="text-center">

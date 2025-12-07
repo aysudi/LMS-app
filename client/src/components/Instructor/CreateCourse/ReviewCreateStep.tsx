@@ -13,6 +13,7 @@ import {
   FaCheckCircle,
   FaImage,
 } from "react-icons/fa";
+import HTMLRenderer from "../../../utils/htmlRenderer";
 
 interface ReviewCreateStepProps {
   formData: {
@@ -197,9 +198,11 @@ const ReviewCreateStep: React.FC<ReviewCreateStepProps> = ({
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             {t("instructor.createCourse.reviewCreate.title")}
           </h2>
-          <p className="text-gray-600">
-            {t("instructor.createCourse.reviewCreate.description")}
-          </p>
+          <HTMLRenderer
+            content={t("instructor.createCourse.reviewCreate.description")}
+            className="text-gray-600"
+            maxLength={200}
+          />
         </div>
 
         {/* Course Preview Card */}
@@ -225,12 +228,15 @@ const ReviewCreateStep: React.FC<ReviewCreateStepProps> = ({
               <h3 className="text-xl font-bold text-gray-900 mb-2">
                 {formData.title || t("course.title")}
               </h3>
-              <p className="text-gray-600 mb-3 line-clamp-2">
-                {formData.shortDescription ||
+              <HTMLRenderer
+                content={
+                  formData.shortDescription ||
                   (formData.description
-                    ? formData.description.slice(0, 100) + "..."
-                    : t("course.shortDescription"))}
-              </p>
+                    ? formData.description.slice(0, 100)
+                    : t("course.shortDescription"))
+                }
+                className="text-gray-600 mb-3 line-clamp-2"
+              ></HTMLRenderer>
               <div className="flex items-center space-x-4 text-sm">
                 <span className="flex items-center space-x-1 text-gray-600">
                   <FaBook className="text-xs" />
@@ -365,13 +371,15 @@ const ReviewCreateStep: React.FC<ReviewCreateStepProps> = ({
           <h3 className="font-semibold text-gray-900 mb-4">
             {t("courseDetails.description")}
           </h3>
-          <div className="prose prose-sm max-w-none text-gray-700">
-            {formData.description.split("\n").map((paragraph, index) => (
-              <p key={index} className="mb-2">
-                {paragraph}
-              </p>
-            ))}
-          </div>
+          <HTMLRenderer
+            content={
+              formData.shortDescription ||
+              (formData.description
+                ? formData.description.slice(0, 100)
+                : t("course.shortDescription"))
+            }
+            className="prose prose-sm max-w-none text-gray-700"
+          ></HTMLRenderer>
         </div>
 
         {/* Learning Objectives, Requirements, Target Audience */}

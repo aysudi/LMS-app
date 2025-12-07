@@ -344,12 +344,7 @@ const LessonEditor = () => {
           </div>
 
           {/* Right Column - Settings */}
-          <Settings
-            isPreview={isPreview}
-            setIsPreview={setIsPreview}
-            duration={duration}
-            setDuration={setDuration}
-          />
+          <Settings duration={duration} setDuration={setDuration} />
         </div>
       </div>
     </div>

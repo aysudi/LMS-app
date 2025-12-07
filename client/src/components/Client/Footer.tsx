@@ -159,28 +159,6 @@ const Footer = () => {
                 Get the latest courses, updates, and learning tips delivered to
                 your inbox.
               </p>
-
-              <div className="max-w-md mx-auto">
-                <div className="flex gap-3">
-                  <div className="flex-1 relative">
-                    <input
-                      type="email"
-                      placeholder="Enter your email"
-                      className="w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-300"
-                    />
-                  </div>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
-                  >
-                    Subscribe
-                  </motion.button>
-                </div>
-                <p className="text-sm text-gray-400 mt-3">
-                  No spam, unsubscribe at any time.
-                </p>
-              </div>
             </motion.div>
           </div>
         </section>
