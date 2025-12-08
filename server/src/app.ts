@@ -45,7 +45,7 @@ app.use(
     origin: [
       "http://localhost:5173",
       "http://localhost:5174",
-      "https://lms-project-weld-nine.vercel.app",
+      "https://lms-app-sepia.vercel.app",
     ],
     credentials: true,
   })
