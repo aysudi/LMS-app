@@ -2,26 +2,19 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 // @ts-ignore
 import { useTranslation } from "react-i18next";
-import {
-  FaUsers,
-  FaSearch,
-  FaDownload,
-  FaChartLine,
-  FaClock,
-  FaGraduationCap,
-} from "react-icons/fa";
+import { FaUsers, FaSearch } from "react-icons/fa";
 import {
   useInstructorCoursesWithStats,
   useCourseStudents,
 } from "../../hooks/useInstructor";
-import { exportStudentsData } from "../../services/instructor.service";
-import { useSnackbar } from "notistack";
 import Loading from "../../components/Common/Loading";
 import StudentRow from "../../components/Instructor/Students/StudentRow";
+import Header from "../../components/Instructor/Students/Header";
+import Pagination from "../../components/Instructor/Students/Pagination";
+import StatsCards from "../../components/Instructor/Students/StatsCards";
 
 const InstructorStudents = () => {
   const { t } = useTranslation();
-  const { enqueueSnackbar } = useSnackbar();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCourse, setSelectedCourse] = useState("all");
   const [progressFilter, setProgressFilter] = useState("all");
@@ -29,7 +22,6 @@ const InstructorStudents = () => {
     "name" | "progress" | "enrolled" | "lastActive"
   >("name");
   const [page, setPage] = useState(1);
-  const [isExporting, setIsExporting] = useState(false);
 
   const { data: coursesData, isLoading: coursesLoading } =
     useInstructorCoursesWithStats({
@@ -59,9 +51,7 @@ const InstructorStudents = () => {
   const allStudents = studentsData?.data?.students || [];
   const totalPages = studentsData?.data?.pagination?.totalPages || 1;
 
-  // Filter students based on search term and progress
   const filteredStudents = allStudents.filter((student) => {
-    // Search filter
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
       const fullName =
@@ -73,7 +63,6 @@ const InstructorStudents = () => {
       }
     }
 
-    // Progress filter
     if (progressFilter !== "all") {
       const progress = student.progress?.progressPercentage || 0;
 
@@ -92,7 +81,6 @@ const InstructorStudents = () => {
     return true;
   });
 
-  // Sort students based on sort option
   const sortedStudents = [...filteredStudents].sort((a, b) => {
     switch (sortBy) {
       case "name":
@@ -128,30 +116,6 @@ const InstructorStudents = () => {
 
   const students = sortedStudents;
 
-  const totalStudents = instructorCourses.reduce(
-    (acc, course) => acc + (course.studentsEnrolled?.length || 0),
-    0
-  );
-  const completedStudents = allStudents.filter(
-    (s) => s.progress?.progressPercentage === 100
-  ).length;
-  const activeToday = allStudents.filter((s) => {
-    const lastActive = new Date(s.enrollment?.lastAccessedAt || 0);
-    const today = new Date();
-    return lastActive.toDateString() === today.toDateString();
-  }).length;
-
-  const averageProgress =
-    allStudents.length > 0
-      ? Math.round(
-          allStudents.reduce(
-            (acc, s) => acc + (s.progress?.progressPercentage || 0),
-            0
-          ) / allStudents.length
-        )
-      : 0;
-
-  // Reset pagination when filters change
   useEffect(() => {
     setPage(1);
   }, [searchTerm, selectedCourse, progressFilter, sortBy]);
@@ -170,44 +134,6 @@ const InstructorStudents = () => {
     sortBy !== "name";
 
   const isLoading = coursesLoading || studentsLoading;
-
-  const handleExportData = async () => {
-    const courseId =
-      selectedCourse === "all" ? instructorCourses[0]?._id : selectedCourse;
-
-    if (!courseId) {
-      enqueueSnackbar("Please select a course to export data", {
-        variant: "warning",
-      });
-      return;
-    }
-
-    setIsExporting(true);
-    try {
-      const blob = await exportStudentsData(courseId, "csv");
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.style.display = "none";
-      a.href = url;
-      a.download = `students-data-${courseId}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      enqueueSnackbar("Students data exported successfully!", {
-        variant: "success",
-      });
-    } catch (error: any) {
-      enqueueSnackbar(
-        error.response?.data?.message || "Failed to export students data",
-        {
-          variant: "error",
-        }
-      );
-    } finally {
-      setIsExporting(false);
-    }
-  };
 
   if (isLoading) {
     return (
@@ -236,110 +162,16 @@ const InstructorStudents = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between mb-8"
-        >
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              {t("navigation.students")}
-            </h1>
-            <p className="text-gray-600 mt-2">
-              {t("instructor.manageTrackStudentsProgress")}
-            </p>
-          </div>
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={handleExportData}
-            disabled={isExporting || instructorCourses.length === 0}
-            className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200 font-medium flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isExporting ? (
-              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
-            ) : (
-              <FaDownload className="text-sm" />
-            )}
-            <span>
-              {isExporting
-                ? "Exporting..."
-                : t("instructor.students.exportData")}
-            </span>
-          </motion.button>
-        </motion.div>
+        <Header
+          selectedCourse={selectedCourse}
+          instructorCourses={instructorCourses}
+        />
 
         {/* Stats Cards */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8"
-        >
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center space-x-3">
-              <div className="p-3 bg-blue-100 rounded-xl">
-                <FaUsers className="text-xl text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500">
-                  {t("instructor.students.totalStudents")}
-                </p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {totalStudents.toLocaleString()}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center space-x-3">
-              <div className="p-3 bg-green-100 rounded-xl">
-                <FaChartLine className="text-xl text-green-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500">
-                  {t("instructor.students.averageProgress")}
-                </p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {averageProgress}%
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center space-x-3">
-              <div className="p-3 bg-yellow-100 rounded-xl">
-                <FaGraduationCap className="text-xl text-yellow-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500">
-                  {t("student.completedCourses")}
-                </p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {completedStudents}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center space-x-3">
-              <div className="p-3 bg-purple-100 rounded-xl">
-                <FaClock className="text-xl text-purple-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500">
-                  {t("instructor.students.activeToday")}
-                </p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {activeToday}
-                </p>
-              </div>
-            </div>
-          </div>
-        </motion.div>
+        <StatsCards
+          instructorCourses={instructorCourses}
+          allStudents={students}
+        />
 
         {/* Filters and Search */}
         <motion.div
@@ -481,46 +313,7 @@ const InstructorStudents = () => {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="flex items-center justify-center mt-8"
-          >
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={() => setPage(Math.max(1, page - 1))}
-                disabled={page === 1}
-                className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {t("common.previous")}
-              </button>
-
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                (pageNum) => (
-                  <button
-                    key={pageNum}
-                    onClick={() => setPage(pageNum)}
-                    className={`px-3 py-2 text-sm font-medium rounded-md ${
-                      page === pageNum
-                        ? "text-white bg-indigo-600 border border-indigo-600"
-                        : "text-gray-500 bg-white border border-gray-300 hover:bg-gray-50"
-                    }`}
-                  >
-                    {pageNum}
-                  </button>
-                )
-              )}
-
-              <button
-                onClick={() => setPage(Math.min(totalPages, page + 1))}
-                disabled={page === totalPages}
-                className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {t("common.next")}
-              </button>
-            </div>
-          </motion.div>
+          <Pagination page={page} setPage={setPage} totalPages={totalPages} />
         )}
       </div>
     </div>
