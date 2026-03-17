@@ -1,4 +1,5 @@
 import { sendEmail } from "./sendMail";
+import he from "he";
 
 interface ContactNotificationData {
   adminEmail: string;
@@ -20,12 +21,14 @@ interface ContactReplyData {
 }
 
 export const sendContactNotificationEmail = async (
-  data: ContactNotificationData
+  data: ContactNotificationData,
 ): Promise<void> => {
   try {
     const { adminEmail, contactData } = data;
 
-    const subject = `New Contact Message: ${contactData.subject}`;
+    const subject = `New Contact Message: ${he.encode(contactData.subject)}`;
+
+    const safePhone = contactData.phone ? he.encode(contactData.phone) : null;
 
     const html = `
       <!DOCTYPE html>
@@ -55,27 +58,27 @@ export const sendContactNotificationEmail = async (
             <div class="content">
               <div class="info-section">
                 <h3 style="margin: 0 0 15px 0; color: #1e293b;">Contact Information</h3>
-                <p style="margin: 5px 0;"><strong>Name:</strong> ${
-                  contactData.name
-                }</p>
-                <p style="margin: 5px 0;"><strong>Email:</strong> ${
-                  contactData.email
-                }</p>
+                <p style="margin: 5px 0;"><strong>Name:</strong> ${he.encode(
+                  contactData.name,
+                )}</p>
+                <p style="margin: 5px 0;"><strong>Email:</strong> ${he.encode(
+                  contactData.email,
+                )}</p>
                 ${
-                  contactData.phone
-                    ? `<p style="margin: 5px 0;"><strong>Phone:</strong> ${contactData.phone}</p>`
+                  safePhone
+                    ? `<p style="margin: 5px 0;"><strong>Phone:</strong> ${safePhone}</p>`
                     : ""
                 }
-                <p style="margin: 5px 0;"><strong>Subject:</strong> ${
-                  contactData.subject
-                }</p>
+                <p style="margin: 5px 0;"><strong>Subject:</strong> ${he.encode(
+                  contactData.subject,
+                )}</p>
               </div>
               
               <div class="message-section">
                 <h3 style="margin: 0 0 15px 0; color: #1e293b;">Message</h3>
-                <p style="line-height: 1.6; color: #475569; white-space: pre-wrap;">${
-                  contactData.message
-                }</p>
+                <p style="line-height: 1.6; color: #475569; white-space: pre-wrap;">${he.encode(
+                  contactData.message,
+                )}</p>
               </div>
               
               <div style="text-align: center; margin-top: 30px;">
@@ -93,17 +96,19 @@ export const sendContactNotificationEmail = async (
       </html>
     `;
 
-    const textContext = `
-    New contact message received:
+    const textContent = `
+    New contact message:
     
-    Name: ${contactData.name}
-    Email: ${contactData.email}
-    Subject: ${contactData.subject}
-    Message: ${contactData.message}
-    Phone: ${contactData.phone || "N/A"}    
+    Name: ${he.encode(contactData.name)}
+    Email: ${he.encode(contactData.email)}
+    Subject: ${he.encode(contactData.subject)}
+    Phone: ${safePhone || "N/A"}   
+
+    Message: 
+    ${he.encode(contactData.message)}
     `;
 
-    await sendEmail(adminEmail, subject, html, textContext);
+    await sendEmail(adminEmail, subject, html, textContent);
   } catch (error) {
     console.error("Failed to send contact notification email:", error);
     throw error;
@@ -111,7 +116,7 @@ export const sendContactNotificationEmail = async (
 };
 
 export const sendContactReplyEmail = async (
-  data: ContactReplyData
+  data: ContactReplyData,
 ): Promise<void> => {
   try {
     const {
@@ -149,18 +154,18 @@ export const sendContactReplyEmail = async (
             </div>
             
             <div class="content">
-              <p style="margin: 0 0 20px 0; color: #1e293b;">Dear ${contactName},</p>
+              <p style="margin: 0 0 20px 0; color: #1e293b;">Dear ${he.encode(contactName)},</p>
               <p style="margin: 0 0 20px 0; color: #475569;">Thank you for reaching out to us. We have reviewed your message and here's our response:</p>
               
               <div class="reply-section">
                 <h3 style="margin: 0 0 15px 0; color: #059669;">Our Response</h3>
-                <p style="line-height: 1.6; color: #1e293b; white-space: pre-wrap;">${replyMessage}</p>
+                <p style="line-height: 1.6; color: #1e293b; white-space: pre-wrap;">${he.encode(replyMessage)}</p>
               </div>
               
               <div class="original-section">
                 <h3 style="margin: 0 0 15px 0; color: #64748b;">Your Original Message</h3>
-                <p style="margin: 0 0 10px 0; color: #64748b;"><strong>Subject:</strong> ${originalSubject}</p>
-                <p style="line-height: 1.6; color: #64748b; white-space: pre-wrap;">${originalMessage}</p>
+                <p style="margin: 0 0 10px 0; color: #64748b;"><strong>Subject:</strong> ${he.encode(originalSubject)}</p>
+                <p style="line-height: 1.6; color: #64748b; white-space: pre-wrap;">${he.encode(originalMessage)}</p>
               </div>
               
               <p style="margin: 30px 0 0 0; color: #475569;">If you have any further questions, please don't hesitate to contact us again.</p>
@@ -175,7 +180,7 @@ export const sendContactReplyEmail = async (
         </body>
       </html>
     `;
-    await sendEmail(contactEmail, subject, html, subject);
+    await sendEmail(contactEmail, subject, html, he.encode(replyMessage));
   } catch (error) {
     console.error("Failed to send contact reply email:", error);
     throw error;

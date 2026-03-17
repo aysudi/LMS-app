@@ -2,12 +2,12 @@ import nodemailer from "nodemailer";
 import config from "../configs/config";
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp-relay.brevo.com",
   port: 587,
   secure: false,
   auth: {
-    user: config.GMAIL_USER,
-    pass: config.GMAIL_PASS,
+    user: process.env.BREVO_SMTP_USER || "apikey",
+    pass: process.env.BREVO_SMTP_PASS,
   },
 });
 
@@ -15,22 +15,19 @@ export const sendEmail = async (
   to: string,
   subject: string,
   htmlContent: string,
-  textContent?: string,
+  textContent?: string | undefined,
 ): Promise<void> => {
   try {
-    if (
-      process.env.NODE_ENV !== "production" &&
-      (!config.GMAIL_USER || !config.GMAIL_PASS)
-    ) {
+    if (process.env.NODE_ENV !== "production" && !process.env.BREVO_SMTP_PASS) {
       console.log(
-        `[DEV] Email skipped - no credentials configured. Would send to ${to} with subject: ${subject}`,
+        `[DEV] Email skipped - no Brevo credentials. Would send to ${to} with subject: ${subject}`,
       );
       return;
     }
 
     const mailOptions = {
       from: `"${process.env.EMAIL_FROM_NAME || "Skillify"}" <${
-        process.env.EMAIL_FROM || process.env.EMAIL_USER
+        process.env.EMAIL_FROM
       }>`,
       to,
       subject,
@@ -399,10 +396,7 @@ export const sendCertificateEmail = async (
   fileName: string,
 ): Promise<void> => {
   try {
-    if (
-      process.env.NODE_ENV !== "production" &&
-      (!config.GMAIL_USER || !config.GMAIL_PASS)
-    ) {
+    if (process.env.NODE_ENV !== "production" && !process.env.BREVO_SMTP_PASS) {
       console.log(
         `[DEV] Certificate email skipped - no credentials configured. Would send to ${email} for course: ${courseName}`,
       );
@@ -458,7 +452,7 @@ export const sendCertificateEmail = async (
 
     const mailOptions = {
       from: `"${process.env.EMAIL_FROM_NAME || "Skillify"}" <${
-        process.env.EMAIL_FROM || process.env.EMAIL_USER
+        process.env.EMAIL_FROM
       }>`,
       to: email,
       subject,
@@ -520,7 +514,7 @@ export const sendApplicationApprovedEmail = async (
             
             <p>Ready to get started? Click the button below to access your instructor dashboard:</p>
             <p style="text-align: center;">
-              <a href="http://localhost:5173/instructor/dashboard" class="button">Go to Dashboard</a>
+              <a href="${process.env.CLIENT_URL}/instructor/dashboard" class="button">Go to Dashboard</a>
             </p>
             
             <p>If you have any questions or need assistance, our support team is here to help.</p>
@@ -546,7 +540,7 @@ export const sendApplicationApprovedEmail = async (
       - Interact with students
       - Earn revenue from your expertise
 
-      Ready to get started? Visit your instructor dashboard: http://localhost:5173/instructor/dashboard
+      Ready to get started? Visit your instructor dashboard: ${process.env.CLIENT_URL}/instructor/dashboard
 
       If you have any questions or need assistance, our support team is here to help.
 
@@ -703,7 +697,7 @@ export const sendApplicationRejectedEmail = async (
             <p>We appreciate the time and effort you put into your application. Our standards help us maintain the quality of education our students expect, and we encourage you to continue developing your expertise.</p>
             
             <p style="text-align: center;">
-              <a href="http://localhost:5173/become-instructor" class="button">View Guidelines & Requirements</a>
+              <a href="${process.env.CLIENT_URL}/become-instructor" class="button">View Guidelines & Requirements</a>
             </p>
             
             <p>We wish you the best in your professional journey and hope to potentially work with you in the future.</p>
