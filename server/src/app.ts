@@ -30,6 +30,7 @@ import announcementRouter from "./routes/announcementRoutes.js";
 import contactRouter from "./routes/contactRoutes.js";
 import courseMessageRouter from "./routes/courseMessageRoutes.js";
 import studentInstructorMessageRouter from "./routes/studentInstructorMessageRoutes.js";
+import config from "./configs/config.js";
 
 const app = express();
 
@@ -42,13 +43,9 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "http://localhost:5174",
-      "https://lms-app-sepia.vercel.app",
-    ],
+    origin: [config.CLIENT_URL || "http://localhost:5173"],
     credentials: true,
-  })
+  }),
 );
 
 // Health check route
