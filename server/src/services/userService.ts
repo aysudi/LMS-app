@@ -31,7 +31,7 @@ export const getAllUsers = async (
   page: number = 1,
   limit: number = 10,
   role?: string,
-  search?: string
+  search?: string,
 ): Promise<{
   users: UserProfileDto[];
   pagination: {
@@ -67,7 +67,7 @@ export const getAllUsers = async (
       .lean(),
     User.countDocuments(query).populate(
       "wishlist",
-      "title description category"
+      "title description category",
     ),
   ]);
 
@@ -120,7 +120,7 @@ export const getUserModelById = async (userId: string) => {
 
 export const updateUserProfile = async (
   userId: string,
-  updateData: any
+  updateData: any,
 ): Promise<UserProfileDto> => {
   const user = await getUserModelById(userId);
 
@@ -140,10 +140,10 @@ export const updateUserProfile = async (
 export const changeUserPassword = async (
   userId: string,
   currentPassword: string,
-  newPassword: string
+  newPassword: string,
 ): Promise<void> => {
   const user = await User.findOne({ _id: userId, isActive: true }).select(
-    "+password"
+    "+password",
   );
 
   if (!user) {
@@ -156,7 +156,7 @@ export const changeUserPassword = async (
 
   const isCurrentPasswordValid = await comparePassword(
     currentPassword,
-    user.password
+    user.password,
   );
   if (!isCurrentPasswordValid) {
     throw new Error("Current password is incorrect");
@@ -169,7 +169,7 @@ export const changeUserPassword = async (
 
 export const updateUserAvatar = async (
   userId: string,
-  avatarData: { url: string; publicId: string }
+  avatarData: { url: string; publicId: string },
 ): Promise<UserProfileDto> => {
   const user = await getUserModelById(userId);
 
@@ -182,7 +182,7 @@ export const updateUserAvatar = async (
 };
 
 export const getUserByUsername = async (
-  username: string
+  username: string,
 ): Promise<UserProfileDto> => {
   const user = await User.findOne({ username, isActive: true })
     .select("-password -emailVerificationToken -passwordResetToken")
@@ -212,7 +212,7 @@ const getRemainingLockTime = (lockUntil: Date): number => {
 
 export const register = async (
   userData: RegisterUserDto,
-  avatarUrl?: string
+  avatarUrl?: string,
 ): Promise<{ message: string; user: UserProfileDto }> => {
   const existingUser = await User.findOne({
     $or: [{ email: userData.email }, { username: userData.username }],
@@ -251,7 +251,7 @@ export const register = async (
 };
 
 export const verifyEmail = async (
-  token: string
+  token: string,
 ): Promise<{
   message: string;
 }> => {
@@ -280,7 +280,7 @@ export const verifyEmail = async (
 };
 
 export const resendVerificationEmail = async (
-  email: string
+  email: string,
 ): Promise<{ message: string }> => {
   const user = await User.findOne({ email });
 
@@ -306,7 +306,7 @@ export const resendVerificationEmail = async (
   } catch (emailError) {
     console.error("Failed to send verification email:", emailError);
     throw new Error(
-      "Failed to send verification email. Please try again later."
+      "Failed to send verification email. Please try again later.",
     );
   }
 
@@ -336,12 +336,12 @@ export const login = async (loginData: LoginUserDto): Promise<AuthResponse> => {
   if (user.isBanned) {
     if (user.banExpiresAt && user.banExpiresAt > new Date()) {
       const remainingTime = Math.ceil(
-        (user.banExpiresAt.getTime() - Date.now()) / (1000 * 60 * 60)
+        (user.banExpiresAt.getTime() - Date.now()) / (1000 * 60 * 60),
       );
       throw new Error(
         `Your account is temporarily banned. Ban expires in ${remainingTime} hour(s). Reason: ${
           user.banReason || "No reason provided"
-        }`
+        }`,
       );
     } else if (user.banExpiresAt && user.banExpiresAt <= new Date()) {
       // Auto-unban expired bans
@@ -357,7 +357,7 @@ export const login = async (loginData: LoginUserDto): Promise<AuthResponse> => {
       throw new Error(
         `Your account is permanently banned. Reason: ${
           user.banReason || "No reason provided"
-        }`
+        }`,
       );
     }
   }
@@ -367,17 +367,17 @@ export const login = async (loginData: LoginUserDto): Promise<AuthResponse> => {
   if (user.lockUntil && user.lockUntil > new Date()) {
     const remainingTime = getRemainingLockTime(user.lockUntil);
     throw new Error(
-      `Account is temporarily locked due to too many failed login attempts. Try again in ${remainingTime} minutes.`
+      `Account is temporarily locked due to too many failed login attempts. Try again in ${remainingTime} minutes.`,
     );
   }
 
   if (user.authProvider === "google") {
     throw new Error(
-      "This account was created with Google. Please sign in with Google."
+      "This account was created with Google. Please sign in with Google.",
     );
   } else if (user.authProvider === "github") {
     throw new Error(
-      "This account was created with GitHub. Please sign in with GitHub."
+      "This account was created with GitHub. Please sign in with GitHub.",
     );
   }
 
@@ -399,7 +399,7 @@ export const login = async (loginData: LoginUserDto): Promise<AuthResponse> => {
 
       const lockTimeMinutes = Math.ceil(LOCK_TIME / (1000 * 60));
       throw new Error(
-        `Too many failed login attempts. Account locked for ${lockTimeMinutes} minutes.`
+        `Too many failed login attempts. Account locked for ${lockTimeMinutes} minutes.`,
       );
     } else {
       await User.findByIdAndUpdate(user._id, updateData);
@@ -408,7 +408,7 @@ export const login = async (loginData: LoginUserDto): Promise<AuthResponse> => {
       throw new Error(
         `Invalid email or password. ${remainingAttempts} attempt${
           remainingAttempts === 1 ? "" : "s"
-        } remaining before account lockout.`
+        } remaining before account lockout.`,
       );
     }
   }
@@ -433,7 +433,7 @@ export const login = async (loginData: LoginUserDto): Promise<AuthResponse> => {
 };
 
 export const unlockUserAccount = async (
-  email: string
+  email: string,
 ): Promise<{ success: boolean; message: string }> => {
   const user = await User.findOne({ email });
 
@@ -483,7 +483,7 @@ export const getUserAccountStatus = async (email: string) => {
 };
 
 export const forgotPassword = async (
-  email: string
+  email: string,
 ): Promise<{ message: string }> => {
   const user = await User.findOne({ email });
 
@@ -496,13 +496,13 @@ export const forgotPassword = async (
 
   if (!user.isEmailVerified) {
     throw new Error(
-      "Please verify your email address first before resetting password."
+      "Please verify your email address first before resetting password.",
     );
   }
 
   if (user.authProvider !== "local") {
     throw new Error(
-      `This account was created with ${user.authProvider}. Please sign in with ${user.authProvider}.`
+      `This account was created with ${user.authProvider}. Please sign in with ${user.authProvider}.`,
     );
   }
 
@@ -520,7 +520,7 @@ export const forgotPassword = async (
   } catch (emailError) {
     console.error("Failed to send password reset email:", emailError);
     throw new Error(
-      "Failed to send password reset email. Please try again later."
+      "Failed to send password reset email. Please try again later.",
     );
   }
 
@@ -532,7 +532,7 @@ export const forgotPassword = async (
 
 export const resetPassword = async (
   token: string,
-  newPassword: string
+  newPassword: string,
 ): Promise<{ message: string }> => {
   const hashedToken = hashToken(token);
 
@@ -564,7 +564,7 @@ export const resetPassword = async (
 };
 
 export const refreshAccessToken = async (
-  refreshToken: string
+  refreshToken: string,
 ): Promise<{
   accessToken: string;
   user: UserProfileDto;
@@ -573,7 +573,7 @@ export const refreshAccessToken = async (
     const decoded = JWTUtils.verifyRefreshToken(refreshToken);
 
     const user = await User.findById(decoded.userId).select(
-      "-password -emailVerificationToken -passwordResetToken"
+      "-password -emailVerificationToken -passwordResetToken",
     );
 
     if (!user || !user.isActive) {
@@ -597,7 +597,7 @@ export const banUser = async (
   userId: string,
   bannedBy: string,
   banDuration: number, // in hours
-  reason: string
+  reason: string,
 ): Promise<IUser> => {
   const user = await User.findById(userId);
   if (!user) {
@@ -619,7 +619,7 @@ export const banUser = async (
       bannedBy: new mongoose.Types.ObjectId(bannedBy),
       banExpiresAt,
     },
-    { new: true, runValidators: true }
+    { new: true, runValidators: true },
   );
 
   if (!updatedUser) {
@@ -644,7 +644,7 @@ export const unbanUser = async (userId: string): Promise<IUser> => {
       bannedBy: null,
       banExpiresAt: null,
     },
-    { new: true, runValidators: true }
+    { new: true, runValidators: true },
   );
 
   if (!updatedUser) {
@@ -667,6 +667,6 @@ export const checkAndUnbanExpiredUsers = async (): Promise<void> => {
       bannedAt: null,
       bannedBy: null,
       banExpiresAt: null,
-    }
+    },
   );
 };
