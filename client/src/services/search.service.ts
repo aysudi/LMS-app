@@ -39,7 +39,7 @@ export interface SearchHistoryResponse {
 }
 
 export const getSearchSuggestions = async (
-  query: string
+  query: string,
 ): Promise<SearchSuggestion[]> => {
   try {
     if (!query.trim()) {
@@ -49,8 +49,8 @@ export const getSearchSuggestions = async (
     // Request course suggestions that match the query
     const response = await api.get<SearchSuggestionsResponse>(
       `/api/search/suggestions?q=${encodeURIComponent(
-        query.trim()
-      )}&type=course&limit=9`
+        query.trim(),
+      )}&type=course&limit=9`,
     );
 
     const courseSuggestions = response.data.data || [];
@@ -86,14 +86,8 @@ export const getSearchSuggestions = async (
 
 export const getSearchHistory = async (): Promise<RecentSearch[]> => {
   try {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      return getGuestSearchHistory();
-    }
-
     const response = await api.get<SearchHistoryResponse>(
-      "/api/search/history"
+      "/api/search/history",
     );
     return response.data.data || [];
   } catch (error) {
@@ -106,47 +100,28 @@ export const getSearchHistory = async (): Promise<RecentSearch[]> => {
 export const saveSearchToHistory = async (
   query: string,
   type: "search" | "suggestion" = "search",
-  metadata?: { resultCount?: number; selectedSuggestion?: string }
+  metadata?: { resultCount?: number; selectedSuggestion?: string },
 ): Promise<void> => {
+  const payload = {
+    query: query.trim(),
+    type,
+    metadata,
+  };
+
   try {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      saveGuestSearchHistory({
-        query,
-        type,
-        timestamp: new Date().toISOString(),
-        metadata,
-      });
-      return;
-    }
-
-    await api.post("/api/search/history", {
-      query: query.trim(),
-      type,
-      metadata,
-    });
+    await api.post("/api/search/history", payload);
   } catch (error) {
-    console.error("Failed to save search to history:", error);
+    console.error("Backend save failed, fallback to local:", error);
 
     saveGuestSearchHistory({
-      query,
-      type,
+      ...payload,
       timestamp: new Date().toISOString(),
-      metadata,
     });
   }
 };
 
 export const clearSearchHistory = async (): Promise<void> => {
   try {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      clearGuestSearchHistory();
-      return;
-    }
-
     await api.delete("/api/search/history");
   } catch (error) {
     console.error("Failed to clear search history:", error);
@@ -158,7 +133,7 @@ export const clearSearchHistory = async (): Promise<void> => {
 export const getPopularSearches = async (): Promise<string[]> => {
   try {
     const response = await api.get<{ success: boolean; data: string[] }>(
-      "/api/search/popular"
+      "/api/search/popular",
     );
     return response.data.data || [];
   } catch (error) {
@@ -170,7 +145,7 @@ export const getPopularSearches = async (): Promise<string[]> => {
 const GUEST_SEARCH_HISTORY_KEY = "guest_search_history";
 const MAX_GUEST_HISTORY = 20;
 
-const getGuestSearchHistory = (): RecentSearch[] => {
+export const getGuestSearchHistory = (): RecentSearch[] => {
   try {
     const stored = localStorage.getItem(GUEST_SEARCH_HISTORY_KEY);
     if (!stored) return [];
@@ -188,7 +163,7 @@ const saveGuestSearchHistory = (search: RecentSearch): void => {
     const history = getGuestSearchHistory();
 
     const filteredHistory = history.filter(
-      (item) => item.query !== search.query
+      (item) => item.query !== search.query,
     );
 
     const newHistory = [search, ...filteredHistory].slice(0, MAX_GUEST_HISTORY);

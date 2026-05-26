@@ -45,10 +45,11 @@ const InstructorStudents = () => {
     },
     {
       enabled: instructorCourses.length > 0,
-    }
+    },
   );
 
   const allStudents = studentsData?.data?.students || [];
+  console.log("all students: ", studentsData?.data.students);
   const totalPages = studentsData?.data?.pagination?.totalPages || 1;
 
   const filteredStudents = allStudents.filter((student) => {
@@ -102,10 +103,10 @@ const InstructorStudents = () => {
 
       case "lastActive":
         const lastActiveA = new Date(
-          a.enrollment?.lastAccessedAt || 0
+          a.enrollment?.lastAccessedAt || 0,
         ).getTime();
         const lastActiveB = new Date(
-          b.enrollment?.lastAccessedAt || 0
+          b.enrollment?.lastAccessedAt || 0,
         ).getTime();
         return lastActiveB - lastActiveA; // Most recent first
 

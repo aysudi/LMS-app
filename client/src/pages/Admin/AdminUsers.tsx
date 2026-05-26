@@ -49,10 +49,10 @@ const AdminUsers: React.FC = () => {
   const users = usersData?.data?.users || [];
   const totalUsers = usersData?.data?.pagination?.totalUsers || 0;
   const activeUsers = users.filter(
-    (user: AdminUser) => user.status === "active"
+    (user: AdminUser) => user.status === "active",
   ).length;
   const suspendedUsers = users.filter(
-    (user: AdminUser) => user.status === "suspended"
+    (user: AdminUser) => user.status === "suspended",
   ).length;
 
   // Initialize mutation hooks
@@ -70,7 +70,7 @@ const AdminUsers: React.FC = () => {
 
   const handleChangeRole = async (
     userId: string,
-    newRole: "student" | "instructor" | "admin"
+    newRole: "student" | "instructor" | "admin",
   ) => {
     const result = await Swal.fire({
       title: "Change User Role",
@@ -91,7 +91,7 @@ const AdminUsers: React.FC = () => {
   const handleBanUser = async (
     userId: string,
     userName: string,
-    currentlyBanned: boolean = false
+    currentlyBanned: boolean = false,
   ) => {
     if (currentlyBanned) {
       // Unban user
@@ -358,8 +358,8 @@ const AdminUsers: React.FC = () => {
                             user.role === "admin"
                               ? "bg-purple-100 text-purple-800"
                               : user.role === "instructor"
-                              ? "bg-blue-100 text-blue-800"
-                              : "bg-green-100 text-green-800"
+                                ? "bg-blue-100 text-blue-800"
+                                : "bg-green-100 text-green-800"
                           }`}
                         >
                           {user.role}
@@ -379,7 +379,7 @@ const AdminUsers: React.FC = () => {
                                 e.target.value as
                                   | "student"
                                   | "instructor"
-                                  | "admin"
+                                  | "admin",
                               )
                             }
                             className="text-sm border border-slate-300 rounded-lg px-2 py-1 hover:bg-blue-50 transition-colors"
@@ -396,7 +396,7 @@ const AdminUsers: React.FC = () => {
                               handleBanUser(
                                 user.id,
                                 `${user.firstName} ${user.lastName}`,
-                                user.isBanned
+                                user.isBanned,
                               )
                             }
                             className={`transition-colors duration-200 p-2 rounded-lg ${

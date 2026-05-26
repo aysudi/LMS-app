@@ -9,13 +9,14 @@ const StatsCards = ({
   instructorCourses: any[];
   allStudents: any[];
 }) => {
+  console.log("instructor courses: ", instructorCourses);
   const totalStudents = instructorCourses.reduce(
     (acc, course) => acc + (course.studentsEnrolled?.length || 0),
-    0
+    0,
   );
 
   const completedStudents = allStudents.filter(
-    (s) => s.progress?.progressPercentage === 100
+    (s) => s.progress?.progressPercentage === 100,
   ).length;
 
   const activeToday = allStudents.filter((s) => {
@@ -29,10 +30,11 @@ const StatsCards = ({
       ? Math.round(
           allStudents.reduce(
             (acc, s) => acc + (s.progress?.progressPercentage || 0),
-            0
-          ) / allStudents.length
+            0,
+          ) / allStudents.length,
         )
       : 0;
+  // console.log("total students: ", totalStudents);
 
   return (
     <motion.div

@@ -18,11 +18,12 @@ import bcrypt from "bcrypt";
 import { uploadToCloudinary } from "../middlewares/upload.middleware";
 import formatMongoData from "../utils/formatMongoData";
 import cloudinary from "../configs/cloudinary.config";
+import config from "../configs/config";
 
 export const getCurrentUserController = async (
   req: any,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     if (!req.user || !req.user.userId) {
@@ -52,7 +53,7 @@ export const getCurrentUserController = async (
 export const getAllUsersController = async (
   req: any,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const queryParams = req.validatedQuery || req.query;
@@ -81,7 +82,7 @@ export const getAllUsersController = async (
 export const getUserByIdController = async (
   req: any,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const params = req.validatedParams || req.params;
@@ -114,7 +115,7 @@ export const getUserByIdController = async (
 export const getUserByUsernameController = async (
   req: any,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const params = req.validatedParams || req.params;
@@ -147,7 +148,7 @@ export const getUserByUsernameController = async (
 export const registerUser = async (
   req: any,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const { firstName, lastName, username, email, password, role } = req.body;
@@ -198,17 +199,19 @@ export const registerUser = async (
 export const loginUser = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const { email, password } = req.body;
 
     const result = await login({ email, password });
 
+    const isProduction = config.NODE_ENV === "production";
+
     res.cookie("refreshToken", result.refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: isProduction,
+      sameSite: config.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -229,7 +232,7 @@ export const loginUser = async (
 export const verifyEmailController = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const { token } = req.query;
@@ -261,7 +264,7 @@ export const verifyEmailController = async (
 export const resendVerificationEmailController = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const { email } = req.body;
@@ -291,7 +294,7 @@ export const resendVerificationEmailController = async (
 export const forgotPasswordController = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const { email } = req.body;
@@ -321,7 +324,7 @@ export const forgotPasswordController = async (
 export const resetPasswordController = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const { token, newPassword } = req.body;
@@ -351,7 +354,7 @@ export const resetPasswordController = async (
 export const refreshTokenController = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     // Check if cookies exist
@@ -393,13 +396,15 @@ export const refreshTokenController = async (
 export const logoutController = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
+    const isProduction = config.NODE_ENV === "production";
+
     res.clearCookie("refreshToken", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: isProduction,
+      sameSite: config.NODE_ENV === "production" ? "none" : "lax",
     });
 
     res.status(200).json({
@@ -418,7 +423,7 @@ export const logoutController = async (
 export const updateProfileController = async (
   req: any,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     if (!req.user || !req.user.userId) {
@@ -450,7 +455,7 @@ export const updateProfileController = async (
 export const changePasswordController = async (
   req: any,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     if (!req.user || !req.user.userId) {
@@ -488,7 +493,7 @@ export const changePasswordController = async (
 export const updateAvatarController = async (
   req: any,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     if (!req.user || !req.user.userId) {
@@ -523,7 +528,7 @@ export const updateAvatarController = async (
             } else {
               resolve(result);
             }
-          }
+          },
         )
         .end(req.file.buffer);
     })) as any;
@@ -550,7 +555,7 @@ export const updateAvatarController = async (
 export const banUserController = async (
   req: any,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     if (!req.user || !req.user.userId) {
@@ -591,7 +596,7 @@ export const banUserController = async (
 export const unbanUserController = async (
   req: any,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     if (!req.user || !req.user.userId) {

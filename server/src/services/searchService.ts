@@ -9,7 +9,7 @@ import {
 } from "../types/search.types.js";
 
 export const getSearchSuggestions = async (
-  query: SearchQuery
+  query: SearchQuery,
 ): Promise<SearchSuggestion[]> => {
   const {
     q,
@@ -43,9 +43,9 @@ export const getSearchSuggestions = async (
       })
         .populate("instructor", "firstName lastName")
         .select(
-          "title shortDescription image rating originalPrice discountPrice isFree"
+          "title shortDescription image rating originalPrice discountPrice isFree",
         )
-        .limit(Math.ceil(limit * 0.5)) // Allocate 50% of suggestions to courses
+        .limit(Math.ceil(limit * 0.5))
         .lean();
 
       courses.forEach((course: any) => {
@@ -85,7 +85,7 @@ export const getSearchSuggestions = async (
           $sort: { count: -1 },
         },
         {
-          $limit: Math.ceil(limit * 0.3), // Allocate 30% to categories
+          $limit: Math.ceil(limit * 0.3),
         },
       ]);
 
@@ -133,14 +133,14 @@ export const getSearchSuggestions = async (
         },
         {
           $match: {
-            courseCount: { $gt: 0 }, // Only instructors with courses
+            courseCount: { $gt: 0 },
           },
         },
         {
           $sort: { courseCount: -1, avgRating: -1 },
         },
         {
-          $limit: Math.ceil(limit * 0.2), // Allocate 20% to instructors
+          $limit: Math.ceil(limit * 0.2),
         },
         {
           $project: {
@@ -173,14 +173,11 @@ export const getSearchSuggestions = async (
       });
     }
 
-    // Sort suggestions by relevance (courses first, then by count/rating)
     return suggestions
       .sort((a, b) => {
-        // Prioritize courses
         if (a.type === "course" && b.type !== "course") return -1;
         if (b.type === "course" && a.type !== "course") return 1;
 
-        // Then sort by count or rating
         const aScore = (a.count || 0) + (a.metadata?.rating || 0) * 10;
         const bScore = (b.count || 0) + (b.metadata?.rating || 0) * 10;
         return bScore - aScore;
@@ -192,41 +189,54 @@ export const getSearchSuggestions = async (
   }
 };
 
-export const saveSearchHistory = async (
+export const saveSearchHistoryService = async (
   userId: string,
-  searchData: Omit<SearchHistoryType, "_id" | "user">
+  searchData: {
+    query: string;
+    type: "search" | "suggestion";
+    metadata?: any;
+  },
 ): Promise<void> => {
   try {
-    await SearchHistory.deleteMany({
-      user: userId,
-      query: searchData.query.trim(),
-    });
+    const normalizedQuery = searchData.query.trim().toLowerCase();
 
-    // Save new search
-    await SearchHistory.create({
-      user: userId,
-      ...searchData,
-      query: searchData.query.trim(),
-    });
+    await SearchHistory.findOneAndUpdate(
+      {
+        user: userId,
+      },
+      {
+        $set: {
+          query: searchData.query.trim(),
+          queryNormalized: normalizedQuery,
+          type: searchData.type,
+          metadata: searchData.metadata,
+          timestamp: new Date(),
+        },
+        $setOnInsert: {
+          user: userId,
+        },
+      },
+      { upsert: true },
+    );
 
-    // Keep only the last 50 searches per user
     const userSearches = await SearchHistory.find({ user: userId })
       .sort({ timestamp: -1 })
       .skip(50);
 
     if (userSearches.length > 0) {
-      const searchIdsToDelete = userSearches.map((search) => search._id);
-      await SearchHistory.deleteMany({ _id: { $in: searchIdsToDelete } });
+      await SearchHistory.deleteMany({
+        _id: { $in: userSearches.map((s) => s._id) },
+      });
     }
   } catch (error) {
     console.error("Save search history error:", error);
-    throw new Error("Failed to save search history");
+    throw error;
   }
 };
 
 export const getSearchHistory = async (
   userId: string,
-  query: SearchHistoryQuery = {}
+  query: SearchHistoryQuery = {},
 ): Promise<SearchHistoryType[]> => {
   try {
     const { limit = 10, type } = query;
@@ -241,12 +251,13 @@ export const getSearchHistory = async (
       .limit(limit)
       .select("-user")
       .lean();
+    console.log("history: ", history);
 
     return history.map((item: any) => ({
       _id: item._id.toString(),
       query: item.query,
       type: item.type,
-      timestamp: item.timestamp,
+      timestamp: item.createdAt,
       metadata: item.metadata,
     }));
   } catch (error) {
@@ -265,7 +276,7 @@ export const clearSearchHistory = async (userId: string): Promise<void> => {
 };
 
 export const getPopularSearches = async (
-  limit: number = 10
+  limit: number = 10,
 ): Promise<string[]> => {
   try {
     const popular = await SearchHistory.aggregate([

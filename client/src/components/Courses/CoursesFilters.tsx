@@ -34,8 +34,6 @@ const CoursesFilters: React.FC<CoursesFiltersProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-6">
           <div className="flex flex-wrap items-center gap-6">
-            {/* Filter Toggle */}
-
             {/* Quick Filters */}
             <div className="flex flex-wrap items-center gap-3">
               {/* Level Filter */}
@@ -53,9 +51,9 @@ const CoursesFilters: React.FC<CoursesFiltersProps> = ({
               </select>
 
               {/* Price Range */}
-              <div className="flex items-center space-x-2 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3">
+              <div className="flex items-center space-x-2 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2">
                 <span className="text-sm text-gray-600 whitespace-nowrap">
-                  💰 Price:
+                  Price:
                 </span>
                 <input
                   type="number"

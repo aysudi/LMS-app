@@ -49,22 +49,22 @@ const CoursesHeader: React.FC<CoursesHeaderProps> = ({
                 <div className="flex flex-wrap items-center gap-2 mb-3">
                   {searchQuery && (
                     <span className="inline-flex items-center px-3 py-1.5 bg-indigo-100 text-indigo-800 text-sm font-medium rounded-full">
-                      🔍 {t("courses.searchLabel")}: "{searchQuery}"
+                      {t("courses.searchLabel")}: "{searchQuery}"
                     </span>
                   )}
                   {filters.category && (
                     <span className="inline-flex items-center px-3 py-1.5 bg-green-100 text-green-800 text-sm font-medium rounded-full">
-                      📂 {t("courses.category")}: {filters.category}
+                      {t("courses.category")}: {filters.category}
                     </span>
                   )}
                   {filters.level && (
                     <span className="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
-                      📊 {t("courses.level")}: {filters.level}
+                      {t("courses.level")}: {filters.level}
                     </span>
                   )}
                   {(filters.minPrice || filters.maxPrice) && (
                     <span className="inline-flex items-center px-3 py-1.5 bg-purple-100 text-purple-800 text-sm font-medium rounded-full">
-                      💰 Price: {filters.minPrice || "0"}$ -{" "}
+                      Price: {filters.minPrice || "0"}$ -{" "}
                       {filters.maxPrice || "∞"}$
                     </span>
                   )}
@@ -83,7 +83,7 @@ const CoursesHeader: React.FC<CoursesHeaderProps> = ({
                       start: (pagination.currentPage - 1) * 12 + 1,
                       end: Math.min(
                         pagination.currentPage * 12,
-                        pagination.totalCourses
+                        pagination.totalCourses,
                       ),
                       total: pagination.totalCourses,
                     })}

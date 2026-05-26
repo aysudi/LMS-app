@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import {
   getSearchSuggestions as getSearchSuggestionsService,
-  saveSearchHistory as saveSearchHistoryService,
+  saveSearchHistoryService as saveSearchHistoryService,
   getSearchHistory as getSearchHistoryService,
   clearSearchHistory as clearSearchHistoryService,
   getPopularSearches as getPopularSearchesService,
@@ -47,6 +47,7 @@ export const getSearchSuggestions = async (req: Request, res: Response) => {
 export const saveSearchHistory = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user?.userId;
+
     if (!userId) {
       return res.status(401).json({
         success: false,
@@ -66,20 +67,18 @@ export const saveSearchHistory = async (req: Request, res: Response) => {
     await saveSearchHistoryService(userId, {
       query: query.trim(),
       type,
-      timestamp: new Date(),
       metadata,
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
-      message: "Search saved to history",
+      message: "Search saved",
     });
   } catch (error) {
     console.error("Save search history error:", error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Failed to save search history",
-      error: process.env.NODE_ENV === "development" ? error : undefined,
     });
   }
 };

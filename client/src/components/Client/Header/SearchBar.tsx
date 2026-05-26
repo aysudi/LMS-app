@@ -19,6 +19,7 @@ import {
   type SearchSuggestion,
   type RecentSearch,
 } from "../../../services/search.service";
+import { useAuthContext } from "../../../context/AuthContext";
 
 interface SearchBarProps {
   onBlur?: () => void;
@@ -38,6 +39,21 @@ const SearchBar: React.FC<SearchBarProps> = ({ onBlur }) => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const { t } = useTranslation();
+  const { user } = useAuthContext();
+
+  const saveSearchToHistoryAPI = async (
+    query: string,
+    type: "search" | "suggestion",
+    metadata?: any,
+  ) => {
+    if (!user) return;
+
+    try {
+      await saveSearchToHistory(query, type, metadata);
+    } catch (err) {
+      console.error("Save search failed", err);
+    }
+  };
 
   const fetchSearchSuggestions = async (query: string) => {
     if (!query.trim()) {
@@ -48,29 +64,25 @@ const SearchBar: React.FC<SearchBarProps> = ({ onBlur }) => {
     setIsLoadingSuggestions(true);
     try {
       const apiResults = await getSearchSuggestions(query);
-      const recentHistory = await getSearchHistory();
-
-      const matchingRecentSearches = recentHistory
+      const matchingRecentSearches: SearchSuggestion[] = searchHistory
         .filter((item) =>
-          item.query.toLowerCase().includes(query.toLowerCase())
+          item.query.toLowerCase().includes(query.toLowerCase()),
         )
-        .slice(0, 3)
         .map((item) => ({
           id: `recent-${item.query}`,
           value: item.query,
           label: item.query,
-          type: "search" as const,
-          count: undefined,
-          metadata: undefined,
+          type: "search",
         }));
 
-      const combinedSuggestions = [
+      const combinedSuggestions: any = [
         ...matchingRecentSearches,
         ...apiResults.filter(
           (api) =>
             !matchingRecentSearches.some(
-              (recent) => recent.value.toLowerCase() === api.value.toLowerCase()
-            )
+              (recent: any) =>
+                recent.value.toLowerCase() === api.value.toLowerCase(),
+            ),
         ),
       ];
 
@@ -85,6 +97,11 @@ const SearchBar: React.FC<SearchBarProps> = ({ onBlur }) => {
 
   const fetchSearchHistory = async () => {
     try {
+      if (!user) {
+        setSearchHistory([]);
+        return;
+      }
+
       const history = await getSearchHistory();
       setSearchHistory(history);
     } catch (error) {
@@ -94,18 +111,8 @@ const SearchBar: React.FC<SearchBarProps> = ({ onBlur }) => {
   };
 
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchQuery(value);
+    setSearchQuery(e.target.value);
     setSelectedIndex(-1);
-
-    if (value.trim()) {
-      const timeoutId = setTimeout(() => {
-        fetchSearchSuggestions(value);
-      }, 300);
-      return () => clearTimeout(timeoutId);
-    } else {
-      setSuggestions([]);
-    }
   };
 
   const handleSearchInputFocus = () => {
@@ -123,7 +130,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onBlur }) => {
     }, 200);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = async (e: React.KeyboardEvent) => {
     const totalItems = searchQuery.trim()
       ? suggestions.length
       : searchHistory.length;
@@ -141,12 +148,15 @@ const SearchBar: React.FC<SearchBarProps> = ({ onBlur }) => {
         if (searchQuery.trim()) {
           const selectedSuggestion = suggestions[selectedIndex];
           handleSuggestionClick(selectedSuggestion);
+          await fetchSearchHistory();
         } else {
           const selectedHistory = searchHistory[selectedIndex];
           handleHistoryClick(selectedHistory);
+          await fetchSearchHistory();
         }
       } else if (searchQuery.trim()) {
         handleSearchSubmit(e);
+        await fetchSearchHistory();
       }
     } else if (e.key === "Escape") {
       setIsSearchFocused(false);
@@ -157,47 +167,32 @@ const SearchBar: React.FC<SearchBarProps> = ({ onBlur }) => {
 
   const handleSearchSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      await saveSearchToHistory(searchQuery.trim(), "search");
-      navigate(`/courses?search=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery("");
-      setIsSearchFocused(false);
-      searchInputRef.current?.blur();
-    }
+
+    if (!searchQuery.trim()) return;
+
+    await saveSearchToHistoryAPI(searchQuery.trim(), "search");
+
+    navigate(`/courses?search=${encodeURIComponent(searchQuery.trim())}`);
+    setSearchQuery("");
+    setIsSearchFocused(false);
   };
 
   const handleSuggestionClick = async (suggestion: SearchSuggestion) => {
-    await saveSearchToHistory(suggestion.value, "suggestion", {
+    await saveSearchToHistoryAPI(suggestion.value, "suggestion", {
       selectedSuggestion: suggestion.id,
     });
 
-    setSearchQuery(suggestion.value);
-    setIsSearchFocused(false);
-
-    if (suggestion.type === "search") {
-      navigate(`/courses?search=${encodeURIComponent(suggestion.value)}`);
-    } else if (suggestion.type === "course" && suggestion.metadata?.courseId) {
-      navigate(`/course/${suggestion.metadata.courseId}`);
-    } else if (suggestion.type === "category") {
-      navigate(`/courses?category=${encodeURIComponent(suggestion.value)}`);
-    } else if (
-      suggestion.type === "instructor" &&
-      suggestion.metadata?.instructorId
-    ) {
-      navigate(`/instructor/${suggestion.metadata.instructorId}`);
-    } else {
-      navigate(`/courses?search=${encodeURIComponent(suggestion.value)}`);
-    }
-
+    navigate(`/courses?search=${encodeURIComponent(suggestion.value)}`);
     setSearchQuery("");
+    setIsSearchFocused(false);
   };
 
   const handleHistoryClick = async (historyItem: RecentSearch) => {
-    setSearchQuery(historyItem.query);
-    setIsSearchFocused(false);
-    await saveSearchToHistory(historyItem.query, "search");
+    await saveSearchToHistoryAPI(historyItem.query, "search");
+
     navigate(`/courses?search=${encodeURIComponent(historyItem.query)}`);
     setSearchQuery("");
+    setIsSearchFocused(false);
   };
 
   const handleClearHistory = async () => {
@@ -256,6 +251,23 @@ const SearchBar: React.FC<SearchBarProps> = ({ onBlur }) => {
       setSearchQuery("");
     }
   }, [location.pathname, searchParams]);
+
+  useEffect(() => {
+    if (searchQuery.trim().length < 2) {
+      setSuggestions([]);
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      fetchSearchSuggestions(searchQuery);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    fetchSearchHistory();
+  }, []);
 
   return (
     <div className="hidden md:flex flex-1 min-w-0 mx-4 lg:mx-3 xl:mx-8">
@@ -378,37 +390,40 @@ const SearchBar: React.FC<SearchBarProps> = ({ onBlur }) => {
                         </p>
                       </div>
                     ) : (
-                      searchHistory.map((historyItem, index) => (
-                        <motion.div
-                          key={`${historyItem.query}-${historyItem.timestamp}`}
-                          whileHover={{ backgroundColor: "#f8fafc" }}
-                          onClick={() => handleHistoryClick(historyItem)}
-                          className={`px-4 py-3 cursor-pointer transition-colors duration-150 border-b border-gray-50 last:border-b-0 ${
-                            selectedIndex === index
-                              ? "bg-indigo-50"
-                              : "hover:bg-gray-50"
-                          }`}
-                        >
-                          <div className="flex items-center space-x-3">
-                            <FaClock className="text-gray-400 text-sm flex-shrink-0" />
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm text-gray-900 truncate">
-                                {historyItem.query}
-                              </p>
-                              <div className="flex items-center justify-between mt-1">
-                                <span className="text-xs text-gray-500">
-                                  {new Date(
-                                    historyItem.timestamp
-                                  ).toLocaleDateString()}
-                                </span>
-                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 capitalize">
-                                  {historyItem.type}
-                                </span>
+                      searchHistory.map((historyItem, index) => {
+                        console.log("history item: ", historyItem);
+                        return (
+                          <motion.div
+                            key={`${historyItem.query}-${historyItem.timestamp}`}
+                            whileHover={{ backgroundColor: "#f8fafc" }}
+                            onClick={() => handleHistoryClick(historyItem)}
+                            className={`px-4 py-3 cursor-pointer transition-colors duration-150 border-b border-gray-50 last:border-b-0 ${
+                              selectedIndex === index
+                                ? "bg-indigo-50"
+                                : "hover:bg-gray-50"
+                            }`}
+                          >
+                            <div className="flex items-center space-x-3">
+                              <FaClock className="text-gray-400 text-sm flex-shrink-0" />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm text-gray-900 truncate">
+                                  {historyItem.query}
+                                </p>
+                                <div className="flex items-center justify-between mt-1">
+                                  <span className="text-xs text-gray-500">
+                                    {new Date(
+                                      historyItem.timestamp,
+                                    ).toLocaleDateString()}
+                                  </span>
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 capitalize">
+                                    {historyItem.type}
+                                  </span>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </motion.div>
-                      ))
+                          </motion.div>
+                        );
+                      })
                     )}
                   </div>
                 )}

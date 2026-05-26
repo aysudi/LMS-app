@@ -24,8 +24,6 @@ const CourseCard = ({
     navigate(`/course/${course.id}`);
   };
 
-  console.log(course);
-
   if (viewMode === "list") {
     return (
       <motion.div
@@ -103,7 +101,7 @@ const CourseCard = ({
                   <FaUsers className="text-indigo-500" />
                   <span className="text-gray-600">
                     {Number(
-                      course.studentsEnrolled.length || 0
+                      course.studentsEnrolled.length || 0,
                     ).toLocaleString()}
                   </span>
                 </div>
@@ -165,7 +163,7 @@ const CourseCard = ({
             <div className="absolute bottom-4 left-4">
               <span className="px-3 py-1.5 bg-red-500 text-white text-xs font-bold rounded-full shadow-lg">
                 {Math.round(
-                  (1 - course.discountPrice / course.originalPrice) * 100
+                  (1 - course.discountPrice / course.originalPrice) * 100,
                 )}
                 % OFF
               </span>
