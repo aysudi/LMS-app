@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import { ICart } from "../types/cart.type";
-import CartSchema from "../schemas/cartSchema";
+import { ICart } from "../types/cart.type.js";
+import CartSchema from "../schemas/cartSchema.js";
 
 const Cart = mongoose.model<ICart>("Cart", CartSchema);
 

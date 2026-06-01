@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { MessageStatus } from "../types/studentInstructorMessage.types";
+import { MessageStatus } from "../types/studentInstructorMessage.types.js";
 
 const studentInstructorMessageSchema = new mongoose.Schema(
   {
@@ -74,7 +74,7 @@ const studentInstructorMessageSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // Indexes for better query performance

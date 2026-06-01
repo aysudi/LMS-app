@@ -1,31 +1,28 @@
 import nodemailer from "nodemailer";
 import config from "../configs/config";
 const transporter = nodemailer.createTransport({
-    service: "gmail",
+    host: "smtp-relay.brevo.com",
     port: 587,
     secure: false,
     auth: {
-        user: config.GMAIL_USER,
-        pass: config.GMAIL_PASS,
+        user: config.BREVO_SMTP_USER,
+        pass: config.BREVO_SMTP_PASS,
     },
 });
 export const sendEmail = async (to, subject, htmlContent, textContent) => {
     try {
-        // Only skip email sending in development if credentials are actually not configured
-        if (process.env.NODE_ENV !== "production" &&
-            (!config.GMAIL_USER || !config.GMAIL_PASS)) {
-            console.log(`[DEV] Email skipped - no credentials configured. Would send to ${to} with subject: ${subject}`);
+        if (process.env.NODE_ENV !== "production" && !process.env.BREVO_SMTP_PASS) {
+            console.log(`[DEV] Email skipped - no Brevo credentials. Would send to ${to} with subject: ${subject}`);
             return;
         }
-        console.log(`[EMAIL] Sending email to ${to} with subject: ${subject}`);
         const mailOptions = {
-            from: `"${process.env.EMAIL_FROM_NAME || "Skillify"}" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
+            from: `"${process.env.EMAIL_FROM_NAME || "Skillify"}" <${process.env.EMAIL_FROM}>`,
             to,
             subject,
             text: textContent,
             html: htmlContent,
         };
-        const result = await transporter.sendMail(mailOptions);
+        await transporter.sendMail(mailOptions);
     }
     catch (error) {
         console.error("Error sending email:", error);
@@ -34,7 +31,7 @@ export const sendEmail = async (to, subject, htmlContent, textContent) => {
 };
 // Email verification function
 export const sendVerificationEmail = async (email, firstName, verificationToken) => {
-    const verificationUrl = `${config.CLIENT_URL || "http://localhost:5173"}/auth/verify-email?token=${verificationToken}`;
+    const verificationUrl = `${config.CLIENT_URL}/auth/verify-email?token=${verificationToken}`;
     const subject = "Verify Your Email Address - Skillify";
     const htmlContent = `
     <!DOCTYPE html>
@@ -198,7 +195,7 @@ export const sendUnlockAccountEmail = async (email, firstName, unlockTime) => {
 };
 // Forgot password email function
 export const sendForgotPasswordEmail = async (email, firstName, resetToken) => {
-    const resetUrl = `${process.env.CLIENT_URL || "http://localhost:3000"}/auth/reset-password?token=${resetToken}`;
+    const resetUrl = `${process.env.CLIENT_URL}/auth/reset-password?token=${resetToken}`;
     const subject = "Reset Your Password - Skillify";
     const htmlContent = `
     <!DOCTYPE html>
@@ -342,13 +339,10 @@ export const sendNotificationEmail = async (email, firstName, subject, message) 
 // Certificate email function with attachment
 export const sendCertificateEmail = async (email, studentName, courseName, certificateBuffer, fileName) => {
     try {
-        // Only skip email sending in development if credentials are actually not configured
-        if (process.env.NODE_ENV !== "production" &&
-            (!config.GMAIL_USER || !config.GMAIL_PASS)) {
+        if (process.env.NODE_ENV !== "production" && !process.env.BREVO_SMTP_PASS) {
             console.log(`[DEV] Certificate email skipped - no credentials configured. Would send to ${email} for course: ${courseName}`);
             return;
         }
-        console.log(`[EMAIL] Sending certificate email to ${email} for course: ${courseName}`);
         const subject = `🎉 Your Certificate of Completion - ${courseName}`;
         const htmlContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -395,7 +389,7 @@ export const sendCertificateEmail = async (email, studentName, courseName, certi
       </div>
     `;
         const mailOptions = {
-            from: `"${process.env.EMAIL_FROM_NAME || "Skillify"}" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
+            from: `"${process.env.EMAIL_FROM_NAME || "Skillify"}" <${process.env.EMAIL_FROM}>`,
             to: email,
             subject,
             html: htmlContent,
@@ -452,7 +446,7 @@ export const sendApplicationApprovedEmail = async (email, instructorName) => {
             
             <p>Ready to get started? Click the button below to access your instructor dashboard:</p>
             <p style="text-align: center;">
-              <a href="http://localhost:5173/instructor/dashboard" class="button">Go to Dashboard</a>
+              <a href="${process.env.CLIENT_URL}/instructor/dashboard" class="button">Go to Dashboard</a>
             </p>
             
             <p>If you have any questions or need assistance, our support team is here to help.</p>
@@ -478,7 +472,7 @@ export const sendApplicationApprovedEmail = async (email, instructorName) => {
       - Interact with students
       - Earn revenue from your expertise
 
-      Ready to get started? Visit your instructor dashboard: http://localhost:5173/instructor/dashboard
+      Ready to get started? Visit your instructor dashboard: ${process.env.CLIENT_URL}/instructor/dashboard
 
       If you have any questions or need assistance, our support team is here to help.
 
@@ -612,7 +606,7 @@ export const sendApplicationRejectedEmail = async (email, instructorName, reason
             <p>We appreciate the time and effort you put into your application. Our standards help us maintain the quality of education our students expect, and we encourage you to continue developing your expertise.</p>
             
             <p style="text-align: center;">
-              <a href="http://localhost:5173/become-instructor" class="button">View Guidelines & Requirements</a>
+              <a href="${process.env.CLIENT_URL}/become-instructor" class="button">View Guidelines & Requirements</a>
             </p>
             
             <p>We wish you the best in your professional journey and hope to potentially work with you in the future.</p>
@@ -644,8 +638,8 @@ export const sendApplicationRejectedEmail = async (email, instructorName, reason
 // Course approval email
 export const sendCourseApprovedEmail = async (email, instructorName, courseTitle, courseId, adminFeedback) => {
     const subject = `🎉 Your Course "${courseTitle}" has been Approved!`;
-    const courseUrl = `${process.env.CLIENT_URL || "http://localhost:5173"}/course/${courseId}`;
-    const dashboardUrl = `${process.env.CLIENT_URL || "http://localhost:5173"}/instructor/courses`;
+    const courseUrl = `${process.env.CLIENT_URL}/course/${courseId}`;
+    const dashboardUrl = `${process.env.CLIENT_URL}/instructor/courses`;
     const htmlContent = `
     <!DOCTYPE html>
     <html>
@@ -793,8 +787,8 @@ export const sendCourseApprovedEmail = async (email, instructorName, courseTitle
 // Course rejection email
 export const sendCourseRejectedEmail = async (email, instructorName, courseTitle, courseId, rejectionReason, adminFeedback) => {
     const subject = `Course Review Update: "${courseTitle}"`;
-    const dashboardUrl = `${process.env.CLIENT_URL || "http://localhost:5173"}/instructor/courses`;
-    const guidelinesUrl = `${process.env.CLIENT_URL || "http://localhost:5173"}/instructor-guidelines`;
+    const dashboardUrl = `${process.env.CLIENT_URL}/instructor/courses`;
+    const guidelinesUrl = `${process.env.CLIENT_URL}/instructor-guidelines`;
     const htmlContent = `
     <!DOCTYPE html>
     <html>

@@ -1,12 +1,12 @@
-import Announcement from "../models/Announcement";
-import Course from "../models/Course";
-import formatMongoData from "../utils/formatMongoData";
+import Announcement from "../models/Announcement.js";
+import Course from "../models/Course.js";
+import formatMongoData from "../utils/formatMongoData.js";
 import {
   CreateAnnouncementDto,
   UpdateAnnouncementDto,
   AnnouncementQuery,
   IAnnouncement,
-} from "../types/announcement.types";
+} from "../types/announcement.types.js";
 
 // Get all announcements with pagination and filtering
 export const getAllAnnouncementsService = async (query: AnnouncementQuery) => {
@@ -23,7 +23,6 @@ export const getAllAnnouncementsService = async (query: AnnouncementQuery) => {
     sortOrder = "desc",
   } = query;
 
-  // Build filter object
   const filter: any = {};
 
   if (course) filter.course = course;
@@ -39,7 +38,6 @@ export const getAllAnnouncementsService = async (query: AnnouncementQuery) => {
     ];
   }
 
-  // Build sort object
   const sort: any = {};
   sort[sortBy] = sortOrder === "asc" ? 1 : -1;
 
@@ -73,7 +71,7 @@ export const getAllAnnouncementsService = async (query: AnnouncementQuery) => {
 // Get announcements by course ID
 export const getAnnouncementsByCourseService = async (
   courseId: string,
-  query: AnnouncementQuery
+  query: AnnouncementQuery,
 ) => {
   const courseQuery = { ...query, course: courseId };
   return getAllAnnouncementsService(courseQuery);
@@ -82,7 +80,7 @@ export const getAnnouncementsByCourseService = async (
 // Get announcements by instructor ID
 export const getAnnouncementsByInstructorService = async (
   instructorId: string,
-  query: AnnouncementQuery
+  query: AnnouncementQuery,
 ) => {
   const instructorQuery = { ...query, instructor: instructorId };
   return getAllAnnouncementsService(instructorQuery);
@@ -90,7 +88,7 @@ export const getAnnouncementsByInstructorService = async (
 
 // Get single announcement by ID
 export const getAnnouncementByIdService = async (
-  announcementId: string
+  announcementId: string,
 ): Promise<IAnnouncement> => {
   const announcement = await Announcement.findById(announcementId)
     .populate("instructor", "firstName lastName email avatar")
@@ -107,9 +105,8 @@ export const getAnnouncementByIdService = async (
 // Create new announcement
 export const createAnnouncementService = async (
   announcementData: CreateAnnouncementDto,
-  instructorId: string
+  instructorId: string,
 ): Promise<IAnnouncement> => {
-  // Verify that the course exists and belongs to the instructor
   const course = await Course.findOne({
     _id: announcementData.course,
     instructor: instructorId,
@@ -117,7 +114,7 @@ export const createAnnouncementService = async (
 
   if (!course) {
     throw new Error(
-      "Course not found or you don't have permission to create announcements for this course"
+      "Course not found or you don't have permission to create announcements for this course",
     );
   }
 
@@ -132,7 +129,10 @@ export const createAnnouncementService = async (
   await announcement.save();
 
   return formatMongoData(
-    await announcement.populate("instructor", "firstName lastName email avatar")
+    await announcement.populate(
+      "instructor",
+      "firstName lastName email avatar",
+    ),
   );
 };
 
@@ -140,9 +140,8 @@ export const createAnnouncementService = async (
 export const updateAnnouncementService = async (
   announcementId: string,
   updateData: UpdateAnnouncementDto,
-  instructorId: string
+  instructorId: string,
 ): Promise<IAnnouncement> => {
-  // Find announcement and verify ownership
   const announcement = await Announcement.findOne({
     _id: announcementId,
     instructor: instructorId,
@@ -150,14 +149,14 @@ export const updateAnnouncementService = async (
 
   if (!announcement) {
     throw new Error(
-      "Announcement not found or you don't have permission to update it"
+      "Announcement not found or you don't have permission to update it",
     );
   }
 
   const updatedAnnouncement = await Announcement.findByIdAndUpdate(
     announcementId,
     updateData,
-    { new: true, runValidators: true }
+    { new: true, runValidators: true },
   )
     .populate("instructor", "firstName lastName email avatar")
     .populate("course", "title thumbnail")
@@ -173,7 +172,7 @@ export const updateAnnouncementService = async (
 // Delete announcement
 export const deleteAnnouncementService = async (
   announcementId: string,
-  instructorId: string
+  instructorId: string,
 ): Promise<void> => {
   const announcement = await Announcement.findOne({
     _id: announcementId,
@@ -182,7 +181,7 @@ export const deleteAnnouncementService = async (
 
   if (!announcement) {
     throw new Error(
-      "Announcement not found or you don't have permission to delete it"
+      "Announcement not found or you don't have permission to delete it",
     );
   }
 
@@ -192,7 +191,7 @@ export const deleteAnnouncementService = async (
 // Mark announcement as read
 export const markAnnouncementAsReadService = async (
   announcementId: string,
-  userId: string
+  userId: string,
 ): Promise<IAnnouncement> => {
   const announcement = await Announcement.findById(announcementId);
 
@@ -200,9 +199,8 @@ export const markAnnouncementAsReadService = async (
     throw new Error("Announcement not found");
   }
 
-  // Check if user already marked as read
   const alreadyRead = announcement.readBy.some(
-    (read) => read.user && read.user.toString() === userId
+    (read: any) => read.user && read.user.toString() === userId,
   );
 
   if (!alreadyRead) {
@@ -271,11 +269,11 @@ export const getAnnouncementStatsService = async (instructorId: string) => {
       highPriority: 0,
       totalReads: 0,
     },
-    byPriority: priorityStats.reduce((acc, stat) => {
+    byPriority: priorityStats.reduce((acc: any, stat: any) => {
       acc[stat._id] = stat.count;
       return acc;
     }, {}),
-    byAudience: audienceStats.reduce((acc, stat) => {
+    byAudience: audienceStats.reduce((acc: any, stat: any) => {
       acc[stat._id] = stat.count;
       return acc;
     }, {}),

@@ -1,21 +1,21 @@
 import { Response } from "express";
-import { AuthRequest } from "../types/common.types";
-import User from "../models/User";
-import Course from "../models/Course";
-import Enrollment from "../models/Enrollment";
-import { UserRole } from "../types/user.types";
-import formatMongoData from "../utils/formatMongoData";
+import { AuthRequest } from "../types/common.types.js";
+import User from "../models/User.js";
+import Course from "../models/Course.js";
+import Enrollment from "../models/Enrollment.js";
+import { UserRole } from "../types/user.types.js";
+import formatMongoData from "../utils/formatMongoData.js";
 import mongoose from "mongoose";
 import {
   sendCourseApprovedEmail,
   sendCourseRejectedEmail,
-} from "../utils/sendMail";
-import { getAdminAnalyticsService } from "../services/adminAnalyticsService";
+} from "../utils/sendMail.js";
+import { getAdminAnalyticsService } from "../services/adminAnalyticsService.js";
 
 // Get admin dashboard statistics
 export const getAdminDashboardStats = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
 ) => {
   try {
     const userId = req.user?.id;
@@ -44,7 +44,6 @@ export const getAdminDashboardStats = async (
       Course.countDocuments({ isPublished: false, status: "pending" }),
     ]);
 
-    // Get recent user growth (last 30 days)
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
@@ -128,7 +127,7 @@ export const getAdminUsers = async (req: AuthRequest, res: Response) => {
     const [users, totalUsers] = await Promise.all([
       User.find(filters)
         .select(
-          "-password -refreshToken -verificationToken -passwordResetToken"
+          "-password -refreshToken -verificationToken -passwordResetToken",
         )
         .sort(sort)
         .skip(skip)
@@ -154,7 +153,7 @@ export const getAdminUsers = async (req: AuthRequest, res: Response) => {
           coursesCreated: coursesCreated,
           lastActive: "Recently",
         };
-      })
+      }),
     );
 
     const totalPages = Math.ceil(totalUsers / limitNum);
@@ -206,7 +205,7 @@ export const updateUserStatus = async (req: AuthRequest, res: Response) => {
     const user = await User.findByIdAndUpdate(
       targetUserId,
       { status },
-      { new: true }
+      { new: true },
     ).select("-password -refreshToken -verificationToken -passwordResetToken");
 
     if (!user) {
@@ -255,7 +254,7 @@ export const updateUserRole = async (req: AuthRequest, res: Response) => {
     const user = await User.findByIdAndUpdate(
       targetUserId,
       { role },
-      { new: true }
+      { new: true },
     ).select("-password -refreshToken -verificationToken -passwordResetToken");
 
     if (!user) {
@@ -311,7 +310,7 @@ export const bulkUpdateUsers = async (req: AuthRequest, res: Response) => {
 
     const result = await User.updateMany(
       { _id: { $in: userIds } },
-      { $set: validUpdates }
+      { $set: validUpdates },
     );
 
     res.status(200).json({
@@ -345,7 +344,7 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
     const user = await User.findByIdAndUpdate(
       targetUserId,
       { status: "deleted", deletedAt: new Date() },
-      { new: true }
+      { new: true },
     );
 
     if (!user) {
@@ -405,7 +404,7 @@ export const getRecentActivity = async (req: AuthRequest, res: Response) => {
 
     const activities: any[] = [];
 
-    recentUsers.forEach((user) => {
+    recentUsers.forEach((user: any) => {
       activities.push({
         id: `user_${user._id}`,
         type: "new_user",
@@ -416,7 +415,7 @@ export const getRecentActivity = async (req: AuthRequest, res: Response) => {
       });
     });
 
-    recentCourses.forEach((course) => {
+    recentCourses.forEach((course: any) => {
       const instructor = course.instructor as any;
       const isPublished = (course as any).isPublished;
       activities.push({
@@ -433,7 +432,7 @@ export const getRecentActivity = async (req: AuthRequest, res: Response) => {
       });
     });
 
-    recentEnrollments.forEach((enrollment) => {
+    recentEnrollments.forEach((enrollment: any) => {
       const user = enrollment.user as any;
       const course = enrollment.course as any;
       activities.push({
@@ -449,7 +448,7 @@ export const getRecentActivity = async (req: AuthRequest, res: Response) => {
     });
 
     activities.sort(
-      (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
+      (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime(),
     );
     const limitedActivities = activities.slice(0, limit);
 
@@ -645,7 +644,6 @@ export const getAdminCourses = async (req: AuthRequest, res: Response) => {
     const search = req.query.search as string;
     const skip = (page - 1) * limit;
 
-    // Build filter - exclude draft courses, only show courses that have been submitted
     const filter: any = {
       status: { $in: ["pending", "approved", "rejected"] },
     };
@@ -750,7 +748,7 @@ export const approveCourse = async (req: AuthRequest, res: Response) => {
 
     const course = await Course.findById(courseId).populate(
       "instructor",
-      "firstName lastName email"
+      "firstName lastName email",
     );
     if (!course) {
       return res.status(404).json({
@@ -778,7 +776,6 @@ export const approveCourse = async (req: AuthRequest, res: Response) => {
 
     await course.save();
 
-    // Send email notification to instructor about approval
     try {
       const instructor = course.instructor as any;
       await sendCourseApprovedEmail(
@@ -786,11 +783,10 @@ export const approveCourse = async (req: AuthRequest, res: Response) => {
         `${instructor.firstName} ${instructor.lastName}`,
         course.title,
         course._id.toString(),
-        adminFeedback
+        adminFeedback,
       );
     } catch (emailError) {
       console.error("Failed to send approval email:", emailError);
-      // Continue with the response even if email fails
     }
 
     res.status(200).json({
@@ -838,7 +834,7 @@ export const rejectCourse = async (req: AuthRequest, res: Response) => {
 
     const course = await Course.findById(courseId).populate(
       "instructor",
-      "firstName lastName email"
+      "firstName lastName email",
     );
     if (!course) {
       return res.status(404).json({
@@ -854,7 +850,6 @@ export const rejectCourse = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Update course status
     course.status = "rejected";
     course.isPublished = false;
     course.reviewedAt = new Date();
@@ -866,7 +861,6 @@ export const rejectCourse = async (req: AuthRequest, res: Response) => {
 
     await course.save();
 
-    // Send email notification to instructor about rejection
     try {
       const instructor = course.instructor as any;
       await sendCourseRejectedEmail(
@@ -875,11 +869,10 @@ export const rejectCourse = async (req: AuthRequest, res: Response) => {
         course.title,
         course._id.toString(),
         rejectionReason,
-        adminFeedback
+        adminFeedback,
       );
     } catch (emailError) {
       console.error("Failed to send rejection email:", emailError);
-      // Continue with the response even if email fails
     }
 
     res.status(200).json({
@@ -904,7 +897,7 @@ export const rejectCourse = async (req: AuthRequest, res: Response) => {
 // Get detailed course information for admin review
 export const getAdminCourseDetails = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
 ) => {
   try {
     const userId = req.user?.id;

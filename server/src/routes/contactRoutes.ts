@@ -1,10 +1,10 @@
 import express from "express";
-import * as contactController from "../controllers/contactController";
+import * as contactController from "../controllers/contactController.js";
 import {
   authenticateToken,
   authorizeRoles,
-} from "../middlewares/auth.middleware";
-import { UserRole } from "../types/user.types";
+} from "../middlewares/auth.middleware.js";
+import { UserRole } from "../types/user.types.js";
 
 const router = express.Router();
 
@@ -16,35 +16,35 @@ router.get(
   "/",
   authenticateToken,
   authorizeRoles(UserRole.ADMIN),
-  contactController.getContacts
+  contactController.getContacts,
 );
 
 router.get(
   "/stats",
   authenticateToken,
   authorizeRoles(UserRole.ADMIN),
-  contactController.getContactStats
+  contactController.getContactStats,
 );
 
 router.get(
   "/:id",
   authenticateToken,
   authorizeRoles(UserRole.ADMIN),
-  contactController.getContactById
+  contactController.getContactById,
 );
 
 router.post(
   "/:id/reply",
   authenticateToken,
   authorizeRoles(UserRole.ADMIN),
-  contactController.replyToContact
+  contactController.replyToContact,
 );
 
 router.delete(
   "/:id",
   authenticateToken,
   authorizeRoles(UserRole.ADMIN),
-  contactController.deleteContact
+  contactController.deleteContact,
 );
 
 export default router;

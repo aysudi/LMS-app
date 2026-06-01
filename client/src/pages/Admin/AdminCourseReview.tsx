@@ -35,7 +35,7 @@ const AdminCourseReview: React.FC = () => {
     "overview" | "curriculum" | "instructor"
   >("overview");
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
   const [rejectionReason, setRejectionReason] = useState("");
   const [adminFeedback, setAdminFeedback] = useState("");
@@ -53,7 +53,7 @@ const AdminCourseReview: React.FC = () => {
           onSuccess: () => {
             navigate("/admin/courses");
           },
-        }
+        },
       );
     }
   };
@@ -74,7 +74,7 @@ const AdminCourseReview: React.FC = () => {
           onSuccess: () => {
             navigate("/admin/courses");
           },
-        }
+        },
       );
     }
   };
@@ -332,7 +332,7 @@ const AdminCourseReview: React.FC = () => {
                                 {item}
                               </span>
                             </div>
-                          )
+                          ),
                         )}
                       </div>
                     </div>
@@ -357,7 +357,7 @@ const AdminCourseReview: React.FC = () => {
                               {requirement}
                             </span>
                           </li>
-                        )
+                        ),
                       )}
                     </ul>
                   </div>
@@ -382,7 +382,7 @@ const AdminCourseReview: React.FC = () => {
                               {audience}
                             </span>
                           </li>
-                        )
+                        ),
                       )}
                     </ul>
                   </div>
@@ -477,8 +477,8 @@ const AdminCourseReview: React.FC = () => {
                                 section.lessons.reduce(
                                   (total: number, lesson: any) =>
                                     total + lesson.duration,
-                                  0
-                                )
+                                  0,
+                                ),
                               )}
                             </span>
                           </div>

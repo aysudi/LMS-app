@@ -104,7 +104,6 @@ export const getSearchSuggestions = async (
       });
     }
 
-    // Instructor suggestions
     if (includeInstructors) {
       const instructors = await User.aggregate([
         {
@@ -251,7 +250,6 @@ export const getSearchHistory = async (
       .limit(limit)
       .select("-user")
       .lean();
-    console.log("history: ", history);
 
     return history.map((item: any) => ({
       _id: item._id.toString(),

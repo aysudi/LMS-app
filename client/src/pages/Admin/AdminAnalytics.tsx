@@ -230,7 +230,9 @@ const AdminAnalytics: React.FC = () => {
                             width: `${
                               (category.count /
                                 Math.max(
-                                  ...courses.byCategory.map((c: any) => c.count)
+                                  ...courses.byCategory.map(
+                                    (c: any) => c.count,
+                                  ),
                                 )) *
                               100
                             }%`,

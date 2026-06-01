@@ -1,17 +1,17 @@
-import Course from "../models/Course";
-import Section from "../models/Section";
-import Lesson from "../models/Lesson";
-import UserNote from "../models/UserNote";
+import Course from "../models/Course.js";
+import Section from "../models/Section.js";
+import Lesson from "../models/Lesson.js";
+import UserNote from "../models/UserNote.js";
 import {
   ILesson,
   CreateLessonData,
   UpdateLessonData,
-} from "../types/lesson.types";
-import UserProgress from "../models/UserProgress";
-import { deleteFromCloudinary } from "../middlewares/course-upload.middleware";
+} from "../types/lesson.types.js";
+import UserProgress from "../models/UserProgress.js";
+import { deleteFromCloudinary } from "../middlewares/course-upload.middleware.js";
 
 export const getAllLessons = async (): Promise<ILesson[]> => {
-  const lessons = await Lesson.find({})
+  const lessons: any = await Lesson.find({})
     .populate("course", "title instructor")
     .populate("section", "title")
     .sort({ createdAt: -1 })
@@ -24,7 +24,7 @@ export const createLessonService = async (
   courseId: string,
   sectionId: string,
   lessonData: CreateLessonData,
-  instructorId: string
+  instructorId: string,
 ): Promise<ILesson> => {
   const course = await Course.findOne({
     _id: courseId,
@@ -54,10 +54,8 @@ export const createLessonService = async (
     lessonData.order = lastLesson ? lastLesson.order + 1 : 1;
   }
 
-  // Handle uploaded files
   const lessonPayload = { ...lessonData };
 
-  // Parse quiz data if it's a JSON string
   if (lessonData.quiz && typeof lessonData.quiz === "string") {
     try {
       lessonPayload.quiz = JSON.parse(lessonData.quiz);
@@ -80,11 +78,10 @@ export const createLessonService = async (
         url: resource.url,
         publicId: resource.publicId,
         name: resource.name,
-      })
+      }),
     );
   }
 
-  // Remove uploadedFiles from payload before saving
   delete lessonPayload.uploadedFiles;
 
   const lesson = new Lesson({
@@ -102,7 +99,7 @@ export const createLessonService = async (
 };
 
 export const getLessonsBySectionService = async (
-  sectionId: string
+  sectionId: string,
 ): Promise<ILesson[]> => {
   const lessons = await Lesson.find({
     section: sectionId,
@@ -115,7 +112,7 @@ export const getLessonsBySectionService = async (
 };
 
 export const getLessonByIdService = async (
-  lessonId: string
+  lessonId: string,
 ): Promise<ILesson> => {
   const lesson = await Lesson.findById(lessonId)
     .populate("section")
@@ -132,7 +129,7 @@ export const updateLessonService = async (
   courseId: string,
   lessonId: string,
   lessonData: UpdateLessonData,
-  instructorId: string
+  instructorId: string,
 ): Promise<ILesson> => {
   const course = await Course.findOne({
     _id: courseId,
@@ -179,10 +176,10 @@ export const updateLessonService = async (
 
   if (payload.existingResources && Array.isArray(payload.existingResources)) {
     const existingResourcesFromDB =
-      lesson.resources?.filter((dbResource) =>
+      lesson.resources?.filter((dbResource: any) =>
         payload.existingResources.some(
-          (clientResource: any) => clientResource.url === dbResource.url
-        )
+          (clientResource: any) => clientResource.url === dbResource.url,
+        ),
       ) || [];
 
     finalResources = [...existingResourcesFromDB];
@@ -197,24 +194,24 @@ export const updateLessonService = async (
         type: (resource.name.split(".").pop()?.toLowerCase() as any)
           ? "pdf"
           : "other",
-      })
+      }),
     );
     finalResources = [...finalResources, ...newUploadedResources];
   }
 
   if (lesson.resources?.length) {
     const resourcesToDelete = lesson.resources.filter(
-      (oldResource) =>
+      (oldResource: any) =>
         !finalResources.some(
-          (newResource) => newResource.url === oldResource.url
-        )
+          (newResource) => newResource.url === oldResource.url,
+        ),
     );
 
     if (resourcesToDelete.length > 0) {
       await Promise.all(
-        resourcesToDelete.map((resource) =>
-          deleteFromCloudinary(resource.publicId, "raw")
-        )
+        resourcesToDelete.map((resource: any) =>
+          deleteFromCloudinary(resource.publicId, "raw"),
+        ),
       );
     }
   }
@@ -236,7 +233,7 @@ export const updateLessonService = async (
 export const deleteLessonService = async (
   courseId: string,
   lessonId: string,
-  instructorId: string
+  instructorId: string,
 ): Promise<{ message: string }> => {
   const course = await Course.findOne({
     _id: courseId,
@@ -256,29 +253,23 @@ export const deleteLessonService = async (
     throw new Error("Lesson not found");
   }
 
-  // Delete files from Cloudinary
   const deletionPromises = [];
 
-  // Delete video
   if (lesson.video?.publicId) {
     deletionPromises.push(deleteFromCloudinary(lesson.video.publicId, "video"));
   }
 
-  // Delete resources
   if (lesson.resources?.length) {
-    lesson.resources.forEach((resource) => {
+    lesson.resources.forEach((resource: any) => {
       deletionPromises.push(deleteFromCloudinary(resource.publicId, "raw"));
     });
   }
 
-  // Wait for all Cloudinary deletions to complete
   await Promise.allSettled(deletionPromises);
 
-  // Delete related data
   await UserNote.deleteMany({ lesson: lessonId });
   await UserProgress.deleteMany({ lesson: lessonId });
 
-  // Delete lesson
   await lesson.deleteOne();
 
   course.lastUpdated = new Date();
@@ -292,9 +283,8 @@ export const addNoteToLessonService = async (
   sectionId: string,
   lessonId: string,
   noteData: any,
-  userId: string
+  userId: string,
 ) => {
-  // Verify course exists and user is enrolled
   const course = await Course.findById(courseId);
   if (!course) {
     throw new Error("Course not found");
@@ -304,7 +294,6 @@ export const addNoteToLessonService = async (
     throw new Error("You must be enrolled in this course to add notes");
   }
 
-  // Verify section exists and belongs to course
   const section = await Section.findOne({
     _id: sectionId,
     course: courseId,
@@ -314,7 +303,6 @@ export const addNoteToLessonService = async (
     throw new Error("Section not found");
   }
 
-  // Verify lesson exists
   const lesson = await Lesson.findOne({
     _id: lessonId,
     section: sectionId,
@@ -325,7 +313,6 @@ export const addNoteToLessonService = async (
     throw new Error("Lesson not found");
   }
 
-  // Create user note
   const userNote = new UserNote({
     user: userId,
     course: courseId,
@@ -342,7 +329,7 @@ export const getUserNotesForLessonService = async (
   courseId: string,
   sectionId: string,
   lessonId: string,
-  userId: string
+  userId: string,
 ) => {
   const course = await Course.findById(courseId);
   if (!course) {

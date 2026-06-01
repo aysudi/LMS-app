@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import StudentInstructorMessage from "../models/StudentInstructorMessage";
-import Enrollment from "../models/Enrollment";
-import Course from "../models/Course";
-import { MessageStatus } from "../types/studentInstructorMessage.types";
+import StudentInstructorMessage from "../models/StudentInstructorMessage.js";
+import Enrollment from "../models/Enrollment.js";
+import Course from "../models/Course.js";
+import { MessageStatus } from "../types/studentInstructorMessage.types.js";
 import mongoose from "mongoose";
 
 interface AuthenticatedRequest extends Request {
@@ -30,7 +30,6 @@ export const sendMessageToInstructor = async (req: Request, res: Response) => {
       return res.status(401).json({ error: "Authentication required" });
     }
 
-    // Verify enrollment
     const enrollment = await Enrollment.findOne({
       user: studentId,
       course: courseId,
@@ -43,7 +42,6 @@ export const sendMessageToInstructor = async (req: Request, res: Response) => {
       });
     }
 
-    // Verify instructor owns the course
     const course = await Course.findById(courseId);
     if (!course || course.instructor.toString() !== instructorId) {
       return res.status(400).json({
@@ -63,9 +61,8 @@ export const sendMessageToInstructor = async (req: Request, res: Response) => {
 
     await message.save();
 
-    // Populate message with user and course info
     const populatedMessage = await StudentInstructorMessage.findById(
-      message._id
+      message._id,
     )
       .populate("student", "firstName lastName email avatar")
       .populate("instructor", "firstName lastName email avatar")
@@ -92,13 +89,11 @@ export const replyToMessage = async (req: Request, res: Response) => {
       return res.status(401).json({ error: "Authentication required" });
     }
 
-    // Find the parent message
     const parentMessage = await StudentInstructorMessage.findById(messageId);
     if (!parentMessage) {
       return res.status(404).json({ error: "Message not found" });
     }
 
-    // Check if user is either the student or instructor in the conversation
     const isStudent = parentMessage.student.toString() === userId;
     const isInstructor = parentMessage.instructor.toString() === userId;
 
@@ -121,7 +116,6 @@ export const replyToMessage = async (req: Request, res: Response) => {
 
     await reply.save();
 
-    // Populate reply with user and course info
     const populatedReply = await StudentInstructorMessage.findById(reply._id)
       .populate("student", "firstName lastName email avatar")
       .populate("instructor", "firstName lastName email avatar")
@@ -219,7 +213,7 @@ export const getStudentConversations = async (req: Request, res: Response) => {
 // Get conversations for an instructor
 export const getInstructorConversations = async (
   req: Request,
-  res: Response
+  res: Response,
 ) => {
   try {
     const instructorId = (req.user as any)?.userId;
@@ -321,7 +315,6 @@ export const getConversationThread = async (req: Request, res: Response) => {
       return res.status(401).json({ error: "Authentication required" });
     }
 
-    // Find the root message
     const rootMessage = await StudentInstructorMessage.findById(messageId)
       .populate("student", "firstName lastName email avatar")
       .populate("instructor", "firstName lastName email avatar")
@@ -331,7 +324,6 @@ export const getConversationThread = async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Message not found" });
     }
 
-    // Check if user has access to this conversation
     const hasAccess =
       rootMessage.student._id.toString() === userId ||
       rootMessage.instructor._id.toString() === userId;
@@ -342,7 +334,6 @@ export const getConversationThread = async (req: Request, res: Response) => {
       });
     }
 
-    // Get all replies
     const replies = await StudentInstructorMessage.find({
       parentMessage: messageId,
     })
@@ -378,7 +369,6 @@ export const markMessageAsRead = async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Message not found" });
     }
 
-    // Check if user can mark as read (must be the recipient)
     const canMarkAsRead =
       (message.isStudentMessage && message.instructor.toString() === userId) ||
       (!message.isStudentMessage && message.student.toString() === userId);
@@ -405,7 +395,7 @@ export const markMessageAsRead = async (req: Request, res: Response) => {
 // Mark conversation as resolved
 export const markConversationAsResolved = async (
   req: Request,
-  res: Response
+  res: Response,
 ) => {
   try {
     const { messageId } = req.params;
@@ -420,7 +410,6 @@ export const markConversationAsResolved = async (
       return res.status(404).json({ error: "Message not found" });
     }
 
-    // Only instructor can mark as resolved
     if (message.instructor.toString() !== userId) {
       return res.status(403).json({
         error: "Only the instructor can mark conversations as resolved",
@@ -431,13 +420,12 @@ export const markConversationAsResolved = async (
     message.resolvedAt = new Date();
     await message.save();
 
-    // Also mark all replies as resolved
     await StudentInstructorMessage.updateMany(
       { parentMessage: messageId },
       {
         status: MessageStatus.RESOLVED,
         resolvedAt: new Date(),
-      }
+      },
     );
 
     res.json({
@@ -480,13 +468,12 @@ export const getEnrolledInstructors = async (req: Request, res: Response) => {
       },
     }));
 
-    // Remove duplicates based on instructor ID
     const uniqueInstructors = instructors.filter(
       (item, index, self) =>
         index ===
         self.findIndex(
-          (t) => t.instructor._id.toString() === item.instructor._id.toString()
-        )
+          (t) => t.instructor._id.toString() === item.instructor._id.toString(),
+        ),
     );
 
     res.json({

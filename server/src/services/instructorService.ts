@@ -1,9 +1,9 @@
-import Course from "../models/Course";
-import Enrollment from "../models/Enrollment";
-import Order from "../models/Order";
-import InstructorEarnings from "../models/InstructorEarnings";
-import InstructorAnalytics from "../models/InstructorAnalytics";
-import UserProgress from "../models/UserProgress";
+import Course from "../models/Course.js";
+import Enrollment from "../models/Enrollment.js";
+import Order from "../models/Order.js";
+import InstructorEarnings from "../models/InstructorEarnings.js";
+import InstructorAnalytics from "../models/InstructorAnalytics.js";
+import UserProgress from "../models/UserProgress.js";
 import mongoose from "mongoose";
 
 // Get instructor dashboard overview
@@ -13,7 +13,7 @@ export const getInstructorOverviewService = async (instructorId: string) => {
     isPublished: true,
   });
 
-  const courseIds = courses.map((course) => course._id);
+  const courseIds = courses.map((course: any) => course._id);
 
   const totalStudents = await Enrollment.countDocuments({
     course: { $in: courseIds },
@@ -117,7 +117,7 @@ export const getInstructorOverviewService = async (instructorId: string) => {
       watchTime: Math.round(performance.totalWatchTime / 3600), // Convert to hours
       conversionRate: Number(conversionRate.toFixed(1)),
     },
-    courses: courses.map((course) => ({
+    courses: courses.map((course: any) => ({
       _id: course._id,
       title: course.title,
       studentsCount: course.studentsEnrolled?.length || 0,
@@ -142,7 +142,7 @@ export const getInstructorCoursesWithStatsService = async (
     minRating?: number;
     sortBy?: string;
     sortOrder?: "asc" | "desc";
-  } = {}
+  } = {},
 ) => {
   const {
     page = 1,
@@ -230,7 +230,7 @@ export const getInstructorCoursesWithStatsService = async (
   const totalCourses = await Course.countDocuments(filter);
 
   const coursesWithStats = await Promise.all(
-    courses.map(async (course) => {
+    courses.map(async (course: any) => {
       const enrollmentsCount = await Enrollment.countDocuments({
         course: course._id,
         status: "active",
@@ -265,7 +265,7 @@ export const getInstructorCoursesWithStatsService = async (
           completions,
         },
       };
-    })
+    }),
   );
 
   return {
@@ -285,7 +285,7 @@ export const getCourseStudentsService = async (
   instructorId: string,
   courseId: string,
   page: number = 1,
-  limit: number = 20
+  limit: number = 20,
 ) => {
   const course = await Course.findOne({
     _id: courseId,
@@ -313,10 +313,10 @@ export const getCourseStudentsService = async (
         course: courseId,
       });
 
-      const completedLessons = progress.filter((p) => p.completed).length;
+      const completedLessons = progress.filter((p: any) => p.completed).length;
       const totalWatchTime = progress.reduce(
-        (sum, p) => sum + (p.watchTime || 0),
-        0
+        (sum: any, p: any) => sum + (p.watchTime || 0),
+        0,
       );
 
       return {
@@ -334,7 +334,7 @@ export const getCourseStudentsService = async (
           progressPercentage: enrollment.progressPercentage,
         },
       };
-    })
+    }),
   );
 
   return {

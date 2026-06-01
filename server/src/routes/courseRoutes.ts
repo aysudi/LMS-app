@@ -2,8 +2,8 @@ import { Router } from "express";
 import {
   authenticateToken,
   authorizeRoles,
-} from "../middlewares/auth.middleware";
-import { UserRole } from "../types/user.types";
+} from "../middlewares/auth.middleware.js";
+import { UserRole } from "../types/user.types.js";
 import {
   createCourse,
   deleteCourse,
@@ -18,7 +18,7 @@ import {
   getCourseReviews,
   updateReview,
   deleteReview,
-} from "../controllers/courseController";
+} from "../controllers/courseController.js";
 import {
   courseUploadMiddleware,
   courseUploadErrorHandler,
@@ -37,13 +37,13 @@ courseRouter.get("/:id/reviews", (req, res) => getCourseReviews(req, res));
 courseRouter.use(authenticateToken);
 
 courseRouter.get("/user/enrolled", (req, res) =>
-  getUserCourses(req as any, res)
+  getUserCourses(req as any, res),
 );
 
 courseRouter.get(
   "/instructor/courses",
   authorizeRoles(UserRole.INSTRUCTOR),
-  (req, res) => getInstructorCourses(req as any, res)
+  (req, res) => getInstructorCourses(req as any, res),
 );
 courseRouter.post(
   "/",
@@ -51,7 +51,7 @@ courseRouter.post(
   courseUploadMiddleware,
   courseUploadErrorHandler,
   processCourseUploads,
-  (req: any, res: any) => createCourse(req, res)
+  (req: any, res: any) => createCourse(req, res),
 );
 courseRouter.put(
   "/:id",
@@ -59,29 +59,29 @@ courseRouter.put(
   courseUploadMiddleware,
   courseUploadErrorHandler,
   processCourseUploads,
-  (req: any, res: any) => updateCourse(req, res)
+  (req: any, res: any) => updateCourse(req, res),
 );
 courseRouter.delete("/:id", authorizeRoles(UserRole.INSTRUCTOR), (req, res) =>
-  deleteCourse(req as any, res)
+  deleteCourse(req as any, res),
 );
 courseRouter.patch(
   "/:id/toggle-status",
   authorizeRoles(UserRole.INSTRUCTOR),
-  (req, res) => toggleCourseStatus(req as any, res)
+  (req, res) => toggleCourseStatus(req as any, res),
 );
 courseRouter.patch(
   "/:id/submit-for-approval",
   authorizeRoles(UserRole.INSTRUCTOR),
-  (req, res) => submitCourseForApproval(req as any, res)
+  (req, res) => submitCourseForApproval(req as any, res),
 );
 
 // Review routes (authenticated)
 courseRouter.post("/:id/reviews", (req, res) => addReview(req as any, res));
 courseRouter.put("/:id/reviews/:reviewId", (req, res) =>
-  updateReview(req as any, res)
+  updateReview(req as any, res),
 );
 courseRouter.delete("/:id/reviews/:reviewId", (req, res) =>
-  deleteReview(req as any, res)
+  deleteReview(req as any, res),
 );
 
 // Track course view for analytics

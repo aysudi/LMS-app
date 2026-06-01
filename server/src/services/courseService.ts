@@ -1,16 +1,16 @@
 import { FilterQuery } from "mongoose";
-import Course from "../models/Course";
-import User from "../models/User";
-import Section from "../models/Section";
-import Lesson from "../models/Lesson";
+import Course from "../models/Course.js";
+import User from "../models/User.js";
+import Section from "../models/Section.js";
+import Lesson from "../models/Lesson.js";
 import {
   CourseQuery,
   CreateCourseData,
   ICourse,
   UpdateCourseData,
-} from "../types/course.types";
-import UserNote from "../models/UserNote";
-import UserProgress from "../models/UserProgress";
+} from "../types/course.types.js";
+import UserNote from "../models/UserNote.js";
+import UserProgress from "../models/UserProgress.js";
 import {
   deleteFromCloudinary,
   extractPublicIdFromUrl,
@@ -86,7 +86,7 @@ export const getCourseByIdService = async (id: string) => {
   const course = await Course.findOne(filter)
     .populate(
       "instructor",
-      "firstName lastName email avatar bio instructorApplication instructorProfile"
+      "firstName lastName email avatar bio instructorApplication instructorProfile",
     )
     .populate("sections")
     .populate("reviews.user", "firstName lastName avatar")
@@ -108,7 +108,7 @@ export const getCourseByIdService = async (id: string) => {
         lessons,
         lessonCount: lessons.length,
       };
-    })
+    }),
   );
 
   return {
@@ -119,7 +119,7 @@ export const getCourseByIdService = async (id: string) => {
 
 export const createCourseService = async (
   courseData: CreateCourseData,
-  instructorId: string
+  instructorId: string,
 ) => {
   const coursePayload = { ...courseData, instructor: instructorId };
 
@@ -139,9 +139,7 @@ export const createCourseService = async (
 
   delete coursePayload.uploadedFiles;
 
-  // Set status based on what was explicitly provided, or use default logic
   if (coursePayload.status) {
-    // If status is explicitly provided, use it
     if (coursePayload.status === "draft") {
       coursePayload.isPublished = false;
     } else if (coursePayload.status === "pending") {
@@ -149,7 +147,6 @@ export const createCourseService = async (
       coursePayload.submittedAt = new Date();
     }
   } else {
-    // Fallback to original logic if no status provided
     if (coursePayload.isPublished) {
       coursePayload.status = "pending";
       coursePayload.submittedAt = new Date();
@@ -167,7 +164,7 @@ export const createCourseService = async (
 export const updateCourseService = async (
   id: string,
   updateData: UpdateCourseData,
-  instructorId: string
+  instructorId: string,
 ) => {
   const course = await Course.findOne({
     _id: id,
@@ -216,7 +213,7 @@ export const updateCourseService = async (
 
 export const submitCourseForApprovalService = async (
   id: string,
-  instructorId: string
+  instructorId: string,
 ) => {
   const course = await Course.findOne({
     _id: id,
@@ -257,7 +254,7 @@ export const deleteCourseService = async (id: string, instructorId: string) => {
 
   if (course.videoPromo?.publicId) {
     deletionPromises.push(
-      deleteFromCloudinary(course.videoPromo.publicId, "video")
+      deleteFromCloudinary(course.videoPromo.publicId, "video"),
     );
   }
 
@@ -284,7 +281,7 @@ export const getUserCoursesService = async (userId: string) => {
     .populate("instructor", "firstName lastName avatar")
     .populate("sections")
     .select(
-      "title description image price level rating totalDuration totalLessons"
+      "title description image price level rating totalDuration totalLessons",
     )
     .lean();
 
@@ -302,7 +299,7 @@ export const getInstructorCoursesService = async (instructorId: string) => {
 // Get course statistics for instructor
 export const getCourseStatisticsService = async (
   courseId: string,
-  instructorId: string
+  instructorId: string,
 ) => {
   const course = await Course.findOne({
     _id: courseId,
@@ -348,7 +345,7 @@ export const getCourseStatisticsService = async (
 // Toggle course publish status
 export const toggleCourseStatusService = async (
   id: string,
-  instructorId: string
+  instructorId: string,
 ) => {
   const course = await Course.findOne({
     _id: id,
@@ -374,7 +371,7 @@ export const toggleCourseStatusService = async (
 // Enroll user in course
 export const enrollUserInCourseService = async (
   courseId: string,
-  userId: string
+  userId: string,
 ) => {
   const course = await Course.findById(courseId);
   const user = await User.findById(userId);
@@ -411,7 +408,7 @@ export const addReviewToCourseService = async (
   courseId: string,
   userId: string,
   rating: number,
-  comment: string
+  comment: string,
 ) => {
   const course = await Course.findById(courseId);
 
@@ -419,21 +416,18 @@ export const addReviewToCourseService = async (
     throw new Error("Course not found");
   }
 
-  // Check if user is enrolled in the course
   if (!course.studentsEnrolled.includes(userId as any)) {
     throw new Error("You must be enrolled in this course to leave a review");
   }
 
-  // Check if user has already reviewed this course
   const existingReview = course.reviews.find(
-    (review: any) => review.user.toString() === userId
+    (review: any) => review.user.toString() === userId,
   );
 
   if (existingReview) {
     throw new Error("You have already reviewed this course");
   }
 
-  // Add the new review
   course.reviews.push({
     user: userId as any,
     rating,
@@ -441,12 +435,10 @@ export const addReviewToCourseService = async (
     date: new Date(),
   });
 
-  // Recalculate average rating
   (course as any).calculateAverageRating();
 
   await course.save();
 
-  // Populate the new review and return the course
   const updatedCourse = await Course.findById(courseId)
     .populate("reviews.user", "firstName lastName avatar")
     .lean();
@@ -458,7 +450,7 @@ export const addReviewToCourseService = async (
 export const getCourseReviewsService = async (
   courseId: string,
   page: number = 1,
-  limit: number = 10
+  limit: number = 10,
 ) => {
   const course = await Course.findById(courseId)
     .select("reviews rating ratingsCount")
@@ -469,12 +461,10 @@ export const getCourseReviewsService = async (
     throw new Error("Course not found");
   }
 
-  // Sort reviews by date (newest first)
   const sortedReviews = course.reviews.sort(
-    (a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    (a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   );
 
-  // Apply pagination
   const skip = (page - 1) * limit;
   const paginatedReviews = sortedReviews.slice(skip, skip + limit);
 
@@ -498,7 +488,7 @@ export const updateReviewService = async (
   courseId: string,
   userId: string,
   rating: number,
-  comment: string
+  comment: string,
 ) => {
   const course = await Course.findById(courseId);
 
@@ -506,26 +496,22 @@ export const updateReviewService = async (
     throw new Error("Course not found");
   }
 
-  // Find the user's existing review
   const reviewIndex = course.reviews.findIndex(
-    (review: any) => review.user.toString() === userId
+    (review: any) => review.user.toString() === userId,
   );
 
   if (reviewIndex === -1) {
     throw new Error("Review not found");
   }
 
-  // Update the review
   course.reviews[reviewIndex].rating = rating;
   course.reviews[reviewIndex].comment = comment;
   course.reviews[reviewIndex].date = new Date();
 
-  // Recalculate average rating
   (course as any).calculateAverageRating();
 
   await course.save();
 
-  // Return updated course with populated reviews
   const updatedCourse = await Course.findById(courseId)
     .populate("reviews.user", "firstName lastName avatar")
     .lean();
@@ -541,9 +527,8 @@ export const deleteReviewService = async (courseId: string, userId: string) => {
     throw new Error("Course not found");
   }
 
-  // Find and remove the user's review
   const reviewIndex = course.reviews.findIndex(
-    (review: any) => review.user.toString() === userId
+    (review: any) => review.user.toString() === userId,
   );
 
   if (reviewIndex === -1) {
@@ -552,7 +537,6 @@ export const deleteReviewService = async (courseId: string, userId: string) => {
 
   course.reviews.splice(reviewIndex, 1);
 
-  // Recalculate average rating
   (course as any).calculateAverageRating();
 
   await course.save();

@@ -1,26 +1,26 @@
 import { Response } from "express";
-import { AuthRequest } from "../types/common.types";
+import { AuthRequest } from "../types/common.types.js";
 import { Types } from "mongoose";
-import Course from "../models/Course";
-import User from "../models/User";
-import Enrollment from "../models/Enrollment";
-import InstructorEarnings from "../models/InstructorEarnings";
+import Course from "../models/Course.js";
+import User from "../models/User.js";
+import Enrollment from "../models/Enrollment.js";
+import InstructorEarnings from "../models/InstructorEarnings.js";
 import { createInstructorEarningsForOrder } from "../services/instructorEarningsService.js";
 import { trackEnrollment } from "../services/analyticsService.js";
 import {
   OrderStatus,
   PaymentStatus,
   PaymentMethod,
-} from "../types/order.types";
-import { EnrollmentStatus } from "../types/enrollment.types";
+} from "../types/order.types.js";
+import { EnrollmentStatus } from "../types/enrollment.types.js";
 import type {
   CreateOrderRequest,
   CreateOrderResponse,
   OrderListResponse,
   OrderDetailsResponse,
-} from "../types/order.types";
-import Order from "../models/Order";
-import formatMongoData from "../utils/formatMongoData";
+} from "../types/order.types.js";
+import Order from "../models/Order.js";
+import formatMongoData from "../utils/formatMongoData.js";
 
 // Create a new order (before payment)
 export const createOrder = async (req: AuthRequest, res: Response) => {
@@ -56,8 +56,8 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
     const user = await User.findById(userId).populate("enrolledCourses");
     const alreadyEnrolled = courses.filter((course) =>
       user?.enrolledCourses.some(
-        (enrolled: any) => enrolled._id.toString() === course._id.toString()
-      )
+        (enrolled: any) => enrolled._id.toString() === course._id.toString(),
+      ),
     );
 
     if (alreadyEnrolled.length > 0) {
@@ -115,7 +115,6 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
       success: true,
       data: {
         order,
-        // clientSecret would be added here for Stripe integration
       },
     };
 
@@ -148,7 +147,7 @@ export const getUserOrders = async (req: AuthRequest, res: Response) => {
       Order.find({ user: userId })
         .populate(
           "items.course",
-          "title image instructor category originalPrice discountPrice"
+          "title image instructor category originalPrice discountPrice",
         )
         .sort({ createdAt: -1 })
         .skip(skip)
@@ -179,7 +178,7 @@ export const getUserOrders = async (req: AuthRequest, res: Response) => {
 // Get order details
 export const getOrderById = async (req: AuthRequest, res: Response) => {
   try {
-    const { orderId } = req.params;
+    const { orderId }: any = req.params;
     const userId = req.user?.id;
 
     if (!userId) {
@@ -198,7 +197,7 @@ export const getOrderById = async (req: AuthRequest, res: Response) => {
 
     const order = await Order.findOne({ _id: orderId, user: userId }).populate(
       "items.course",
-      "title image instructor category originalPrice discountPrice duration level"
+      "title image instructor category originalPrice discountPrice duration level",
     );
 
     if (!order) {
@@ -281,7 +280,6 @@ export const completeOrder = async (orderId: string, paymentDetails: any) => {
       throw new Error("Order not found");
     }
 
-    // Update order status
     order.status = OrderStatus.COMPLETED;
     order.paymentStatus = PaymentStatus.COMPLETED;
     order.completedAt = new Date();
@@ -297,7 +295,6 @@ export const completeOrder = async (orderId: string, paymentDetails: any) => {
 
     await order.save();
 
-    // Create enrollments for all courses in the order
     const enrollments = order.items.map(
       (item) =>
         new Enrollment({
@@ -306,15 +303,13 @@ export const completeOrder = async (orderId: string, paymentDetails: any) => {
           order: order._id,
           status: EnrollmentStatus.ACTIVE,
           enrolledAt: new Date(),
-        })
+        }),
     );
 
     await Enrollment.insertMany(enrollments);
 
-    // Create instructor earnings for each course in the order
     await createInstructorEarningsForOrder(order);
 
-    // Update user's enrolled courses and spending
     const courseIds = order.items.map((item) => item.course);
     await User.findByIdAndUpdate(order.user, {
       $push: { enrolledCourses: { $each: courseIds } },
@@ -327,12 +322,11 @@ export const completeOrder = async (orderId: string, paymentDetails: any) => {
         $addToSet: { studentsEnrolled: order.user },
       });
 
-      console.log("item: ", item);
       try {
         await trackEnrollment(
           item.course.toString(),
           order.user.toString(),
-          item.actualPrice
+          item.actualPrice,
         );
       } catch (analyticsError) {
         console.error("Error tracking enrollment analytics:", analyticsError);
@@ -360,7 +354,6 @@ export const confirmPayment = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Find the order
     const order = await Order.findOne({
       _id: orderId,
       user: userId,
@@ -393,11 +386,9 @@ export const confirmPayment = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Update order with payment details
     order.status = OrderStatus.COMPLETED;
     order.paymentStatus = PaymentStatus.COMPLETED;
 
-    // Use set() method to ensure the subdocument is properly updated
     order.set("paymentDetails", {
       method: PaymentMethod.CREDIT_CARD,
       stripePaymentIntentId: paymentIntentId,
@@ -408,7 +399,6 @@ export const confirmPayment = async (req: AuthRequest, res: Response) => {
 
     await order.save();
 
-    // Create enrollments for all courses in the order
     const enrollments = order.items.map(
       (item) =>
         new Enrollment({
@@ -417,15 +407,13 @@ export const confirmPayment = async (req: AuthRequest, res: Response) => {
           order: order._id,
           status: EnrollmentStatus.ACTIVE,
           enrolledAt: new Date(),
-        })
+        }),
     );
 
     await Enrollment.insertMany(enrollments);
 
-    // Create instructor earnings for each course in the order
     await createInstructorEarningsForOrder(order);
 
-    // Update user's enrolled courses and spending
     const courseIds = order.items.map((item) => item.course);
     await User.findByIdAndUpdate(order.user, {
       $push: { enrolledCourses: { $each: courseIds } },
@@ -433,10 +421,9 @@ export const confirmPayment = async (req: AuthRequest, res: Response) => {
       lastPurchaseAt: new Date(),
     });
 
-    // Update each course's studentsEnrolled array
     for (const courseId of courseIds) {
       await Course.findByIdAndUpdate(courseId, {
-        $addToSet: { studentsEnrolled: order.user }, // $addToSet prevents duplicates
+        $addToSet: { studentsEnrolled: order.user },
       });
     }
 

@@ -11,7 +11,7 @@ import { getCourseStudentsService } from "../services/instructorService.js";
 // Get instructor total earnings summary
 export const getInstructorEarnings = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
 ) => {
   try {
     const instructorId = req.user?.id;
@@ -41,7 +41,7 @@ export const getInstructorEarnings = async (
 // Get instructor earnings by course
 export const getInstructorEarningsByCourseController = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
 ) => {
   try {
     const instructorId = req.user?.id;
@@ -56,7 +56,7 @@ export const getInstructorEarningsByCourseController = async (
 
     const earnings = await getInstructorEarningsByCourse(
       instructorId,
-      courseId as string
+      courseId as string,
     );
 
     res.json({
@@ -75,7 +75,7 @@ export const getInstructorEarningsByCourseController = async (
 // Get monthly analytics data
 export const getInstructorMonthlyAnalyticsController = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
 ) => {
   try {
     const instructorId = req.user?.id;
@@ -90,7 +90,7 @@ export const getInstructorMonthlyAnalyticsController = async (
 
     const analyticsData = await getInstructorMonthlyAnalytics(
       instructorId,
-      period as string
+      period as string,
     );
 
     res.json({
@@ -109,7 +109,7 @@ export const getInstructorMonthlyAnalyticsController = async (
 // Request payout
 export const requestInstructorPayout = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
 ) => {
   try {
     const instructorId = req.user?.id;
@@ -128,9 +128,6 @@ export const requestInstructorPayout = async (
         message: "Minimum payout amount is $50",
       });
     }
-
-    // Here you would integrate with your payment processing system
-    // For now, we'll just create a payout request record
 
     res.json({
       success: true,
@@ -154,7 +151,7 @@ export const requestInstructorPayout = async (
 // Export earnings report
 export const exportEarningsReportController = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
 ) => {
   try {
     const instructorId = req.user?.id;
@@ -167,13 +164,11 @@ export const exportEarningsReportController = async (
       });
     }
 
-    // Get earnings data
     const earningsData = await getInstructorTotalEarnings(instructorId);
     const courseEarnings = await getInstructorEarningsByCourse(instructorId);
 
     if (format === "csv") {
-      // Generate CSV with BOM for proper UTF-8 encoding
-      let csv = "\uFEFF"; // UTF-8 BOM
+      let csv = "\uFEFF";
       csv +=
         "Course Name,Student Name,Gross Amount,Platform Fee,Instructor Share,Payout Status,Order Date\n";
 
@@ -189,7 +184,7 @@ export const exportEarningsReportController = async (
           const grossAmount = `$${(earning.grossAmount || 0).toFixed(2)}`;
           const platformFee = `$${(earning.platformFee || 0).toFixed(2)}`;
           const instructorShare = `$${(earning.instructorShare || 0).toFixed(
-            2
+            2,
           )}`;
           const status = earning.payoutStatus || "pending";
           const date = new Date(earning.createdAt).toLocaleDateString();
@@ -201,7 +196,7 @@ export const exportEarningsReportController = async (
       res.setHeader("Content-Type", "text/csv; charset=utf-8");
       res.setHeader(
         "Content-Disposition",
-        `attachment; filename="earnings-report-${period || "all"}.csv"`
+        `attachment; filename="earnings-report-${period || "all"}.csv"`,
       );
       res.send(csv);
     } else {
@@ -226,7 +221,7 @@ export const exportEarningsReportController = async (
 // Export analytics report
 export const exportAnalyticsReportController = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
 ) => {
   try {
     const instructorId = req.user?.id;
@@ -239,15 +234,13 @@ export const exportAnalyticsReportController = async (
       });
     }
 
-    // Get analytics data
     const monthlyData = await getInstructorMonthlyAnalytics(
       instructorId,
-      period as string
+      period as string,
     );
 
     if (format === "csv") {
-      // Generate CSV with BOM for proper UTF-8 encoding
-      let csv = "\uFEFF"; // UTF-8 BOM
+      let csv = "\uFEFF";
       csv +=
         "Month,Total Revenue,Instructor Earnings,New Enrollments,Report Date\n";
 
@@ -268,11 +261,10 @@ export const exportAnalyticsReportController = async (
       res.setHeader("Content-Type", "text/csv; charset=utf-8");
       res.setHeader(
         "Content-Disposition",
-        `attachment; filename="analytics-report-${period}.csv"`
+        `attachment; filename="analytics-report-${period}.csv"`,
       );
       res.send(csv);
     } else {
-      // For PDF, return JSON for now
       res.json({
         success: true,
         data: {
@@ -294,7 +286,7 @@ export const exportAnalyticsReportController = async (
 // Update payout status (admin function, but we can add it for completeness)
 export const updateInstructorPayoutStatus = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
 ) => {
   try {
     const instructorId = req.user?.id;
@@ -342,11 +334,11 @@ export const updateInstructorPayoutStatus = async (
 // Export students data
 export const exportStudentsDataController = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
 ) => {
   try {
     const instructorId = req.user?.id;
-    const { courseId } = req.params;
+    const { courseId }: any = req.params;
     const { format = "csv" } = req.query;
 
     if (!instructorId) {
@@ -363,19 +355,17 @@ export const exportStudentsDataController = async (
       });
     }
 
-    // Get students data for the course
     const studentsData = await getCourseStudentsService(
       instructorId,
       courseId,
       1,
-      1000
+      1000,
     );
 
     const students = studentsData.students || [];
 
     if (format === "csv") {
-      // Generate CSV with BOM for proper UTF-8 encoding
-      let csv = "\uFEFF"; // UTF-8 BOM
+      let csv = "\uFEFF";
       csv +=
         "Student Name,Email Address,Enrollment Date,Course Progress,Last Activity,Completion Status\n";
 
@@ -383,7 +373,6 @@ export const exportStudentsDataController = async (
         csv += "No students enrolled in this course,,,,,,\n";
       } else {
         students.forEach((studentData: any) => {
-          // Use the correct data structure from the service
           const student = studentData.student;
           const enrollment = studentData.enrollment;
 
@@ -402,8 +391,8 @@ export const exportStudentsDataController = async (
             progress === 100
               ? "Completed"
               : progress > 0
-              ? "In Progress"
-              : "Not Started";
+                ? "In Progress"
+                : "Not Started";
 
           csv += `"${name}","${email}","${enrolledDate}","${progress}%","${lastActive}","${status}"\n`;
         });
@@ -412,11 +401,10 @@ export const exportStudentsDataController = async (
       res.setHeader("Content-Type", "text/csv; charset=utf-8");
       res.setHeader(
         "Content-Disposition",
-        `attachment; filename="students-data-${courseId}.csv"`
+        `attachment; filename="students-data-${courseId}.csv"`,
       );
       res.send(csv);
     } else {
-      // Return JSON data
       res.json({
         success: true,
         data: students,

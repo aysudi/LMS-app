@@ -1,5 +1,5 @@
 import puppeteer from "puppeteer";
-import { sendCertificateEmail as emailCertificate } from "../utils/sendMail";
+import { sendCertificateEmail as emailCertificate } from "../utils/sendMail.js";
 
 export interface CertificateData {
   studentName: string;
@@ -12,7 +12,7 @@ export interface CertificateData {
 }
 
 export const generateCertificate = async (
-  data: CertificateData
+  data: CertificateData,
 ): Promise<Buffer> => {
   try {
     const certificateHTML = generateCertificateHTML(data);
@@ -22,7 +22,7 @@ export const generateCertificate = async (
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
 
-    const page = await browser.newPage();
+    const page: any = await browser.newPage();
     await page.setContent(certificateHTML, { waitUntil: "networkidle0" });
 
     const pdfBuffer = await page.pdf({
@@ -284,7 +284,7 @@ const generateCertificateHTML = (data: CertificateData): string => {
                 year: "numeric",
                 month: "long",
                 day: "numeric",
-              }
+              },
             )}</div>
             <div class="certificate-id">ID: ${data.certificateId}</div>
           </div>
@@ -307,16 +307,15 @@ export const sendCertificateEmail = async (
   studentName: string,
   courseName: string,
   certificateBuffer: Buffer,
-  certificateId: string
+  certificateId: string,
 ): Promise<boolean> => {
   try {
-    // Send email with certificate attachment
     await emailCertificate(
       email,
       studentName,
       courseName,
       certificateBuffer,
-      `certificate-${certificateId}.pdf`
+      `certificate-${certificateId}.pdf`,
     );
 
     return true;

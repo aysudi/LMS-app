@@ -3,7 +3,7 @@ import {
   OrderStatus,
   PaymentStatus,
   PaymentMethod,
-} from "../types/order.types";
+} from "../types/order.types.js";
 
 const orderItemSchema = new mongoose.Schema(
   {
@@ -27,7 +27,7 @@ const orderItemSchema = new mongoose.Schema(
       min: 0,
     },
   },
-  { _id: false, versionKey: false }
+  { _id: false, versionKey: false },
 );
 
 const paymentDetailsSchema = new mongoose.Schema(
@@ -75,7 +75,7 @@ const paymentDetailsSchema = new mongoose.Schema(
       sparse: true,
     },
   },
-  { _id: false, versionKey: false }
+  { _id: false, versionKey: false },
 );
 
 const orderSchema = new mongoose.Schema(
@@ -170,7 +170,7 @@ const orderSchema = new mongoose.Schema(
   {
     timestamps: true,
     versionKey: false,
-  }
+  },
 );
 
 orderSchema.index({ user: 1, createdAt: -1 });
@@ -195,7 +195,7 @@ orderSchema.methods.canBeCancelled = function () {
   return (
     [OrderStatus.PENDING, OrderStatus.PROCESSING].includes(this.status) &&
     ![PaymentStatus.COMPLETED, PaymentStatus.REFUNDED].includes(
-      this.paymentStatus
+      this.paymentStatus,
     )
   );
 };

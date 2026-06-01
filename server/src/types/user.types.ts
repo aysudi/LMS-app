@@ -1,5 +1,3 @@
-import { Document } from "mongoose";
-
 export enum UserRole {
   STUDENT = "student",
   INSTRUCTOR = "instructor",
@@ -12,7 +10,7 @@ export enum AuthProvider {
   GITHUB = "github",
 }
 
-export interface IUser extends Document {
+export interface IUser {
   _id: string;
   firstName: string;
   lastName: string;

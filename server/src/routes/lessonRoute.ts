@@ -8,18 +8,18 @@ import {
   deleteLesson,
   addNoteToLesson,
   getUserNotesForLesson,
-} from "../controllers/lessonController";
+} from "../controllers/lessonController.js";
 import {
   authenticateToken,
   authorizeRoles,
-} from "../middlewares/auth.middleware";
-import { UserRole } from "../types/user.types";
+} from "../middlewares/auth.middleware.js";
+import { UserRole } from "../types/user.types.js";
 import {
   lessonUploadMiddleware,
   lessonUploadErrorHandler,
   processLessonUploads,
-} from "../middlewares/lesson-upload.middleware";
-import { processLessonData } from "../middlewares/lesson-data.middleware";
+} from "../middlewares/lesson-upload.middleware.js";
+import { processLessonData } from "../middlewares/lesson-data.middleware.js";
 
 const lessonRouter = Router();
 
@@ -28,7 +28,7 @@ const lessonRouter = Router();
 lessonRouter.get("/", (req, res) => getAllLessonsController(req as any, res));
 
 lessonRouter.get("/section/:sectionId", (req, res) =>
-  getLessonsBySection(req as any, res)
+  getLessonsBySection(req as any, res),
 );
 
 lessonRouter.get("/:lessonId", (req, res) => getLessonById(req as any, res));
@@ -41,7 +41,7 @@ lessonRouter.post(
   lessonUploadErrorHandler,
   processLessonUploads,
   processLessonData,
-  (req: any, res: any) => addLesson(req, res)
+  (req: any, res: any) => addLesson(req, res),
 );
 
 lessonRouter.put(
@@ -52,27 +52,27 @@ lessonRouter.put(
   lessonUploadErrorHandler,
   processLessonUploads,
   processLessonData,
-  (req: any, res: any) => updateLesson(req, res)
+  (req: any, res: any) => updateLesson(req, res),
 );
 
 lessonRouter.delete(
   "/:courseId/lesson/:lessonId",
   authenticateToken,
   authorizeRoles(UserRole.INSTRUCTOR),
-  (req, res) => deleteLesson(req as any, res)
+  (req, res) => deleteLesson(req as any, res),
 );
 
 // Add note to lesson (students and instructors)
 lessonRouter.post(
   "/:courseId/sections/:sectionId/lessons/:lessonId/notes",
   authenticateToken,
-  (req, res) => addNoteToLesson(req as any, res)
+  (req, res) => addNoteToLesson(req as any, res),
 );
 
 // Get user notes for a lesson (students and instructors)
 lessonRouter.get(
   "/:courseId/sections/:sectionId/lessons/:lessonId/notes",
-  (req, res) => getUserNotesForLesson(req as any, res)
+  (req, res) => getUserNotesForLesson(req as any, res),
 );
 
 export default lessonRouter;

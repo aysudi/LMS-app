@@ -3,8 +3,8 @@ import {
   generateAndSendCertificate,
   downloadCertificate,
   getCertificateStatus,
-} from "../controllers/certificateController";
-import { authenticateToken } from "../middlewares/auth.middleware";
+} from "../controllers/certificateController.js";
+import { authenticateToken } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
@@ -15,7 +15,7 @@ router.post("/generate", authenticateToken, generateAndSendCertificate);
 router.get(
   "/status/:courseId/:userId",
   authenticateToken,
-  getCertificateStatus
+  getCertificateStatus,
 );
 
 // Download certificate (future implementation)

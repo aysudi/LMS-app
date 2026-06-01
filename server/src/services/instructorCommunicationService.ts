@@ -8,7 +8,7 @@ export const getInstructorMessagesService = async (
   limit: number,
   status: string = "all",
   type: string = "all",
-  courseId?: string
+  courseId?: string,
 ) => {
   const skip = (page - 1) * limit;
 
@@ -50,9 +50,8 @@ export const getInstructorMessagesService = async (
 export const replyToMessageService = async (
   instructorId: string,
   messageId: string,
-  message: string
+  message: string,
 ) => {
-  // Find and verify message ownership
   const communication = await InstructorCommunication.findOne({
     _id: messageId,
     instructor: instructorId,
@@ -62,7 +61,6 @@ export const replyToMessageService = async (
     return null;
   }
 
-  // Add reply
   communication.replies.push({
     sender: instructorId,
     message,
@@ -70,7 +68,6 @@ export const replyToMessageService = async (
     isInstructorReply: true,
   });
 
-  // Update status and last reply time
   communication.status = MessageStatus.REPLIED;
   communication.lastReplyAt = new Date();
 
@@ -85,7 +82,7 @@ export const replyToMessageService = async (
 // Mark message as read
 export const markMessageAsReadService = async (
   instructorId: string,
-  messageId: string
+  messageId: string,
 ) => {
   const communication = await InstructorCommunication.findOneAndUpdate(
     {
@@ -96,7 +93,7 @@ export const markMessageAsReadService = async (
     {
       status: MessageStatus.READ,
     },
-    { new: true }
+    { new: true },
   );
 
   return !!communication;
@@ -105,7 +102,7 @@ export const markMessageAsReadService = async (
 // Mark message as resolved
 export const markMessageAsResolvedService = async (
   instructorId: string,
-  messageId: string
+  messageId: string,
 ) => {
   const communication = await InstructorCommunication.findOneAndUpdate(
     {
@@ -115,7 +112,7 @@ export const markMessageAsResolvedService = async (
     {
       status: MessageStatus.RESOLVED,
     },
-    { new: true }
+    { new: true },
   );
 
   return !!communication;
@@ -123,7 +120,6 @@ export const markMessageAsResolvedService = async (
 
 // Get comprehensive message statistics for instructor
 export const getMessageStatsService = async (instructorId: string) => {
-  // Get counts by status
   const statusStats = await InstructorCommunication.aggregate([
     { $match: { instructor: instructorId } },
     {
@@ -134,7 +130,6 @@ export const getMessageStatsService = async (instructorId: string) => {
     },
   ]);
 
-  // Get counts by type
   const typeStats = await InstructorCommunication.aggregate([
     { $match: { instructor: instructorId } },
     {
@@ -145,23 +140,27 @@ export const getMessageStatsService = async (instructorId: string) => {
     },
   ]);
 
-  // Get recent messages (last 7 days)
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
   const recentCount = await InstructorCommunication.countDocuments({
     instructor: instructorId,
     createdAt: { $gte: sevenDaysAgo },
   });
 
-  // Format stats
   return {
-    byStatus: statusStats.reduce((acc, stat) => {
-      acc[stat._id] = stat.count;
-      return acc;
-    }, {} as Record<string, number>),
-    byType: typeStats.reduce((acc, stat) => {
-      acc[stat._id] = stat.count;
-      return acc;
-    }, {} as Record<string, number>),
+    byStatus: statusStats.reduce(
+      (acc, stat) => {
+        acc[stat._id] = stat.count;
+        return acc;
+      },
+      {} as Record<string, number>,
+    ),
+    byType: typeStats.reduce(
+      (acc, stat) => {
+        acc[stat._id] = stat.count;
+        return acc;
+      },
+      {} as Record<string, number>,
+    ),
     recentMessages: recentCount,
   };
 };

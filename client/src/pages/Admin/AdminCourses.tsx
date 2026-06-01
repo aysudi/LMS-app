@@ -53,7 +53,7 @@ const AdminCourses: React.FC = () => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedCourses = filteredCourses.slice(
     startIndex,
-    startIndex + itemsPerPage
+    startIndex + itemsPerPage,
   );
 
   const getStatusBadge = (status: string) => {
@@ -471,7 +471,7 @@ const AdminCourses: React.FC = () => {
                     >
                       {page}
                     </button>
-                  )
+                  ),
                 )}
               </div>
               <button

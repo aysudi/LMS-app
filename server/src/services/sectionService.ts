@@ -1,15 +1,15 @@
-import Section from "../models/Section";
-import Lesson from "../models/Lesson";
-import Course from "../models/Course";
+import Section from "../models/Section.js";
+import Lesson from "../models/Lesson.js";
+import Course from "../models/Course.js";
 import mongoose from "mongoose";
 import {
   ISection,
   CreateSectionData,
   UpdateSectionData,
   SectionWithLessonCount,
-} from "../types/section.types";
-import UserProgress from "../models/UserProgress";
-import UserNote from "../models/UserNote";
+} from "../types/section.types.js";
+import UserProgress from "../models/UserProgress.js";
+import UserNote from "../models/UserNote.js";
 
 export const getAllSections = async (): Promise<ISection[]> => {
   const sections = await Section.find({})
@@ -21,11 +21,11 @@ export const getAllSections = async (): Promise<ISection[]> => {
     .sort({ createdAt: -1 })
     .lean();
 
-  return sections;
+  return sections as unknown as ISection[];
 };
 
 export const getSectionsByCourse = async (
-  courseId: string
+  courseId: string | string[],
 ): Promise<ISection[]> => {
   const sections = await Section.find({ course: courseId })
     .populate({
@@ -37,8 +37,10 @@ export const getSectionsByCourse = async (
   return sections;
 };
 
-export const getSectionById = async (sectionId: string): Promise<ISection> => {
-  const section = await Section.findById(sectionId)
+export const getSectionById = async (
+  sectionId: string | string[],
+): Promise<ISection> => {
+  const section: any = await Section.findById(sectionId)
     .populate("course", "title instructor")
     .populate({
       path: "lessons",
@@ -53,11 +55,11 @@ export const getSectionById = async (sectionId: string): Promise<ISection> => {
   return section;
 };
 
-import { deleteFromCloudinary } from "../middlewares/course-upload.middleware";
+import { deleteFromCloudinary } from "../middlewares/course-upload.middleware.js";
 
 export const createSection = async (
   sectionData: CreateSectionData,
-  instructorId: string
+  instructorId: string,
 ): Promise<ISection> => {
   const course = await Course.findOne({
     _id: sectionData.course,
@@ -76,7 +78,6 @@ export const createSection = async (
     order = lastSection ? lastSection.order + 1 : 1;
   }
 
-  // Handle thumbnail upload
   const sectionPayload: Partial<ISection> = {
     title: sectionData.title,
     description: sectionData.description,
@@ -98,9 +99,9 @@ export const createSection = async (
 };
 
 export const updateSection = async (
-  sectionId: string,
+  sectionId: string | string[],
   updateData: UpdateSectionData,
-  instructorId: string
+  instructorId: string,
 ): Promise<ISection> => {
   const section = await Section.findById(sectionId).populate("course");
 
@@ -112,11 +113,9 @@ export const updateSection = async (
     throw new Error("You are not authorized to update this section");
   }
 
-  // Handle thumbnail update
   const updatePayload = { ...updateData };
 
   if (updatePayload.uploadedFiles?.thumbnail) {
-    // Delete old thumbnail if exists
     if (section.thumbnail?.publicId) {
       await deleteFromCloudinary(section.thumbnail.publicId, "image");
     }
@@ -127,7 +126,6 @@ export const updateSection = async (
     };
   }
 
-  // Remove uploadedFiles from payload before saving
   delete updatePayload.uploadedFiles;
 
   Object.assign(section, updatePayload);
@@ -137,8 +135,8 @@ export const updateSection = async (
 };
 
 export const deleteSection = async (
-  sectionId: string,
-  instructorId: string
+  sectionId: string | string[],
+  instructorId: string,
 ): Promise<{ message: string }> => {
   const section = await Section.findById(sectionId).populate("course");
 
@@ -164,7 +162,7 @@ export const deleteSection = async (
 };
 
 export const getSectionsWithLessonCount = async (
-  courseId: string
+  courseId: string,
 ): Promise<SectionWithLessonCount[]> => {
   const sections = await Section.aggregate([
     { $match: { course: new mongoose.Types.ObjectId(courseId) } },
@@ -183,7 +181,7 @@ export const getSectionsWithLessonCount = async (
     },
     {
       $project: {
-        lessons: 0, // Remove the lessons array, keep only count
+        lessons: 0,
       },
     },
     { $sort: { order: 1 } },

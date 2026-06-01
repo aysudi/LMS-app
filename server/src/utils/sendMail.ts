@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer";
-import config from "../configs/config";
+import config from "../configs/config.js";
 
 const transporter = nodemailer.createTransport({
   host: "smtp-relay.brevo.com",

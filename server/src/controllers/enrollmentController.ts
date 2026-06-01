@@ -1,15 +1,10 @@
 import { Response } from "express";
-import { AuthRequest } from "../types/common.types";
-import Enrollment from "../models/Enrollment";
-import Course from "../models/Course";
-import User from "../models/User";
-import { EnrollmentStatus } from "../types/enrollment.types";
-// import { findOrCreateConversation } from "../services/conversationService.js";
-import {
-  trackEnrollment,
-  trackCourseCompletion,
-  trackWatchTime,
-} from "../services/analyticsService.js";
+import { AuthRequest } from "../types/common.types.js";
+import Enrollment from "../models/Enrollment.js";
+import Course from "../models/Course.js";
+import User from "../models/User.js";
+import { EnrollmentStatus } from "../types/enrollment.types.js";
+import { trackEnrollment } from "../services/analyticsService.js";
 import type {
   EnrollmentListResponse,
   EnrollmentDetailsResponse,
@@ -20,8 +15,8 @@ import type {
   AddReviewRequest,
   AddReviewResponse,
   LearningStatsResponse,
-} from "../types/enrollment.types";
-import formatMongoData from "../utils/formatMongoData";
+} from "../types/enrollment.types.js";
+import formatMongoData from "../utils/formatMongoData.js";
 
 export const getUserEnrollments = async (req: AuthRequest, res: Response) => {
   try {
@@ -155,7 +150,7 @@ export const getEnrollmentById = async (req: AuthRequest, res: Response) => {
 
 export const updateEnrollmentProgress = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
 ) => {
   try {
     const userId = req.user?.id;
@@ -185,7 +180,6 @@ export const updateEnrollmentProgress = async (
       });
     }
 
-    // Update lesson completion status
     if (completed) {
       if (!enrollment.completedLessons.includes(lessonId)) {
         enrollment.completedLessons.push(lessonId);
@@ -200,15 +194,12 @@ export const updateEnrollmentProgress = async (
       }
     }
 
-    // Update current lesson
     enrollment.currentLesson = lessonId;
 
-    // Update watch time
     if (watchTime > 0) {
       enrollment.totalWatchTime += watchTime;
     }
 
-    // Calculate progress percentage based on course lessons
     const course = enrollment.course as any;
     const totalLessons = course.totalLessons || 0;
     const completedLessons = enrollment.completedLessons.length;
@@ -261,7 +252,7 @@ export const getEnrollmentNotes = async (req: AuthRequest, res: Response) => {
 
     let notes = enrollment.notes;
     if (lessonId) {
-      notes = notes.filter((note) => note.lesson.toString() === lessonId);
+      notes = notes.filter((note: any) => note.lesson.toString() === lessonId);
     }
 
     res.json({
@@ -476,20 +467,20 @@ export const getLearningStats = async (req: AuthRequest, res: Response) => {
 
     const enrollments = await Enrollment.find({ user: userId }).populate(
       "course",
-      "category"
+      "category",
     );
 
     const totalEnrolledCourses = enrollments.length;
     const totalCompletedCourses = enrollments.filter(
-      (e) => e.status === EnrollmentStatus.COMPLETED
+      (e) => e.status === EnrollmentStatus.COMPLETED,
     ).length;
     const totalInProgressCourses = enrollments.filter(
-      (e) => e.status === EnrollmentStatus.ACTIVE && e.progressPercentage > 0
+      (e) => e.status === EnrollmentStatus.ACTIVE && e.progressPercentage > 0,
     ).length;
 
     const totalWatchTime = enrollments.reduce(
       (sum, e) => sum + e.totalWatchTime,
-      0
+      0,
     );
 
     const averageProgress =
@@ -499,10 +490,9 @@ export const getLearningStats = async (req: AuthRequest, res: Response) => {
         : 0;
 
     const certificatesEarned = enrollments.filter(
-      (e) => e.certificateIssued
+      (e) => e.certificateIssued,
     ).length;
 
-    // Get recent activity (last 5 accessed courses)
     const recentActivity = enrollments
       .filter((e) => e.lastAccessedAt)
       .sort((a, b) => b.lastAccessedAt!.getTime() - a.lastAccessedAt!.getTime())
@@ -534,7 +524,7 @@ export const getLearningStats = async (req: AuthRequest, res: Response) => {
 // Recalculate enrollment progress (for fixing inconsistencies)
 export const recalculateEnrollmentProgress = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
 ) => {
   try {
     const userId = req.user?.id;
@@ -559,7 +549,6 @@ export const recalculateEnrollmentProgress = async (
       });
     }
 
-    // Recalculate progress
     await (enrollment as any).recalculateProgress();
 
     res.json({
@@ -583,7 +572,7 @@ export const recalculateEnrollmentProgress = async (
 // Recalculate all user enrollments progress
 export const recalculateAllUserProgress = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
 ) => {
   try {
     const userId = req.user?.id;
@@ -629,7 +618,6 @@ export const enrollInFreeCourse = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
     const { course: courseId } = req.body;
-    console.log("courseId:", courseId);
 
     if (!userId) {
       return res.status(401).json({
@@ -683,7 +671,6 @@ export const enrollInFreeCourse = async (req: AuthRequest, res: Response) => {
       totalWatchTime: 0,
       completedLessons: [],
     });
-    console.log("enrollment before save:", enrollment);
 
     await enrollment.save();
 
@@ -699,45 +686,20 @@ export const enrollInFreeCourse = async (req: AuthRequest, res: Response) => {
       $push: { studentsEnrolled: userId },
     });
 
-    // Track enrollment for analytics
     try {
       await trackEnrollment(courseId, userId, course.originalPrice || 0);
     } catch (analyticsError) {
       console.error("Error tracking enrollment analytics:", analyticsError);
-      // Don't fail enrollment if analytics tracking fails
     }
 
-    // Automatically create a conversation between student and instructor
     try {
       const courseWithInstructor = await Course.findById(courseId).populate(
         "instructor",
-        "_id firstName lastName"
+        "_id firstName lastName",
       );
-
-      if (courseWithInstructor && courseWithInstructor.instructor) {
-        console.log("Creating conversation between student and instructor...");
-
-        // const conversationResult = await findOrCreateConversation({
-        //   studentId: userId,
-        //   instructorId: (courseWithInstructor.instructor as any)._id,
-        //   courseId: courseId,
-        // });
-
-        // if (conversationResult.success) {
-        //   console.log(
-        //     "✅ Conversation created successfully:",
-        //     conversationResult.data?._id
-        //   );
-        // } else {
-        //   console.log("❌ Failed to create conversation");
-        // }
-      }
     } catch (conversationError) {
       console.log("❌ Error creating conversation:", conversationError);
-      // Don't fail the enrollment if conversation creation fails
     }
-
-    console.log("populatedEnrollment:", populatedEnrollment);
 
     res.status(201).json({
       success: true,

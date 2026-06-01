@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { EnrollmentStatus } from "../types/enrollment.types";
+import { EnrollmentStatus } from "../types/enrollment.types.js";
 
 const enrollmentSchema = new mongoose.Schema(
   {
@@ -143,7 +143,7 @@ const enrollmentSchema = new mongoose.Schema(
   {
     timestamps: true,
     versionKey: false,
-  }
+  },
 );
 
 enrollmentSchema.index({ user: 1, course: 1 }, { unique: true });
@@ -169,12 +169,12 @@ enrollmentSchema.virtual("isInProgress").get(function () {
 
 enrollmentSchema.methods.updateProgress = async function (
   completedLessonsCount: number,
-  totalLessonsCount: number
+  totalLessonsCount: number,
 ) {
   const wasCompleted = this.progressPercentage === 100;
 
   this.progressPercentage = Math.round(
-    (completedLessonsCount / totalLessonsCount) * 100
+    (completedLessonsCount / totalLessonsCount) * 100,
   );
 
   if (
@@ -187,9 +187,8 @@ enrollmentSchema.methods.updateProgress = async function (
 
     // Track course completion for analytics
     try {
-      const { trackCourseCompletion } = await import(
-        "../services/analyticsService.js"
-      );
+      const { trackCourseCompletion } =
+        await import("../services/analyticsService.js");
       await trackCourseCompletion(this.course.toString(), this.user.toString());
     } catch (error) {
       console.error("Error tracking course completion:", error);
@@ -233,7 +232,7 @@ enrollmentSchema.methods.recalculateProgress = async function () {
 enrollmentSchema.methods.addNote = function (
   lessonId: string,
   content: string,
-  timestamp: number
+  timestamp: number,
 ) {
   this.notes.push({
     lesson: lessonId,
@@ -258,7 +257,7 @@ enrollmentSchema.methods.toggleBookmark = function (lessonId: string) {
 
 enrollmentSchema.methods.addReview = async function (
   rating: number,
-  comment: string
+  comment: string,
 ) {
   // Add review to enrollment reviews array
   this.reviews.push({
@@ -306,7 +305,7 @@ enrollmentSchema.methods.calculateAverageRating = function () {
 
   const sum = this.reviews.reduce(
     (acc: number, review: any) => acc + review.rating,
-    0
+    0,
   );
   this.averageRating = Number((sum / this.reviews.length).toFixed(1));
   this.totalRatings = this.reviews.length;

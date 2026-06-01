@@ -1,24 +1,24 @@
 import { Response } from "express";
-import { AuthRequest } from "../types/common.types";
-import UserProgress from "../models/UserProgress";
-import Enrollment from "../models/Enrollment";
-import Course from "../models/Course";
-import Section from "../models/Section";
-import Lesson from "../models/Lesson";
-import User from "../models/User";
+import { AuthRequest } from "../types/common.types.js";
+import UserProgress from "../models/UserProgress.js";
+import Enrollment from "../models/Enrollment.js";
+import Course from "../models/Course.js";
+import Section from "../models/Section.js";
+import Lesson from "../models/Lesson.js";
+import User from "../models/User.js";
 import type {
   UserProgressResponse,
   UpdateUserProgressRequest,
   UpdateUserProgressResponse,
   CourseProgressResponse,
   LearningAnalyticsResponse,
-} from "../types/userProgress.types";
+} from "../types/userProgress.types.js";
 
 // Get user progress for a specific course
 export const getCourseProgress = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
-    const { courseId } = req.params;
+    const { courseId }: any = req.params;
 
     if (!userId) {
       return res.status(401).json({
@@ -55,7 +55,7 @@ export const getCourseProgress = async (req: AuthRequest, res: Response) => {
     });
 
     const completedLessons = userProgresses.filter(
-      (progress) => progress.completed
+      (progress) => progress.completed,
     ).length;
     const totalLessons = allLessons.length;
     const progressPercentage =
@@ -64,12 +64,12 @@ export const getCourseProgress = async (req: AuthRequest, res: Response) => {
         : 0;
     const totalWatchTime = userProgresses.reduce(
       (sum, progress) => sum + progress.watchTime,
-      0
+      0,
     );
 
     const lessonsProgress = allLessons.map((lesson: any) => {
       const progress = userProgresses.find(
-        (p) => p.lesson.toString() === lesson._id.toString()
+        (p) => p.lesson.toString() === lesson._id.toString(),
       );
 
       return {
@@ -207,19 +207,19 @@ export const getLearningAnalytics = async (req: AuthRequest, res: Response) => {
 
     const userProgresses = await UserProgress.find({ user: userId }).populate(
       "course",
-      "category title"
+      "category title",
     );
 
     const totalWatchTime = userProgresses.reduce(
       (sum, progress) => sum + progress.watchTime,
-      0
+      0,
     );
     const totalLessonsCompleted = userProgresses.filter(
-      (progress) => progress.completed
+      (progress) => progress.completed,
     ).length;
 
     const sessionsCount = userProgresses.filter(
-      (progress) => progress.watchTime > 0
+      (progress) => progress.watchTime > 0,
     ).length;
     const averageSessionTime =
       sessionsCount > 0 ? totalWatchTime / sessionsCount : 0;
@@ -228,7 +228,7 @@ export const getLearningAnalytics = async (req: AuthRequest, res: Response) => {
     const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
 
     const recentProgress = userProgresses.filter(
-      (progress) => progress.updatedAt >= sevenDaysAgo
+      (progress) => progress.updatedAt >= sevenDaysAgo,
     );
 
     const dailyActivity = new Map<
@@ -377,7 +377,7 @@ export const getUserProgress = async (req: AuthRequest, res: Response) => {
 // POST: Complete lesson progress (only once, never uncomplete)
 export const completeLessonProgress = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
 ) => {
   try {
     const userId = req.user?.id;
@@ -433,7 +433,7 @@ export const completeLessonProgress = async (
       });
       enrollment.totalWatchTime = allProgress.reduce(
         (sum, p) => sum + (p.watchTime || 0),
-        0
+        0,
       );
       await enrollment.save();
     }

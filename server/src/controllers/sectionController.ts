@@ -7,14 +7,14 @@ import {
   updateSection as updateSectionService,
   deleteSection as deleteSectionService,
   getSectionsWithLessonCount,
-} from "../services/sectionService";
-import { AuthRequest } from "../types/common.types";
-import formatMongoData from "../utils/formatMongoData";
+} from "../services/sectionService.js";
+import { AuthRequest } from "../types/common.types.js";
+import formatMongoData from "../utils/formatMongoData.js";
 
 // Get all sections (admin/system use)
 export const getAllSectionsController = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
 ) => {
   try {
     const sections = await getAllSections();
@@ -51,7 +51,7 @@ export const getSections = async (req: AuthRequest, res: Response) => {
 
 export const getSectionsWithCount = async (req: AuthRequest, res: Response) => {
   try {
-    const { courseId } = req.params;
+    const { courseId }: any = req.params;
 
     const sections = await getSectionsWithLessonCount(courseId);
 
@@ -114,7 +114,7 @@ export const updateSection = async (req: AuthRequest, res: Response) => {
     const section = await updateSectionService(
       sectionId,
       sectionData,
-      instructorId
+      instructorId,
     );
 
     res.status(200).json({

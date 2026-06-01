@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import Order from "../models/Order.js";
 import User from "../models/User.js";
 import Course from "../models/Course.js";
@@ -43,14 +42,13 @@ export const getAdminAnalyticsService = async (params: any = {}) => {
     };
   }
 
-  // Calculate platform revenue (25% commission from orders)
   const revenueData = (await Order.find()).reduce(
     (acc, order) => {
       acc.totalGross += order.total;
       acc.totalOrders += 1;
       return acc;
     },
-    { totalGross: 0, totalOrders: 0 }
+    { totalGross: 0, totalOrders: 0 },
   );
 
   const revenue = revenueData || { totalGross: 0, totalOrders: 0 };
@@ -60,7 +58,7 @@ export const getAdminAnalyticsService = async (params: any = {}) => {
   const previousPeriodStart = new Date(
     dateFilter.createdAt.$gte.getTime() -
       (dateFilter.createdAt.$lte.getTime() -
-        dateFilter.createdAt.$gte.getTime())
+        dateFilter.createdAt.$gte.getTime()),
   );
   const previousPeriodEnd = dateFilter.createdAt.$gte;
 
@@ -89,7 +87,6 @@ export const getAdminAnalyticsService = async (params: any = {}) => {
       ? ((totalPlatformRevenue - previousRevenue) / previousRevenue) * 100
       : 0;
 
-  // Get monthly revenue breakdown
   const monthlyRevenue = await Order.aggregate([
     {
       $match: {
@@ -127,7 +124,6 @@ export const getAdminAnalyticsService = async (params: any = {}) => {
     },
   ]);
 
-  // Get user statistics
   const userStats = await User.aggregate([
     {
       $facet: {
@@ -139,7 +135,7 @@ export const getAdminAnalyticsService = async (params: any = {}) => {
                 $gte: new Date(
                   new Date().getFullYear(),
                   new Date().getMonth(),
-                  1
+                  1,
                 ),
               },
             },
@@ -153,12 +149,12 @@ export const getAdminAnalyticsService = async (params: any = {}) => {
                 $gte: new Date(
                   new Date().getFullYear(),
                   new Date().getMonth() - 1,
-                  1
+                  1,
                 ),
                 $lt: new Date(
                   new Date().getFullYear(),
                   new Date().getMonth(),
-                  1
+                  1,
                 ),
               },
             },
@@ -173,7 +169,7 @@ export const getAdminAnalyticsService = async (params: any = {}) => {
     total: userStats[0].total[0]?.total || 0,
     thisMonth: userStats[0].thisMonth[0]?.total || 0,
     lastMonth: userStats[0].lastMonth[0]?.total || 0,
-    growth: 0, // Initialize growth property
+    growth: 0,
   };
 
   users.growth =
@@ -181,7 +177,6 @@ export const getAdminAnalyticsService = async (params: any = {}) => {
       ? ((users.thisMonth - users.lastMonth) / users.lastMonth) * 100
       : 0;
 
-  // Get course statistics
   const courseStats = await Course.aggregate([
     {
       $facet: {
@@ -194,7 +189,7 @@ export const getAdminAnalyticsService = async (params: any = {}) => {
                 $gte: new Date(
                   new Date().getFullYear(),
                   new Date().getMonth(),
-                  1
+                  1,
                 ),
               },
             },
@@ -231,7 +226,6 @@ export const getAdminAnalyticsService = async (params: any = {}) => {
     byCategory: courseStats[0].byCategory || [],
   };
 
-  // Get enrollment statistics
   const enrollmentStats = await Enrollment.aggregate([
     {
       $facet: {
@@ -243,7 +237,7 @@ export const getAdminAnalyticsService = async (params: any = {}) => {
                 $gte: new Date(
                   new Date().getFullYear(),
                   new Date().getMonth(),
-                  1
+                  1,
                 ),
               },
             },

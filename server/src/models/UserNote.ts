@@ -1,5 +1,5 @@
 import mongoose, { Document } from "mongoose";
-import userNoteSchema from "../schemas/userNoteSchema";
+import userNoteSchema from "../schemas/userNoteSchema.js";
 
 const UserNote = mongoose.model("UserNote", userNoteSchema);
 

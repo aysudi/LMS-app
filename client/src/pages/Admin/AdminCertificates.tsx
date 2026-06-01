@@ -317,7 +317,7 @@ const AdminCertificates: React.FC = () => {
                         </div>
                         <span
                           className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getCategoryColor(
-                            certificate.course.category
+                            certificate.course.category,
                           )}`}
                         >
                           {certificate.course.category}
@@ -331,7 +331,7 @@ const AdminCertificates: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
                           className={`inline-flex px-3 py-1 text-xs font-medium rounded-full border ${getGradeBadgeColor(
-                            certificate.grade
+                            certificate.grade,
                           )}`}
                         >
                           {certificate.grade}
@@ -340,7 +340,7 @@ const AdminCertificates: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {formatDuration(
                           certificate.enrolledAt,
-                          certificate.completedAt
+                          certificate.completedAt,
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -354,7 +354,7 @@ const AdminCertificates: React.FC = () => {
                           <button
                             onClick={() =>
                               navigator.clipboard.writeText(
-                                certificate.certificateId
+                                certificate.certificateId,
                               )
                             }
                             className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -398,7 +398,7 @@ const AdminCertificates: React.FC = () => {
                   <button
                     onClick={() =>
                       setCurrentPage(
-                        Math.min(pagination.totalPages, currentPage + 1)
+                        Math.min(pagination.totalPages, currentPage + 1),
                       )
                     }
                     disabled={!pagination.hasNextPage}
@@ -418,7 +418,7 @@ const AdminCertificates: React.FC = () => {
                       <span className="font-medium">
                         {Math.min(
                           currentPage * limit,
-                          pagination.totalCertificates
+                          pagination.totalCertificates,
                         )}
                       </span>{" "}
                       of{" "}
@@ -462,8 +462,8 @@ const AdminCertificates: React.FC = () => {
                               1,
                               Math.min(
                                 pagination.totalPages - 4,
-                                currentPage - 2
-                              )
+                                currentPage - 2,
+                              ),
                             ) + i;
                           return (
                             <button
@@ -478,13 +478,13 @@ const AdminCertificates: React.FC = () => {
                               {pageNum}
                             </button>
                           );
-                        }
+                        },
                       )}
 
                       <button
                         onClick={() =>
                           setCurrentPage(
-                            Math.min(pagination.totalPages, currentPage + 1)
+                            Math.min(pagination.totalPages, currentPage + 1),
                           )
                         }
                         disabled={!pagination.hasNextPage}

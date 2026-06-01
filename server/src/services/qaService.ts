@@ -14,11 +14,10 @@ import {
 
 // Question Services
 export const createQuestion = async (
-  courseId: string,
+  courseId: string | string[],
   userId: string,
-  questionData: CreateQuestionRequest
+  questionData: CreateQuestionRequest,
 ) => {
-  // Verify course exists and user is enrolled
   const course = await Course.findById(courseId);
   if (!course) {
     throw new Error("Course not found");
@@ -28,7 +27,6 @@ export const createQuestion = async (
     throw new Error("You must be enrolled in this course to ask questions");
   }
 
-  // Verify lesson exists if provided
   if (questionData.lessonId) {
     const lesson = await Lesson.findOne({
       _id: questionData.lessonId,
@@ -57,8 +55,8 @@ export const createQuestion = async (
 };
 
 export const getQuestionsByCourse = async (
-  courseId: string,
-  query: QuestionsQuery = {}
+  courseId: string | string[],
+  query: QuestionsQuery = {},
 ) => {
   const {
     page = 1,
@@ -72,19 +70,16 @@ export const getQuestionsByCourse = async (
 
   const filter: FilterQuery<any> = { course: courseId };
 
-  // Filter by lesson
   if (lessonId) {
     filter.lesson = lessonId;
   }
 
-  // Filter by answered status
   if (answered === "true") {
     filter.acceptedAnswer = { $exists: true, $ne: null };
   } else if (answered === "false") {
     filter.acceptedAnswer = { $exists: false };
   }
 
-  // Text search
   if (search) {
     filter.$or = [
       { title: { $regex: search, $options: "i" } },
@@ -92,13 +87,11 @@ export const getQuestionsByCourse = async (
     ];
   }
 
-  // Filter by tags
   if (tags) {
     const tagArray = tags.split(",").map((tag) => tag.trim());
     filter.tags = { $in: tagArray };
   }
 
-  // Sorting
   let sort: any = {};
   switch (sortBy) {
     case "oldest":
@@ -139,7 +132,10 @@ export const getQuestionsByCourse = async (
   };
 };
 
-export const getQuestionById = async (questionId: string, userId?: string) => {
+export const getQuestionById = async (
+  questionId: string | string[],
+  userId?: string,
+) => {
   const question = await Question.findById(questionId).populate([
     { path: "user", select: "firstName lastName avatar" },
     { path: "course", select: "title" },
@@ -150,27 +146,21 @@ export const getQuestionById = async (questionId: string, userId?: string) => {
     throw new Error("Question not found");
   }
 
-  // Get answers for this question
   const answers = await Answer.find({ question: questionId })
     .populate("user", "firstName lastName avatar")
     .sort({ createdAt: -1 });
 
-  // Add user vote information if userId provided
   if (userId) {
-    // Add userVoteType to question
     (question as any).userVoteType = question.getUserVoteType(userId);
 
-    // Add userVoteType and isAccepted to answers
     answers.forEach((answer: any) => {
       answer.userVoteType = answer.getUserVoteType(userId);
       const isAccepted =
         question.acceptedAnswer?.toString() === answer._id.toString();
 
-      // Set isAccepted in multiple ways to ensure it's serialized
       answer.isAccepted = isAccepted;
       answer._isAccepted = isAccepted;
 
-      // Force the property to be enumerable for JSON serialization
       Object.defineProperty(answer, "isAccepted", {
         value: isAccepted,
         enumerable: true,
@@ -188,9 +178,9 @@ export const getQuestionById = async (questionId: string, userId?: string) => {
 };
 
 export const updateQuestion = async (
-  questionId: string,
+  questionId: string | string[],
   userId: string,
-  updateData: UpdateQuestionRequest
+  updateData: UpdateQuestionRequest,
 ) => {
   const question = await Question.findById(questionId);
 
@@ -212,7 +202,10 @@ export const updateQuestion = async (
   ]);
 };
 
-export const deleteQuestion = async (questionId: string, userId: string) => {
+export const deleteQuestion = async (
+  questionId: string | string[],
+  userId: string,
+) => {
   const question = await Question.findById(questionId);
 
   if (!question) {
@@ -223,19 +216,17 @@ export const deleteQuestion = async (questionId: string, userId: string) => {
     throw new Error("You can only delete your own questions");
   }
 
-  // Delete all answers for this question
   await Answer.deleteMany({ question: questionId });
 
-  // Delete the question
   await Question.findByIdAndDelete(questionId);
 
   return { message: "Question deleted successfully" };
 };
 
 export const voteOnQuestion = async (
-  questionId: string,
+  questionId: string | string[],
   userId: string,
-  voteType: "upvote" | "downvote"
+  voteType: "upvote" | "downvote",
 ) => {
   const question = await Question.findById(questionId);
 
@@ -247,13 +238,11 @@ export const voteOnQuestion = async (
     throw new Error("You cannot vote on your own question");
   }
 
-  // Remove any existing vote
   question.upvotes = question.upvotes.filter((id) => id.toString() !== userId);
   question.downvotes = question.downvotes.filter(
-    (id) => id.toString() !== userId
+    (id) => id.toString() !== userId,
   );
 
-  // Add new vote
   if (voteType === "upvote") {
     question.upvotes.push(userId as any);
   } else {
@@ -270,9 +259,9 @@ export const voteOnQuestion = async (
 
 // Answer Services
 export const createAnswer = async (
-  questionId: string,
+  questionId: string | string[],
   userId: string,
-  answerData: CreateAnswerRequest
+  answerData: CreateAnswerRequest,
 ) => {
   const question = await Question.findById(questionId);
 
@@ -280,7 +269,6 @@ export const createAnswer = async (
     throw new Error("Question not found");
   }
 
-  // Verify user is enrolled in the course
   const course = await Course.findById(question.course);
   if (!course || !course.studentsEnrolled.includes(userId as any)) {
     throw new Error("You must be enrolled in this course to answer questions");
@@ -297,9 +285,9 @@ export const createAnswer = async (
 };
 
 export const updateAnswer = async (
-  answerId: string,
+  answerId: string | string[],
   userId: string,
-  updateData: UpdateAnswerRequest
+  updateData: UpdateAnswerRequest,
 ) => {
   const answer = await Answer.findById(answerId);
 
@@ -317,7 +305,10 @@ export const updateAnswer = async (
   return answer.populate("user", "firstName lastName avatar");
 };
 
-export const deleteAnswer = async (answerId: string, userId: string) => {
+export const deleteAnswer = async (
+  answerId: string | string[],
+  userId: string,
+) => {
   const answer = await Answer.findById(answerId);
 
   if (!answer) {
@@ -328,7 +319,6 @@ export const deleteAnswer = async (answerId: string, userId: string) => {
     throw new Error("You can only delete your own answers");
   }
 
-  // If this was the accepted answer, remove it from question
   const question = await Question.findById(answer.question);
   if (question?.acceptedAnswer?.toString() === answerId) {
     question.acceptedAnswer = undefined;
@@ -341,9 +331,9 @@ export const deleteAnswer = async (answerId: string, userId: string) => {
 };
 
 export const voteOnAnswer = async (
-  answerId: string,
+  answerId: string | string[],
   userId: string,
-  voteType: "upvote" | "downvote"
+  voteType: "upvote" | "downvote",
 ) => {
   const answer = await Answer.findById(answerId);
 
@@ -355,11 +345,9 @@ export const voteOnAnswer = async (
     throw new Error("You cannot vote on your own answer");
   }
 
-  // Remove any existing vote
   answer.upvotes = answer.upvotes.filter((id) => id.toString() !== userId);
   answer.downvotes = answer.downvotes.filter((id) => id.toString() !== userId);
 
-  // Add new vote
   if (voteType === "upvote") {
     answer.upvotes.push(userId as any);
   } else {
@@ -375,9 +363,9 @@ export const voteOnAnswer = async (
 };
 
 export const acceptAnswer = async (
-  questionId: string,
-  answerId: string,
-  userId: string
+  questionId: string | string[],
+  answerId: string | string[],
+  userId: string,
 ) => {
   const question = await Question.findById(questionId);
 

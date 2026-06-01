@@ -25,7 +25,7 @@ export const getSearchSuggestions = async (query) => {
             })
                 .populate("instructor", "firstName lastName")
                 .select("title shortDescription image rating originalPrice discountPrice isFree")
-                .limit(Math.ceil(limit * 0.5)) // Allocate 50% of suggestions to courses
+                .limit(Math.ceil(limit * 0.5))
                 .lean();
             courses.forEach((course) => {
                 suggestions.push({
@@ -63,7 +63,7 @@ export const getSearchSuggestions = async (query) => {
                     $sort: { count: -1 },
                 },
                 {
-                    $limit: Math.ceil(limit * 0.3), // Allocate 30% to categories
+                    $limit: Math.ceil(limit * 0.3),
                 },
             ]);
             categories.forEach((category) => {
@@ -109,14 +109,14 @@ export const getSearchSuggestions = async (query) => {
                 },
                 {
                     $match: {
-                        courseCount: { $gt: 0 }, // Only instructors with courses
+                        courseCount: { $gt: 0 },
                     },
                 },
                 {
                     $sort: { courseCount: -1, avgRating: -1 },
                 },
                 {
-                    $limit: Math.ceil(limit * 0.2), // Allocate 20% to instructors
+                    $limit: Math.ceil(limit * 0.2),
                 },
                 {
                     $project: {
@@ -146,15 +146,12 @@ export const getSearchSuggestions = async (query) => {
                 });
             });
         }
-        // Sort suggestions by relevance (courses first, then by count/rating)
         return suggestions
             .sort((a, b) => {
-            // Prioritize courses
             if (a.type === "course" && b.type !== "course")
                 return -1;
             if (b.type === "course" && a.type !== "course")
                 return 1;
-            // Then sort by count or rating
             const aScore = (a.count || 0) + (a.metadata?.rating || 0) * 10;
             const bScore = (b.count || 0) + (b.metadata?.rating || 0) * 10;
             return bScore - aScore;
@@ -166,30 +163,35 @@ export const getSearchSuggestions = async (query) => {
         return suggestions;
     }
 };
-export const saveSearchHistory = async (userId, searchData) => {
+export const saveSearchHistoryService = async (userId, searchData) => {
     try {
-        await SearchHistory.deleteMany({
+        const normalizedQuery = searchData.query.trim().toLowerCase();
+        await SearchHistory.findOneAndUpdate({
             user: userId,
-            query: searchData.query.trim(),
-        });
-        // Save new search
-        await SearchHistory.create({
-            user: userId,
-            ...searchData,
-            query: searchData.query.trim(),
-        });
-        // Keep only the last 50 searches per user
+        }, {
+            $set: {
+                query: searchData.query.trim(),
+                queryNormalized: normalizedQuery,
+                type: searchData.type,
+                metadata: searchData.metadata,
+                timestamp: new Date(),
+            },
+            $setOnInsert: {
+                user: userId,
+            },
+        }, { upsert: true });
         const userSearches = await SearchHistory.find({ user: userId })
             .sort({ timestamp: -1 })
             .skip(50);
         if (userSearches.length > 0) {
-            const searchIdsToDelete = userSearches.map((search) => search._id);
-            await SearchHistory.deleteMany({ _id: { $in: searchIdsToDelete } });
+            await SearchHistory.deleteMany({
+                _id: { $in: userSearches.map((s) => s._id) },
+            });
         }
     }
     catch (error) {
         console.error("Save search history error:", error);
-        throw new Error("Failed to save search history");
+        throw error;
     }
 };
 export const getSearchHistory = async (userId, query = {}) => {
@@ -204,11 +206,12 @@ export const getSearchHistory = async (userId, query = {}) => {
             .limit(limit)
             .select("-user")
             .lean();
+        console.log("history: ", history);
         return history.map((item) => ({
             _id: item._id.toString(),
             query: item.query,
             type: item.type,
-            timestamp: item.timestamp,
+            timestamp: item.createdAt,
             metadata: item.metadata,
         }));
     }

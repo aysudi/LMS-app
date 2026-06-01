@@ -19,7 +19,6 @@ export const sendCourseMessage = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Verify user is enrolled in the course
     const enrollment = await Enrollment.findOne({
       user: senderId,
       course: courseId,
@@ -32,7 +31,6 @@ export const sendCourseMessage = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Create the message
     const message = await CourseMessage.create({
       content,
       sender: senderId,
@@ -40,22 +38,17 @@ export const sendCourseMessage = async (req: AuthRequest, res: Response) => {
       messageType,
     });
 
-    // Populate sender information
     const populatedMessage = await CourseMessage.findById(message._id).populate(
       "sender",
-      "firstName lastName avatar"
+      "firstName lastName avatar",
     );
 
-    // Emit to all users in the course room
     const io = getIO();
     if (io) {
       io.to(`course-${courseId}`).emit("newCourseMessage", {
         message: populatedMessage,
         course: courseId,
       });
-
-      // Log how many clients are in this room
-      const room = io.sockets.adapter.rooms.get(`course-${courseId}`);
     } else {
       console.log("❌ Socket.IO instance not available");
     }
@@ -89,7 +82,6 @@ export const getCourseMessages = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Verify user is enrolled in the course
     const enrollment = await Enrollment.findOne({
       user: userId,
       course: courseId,
@@ -155,7 +147,6 @@ export const markMessagesAsRead = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Verify user is enrolled in the course
     const enrollment = await Enrollment.findOne({
       user: userId,
       course: courseId,
@@ -168,7 +159,6 @@ export const markMessagesAsRead = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Mark all unread messages as read for this user (excluding user's own messages)
     await CourseMessage.updateMany(
       {
         course: courseId,
@@ -183,7 +173,7 @@ export const markMessagesAsRead = async (req: AuthRequest, res: Response) => {
             readAt: new Date(),
           },
         },
-      }
+      },
     );
 
     res.status(200).json({
@@ -203,19 +193,17 @@ export const markMessagesAsRead = async (req: AuthRequest, res: Response) => {
 // Get unread message count for courses
 export const getUnreadMessageCounts = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
 ) => {
   try {
     const userId = req.user?.userId;
 
-    // Get all user enrollments
     const enrollments = await Enrollment.find({
       user: userId,
     }).select("course");
 
     const courseIds = enrollments.map((e) => e.course);
 
-    // Get unread message counts for each course (excluding user's own messages)
     const unreadCounts = await CourseMessage.aggregate([
       {
         $match: {
@@ -233,11 +221,13 @@ export const getUnreadMessageCounts = async (
       },
     ]);
 
-    // Format the response
-    const countsMap = unreadCounts.reduce((acc, item) => {
-      acc[item._id.toString()] = item.count;
-      return acc;
-    }, {} as Record<string, number>);
+    const countsMap = unreadCounts.reduce(
+      (acc, item) => {
+        acc[item._id.toString()] = item.count;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
     res.status(200).json({
       success: true,
@@ -268,7 +258,6 @@ export const deleteCourseMessage = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Only the sender can delete their message
     if (message.sender.toString() !== userId) {
       return res.status(403).json({
         success: false,
@@ -276,12 +265,10 @@ export const deleteCourseMessage = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Soft delete
     message.isDeleted = true;
     message.deletedAt = new Date();
     await message.save();
 
-    // Emit to course room
     const io = getIO();
     if (io) {
       io.to(`course-${message.course}`).emit("messageDeleted", {
@@ -327,7 +314,6 @@ export const editCourseMessage = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Only the sender can edit their message
     if (message.sender.toString() !== userId) {
       return res.status(403).json({
         success: false,
@@ -335,12 +321,10 @@ export const editCourseMessage = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Update message
     message.content = content;
     message.editedAt = new Date();
     await message.save();
 
-    // Populate and emit
     const updatedMessage = await CourseMessage.findById(message._id)
       .populate("sender", "firstName lastName avatar")
       .populate("course", "title");

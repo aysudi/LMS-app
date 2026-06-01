@@ -5,13 +5,13 @@ import {
   replyToMessageService,
   markMessageAsReadService,
   markMessageAsResolvedService,
-  getMessageStatsService
+  getMessageStatsService,
 } from "../services/instructorCommunicationService.js";
 
 // Get all messages for instructor
 export const getInstructorMessages = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
 ) => {
   try {
     const instructorId = req.user?.id;
@@ -36,12 +36,12 @@ export const getInstructorMessages = async (
       Number(limit),
       status as string,
       type as string,
-      courseId as string
+      courseId as string,
     );
 
     res.json({
       success: true,
-      data
+      data,
     });
   } catch (error: any) {
     console.error("Get instructor messages error:", error);
@@ -56,7 +56,7 @@ export const getInstructorMessages = async (
 export const replyToMessage = async (req: AuthRequest, res: Response) => {
   try {
     const instructorId = req.user?.id;
-    const { messageId } = req.params;
+    const { messageId }: any = req.params;
     const { message } = req.body;
 
     if (!instructorId) {
@@ -73,7 +73,11 @@ export const replyToMessage = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    const data = await replyToMessageService(instructorId, messageId, message.trim());
+    const data = await replyToMessageService(
+      instructorId,
+      messageId,
+      message.trim(),
+    );
 
     if (!data) {
       return res.status(404).json({
@@ -85,7 +89,7 @@ export const replyToMessage = async (req: AuthRequest, res: Response) => {
     res.json({
       success: true,
       message: "Reply sent successfully",
-      data
+      data,
     });
   } catch (error: any) {
     console.error("Reply to message error:", error);
@@ -100,7 +104,7 @@ export const replyToMessage = async (req: AuthRequest, res: Response) => {
 export const markMessageAsRead = async (req: AuthRequest, res: Response) => {
   try {
     const instructorId = req.user?.id;
-    const { messageId } = req.params;
+    const { messageId }: any = req.params;
 
     if (!instructorId) {
       return res.status(401).json({
@@ -134,11 +138,11 @@ export const markMessageAsRead = async (req: AuthRequest, res: Response) => {
 // Mark message as resolved
 export const markMessageAsResolved = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
 ) => {
   try {
     const instructorId = req.user?.id;
-    const { messageId } = req.params;
+    const { messageId }: any = req.params;
 
     if (!instructorId) {
       return res.status(401).json({
@@ -185,7 +189,7 @@ export const getMessageStats = async (req: AuthRequest, res: Response) => {
 
     res.json({
       success: true,
-      data
+      data,
     });
   } catch (error: any) {
     console.error("Get message stats error:", error);

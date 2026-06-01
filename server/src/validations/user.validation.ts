@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { UserRole } from "../types/user.types";
+import { UserRole } from "../types/user.types.js";
 
 export const registerValidationSchema = Joi.object({
   firstName: Joi.string().min(2).max(50).required().messages({

@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
-import { authenticateToken } from "../middlewares/auth.middleware";
-import User from "../models/User";
-import Course from "../models/Course";
+import { authenticateToken } from "../middlewares/auth.middleware.js";
+import User from "../models/User.js";
+import Course from "../models/Course.js";
 
 const router = express.Router();
 
@@ -41,7 +41,7 @@ router.post(
       console.error("Error adding to wishlist:", error);
       res.status(500).json({ message: "Server error" });
     }
-  }
+  },
 );
 
 // Remove course from wishlist
@@ -73,7 +73,7 @@ router.delete(
       console.error("Error removing from wishlist:", error);
       res.status(500).json({ message: "Server error" });
     }
-  }
+  },
 );
 
 // Get user's wishlist
@@ -105,7 +105,7 @@ router.get(
       console.error("Error fetching wishlist:", error);
       res.status(500).json({ message: "Server error" });
     }
-  }
+  },
 );
 
 // Add to search history
@@ -128,7 +128,7 @@ router.post(
 
       // Remove duplicate if exists
       const existingIndex = user.searchHistory.findIndex(
-        (search) => search.query === query && search.category === category
+        (search) => search.query === query && search.category === category,
       );
       if (existingIndex !== -1) {
         user.searchHistory.splice(existingIndex, 1);
@@ -153,7 +153,7 @@ router.post(
       console.error("Error updating search history:", error);
       res.status(500).json({ message: "Server error" });
     }
-  }
+  },
 );
 
 // Get search history
@@ -178,7 +178,7 @@ router.get(
       console.error("Error fetching search history:", error);
       res.status(500).json({ message: "Server error" });
     }
-  }
+  },
 );
 
 // Add viewed course
@@ -201,7 +201,7 @@ router.post(
 
       // Remove if already exists
       const existingIndex = user.viewedCourses.findIndex(
-        (viewed) => viewed.course?.toString() === courseId
+        (viewed) => viewed.course?.toString() === courseId,
       );
       if (existingIndex !== -1) {
         user.viewedCourses.splice(existingIndex, 1);
@@ -225,7 +225,7 @@ router.post(
       console.error("Error recording viewed course:", error);
       res.status(500).json({ message: "Server error" });
     }
-  }
+  },
 );
 
 // Get personalized recommendations
@@ -313,7 +313,7 @@ router.get(
       console.error("Error fetching recommendations:", error);
       res.status(500).json({ message: "Server error" });
     }
-  }
+  },
 );
 
 export default router;

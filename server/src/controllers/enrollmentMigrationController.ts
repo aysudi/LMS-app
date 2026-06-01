@@ -4,13 +4,11 @@ import {
   syncEnrollmentData,
   syncFromUserEnrolledCourses,
   syncFromCourseStudentsEnrolled,
-} from "../services/enrollmentMigrationService";
+} from "../services/enrollmentMigrationService.js";
 
 // Admin function to sync all enrollment data
 export const syncAllEnrollments = async (req: Request, res: Response) => {
   try {
-    console.log("Admin triggered full enrollment sync");
-
     const results = await performFullEnrollmentSync();
 
     res.json({

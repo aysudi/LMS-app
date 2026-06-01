@@ -1,8 +1,8 @@
 import express from "express";
 import passport from "passport";
-import config from "../configs/config";
-import { JWTUtils } from "../utils/jwt.utils";
-import { IUser } from "../types/user.types";
+import config from "../configs/config.js";
+import { JWTUtils } from "../utils/jwt.utils.js";
+import { IUser } from "../types/user.types.js";
 
 const githubRouter = express.Router();
 
@@ -11,7 +11,7 @@ githubRouter.get(
   passport.authenticate("github", {
     scope: ["user:email"],
     session: false,
-  })
+  }),
 );
 
 githubRouter.get(
@@ -43,7 +43,7 @@ githubRouter.get(
       console.error("💥 GitHub callback error:", error);
       res.redirect(`${config.CLIENT_URL}/auth/error`);
     }
-  }
+  },
 );
 
 export default githubRouter;

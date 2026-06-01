@@ -1,4 +1,4 @@
-import { getSearchSuggestions as getSearchSuggestionsService, saveSearchHistory as saveSearchHistoryService, getSearchHistory as getSearchHistoryService, clearSearchHistory as clearSearchHistoryService, getPopularSearches as getPopularSearchesService, } from "../services/searchService.js";
+import { getSearchSuggestions as getSearchSuggestionsService, saveSearchHistoryService as saveSearchHistoryService, getSearchHistory as getSearchHistoryService, clearSearchHistory as clearSearchHistoryService, getPopularSearches as getPopularSearchesService, } from "../services/searchService.js";
 export const getSearchSuggestions = async (req, res) => {
     try {
         const { q, limit, includeCategories, includeInstructors, includeCourses } = req.query;
@@ -49,20 +49,18 @@ export const saveSearchHistory = async (req, res) => {
         await saveSearchHistoryService(userId, {
             query: query.trim(),
             type,
-            timestamp: new Date(),
             metadata,
         });
-        res.status(201).json({
+        return res.status(201).json({
             success: true,
-            message: "Search saved to history",
+            message: "Search saved",
         });
     }
     catch (error) {
         console.error("Save search history error:", error);
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: "Failed to save search history",
-            error: process.env.NODE_ENV === "development" ? error : undefined,
         });
     }
 };

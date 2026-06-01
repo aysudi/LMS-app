@@ -23,7 +23,7 @@ import type { ContactMessage } from "../../types/contact.type";
 
 const AdminContacts: React.FC = () => {
   const [selectedContact, setSelectedContact] = useState<ContactMessage | null>(
-    null
+    null,
   );
   const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
   const [replyMessage, setReplyMessage] = useState("");
@@ -58,8 +58,8 @@ const AdminContacts: React.FC = () => {
       filterStatus === "replied"
         ? true
         : filterStatus === "unreplied"
-        ? false
-        : undefined,
+          ? false
+          : undefined,
   });
 
   const { replyToContact } = useContactMutations();
@@ -92,7 +92,7 @@ const AdminContacts: React.FC = () => {
             type: "error",
           });
         },
-      }
+      },
     );
   };
 
@@ -304,7 +304,7 @@ const AdminContacts: React.FC = () => {
                         </div>
                         <span
                           className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                            contact.isReplied
+                            contact.isReplied,
                           )}`}
                         >
                           {contact.isReplied ? "Replied" : "Pending"}
@@ -390,7 +390,7 @@ const AdminContacts: React.FC = () => {
             <div className="flex gap-2">
               {Array.from(
                 { length: pagination.totalPages },
-                (_, i) => i + 1
+                (_, i) => i + 1,
               ).map((page) => (
                 <button
                   key={page}
@@ -468,7 +468,7 @@ const AdminContacts: React.FC = () => {
                     </label>
                     <span
                       className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
-                        selectedContact.isReplied
+                        selectedContact.isReplied,
                       )}`}
                     >
                       {selectedContact.isReplied ? "Replied" : "Pending"}
@@ -509,7 +509,7 @@ const AdminContacts: React.FC = () => {
                         Sent{" "}
                         {formatDistanceToNow(
                           new Date(selectedContact.repliedAt!),
-                          { addSuffix: true }
+                          { addSuffix: true },
                         )}
                       </p>
                     </div>

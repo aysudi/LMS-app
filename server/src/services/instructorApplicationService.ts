@@ -1,19 +1,19 @@
 import InstructorApplication, {
   IInstructorApplication,
-} from "../schemas/instructorApplicationSchema";
-import User from "../models/User";
-import { UserRole } from "../types/user.types";
+} from "../schemas/instructorApplicationSchema.js";
+import User from "../models/User.js";
+import { UserRole } from "../types/user.types.js";
 import mongoose from "mongoose";
 import {
   sendApplicationApprovedEmail,
   sendApplicationReceivedEmail,
   sendApplicationRejectedEmail,
-} from "../utils/sendMail";
+} from "../utils/sendMail.js";
 
 // Submit instructor application
 export const submitInstructorApplication = async (
   userId: string,
-  applicationData: any
+  applicationData: any,
 ): Promise<IInstructorApplication> => {
   try {
     const user = await User.findById(userId);
@@ -25,7 +25,6 @@ export const submitInstructorApplication = async (
       throw new Error("You are already an instructor");
     }
 
-    // Check if user already has a pending or approved application
     const existingApplication = await InstructorApplication.findOne({
       user: userId,
     });
@@ -33,22 +32,20 @@ export const submitInstructorApplication = async (
     if (existingApplication) {
       if (existingApplication.status === "pending") {
         throw new Error(
-          "You have already submitted an instructor application that is currently under review"
+          "You have already submitted an instructor application that is currently under review",
         );
       }
       if (existingApplication.status === "approved") {
         throw new Error("You are already an approved instructor");
       }
-      // If rejected, they can resubmit - delete the old one and allow new submission
       if (existingApplication.status === "rejected") {
         await InstructorApplication.findByIdAndDelete(existingApplication._id);
         console.log(
-          `Deleted rejected application for user ${userId} to allow resubmission`
+          `Deleted rejected application for user ${userId} to allow resubmission`,
         );
       }
     }
 
-    // Create new instructor application
     const newApplication = new InstructorApplication({
       user: userId,
       firstName: applicationData.firstName || user.firstName,
@@ -69,11 +66,10 @@ export const submitInstructorApplication = async (
 
     const savedApplication = await newApplication.save();
 
-    // Send email asynchronously - don't block the response if it fails
     sendApplicationReceivedEmail(
       user.email,
       user.firstName,
-      user.lastName
+      user.lastName,
     ).catch((error) => {
       console.error("Error sending application received email:", error.message);
     });
@@ -88,7 +84,7 @@ export const submitInstructorApplication = async (
 export const getAllInstructorApplications = async (
   page: number = 1,
   limit: number = 10,
-  status?: string
+  status?: string,
 ) => {
   try {
     const skip = (page - 1) * limit;
@@ -143,20 +139,18 @@ export const getUserInstructorApplication = async (userId: string) => {
 export const approveInstructorApplication = async (
   applicationId: string,
   adminId: string,
-  adminFeedback?: string
+  adminFeedback?: string,
 ) => {
   try {
-    // Find the application
-    const application = await InstructorApplication.findById(
-      applicationId
-    ).populate("user");
+    const application =
+      await InstructorApplication.findById(applicationId).populate("user");
     if (!application) {
       throw new Error("Application not found");
     }
 
     if (application.status !== "pending") {
       throw new Error(
-        `Cannot approve application with status: ${application.status}. Only pending applications can be approved.`
+        `Cannot approve application with status: ${application.status}. Only pending applications can be approved.`,
       );
     }
 
@@ -165,7 +159,6 @@ export const approveInstructorApplication = async (
       throw new Error("User not found for this application");
     }
 
-    // Update application status
     application.status = "approved";
     application.reviewedAt = new Date();
     application.reviewedBy = new mongoose.Types.ObjectId(adminId);
@@ -173,7 +166,6 @@ export const approveInstructorApplication = async (
       application.adminFeedback = adminFeedback;
     }
 
-    // Upgrade user to instructor and copy essential data
     user.role = UserRole.INSTRUCTOR;
     user.instructorInfo = {
       bio: application.bio,
@@ -193,13 +185,11 @@ export const approveInstructorApplication = async (
       paymentInfo: {},
     };
 
-    // Save both application and user
     await Promise.all([application.save(), user.save()]);
 
-    // Send email asynchronously - don't block the response if it fails
     sendApplicationApprovedEmail(
       user.email,
-      `${user.firstName} ${user.lastName}`
+      `${user.firstName} ${user.lastName}`,
     ).catch((error) => {
       console.error("Error sending application approved email:", error.message);
     });
@@ -215,20 +205,18 @@ export const rejectInstructorApplication = async (
   applicationId: string,
   adminId: string,
   rejectionReason: string,
-  adminFeedback?: string
+  adminFeedback?: string,
 ) => {
   try {
-    // Find the application
-    const application = await InstructorApplication.findById(
-      applicationId
-    ).populate("user");
+    const application =
+      await InstructorApplication.findById(applicationId).populate("user");
     if (!application) {
       throw new Error("Application not found");
     }
 
     if (application.status !== "pending") {
       throw new Error(
-        `Cannot reject application with status: ${application.status}. Only pending applications can be rejected.`
+        `Cannot reject application with status: ${application.status}. Only pending applications can be rejected.`,
       );
     }
 
@@ -237,7 +225,6 @@ export const rejectInstructorApplication = async (
       throw new Error("User not found for this application");
     }
 
-    // Update application status
     application.status = "rejected";
     application.reviewedAt = new Date();
     application.reviewedBy = new mongoose.Types.ObjectId(adminId);
@@ -248,11 +235,10 @@ export const rejectInstructorApplication = async (
 
     await application.save();
 
-    // Send email asynchronously - don't block the response if it fails
     sendApplicationRejectedEmail(
       user.email,
       `${user.firstName} ${user.lastName}`,
-      rejectionReason
+      rejectionReason,
     ).catch((error) => {
       console.error("Error sending application rejected email:", error.message);
     });

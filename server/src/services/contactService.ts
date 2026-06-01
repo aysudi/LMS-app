@@ -1,14 +1,14 @@
-import Contact from "../models/Contact";
+import Contact from "../models/Contact.js";
 import {
   CreateContactData,
   GetContactsQuery,
   ReplyContactData,
   ContactsPaginationData,
-} from "../types/contact.types";
+} from "../types/contact.types.js";
 import {
   sendContactNotificationEmail,
   sendContactReplyEmail,
-} from "../utils/emailService";
+} from "../utils/emailService.js";
 
 // Create a new contact message
 export const createContact = async (contactData: CreateContactData) => {
@@ -16,7 +16,6 @@ export const createContact = async (contactData: CreateContactData) => {
     const contact = new Contact(contactData);
     const savedContact = await contact.save();
 
-    // Send notification email to admin (non-blocking)
     sendContactNotificationEmail({
       adminEmail: process.env.GMAIL_USER!,
       contactData: {
@@ -29,7 +28,7 @@ export const createContact = async (contactData: CreateContactData) => {
     }).catch((error) => {
       console.error(
         "Failed to send contact notification email:",
-        error.message
+        error.message,
       );
     });
 
@@ -45,7 +44,7 @@ export const createContact = async (contactData: CreateContactData) => {
 
 // Get all contact messages with pagination and filtering
 export const getContacts = async (
-  query: GetContactsQuery
+  query: GetContactsQuery,
 ): Promise<ContactsPaginationData> => {
   try {
     let {
@@ -57,7 +56,6 @@ export const getContacts = async (
       sortOrder = "desc",
     } = query;
 
-    // Build filter object
     const filter: any = {};
 
     if (search) {
@@ -69,9 +67,7 @@ export const getContacts = async (
       ];
     }
 
-    // Handle isReplied filter properly
     if (isReplied !== undefined && isReplied !== null) {
-      // Convert string "true"/"false" to boolean, or keep boolean as is
       if (typeof isReplied === "string") {
         filter.isReplied = isReplied === "true";
       } else if (typeof isReplied === "boolean") {
@@ -79,14 +75,11 @@ export const getContacts = async (
       }
     }
 
-    // Build sort object
     const sort: any = {};
     sort[sortBy] = sortOrder === "asc" ? 1 : -1;
 
-    // Calculate pagination
     const skip = (page - 1) * limit;
 
-    // Get contacts and total count
     const [contacts, totalContacts] = await Promise.all([
       Contact.find(filter).sort(sort).skip(skip).limit(limit).lean(),
       Contact.countDocuments(filter),
@@ -132,7 +125,7 @@ export const getContactById = async (contactId: string) => {
 // Reply to a contact message
 export const replyToContact = async (
   contactId: string,
-  replyData: ReplyContactData
+  replyData: ReplyContactData,
 ) => {
   try {
     const contact = await Contact.findById(contactId);
@@ -141,14 +134,12 @@ export const replyToContact = async (
       throw new Error("Contact message not found");
     }
 
-    // Update contact with reply
     contact.isReplied = true;
     contact.repliedAt = new Date();
     contact.replyMessage = replyData.replyMessage;
 
     const updatedContact = await contact.save();
 
-    // Send reply email to the contact person (non-blocking)
     await sendContactReplyEmail({
       contactEmail: contact.email,
       contactName: contact.name,

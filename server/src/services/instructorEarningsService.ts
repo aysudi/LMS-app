@@ -6,7 +6,6 @@ import Course from "../models/Course.js";
 export const createInstructorEarningsForOrder = async (order: any) => {
   const earningsPromises = order.items.map(async (item: any) => {
     try {
-      // Get course to find instructor
       const course = await Course.findById(item.course);
       if (!course) {
         console.error(`Course not found for item: ${item.course}`);
@@ -14,7 +13,6 @@ export const createInstructorEarningsForOrder = async (order: any) => {
       }
 
       const grossAmount = item.actualPrice;
-      // Platform takes 25% commission + 3% payment processing = 28% total, instructor gets 72%
       const platformCommissionRate = 0.25; // 25% platform commission
       const paymentProcessingRate = 0.03; // 3% payment processing fee
       const totalPlatformFeeRate =
@@ -23,7 +21,6 @@ export const createInstructorEarningsForOrder = async (order: any) => {
       const platformFee = grossAmount * totalPlatformFeeRate;
       const instructorShare = grossAmount - platformFee;
 
-      // Check if earnings already exist to prevent duplicates
       const existingEarning = await InstructorEarnings.findOne({
         order: order._id,
         course: item.course,
@@ -32,12 +29,11 @@ export const createInstructorEarningsForOrder = async (order: any) => {
 
       if (existingEarning) {
         console.log(
-          `Earnings already exist for order ${order._id}, course ${item.course}`
+          `Earnings already exist for order ${order._id}, course ${item.course}`,
         );
         return existingEarning;
       }
 
-      // Create earnings record
       const earning = new InstructorEarnings({
         instructor: course.instructor,
         course: item.course,
@@ -54,13 +50,13 @@ export const createInstructorEarningsForOrder = async (order: any) => {
 
       const savedEarning = await earning.save();
       console.log(
-        `Created instructor earnings for instructor ${course.instructor}, course ${item.course}, amount: ${instructorShare}`
+        `Created instructor earnings for instructor ${course.instructor}, course ${item.course}, amount: ${instructorShare}`,
       );
       return savedEarning;
     } catch (error) {
       console.error(
         `Error creating instructor earning for course ${item.course}:`,
-        error
+        error,
       );
       return null;
     }
@@ -117,7 +113,7 @@ export const getInstructorTotalEarnings = async (instructorId: string) => {
 // Get instructor earnings by course
 export const getInstructorEarningsByCourse = async (
   instructorId: string,
-  courseId?: string
+  courseId?: string,
 ) => {
   const matchFilter: any = {
     instructor: new mongoose.Types.ObjectId(instructorId),
@@ -135,7 +131,7 @@ export const getInstructorEarningsByCourse = async (
 export const updatePayoutStatus = async (
   instructorId: string,
   earningIds: string[],
-  status: "pending" | "processing" | "completed" | "failed"
+  status: "pending" | "processing" | "completed" | "failed",
 ) => {
   return await InstructorEarnings.updateMany(
     {
@@ -145,14 +141,14 @@ export const updatePayoutStatus = async (
     {
       payoutStatus: status,
       ...(status === "completed" && { paidAt: new Date() }),
-    }
+    },
   );
 };
 
 // Get monthly analytics data for instructor
 export const getInstructorMonthlyAnalytics = async (
   instructorId: string,
-  period: string = "6m"
+  period: string = "6m",
 ) => {
   const months = period === "1y" ? 12 : period === "3m" ? 3 : 6;
   const startDate = new Date();

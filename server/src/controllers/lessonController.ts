@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { AuthRequest } from "../types/common.types";
+import { AuthRequest } from "../types/common.types.js";
 import {
   createLessonService,
   getAllLessons,
@@ -9,12 +9,12 @@ import {
   deleteLessonService,
   addNoteToLessonService,
   getUserNotesForLessonService,
-} from "../services/lessonService";
-import formatMongoData from "../utils/formatMongoData";
+} from "../services/lessonService.js";
+import formatMongoData from "../utils/formatMongoData.js";
 
 export const getAllLessonsController = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
 ) => {
   try {
     const lessons = await getAllLessons();
@@ -40,7 +40,7 @@ export const addLesson = async (req: AuthRequest, res: Response) => {
       lessonData.course,
       lessonData.section,
       lessonData,
-      instructorId
+      instructorId,
     );
 
     res.status(201).json({
@@ -58,7 +58,7 @@ export const addLesson = async (req: AuthRequest, res: Response) => {
 
 export const updateLesson = async (req: AuthRequest, res: Response) => {
   try {
-    const { courseId, lessonId } = req.params;
+    const { courseId, lessonId }: any = req.params;
     const instructorId = req.user!.userId;
     const lessonData = req.body;
 
@@ -66,7 +66,7 @@ export const updateLesson = async (req: AuthRequest, res: Response) => {
       courseId,
       lessonId,
       lessonData,
-      instructorId
+      instructorId,
     );
 
     res.status(200).json({
@@ -85,7 +85,7 @@ export const updateLesson = async (req: AuthRequest, res: Response) => {
 
 export const deleteLesson = async (req: AuthRequest, res: Response) => {
   try {
-    const { courseId, lessonId } = req.params;
+    const { courseId, lessonId }: any = req.params;
     const instructorId = req.user!.userId;
 
     const result = await deleteLessonService(courseId, lessonId, instructorId);
@@ -105,7 +105,7 @@ export const deleteLesson = async (req: AuthRequest, res: Response) => {
 
 export const addNoteToLesson = async (req: AuthRequest, res: Response) => {
   try {
-    const { courseId, sectionId, lessonId } = req.params;
+    const { courseId, sectionId, lessonId }: any = req.params;
     const userId = req.user!.userId;
     const noteData = req.body;
 
@@ -114,7 +114,7 @@ export const addNoteToLesson = async (req: AuthRequest, res: Response) => {
       sectionId,
       lessonId,
       noteData,
-      userId
+      userId,
     );
 
     res.status(201).json({
@@ -132,7 +132,7 @@ export const addNoteToLesson = async (req: AuthRequest, res: Response) => {
 
 export const getLessonsBySection = async (req: AuthRequest, res: Response) => {
   try {
-    const { sectionId } = req.params;
+    const { sectionId }: any = req.params;
 
     const lessons = await getLessonsBySectionService(sectionId);
 
@@ -150,7 +150,7 @@ export const getLessonsBySection = async (req: AuthRequest, res: Response) => {
 
 export const getLessonById = async (req: AuthRequest, res: Response) => {
   try {
-    const { lessonId } = req.params;
+    const { lessonId }: any = req.params;
 
     const lesson = await getLessonByIdService(lessonId);
 
@@ -168,17 +168,17 @@ export const getLessonById = async (req: AuthRequest, res: Response) => {
 
 export const getUserNotesForLesson = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
 ) => {
   try {
-    const { courseId, sectionId, lessonId } = req.params;
+    const { courseId, sectionId, lessonId }: any = req.params;
     const userId = req.user!.userId;
 
     const notes = await getUserNotesForLessonService(
       courseId,
       sectionId,
       lessonId,
-      userId
+      userId,
     );
 
     res.status(200).json({

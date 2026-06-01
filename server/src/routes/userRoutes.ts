@@ -17,13 +17,13 @@ import {
   updateAvatarController,
   banUserController,
   unbanUserController,
-} from "../controllers/userController";
+} from "../controllers/userController.js";
 import {
   uploadMiddleware,
   uploadErrorHandler,
-} from "../middlewares/upload.middleware";
+} from "../middlewares/upload.middleware.js";
 import { validateJoiRequest } from "../middlewares/validation.middleware.js";
-import { authenticateToken } from "../middlewares/auth.middleware";
+import { authenticateToken } from "../middlewares/auth.middleware.js";
 import {
   registerValidationSchema,
   loginValidationSchema,
@@ -33,7 +33,7 @@ import {
   getUsersQuerySchema,
   getUserByIdSchema,
   getUserByUsernameSchema,
-} from "../validations/user.validation";
+} from "../validations/user.validation.js";
 
 const validateQuery = (schema: any) => {
   return (req: any, res: any, next: any) => {
@@ -75,7 +75,7 @@ userRouter.post(
   uploadMiddleware,
   uploadErrorHandler,
   validateJoiRequest(registerValidationSchema),
-  registerUser
+  registerUser,
 );
 
 userRouter.post("/login", validateJoiRequest(loginValidationSchema), loginUser);
@@ -89,31 +89,31 @@ userRouter.get("/verify-email", verifyEmailController);
 userRouter.post(
   "/resend-verification",
   validateJoiRequest(resendVerificationSchema),
-  resendVerificationEmailController
+  resendVerificationEmailController,
 );
 
 userRouter.post(
   "/forgot-password",
   validateJoiRequest(forgotPasswordSchema),
-  forgotPasswordController
+  forgotPasswordController,
 );
 
 userRouter.post(
   "/reset-password",
   validateJoiRequest(resetPasswordSchema),
-  resetPasswordController
+  resetPasswordController,
 );
 
 userRouter.get(
   "/username/:username",
   validateParams(getUserByUsernameSchema),
-  getUserByUsernameController
+  getUserByUsernameController,
 );
 
 userRouter.get(
   "/:userId",
   validateParams(getUserByIdSchema),
-  getUserByIdController
+  getUserByIdController,
 );
 
 // Profile management routes - must be authenticated
@@ -124,7 +124,7 @@ userRouter.put(
   authenticateToken,
   uploadMiddleware,
   uploadErrorHandler,
-  updateAvatarController
+  updateAvatarController,
 );
 
 // Admin routes for user management

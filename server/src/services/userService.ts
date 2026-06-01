@@ -1,4 +1,4 @@
-import User from "../models/User";
+import User from "../models/User.js";
 import mongoose from "mongoose";
 import {
   RegisterUserDto,
@@ -6,23 +6,23 @@ import {
   IUser,
   AuthResponse,
   UserProfileDto,
-} from "../types/user.types";
-import formatMongoData from "../utils/formatMongoData";
-import { JWTUtils } from "../utils/jwt.utils";
+} from "../types/user.types.js";
+import formatMongoData from "../utils/formatMongoData.js";
+import { JWTUtils } from "../utils/jwt.utils.js";
 import {
   createUserProfile,
   comparePassword,
   hashPassword,
-} from "../utils/user.utils";
+} from "../utils/user.utils.js";
 import {
   generateVerificationToken,
   generatePasswordResetToken,
   hashToken,
-} from "../utils/token.utils";
+} from "../utils/token.utils.js";
 import {
   sendVerificationEmail,
   sendForgotPasswordEmail,
-} from "../utils/sendMail";
+} from "../utils/sendMail.js";
 
 const MAX_ATTEMPTS = 5;
 const LOCK_TIME = 15 * 60 * 1000;
@@ -124,7 +124,6 @@ export const updateUserProfile = async (
 ): Promise<UserProfileDto> => {
   const user = await getUserModelById(userId);
 
-  // Remove sensitive fields that shouldn't be updated via this endpoint
   delete updateData.password;
   delete updateData.email; // Email updates might require verification
   delete updateData.role;
@@ -332,7 +331,6 @@ export const login = async (loginData: LoginUserDto): Promise<AuthResponse> => {
     throw new Error("Account has been deactivated. Please contact support.");
   }
 
-  // Check if user is banned
   if (user.isBanned) {
     if (user.banExpiresAt && user.banExpiresAt > new Date()) {
       const remainingTime = Math.ceil(
@@ -344,7 +342,6 @@ export const login = async (loginData: LoginUserDto): Promise<AuthResponse> => {
         }`,
       );
     } else if (user.banExpiresAt && user.banExpiresAt <= new Date()) {
-      // Auto-unban expired bans
       await User.findByIdAndUpdate(user._id, {
         isBanned: false,
         banReason: null,
@@ -353,7 +350,6 @@ export const login = async (loginData: LoginUserDto): Promise<AuthResponse> => {
         banExpiresAt: null,
       });
     } else {
-      // Permanent ban
       throw new Error(
         `Your account is permanently banned. Reason: ${
           user.banReason || "No reason provided"

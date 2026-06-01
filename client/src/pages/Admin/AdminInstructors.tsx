@@ -88,8 +88,8 @@ const AdminInstructors: React.FC = () => {
           <p class="mb-4">You are about to reject <strong>${
             application.user?.firstName || ""
           } ${
-        application.user?.lastName || ""
-      }</strong>'s instructor application.</p>
+            application.user?.lastName || ""
+          }</strong>'s instructor application.</p>
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-2">
               Rejection Reason <span class="text-red-500">*</span>
@@ -670,7 +670,7 @@ const AdminInstructors: React.FC = () => {
                         </span>
                         <p className="text-slate-900">
                           {new Date(
-                            selectedApplication.reviewedAt
+                            selectedApplication.reviewedAt,
                           ).toLocaleString()}
                         </p>
                       </div>
@@ -703,7 +703,7 @@ const AdminInstructors: React.FC = () => {
                           <p className="text-red-700">
                             {selectedApplication.rejectionReason.replace(
                               /_/g,
-                              " "
+                              " ",
                             )}
                           </p>
                         </div>

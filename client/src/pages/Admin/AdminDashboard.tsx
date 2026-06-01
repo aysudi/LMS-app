@@ -137,8 +137,8 @@ const AdminDashboard: React.FC = () => {
                 changeType === "positive"
                   ? "text-green-600"
                   : changeType === "negative"
-                  ? "text-red-600"
-                  : "text-slate-500"
+                    ? "text-red-600"
+                    : "text-slate-500"
               }`}
             >
               <span>{change}</span>

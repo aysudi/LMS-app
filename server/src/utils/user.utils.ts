@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import { UserProfileDto } from "../types/user.types";
+import { UserProfileDto } from "../types/user.types.js";
 
 export const hashPassword = async (password: string): Promise<string> => {
   const saltRounds = 12;
@@ -8,14 +8,14 @@ export const hashPassword = async (password: string): Promise<string> => {
 
 export const comparePassword = async (
   password: string,
-  hash: string
+  hash: string,
 ): Promise<boolean> => {
   return bcrypt.compare(password, hash);
 };
 
 export const generateInitials = (
   firstName: string,
-  lastName: string
+  lastName: string,
 ): string => {
   const firstInitial = firstName ? firstName.charAt(0).toUpperCase() : "";
   const lastInitial = lastName ? lastName.charAt(0).toUpperCase() : "";
@@ -25,7 +25,7 @@ export const generateInitials = (
 export const getAvatarOrInitials = (
   avatar: string | undefined,
   firstName: string,
-  lastName: string
+  lastName: string,
 ): string => {
   if (avatar && avatar.trim() !== "") {
     return avatar;
@@ -43,7 +43,7 @@ export const createUserProfile = (user: any): UserProfileDto => {
   const avatarOrInitials = getAvatarOrInitials(
     user.avatar,
     user.firstName,
-    user.lastName
+    user.lastName,
   );
 
   return {

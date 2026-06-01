@@ -1,8 +1,8 @@
 import express from "express";
 import passport from "passport";
-import config from "../configs/config";
-import { JWTUtils } from "../utils/jwt.utils";
-import { IUser } from "../types/user.types";
+import config from "../configs/config.js";
+import { JWTUtils } from "../utils/jwt.utils.js";
+import { IUser } from "../types/user.types.js";
 
 const googleRouter = express.Router();
 
@@ -12,7 +12,7 @@ googleRouter.get(
     scope: ["profile", "email"],
     prompt: "select_account",
     session: false,
-  })
+  }),
 );
 
 googleRouter.get(
@@ -44,7 +44,7 @@ googleRouter.get(
       console.error("Google callback error:", error);
       res.redirect(`${config.CLIENT_URL}/auth/error`);
     }
-  }
+  },
 );
 
 export default googleRouter;

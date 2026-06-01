@@ -7,17 +7,17 @@ import {
   getSection,
   updateSection,
   deleteSection,
-} from "../controllers/sectionController";
+} from "../controllers/sectionController.js";
 import {
   authenticateToken,
   authorizeRoles,
-} from "../middlewares/auth.middleware";
-import { UserRole } from "../types/user.types";
+} from "../middlewares/auth.middleware.js";
+import { UserRole } from "../types/user.types.js";
 import {
   sectionUploadMiddleware,
   sectionUploadErrorHandler,
   processSectionUploads,
-} from "../middlewares/section-upload.middleware";
+} from "../middlewares/section-upload.middleware.js";
 
 const sectionRouter = Router();
 
@@ -30,15 +30,15 @@ sectionRouter.post(
   sectionUploadMiddleware,
   sectionUploadErrorHandler,
   processSectionUploads,
-  (req: any, res: any) => addSection(req, res)
+  (req: any, res: any) => addSection(req, res),
 );
 
 sectionRouter.get("/course/:courseId", (req, res) =>
-  getSections(req as any, res)
+  getSections(req as any, res),
 );
 
 sectionRouter.get("/:courseId/with-count", (req, res) =>
-  getSectionsWithCount(req as any, res)
+  getSectionsWithCount(req as any, res),
 );
 
 sectionRouter.get("/:sectionId", (req, res) => getSection(req as any, res));
@@ -50,14 +50,14 @@ sectionRouter.put(
   sectionUploadMiddleware,
   sectionUploadErrorHandler,
   processSectionUploads,
-  (req: any, res: any) => updateSection(req, res)
+  (req: any, res: any) => updateSection(req, res),
 );
 
 sectionRouter.delete(
   "/:sectionId",
   authenticateToken,
   authorizeRoles(UserRole.INSTRUCTOR),
-  (req, res) => deleteSection(req as any, res)
+  (req, res) => deleteSection(req as any, res),
 );
 
 export default sectionRouter;

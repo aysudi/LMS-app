@@ -1,21 +1,20 @@
 import { Request, Response } from "express";
-import { validateCertificateGeneration } from "../validations/certificateValidation";
+import { validateCertificateGeneration } from "../validations/certificateValidation.js";
 import {
   generateCertificate,
   sendCertificateEmail,
-} from "../services/certificateService";
-import Certificate from "../models/Certificate";
-import Enrollment from "../models/Enrollment";
-import Course from "../models/Course";
+} from "../services/certificateService.js";
+import Certificate from "../models/Certificate.js";
+import Enrollment from "../models/Enrollment.js";
+import Course from "../models/Course.js";
 import mongoose from "mongoose";
 
 // Generate and send certificate
 export const generateAndSendCertificate = async (
   req: Request,
-  res: Response
+  res: Response,
 ) => {
   try {
-    // Validate request body
     const { error, value } = validateCertificateGeneration(req.body);
     if (error) {
       return res.status(400).json({
@@ -33,7 +32,6 @@ export const generateAndSendCertificate = async (
       courseName,
     } = value;
 
-    // Check if course provides certificates
     const course = await Course.findById(courseId);
     if (!course) {
       return res.status(404).json({
@@ -49,7 +47,6 @@ export const generateAndSendCertificate = async (
       });
     }
 
-    // Check if certificate already exists for this user and course
     const existingCertificate = await Certificate.findOne({
       userId: new mongoose.Types.ObjectId(userId),
       courseId: new mongoose.Types.ObjectId(courseId),
@@ -67,7 +64,6 @@ export const generateAndSendCertificate = async (
       });
     }
 
-    // Generate certificate
     const certificateData = {
       studentName,
       courseName,
@@ -96,19 +92,6 @@ export const generateAndSendCertificate = async (
 
     await certificate.save();
 
-    const enrollment = await Enrollment.findOneAndUpdate(
-      {
-        user: new mongoose.Types.ObjectId(userId),
-        course: new mongoose.Types.ObjectId(courseId),
-        status: "completed",
-      },
-      {
-        certificateIssued: true,
-        certificateIssuedAt: new Date(),
-        certificateId: certificateData.certificateId,
-      }
-    );
-
     let emailSuccess = false;
     let emailError = null;
 
@@ -118,7 +101,7 @@ export const generateAndSendCertificate = async (
         studentName,
         courseName,
         certificateBuffer,
-        certificateData.certificateId
+        certificateData.certificateId,
       );
       emailSuccess = true;
 
@@ -150,7 +133,6 @@ export const generateAndSendCertificate = async (
   } catch (error) {
     console.error("Certificate generation error:", error);
 
-    // Handle duplicate key error (in case of race condition)
     if (error instanceof Error && error.message.includes("E11000")) {
       return res.status(400).json({
         success: false,
@@ -171,7 +153,7 @@ export const generateAndSendCertificate = async (
 // Get certificate status
 export const getCertificateStatus = async (req: Request, res: Response) => {
   try {
-    const { courseId, userId } = req.params;
+    const { courseId, userId }: any = req.params;
 
     if (!courseId || !userId) {
       return res.status(400).json({
@@ -180,7 +162,6 @@ export const getCertificateStatus = async (req: Request, res: Response) => {
       });
     }
 
-    // Validate ObjectId format
     if (
       !mongoose.Types.ObjectId.isValid(courseId) ||
       !mongoose.Types.ObjectId.isValid(userId)
@@ -191,7 +172,6 @@ export const getCertificateStatus = async (req: Request, res: Response) => {
       });
     }
 
-    // Check if course provides certificates
     const course = await Course.findById(courseId);
     if (!course) {
       return res.status(404).json({
@@ -213,7 +193,6 @@ export const getCertificateStatus = async (req: Request, res: Response) => {
       });
     }
 
-    // Check if certificate exists for this user and course
     const certificate = await Certificate.findOne({
       userId: new mongoose.Types.ObjectId(userId),
       courseId: new mongoose.Types.ObjectId(courseId),
@@ -250,7 +229,6 @@ export const downloadCertificate = async (req: Request, res: Response) => {
       });
     }
 
-    // Find certificate in database
     const certificate = await Certificate.findOne({ certificateId });
 
     if (!certificate) {
@@ -260,7 +238,6 @@ export const downloadCertificate = async (req: Request, res: Response) => {
       });
     }
 
-    // Generate certificate PDF from stored data
     const certificateData = {
       studentName: certificate.studentName,
       courseName: certificate.courseName,
@@ -273,11 +250,10 @@ export const downloadCertificate = async (req: Request, res: Response) => {
 
     const certificateBuffer = await generateCertificate(certificateData);
 
-    // Set headers for PDF download
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename="certificate-${certificateId}.pdf"`
+      `attachment; filename="certificate-${certificateId}.pdf"`,
     );
 
     res.send(certificateBuffer);

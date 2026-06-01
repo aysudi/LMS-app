@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import * as contactService from "../services/contactService";
+import * as contactService from "../services/contactService.js";
 
 // Create a new contact message
 export const createContact = async (
@@ -14,7 +14,7 @@ export const createContact = async (
       phone?: string;
     }
   >,
-  res: Response
+  res: Response,
 ) => {
   try {
     const contactData = req.body;
@@ -55,7 +55,7 @@ export const getContacts = async (req: Request<{}, {}, {}>, res: Response) => {
 // Get a single contact message by ID (Admin only)
 export const getContactById = async (
   req: Request<{ id: string }>,
-  res: Response
+  res: Response,
 ) => {
   try {
     const { id } = req.params;
@@ -84,7 +84,7 @@ export const getContactById = async (
 // Reply to a contact message (Admin only)
 export const replyToContact = async (
   req: Request<{ id: string }, {}, { replyMessage: string }>,
-  res: Response
+  res: Response,
 ) => {
   try {
     const { id } = req.params;
@@ -115,7 +115,7 @@ export const replyToContact = async (
 // Delete a contact message (Admin only)
 export const deleteContact = async (
   req: Request<{ id: string }>,
-  res: Response
+  res: Response,
 ) => {
   try {
     const { id } = req.params;

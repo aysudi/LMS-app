@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import multer from "multer";
-import cloudinary from "../configs/cloudinary.config";
+import cloudinary from "../configs/cloudinary.config.js";
 
 // Configure multer to store files in memory
 const storage = multer.memoryStorage();
@@ -24,7 +24,7 @@ const upload = multer({
 // Function to upload buffer to Cloudinary
 export const uploadToCloudinary = async (
   buffer: Buffer,
-  filename: string
+  filename: string,
 ): Promise<string> => {
   return new Promise((resolve, reject) => {
     cloudinary.uploader
@@ -42,7 +42,7 @@ export const uploadToCloudinary = async (
           } else {
             resolve(result?.secure_url || "");
           }
-        }
+        },
       )
       .end(buffer);
   });
@@ -56,7 +56,7 @@ export const uploadErrorHandler = (
   err: any,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   if (err instanceof multer.MulterError) {
     if (err.code === "LIMIT_FILE_SIZE") {

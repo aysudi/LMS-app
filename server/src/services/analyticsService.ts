@@ -1,8 +1,5 @@
-import mongoose from "mongoose";
 import InstructorAnalytics from "../models/InstructorAnalytics.js";
 import Course from "../models/Course.js";
-import Enrollment from "../models/Enrollment.js";
-import UserProgress from "../models/UserProgress.js";
 
 // Track course view for analytics
 export const trackCourseView = async (courseId: string, userId?: string) => {
@@ -13,7 +10,6 @@ export const trackCourseView = async (courseId: string, userId?: string) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Find or create analytics record for today
     let analytics = await InstructorAnalytics.findOne({
       instructor: course.instructor._id,
       course: courseId,
@@ -50,7 +46,7 @@ export const trackCourseView = async (courseId: string, userId?: string) => {
 export const trackEnrollment = async (
   courseId: string,
   userId: string,
-  revenue: number = 0
+  revenue: number = 0,
 ) => {
   try {
     const course = await Course.findById(courseId).populate("instructor");
@@ -59,7 +55,6 @@ export const trackEnrollment = async (
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Find or create analytics record for today
     let analytics = await InstructorAnalytics.findOne({
       instructor: course.instructor._id,
       course: courseId,
@@ -86,7 +81,6 @@ export const trackEnrollment = async (
       analytics.totalRevenue += revenue;
     }
 
-    // Calculate conversion rate
     if (analytics.courseViews > 0) {
       analytics.conversionRate =
         (analytics.newEnrollments / analytics.courseViews) * 100;
@@ -102,7 +96,7 @@ export const trackEnrollment = async (
 // Track course completion
 export const trackCourseCompletion = async (
   courseId: string,
-  userId: string
+  userId: string,
 ) => {
   try {
     const course = await Course.findById(courseId).populate("instructor");
@@ -147,7 +141,7 @@ export const trackCourseCompletion = async (
 export const trackWatchTime = async (
   courseId: string,
   userId: string,
-  watchTimeSeconds: number
+  watchTimeSeconds: number,
 ) => {
   try {
     const course = await Course.findById(courseId).populate("instructor");

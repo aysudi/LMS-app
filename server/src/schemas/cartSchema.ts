@@ -1,5 +1,5 @@
 import { Schema } from "mongoose";
-import { ICart, ICartItem } from "../types/cart.type";
+import { ICart, ICartItem } from "../types/cart.type.js";
 
 const CartItemSchema = new Schema<ICartItem>({
   courseId: {
@@ -31,7 +31,7 @@ const CartSchema = new Schema<ICart>(
   {
     timestamps: true,
     versionKey: false,
-  }
+  },
 );
 
 CartSchema.index({ "items.courseId": 1 });
@@ -39,7 +39,7 @@ CartSchema.index({ "items.courseId": 1 });
 CartSchema.virtual("totalValue").get(function () {
   return this.items.reduce(
     (total, item) => total + item.priceAtTimeOfAdding,
-    0
+    0,
   );
 });
 

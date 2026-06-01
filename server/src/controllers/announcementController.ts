@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { AuthRequest } from "../types/common.types";
+import { AuthRequest } from "../types/common.types.js";
 import {
   getAllAnnouncementsService,
   getAnnouncementsByCourseService,
@@ -10,12 +10,12 @@ import {
   deleteAnnouncementService,
   markAnnouncementAsReadService,
   getAnnouncementStatsService,
-} from "../services/announcementService";
+} from "../services/announcementService.js";
 import {
   CreateAnnouncementDto,
   UpdateAnnouncementDto,
   AnnouncementQuery,
-} from "../types/announcement.types";
+} from "../types/announcement.types.js";
 
 // Get all announcements (admin only)
 export const getAllAnnouncements = async (req: Request, res: Response) => {
@@ -56,7 +56,7 @@ export const getAllAnnouncements = async (req: Request, res: Response) => {
 // Get announcements by course ID
 export const getAnnouncementsByCourse = async (req: Request, res: Response) => {
   try {
-    const { courseId } = req.params;
+    const { courseId }: any = req.params;
     const query: AnnouncementQuery = {
       page: req.query.page ? parseInt(req.query.page as string) : 1,
       limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
@@ -91,7 +91,7 @@ export const getAnnouncementsByCourse = async (req: Request, res: Response) => {
 // Get announcements by instructor ID (for instructor dashboard)
 export const getAnnouncementsByInstructor = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
 ) => {
   try {
     const instructorId = req.user!.userId;
@@ -111,7 +111,7 @@ export const getAnnouncementsByInstructor = async (
 
     const result = await getAnnouncementsByInstructorService(
       instructorId,
-      query
+      query,
     );
 
     res.status(200).json({
@@ -133,7 +133,7 @@ export const getAnnouncementsByInstructor = async (
 // Get single announcement by ID
 export const getAnnouncementById = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const { id }: any = req.params;
     const announcement = await getAnnouncementByIdService(id);
 
     res.status(200).json({
@@ -156,7 +156,7 @@ export const createAnnouncement = async (req: AuthRequest, res: Response) => {
 
     const announcement = await createAnnouncementService(
       announcementData,
-      instructorId
+      instructorId,
     );
 
     res.status(201).json({
@@ -177,13 +177,13 @@ export const createAnnouncement = async (req: AuthRequest, res: Response) => {
 export const updateAnnouncement = async (req: AuthRequest, res: Response) => {
   try {
     const instructorId = req.user!.userId;
-    const { id } = req.params;
+    const { id }: any = req.params;
     const updateData: UpdateAnnouncementDto = req.body;
 
     const announcement = await updateAnnouncementService(
       id,
       updateData,
-      instructorId
+      instructorId,
     );
 
     res.status(200).json({
@@ -204,7 +204,7 @@ export const updateAnnouncement = async (req: AuthRequest, res: Response) => {
 export const deleteAnnouncement = async (req: AuthRequest, res: Response) => {
   try {
     const instructorId = req.user!.userId;
-    const { id } = req.params;
+    const { id }: any = req.params;
 
     await deleteAnnouncementService(id, instructorId);
 
@@ -224,11 +224,11 @@ export const deleteAnnouncement = async (req: AuthRequest, res: Response) => {
 // Mark announcement as read (student only)
 export const markAnnouncementAsRead = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
 ) => {
   try {
     const userId = req.user!.userId;
-    const { id } = req.params;
+    const { id }: any = req.params;
 
     const announcement = await markAnnouncementAsReadService(id, userId);
 

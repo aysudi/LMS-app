@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import { uploadToCloudinary } from "../middlewares/upload.middleware";
 import formatMongoData from "../utils/formatMongoData";
 import cloudinary from "../configs/cloudinary.config";
+import config from "../configs/config";
 export const getCurrentUserController = async (req, res, next) => {
     try {
         if (!req.user || !req.user.userId) {
@@ -147,10 +148,11 @@ export const loginUser = async (req, res, next) => {
     try {
         const { email, password } = req.body;
         const result = await login({ email, password });
+        const isProduction = config.NODE_ENV === "production";
         res.cookie("refreshToken", result.refreshToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
+            secure: isProduction,
+            sameSite: config.NODE_ENV === "production" ? "none" : "lax",
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
         res.status(200).json({
@@ -296,10 +298,11 @@ export const refreshTokenController = async (req, res, next) => {
 };
 export const logoutController = async (req, res, next) => {
     try {
+        const isProduction = config.NODE_ENV === "production";
         res.clearCookie("refreshToken", {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
+            secure: isProduction,
+            sameSite: config.NODE_ENV === "production" ? "none" : "lax",
         });
         res.status(200).json({
             success: true,

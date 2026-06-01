@@ -1,6 +1,6 @@
 import { Response } from "express";
-import { AuthRequest } from "../types/common.types";
-import * as cartService from "../services/cartService";
+import { AuthRequest } from "../types/common.types.js";
+import * as cartService from "../services/cartService.js";
 import mongoose from "mongoose";
 
 // Get user's cart
@@ -36,7 +36,7 @@ export const getCart = async (req: AuthRequest, res: Response) => {
 export const addToCart = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
-    const { courseId } = req.params;
+    const { courseId }: any = req.params;
 
     if (!userId) {
       return res.status(401).json({
@@ -89,7 +89,7 @@ export const addToCart = async (req: AuthRequest, res: Response) => {
 export const removeFromCart = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
-    const { courseId } = req.params;
+    const { courseId }: any = req.params;
 
     if (!userId) {
       return res.status(401).json({
@@ -133,7 +133,6 @@ export const removeFromCart = async (req: AuthRequest, res: Response) => {
 
 // Clear entire cart
 export const clearCart = async (req: AuthRequest, res: Response) => {
-  console.log("Clearing cart for user:", req.user?.id);
   try {
     const userId = req.user?.id;
 
@@ -190,7 +189,7 @@ export const getCartSummary = async (req: AuthRequest, res: Response) => {
 export const checkInCart = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
-    const { courseId } = req.params;
+    const { courseId }: any = req.params;
 
     if (!userId) {
       return res.status(401).json({

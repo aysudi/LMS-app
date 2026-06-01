@@ -1,6 +1,6 @@
-import Cart from "../models/Cart";
-import Course from "../models/Course";
-import User from "../models/User";
+import Cart from "../models/Cart.js";
+import Course from "../models/Course.js";
+import User from "../models/User.js";
 import mongoose from "mongoose";
 
 export const getUserCart = async (userId: string) => {
@@ -20,11 +20,11 @@ export const getUserCart = async (userId: string) => {
   }
 
   return {
-    items: cart.items.map((item) => item.courseId),
+    items: cart.items.map((item: any) => item.courseId),
     totalItems: cart.items.length,
     totalValue: cart.items.reduce(
-      (total, item) => total + item.priceAtTimeOfAdding,
-      0
+      (total: any, item: any) => total + item.priceAtTimeOfAdding,
+      0,
     ),
   };
 };
@@ -48,16 +48,14 @@ export const addCourseToCart = async (userId: string, courseId: string) => {
 
   const courseObjectId = new mongoose.Types.ObjectId(courseId);
 
-  // Check if course is already in cart
-  const existingItem = cart.items.find((item) =>
-    item.courseId.equals(courseObjectId)
+  const existingItem = cart.items.find((item: any) =>
+    item.courseId.equals(courseObjectId),
   );
 
   if (existingItem) {
     throw new Error("Course already in cart");
   }
 
-  // Add course to cart collection
   cart.items.push({
     courseId: courseObjectId,
     addedAt: new Date(),
@@ -66,12 +64,11 @@ export const addCourseToCart = async (userId: string, courseId: string) => {
 
   await cart.save();
 
-  // Also add to user's cart array
   try {
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { $addToSet: { cart: courseObjectId } }, // $addToSet prevents duplicates
-      { new: true }
+      { new: true },
     );
 
     if (!updatedUser) {
@@ -87,17 +84,16 @@ export const addCourseToCart = async (userId: string, courseId: string) => {
     courseId,
     totalItems: cart.items.length,
     totalValue: cart.items.reduce(
-      (total, item) => total + item.priceAtTimeOfAdding,
-      0
+      (total: any, item: any) => total + item.priceAtTimeOfAdding,
+      0,
     ),
   };
 };
 
 export const removeCourseFromCart = async (
   userId: string,
-  courseId: string
+  courseId: string,
 ) => {
-  // Validate course ID
   if (!mongoose.Types.ObjectId.isValid(courseId)) {
     throw new Error("Invalid course ID format");
   }
@@ -109,9 +105,8 @@ export const removeCourseFromCart = async (
 
   const courseObjectId = new mongoose.Types.ObjectId(courseId);
 
-  // Find and remove the item from cart collection
-  const itemIndex = cart.items.findIndex((item) =>
-    item.courseId.equals(courseObjectId)
+  const itemIndex = cart.items.findIndex((item: any) =>
+    item.courseId.equals(courseObjectId),
   );
 
   if (itemIndex === -1) {
@@ -121,19 +116,18 @@ export const removeCourseFromCart = async (
   cart.items.splice(itemIndex, 1);
   await cart.save();
 
-  // Also remove from user's cart array
   await User.findByIdAndUpdate(
     userId,
     { $pull: { cart: courseObjectId } },
-    { new: true }
+    { new: true },
   );
 
   return {
     courseId,
     totalItems: cart.items.length,
     totalValue: cart.items.reduce(
-      (total, item) => total + item.priceAtTimeOfAdding,
-      0
+      (total: any, item: any) => total + item.priceAtTimeOfAdding,
+      0,
     ),
   };
 };
@@ -162,22 +156,22 @@ export const getCartSummary = async (userId: string) => {
     totalItems: cart?.items.length || 0,
     totalValue:
       cart?.items.reduce(
-        (total, item) => total + item.priceAtTimeOfAdding,
-        0
+        (total: any, item: any) => total + item.priceAtTimeOfAdding,
+        0,
       ) || 0,
   };
 };
 
 export const isInCart = async (
   userId: string,
-  courseId: string
+  courseId: string,
 ): Promise<boolean> => {
   try {
     const cart = await Cart.findOne({ userId }).select("items");
     if (!cart) return false;
 
     const courseObjectId = new mongoose.Types.ObjectId(courseId);
-    return cart.items.some((item) => item.courseId.equals(courseObjectId));
+    return cart.items.some((item: any) => item.courseId.equals(courseObjectId));
   } catch (error) {
     console.error("Error checking cart:", error);
     return false;
@@ -197,7 +191,7 @@ export const getCartCount = async (userId: string): Promise<number> => {
 // Quick check using user's cart array (faster than checking Cart collection)
 export const isInCartQuick = async (
   userId: string,
-  courseId: string
+  courseId: string,
 ): Promise<boolean> => {
   try {
     const user = await User.findById(userId).select("cart");

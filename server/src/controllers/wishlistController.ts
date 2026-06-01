@@ -39,7 +39,7 @@ export const getWishlist = async (req: AuthRequest, res: Response) => {
 export const addToWishlist = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
-    const { courseId } = req.params;
+    const { courseId }: any = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(courseId)) {
       return res.status(400).json({
@@ -73,15 +73,6 @@ export const addToWishlist = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Check if user is already enrolled in the course
-    // if (user.enrolledCourses.some((id) => id.equals(courseObjectId))) {
-    //   return res.status(400).json({
-    //     success: false,
-    //     message: "Cannot add enrolled course to wishlist",
-    //   });
-    // }
-
-    // Add course to wishlist
     user.wishlist.push(courseObjectId);
     await user.save();
 
@@ -104,7 +95,7 @@ export const addToWishlist = async (req: AuthRequest, res: Response) => {
 export const removeFromWishlist = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
-    const { courseId } = req.params;
+    const { courseId }: any = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(courseId)) {
       return res.status(400).json({

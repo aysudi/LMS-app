@@ -1,13 +1,13 @@
 import { Response } from "express";
-import { AuthRequest } from "../types/common.types";
-import { UserRole } from "../types/user.types";
+import { AuthRequest } from "../types/common.types.js";
+import { UserRole } from "../types/user.types.js";
 import {
   submitInstructorApplication,
   getAllInstructorApplications,
   getUserInstructorApplication,
   approveInstructorApplication,
   rejectInstructorApplication,
-} from "../services/instructorApplicationService";
+} from "../services/instructorApplicationService.js";
 
 // Submit instructor application
 export const submitApplication = async (req: AuthRequest, res: Response) => {
@@ -32,7 +32,7 @@ export const submitApplication = async (req: AuthRequest, res: Response) => {
     const applicationData = req.body;
     const application = await submitInstructorApplication(
       userId,
-      applicationData
+      applicationData,
     );
 
     res.status(201).json({
@@ -121,13 +121,13 @@ export const approveApplication = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    const { applicationId } = req.params;
+    const { applicationId }: any = req.params;
     const { adminFeedback } = req.body;
 
     const application = await approveInstructorApplication(
       applicationId,
       userId,
-      adminFeedback
+      adminFeedback,
     );
 
     res.status(200).json({
@@ -157,7 +157,7 @@ export const rejectApplication = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    const { applicationId } = req.params;
+    const { applicationId }: any = req.params;
     const { rejectionReason, adminFeedback } = req.body;
 
     if (!rejectionReason || rejectionReason.trim() === "") {
@@ -171,7 +171,7 @@ export const rejectApplication = async (req: AuthRequest, res: Response) => {
       applicationId,
       userId,
       rejectionReason,
-      adminFeedback
+      adminFeedback,
     );
 
     res.status(200).json({

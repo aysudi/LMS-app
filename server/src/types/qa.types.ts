@@ -1,7 +1,3 @@
-import { Types } from "mongoose";
-
-// Request/Response Types for Q&A API
-
 export interface CreateQuestionRequest {
   title: string;
   content: string;
