@@ -1,9 +1,9 @@
-import Course from "../models/Course.js";
-import Enrollment from "../models/Enrollment.js";
-import Order from "../models/Order.js";
-import InstructorEarnings from "../models/InstructorEarnings.js";
-import InstructorAnalytics from "../models/InstructorAnalytics.js";
-import UserProgress from "../models/UserProgress.js";
+import Course from "../models/Course";
+import Enrollment from "../models/Enrollment";
+import Order from "../models/Order";
+import InstructorEarnings from "../models/InstructorEarnings";
+import InstructorAnalytics from "../models/InstructorAnalytics";
+import UserProgress from "../models/UserProgress";
 import mongoose from "mongoose";
 
 // Get instructor dashboard overview

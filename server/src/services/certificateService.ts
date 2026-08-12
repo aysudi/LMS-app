@@ -1,5 +1,5 @@
 import puppeteer from "puppeteer";
-import { sendCertificateEmail as emailCertificate } from "../utils/sendMail.js";
+import { sendCertificateEmail as emailCertificate } from "../utils/sendMail";
 
 export interface CertificateData {
   studentName: string;

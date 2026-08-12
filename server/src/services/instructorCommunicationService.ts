@@ -1,5 +1,5 @@
-import InstructorCommunication from "../models/InstructorCommunication.js";
-import { MessageStatus } from "../schemas/instructorCommunicationSchema.js";
+import InstructorCommunication from "../models/InstructorCommunication";
+import { MessageStatus } from "../schemas/instructorCommunicationSchema";
 
 // Get all messages for instructor with filtering and pagination
 export const getInstructorMessagesService = async (

@@ -1,5 +1,5 @@
 import mongoose, { Document } from "mongoose";
-import { ILesson } from "./lesson.types.js";
+import { ILesson } from "./lesson.types";
 
 export interface ISection extends Document {
   title: string;

@@ -1,6 +1,6 @@
-import InstructorEarnings from "../models/InstructorEarnings.js";
+import InstructorEarnings from "../models/InstructorEarnings";
 import mongoose from "mongoose";
-import Course from "../models/Course.js";
+import Course from "../models/Course";
 
 // Create instructor earnings for an order
 export const createInstructorEarningsForOrder = async (order: any) => {

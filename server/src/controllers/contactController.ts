@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import * as contactService from "../services/contactService.js";
+import * as contactService from "../services/contactService";
 
 // Create a new contact message
 export const createContact = async (

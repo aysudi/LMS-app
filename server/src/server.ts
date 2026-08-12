@@ -1,4 +1,4 @@
-import app from "./app.js";
-import connectToDB from "./configs/db.js";
+import app from "./app";
+import connectToDB from "./configs/db";
 
 connectToDB(app);

@@ -1,12 +1,12 @@
 import { Response } from "express";
-import { AuthRequest } from "../types/common.types.js";
+import { AuthRequest } from "../types/common.types";
 import {
   getInstructorMessagesService,
   replyToMessageService,
   markMessageAsReadService,
   markMessageAsResolvedService,
   getMessageStatsService,
-} from "../services/instructorCommunicationService.js";
+} from "../services/instructorCommunicationService";
 
 // Get all messages for instructor
 export const getInstructorMessages = async (

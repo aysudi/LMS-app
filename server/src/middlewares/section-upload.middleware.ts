@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import multer from "multer";
-import cloudinary from "../configs/cloudinary.config.js";
+import cloudinary from "../configs/cloudinary.config";
 import { Buffer } from "buffer";
 
 // Configure multer to store files in memory
@@ -28,7 +28,7 @@ const sectionUpload = multer({
 // Function to upload thumbnail to Cloudinary
 export const uploadThumbnailToCloudinary = async (
   buffer: Buffer,
-  filename: string
+  filename: string,
 ): Promise<{ url: string; publicId: string }> => {
   return new Promise((resolve, reject) => {
     cloudinary.uploader
@@ -50,7 +50,7 @@ export const uploadThumbnailToCloudinary = async (
               publicId: result?.public_id || "",
             });
           }
-        }
+        },
       )
       .end(buffer);
   });
@@ -64,7 +64,7 @@ export const sectionUploadErrorHandler = (
   err: any,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   if (err instanceof multer.MulterError) {
     if (err.code === "LIMIT_FILE_SIZE") {
@@ -99,7 +99,7 @@ export const sectionUploadErrorHandler = (
 export const processSectionUploads = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const file = req.file;

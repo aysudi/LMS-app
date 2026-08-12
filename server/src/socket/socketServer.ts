@@ -1,9 +1,9 @@
 import { Server } from "socket.io";
 import http from "http";
 import jwt from "jsonwebtoken";
-import UserModel from "../models/User.js";
-import { AuthenticatedSocket } from "../types/socket.type.js";
-import Enrollment from "../models/Enrollment.js";
+import UserModel from "../models/User";
+import { AuthenticatedSocket } from "../types/socket.type";
+import Enrollment from "../models/Enrollment";
 
 const connectedUsers = new Map<string, AuthenticatedSocket>();
 
@@ -16,7 +16,7 @@ const authenticateSocket = async (socket: any, next: any) => {
 
     const decoded = jwt.verify(
       token,
-      process.env.JWT_ACCESS_SECRET_KEY || "secret"
+      process.env.JWT_ACCESS_SECRET_KEY || "secret",
     ) as any;
     const user = await UserModel.findById(decoded.userId);
     if (!user) {
@@ -81,18 +81,18 @@ export const initializeSocket = (server: http.Server) => {
         if (enrollment) {
           authSocket.join(`course-${courseId}`);
           console.log(
-            `✅ User ${authSocket.user.id} joined course room: course-${courseId}`
+            `✅ User ${authSocket.user.id} joined course room: course-${courseId}`,
           );
 
           // Log current room members
           const room = io.sockets.adapter.rooms.get(`course-${courseId}`);
           console.log(
             `👥 Total clients in room course-${courseId}:`,
-            room ? room.size : 0
+            room ? room.size : 0,
           );
         } else {
           console.log(
-            `❌ User ${authSocket.user.id} not enrolled in course: ${courseId}`
+            `❌ User ${authSocket.user.id} not enrolled in course: ${courseId}`,
           );
         }
       } catch (error) {

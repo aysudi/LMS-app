@@ -1,9 +1,9 @@
 import { Response } from "express";
-import { AuthRequest } from "../types/common.types.js";
-import User from "../models/User.js";
-import Course from "../models/Course.js";
+import { AuthRequest } from "../types/common.types";
+import User from "../models/User";
+import Course from "../models/Course";
 import mongoose from "mongoose";
-import formatMongoData from "../utils/formatMongoData.js";
+import formatMongoData from "../utils/formatMongoData";
 
 export const getWishlist = async (req: AuthRequest, res: Response) => {
   try {

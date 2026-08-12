@@ -1,12 +1,12 @@
 import { Request, Response, NextFunction } from "express";
-import { JWTUtils } from "../utils/jwt.utils.js";
-import { ApiResponse } from "../types/common.types.js";
-import { UserRole } from "../types/user.types.js";
+import { JWTUtils } from "../utils/jwt.utils";
+import { ApiResponse } from "../types/common.types";
+import { UserRole } from "../types/user.types";
 
 export const authenticateToken = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void => {
   try {
     const authHeader = req.headers.authorization;
@@ -88,7 +88,7 @@ export const authorizeRoles = (...roles: UserRole[]) => {
 export const optionalAuth = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void => {
   try {
     const authHeader = req.headers.authorization;

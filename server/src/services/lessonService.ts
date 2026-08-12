@@ -1,14 +1,14 @@
-import Course from "../models/Course.js";
-import Section from "../models/Section.js";
-import Lesson from "../models/Lesson.js";
-import UserNote from "../models/UserNote.js";
+import Course from "../models/Course";
+import Section from "../models/Section";
+import Lesson from "../models/Lesson";
+import UserNote from "../models/UserNote";
 import {
   ILesson,
   CreateLessonData,
   UpdateLessonData,
-} from "../types/lesson.types.js";
-import UserProgress from "../models/UserProgress.js";
-import { deleteFromCloudinary } from "../middlewares/course-upload.middleware.js";
+} from "../types/lesson.types";
+import UserProgress from "../models/UserProgress";
+import { deleteFromCloudinary } from "../middlewares/course-upload.middleware";
 
 export const getAllLessons = async (): Promise<ILesson[]> => {
   const lessons: any = await Lesson.find({})

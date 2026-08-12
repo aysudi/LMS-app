@@ -7,9 +7,9 @@ import {
   updateSection as updateSectionService,
   deleteSection as deleteSectionService,
   getSectionsWithLessonCount,
-} from "../services/sectionService.js";
-import { AuthRequest } from "../types/common.types.js";
-import formatMongoData from "../utils/formatMongoData.js";
+} from "../services/sectionService";
+import { AuthRequest } from "../types/common.types";
+import formatMongoData from "../utils/formatMongoData";
 
 // Get all sections (admin/system use)
 export const getAllSectionsController = async (

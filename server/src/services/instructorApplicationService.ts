@@ -1,14 +1,14 @@
 import InstructorApplication, {
   IInstructorApplication,
-} from "../schemas/instructorApplicationSchema.js";
-import User from "../models/User.js";
-import { UserRole } from "../types/user.types.js";
+} from "../schemas/instructorApplicationSchema";
+import User from "../models/User";
+import { UserRole } from "../types/user.types";
 import mongoose from "mongoose";
 import {
   sendApplicationApprovedEmail,
   sendApplicationReceivedEmail,
   sendApplicationRejectedEmail,
-} from "../utils/sendMail.js";
+} from "../utils/sendMail";
 
 // Submit instructor application
 export const submitInstructorApplication = async (

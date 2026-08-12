@@ -1,15 +1,15 @@
-import Section from "../models/Section.js";
-import Lesson from "../models/Lesson.js";
-import Course from "../models/Course.js";
+import Section from "../models/Section";
+import Lesson from "../models/Lesson";
+import Course from "../models/Course";
 import mongoose from "mongoose";
 import {
   ISection,
   CreateSectionData,
   UpdateSectionData,
   SectionWithLessonCount,
-} from "../types/section.types.js";
-import UserProgress from "../models/UserProgress.js";
-import UserNote from "../models/UserNote.js";
+} from "../types/section.types";
+import UserProgress from "../models/UserProgress";
+import UserNote from "../models/UserNote";
 
 export const getAllSections = async (): Promise<ISection[]> => {
   const sections = await Section.find({})
@@ -55,7 +55,7 @@ export const getSectionById = async (
   return section;
 };
 
-import { deleteFromCloudinary } from "../middlewares/course-upload.middleware.js";
+import { deleteFromCloudinary } from "../middlewares/course-upload.middleware";
 
 export const createSection = async (
   sectionData: CreateSectionData,

@@ -1,16 +1,16 @@
 import { Response } from "express";
-import { AuthRequest } from "../types/common.types.js";
-import User from "../models/User.js";
-import Course from "../models/Course.js";
-import Enrollment from "../models/Enrollment.js";
-import { UserRole } from "../types/user.types.js";
-import formatMongoData from "../utils/formatMongoData.js";
+import { AuthRequest } from "../types/common.types";
+import User from "../models/User";
+import Course from "../models/Course";
+import Enrollment from "../models/Enrollment";
+import { UserRole } from "../types/user.types";
+import formatMongoData from "../utils/formatMongoData";
 import mongoose from "mongoose";
 import {
   sendCourseApprovedEmail,
   sendCourseRejectedEmail,
-} from "../utils/sendMail.js";
-import { getAdminAnalyticsService } from "../services/adminAnalyticsService.js";
+} from "../utils/sendMail";
+import { getAdminAnalyticsService } from "../services/adminAnalyticsService";
 
 // Get admin dashboard statistics
 export const getAdminDashboardStats = async (

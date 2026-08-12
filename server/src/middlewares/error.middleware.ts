@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { ApiResponse } from "../types/common.types.js";
+import { ApiResponse } from "../types/common.types";
 
 /**
  * Global error handling middleware
@@ -8,7 +8,7 @@ export const errorHandler = (
   error: any,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void => {
   console.error("Error:", error);
 

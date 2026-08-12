@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import StudentInstructorMessage from "../models/StudentInstructorMessage.js";
-import Enrollment from "../models/Enrollment.js";
-import Course from "../models/Course.js";
-import { MessageStatus } from "../types/studentInstructorMessage.types.js";
+import StudentInstructorMessage from "../models/StudentInstructorMessage";
+import Enrollment from "../models/Enrollment";
+import Course from "../models/Course";
+import { MessageStatus } from "../types/studentInstructorMessage.types";
 import mongoose from "mongoose";
 
 interface AuthenticatedRequest extends Request {

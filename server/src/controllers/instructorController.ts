@@ -1,10 +1,10 @@
 import { Response } from "express";
-import { AuthRequest } from "../types/common.types.js";
+import { AuthRequest } from "../types/common.types";
 import {
   getInstructorOverviewService,
   getInstructorCoursesWithStatsService,
   getCourseStudentsService,
-} from "../services/instructorService.js";
+} from "../services/instructorService";
 
 // Get instructor dashboard overview
 export const getInstructorOverview = async (

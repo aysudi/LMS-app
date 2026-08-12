@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-import { AuthRequest } from "../types/common.types.js";
-import CourseMessage from "../models/CourseMessage.js";
-import Enrollment from "../models/Enrollment.js";
-import Course from "../models/Course.js";
+import { AuthRequest } from "../types/common.types";
+import CourseMessage from "../models/CourseMessage";
+import Enrollment from "../models/Enrollment";
+import Course from "../models/Course";
 import mongoose from "mongoose";
-import { getIO } from "../socket/socketManager.js";
+import { getIO } from "../socket/socketManager";
 
 // Send a message to course group chat
 export const sendCourseMessage = async (req: AuthRequest, res: Response) => {

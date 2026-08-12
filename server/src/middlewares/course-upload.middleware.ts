@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import multer from "multer";
-import cloudinary from "../configs/cloudinary.config.js";
+import cloudinary from "../configs/cloudinary.config";
 
 // Configure multer to store files in memory
 const storage = multer.memoryStorage();
@@ -40,7 +40,7 @@ const courseUpload = multer({
 // Function to upload image to Cloudinary
 export const uploadImageToCloudinary = async (
   buffer: Buffer,
-  filename: string
+  filename: string,
 ): Promise<{ url: string; publicId: string }> => {
   return new Promise((resolve, reject) => {
     cloudinary.uploader
@@ -62,7 +62,7 @@ export const uploadImageToCloudinary = async (
               publicId: result?.public_id || "",
             });
           }
-        }
+        },
       )
       .end(buffer);
   });
@@ -71,7 +71,7 @@ export const uploadImageToCloudinary = async (
 // Function to upload video to Cloudinary
 export const uploadVideoToCloudinary = async (
   buffer: Buffer,
-  filename: string
+  filename: string,
 ): Promise<{ url: string; publicId: string }> => {
   return new Promise((resolve, reject) => {
     cloudinary.uploader
@@ -99,7 +99,7 @@ export const uploadVideoToCloudinary = async (
               publicId: result?.public_id || "",
             });
           }
-        }
+        },
       )
       .end(buffer);
   });
@@ -108,7 +108,7 @@ export const uploadVideoToCloudinary = async (
 // Function to delete file from Cloudinary
 export const deleteFromCloudinary = async (
   publicId: string,
-  resourceType: "image" | "video" | "raw" = "image"
+  resourceType: "image" | "video" | "raw" = "image",
 ): Promise<boolean> => {
   try {
     const result = await cloudinary.uploader.destroy(publicId, {
@@ -161,7 +161,7 @@ export const courseUploadErrorHandler = (
   err: any,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   if (err instanceof multer.MulterError) {
     if (err.code === "LIMIT_FILE_SIZE") {
@@ -198,7 +198,7 @@ export const courseUploadErrorHandler = (
 export const processCourseUploads = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };

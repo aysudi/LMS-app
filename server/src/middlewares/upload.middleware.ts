@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import multer from "multer";
-import cloudinary from "../configs/cloudinary.config.js";
+import cloudinary from "../configs/cloudinary.config";
 
 // Configure multer to store files in memory
 const storage = multer.memoryStorage();

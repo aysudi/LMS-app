@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
-import instructorAnalyticsSchema from "../schemas/instructorAnalyticsSchema.js";
+import instructorAnalyticsSchema from "../schemas/instructorAnalyticsSchema";
 
 const InstructorAnalytics = mongoose.model(
   "InstructorAnalytics",
-  instructorAnalyticsSchema
+  instructorAnalyticsSchema,
 );
 
 export default InstructorAnalytics;

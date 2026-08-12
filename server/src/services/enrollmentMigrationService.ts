@@ -1,6 +1,6 @@
-import Course from "../models/Course.js";
-import User from "../models/User.js";
-import Enrollment from "../models/Enrollment.js";
+import Course from "../models/Course";
+import User from "../models/User";
+import Enrollment from "../models/Enrollment";
 
 // Sync enrollments from Enrollment model to User.enrolledCourses and Course.studentsEnrolled
 export const syncEnrollmentData = async () => {

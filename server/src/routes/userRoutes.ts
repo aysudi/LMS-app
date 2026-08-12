@@ -17,13 +17,13 @@ import {
   updateAvatarController,
   banUserController,
   unbanUserController,
-} from "../controllers/userController.js";
+} from "../controllers/userController";
 import {
   uploadMiddleware,
   uploadErrorHandler,
-} from "../middlewares/upload.middleware.js";
-import { validateJoiRequest } from "../middlewares/validation.middleware.js";
-import { authenticateToken } from "../middlewares/auth.middleware.js";
+} from "../middlewares/upload.middleware";
+import { validateJoiRequest } from "../middlewares/validation.middleware";
+import { authenticateToken } from "../middlewares/auth.middleware";
 import {
   registerValidationSchema,
   loginValidationSchema,
@@ -33,7 +33,7 @@ import {
   getUsersQuerySchema,
   getUserByIdSchema,
   getUserByUsernameSchema,
-} from "../validations/user.validation.js";
+} from "../validations/user.validation";
 
 const validateQuery = (schema: any) => {
   return (req: any, res: any, next: any) => {

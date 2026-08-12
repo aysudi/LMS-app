@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { AuthRequest } from "../types/common.types.js";
+import { AuthRequest } from "../types/common.types";
 import {
   createQuestion,
   getQuestionsByCourse,
@@ -12,7 +12,7 @@ import {
   deleteAnswer,
   voteOnAnswer,
   acceptAnswer,
-} from "../services/qaService.js";
+} from "../services/qaService";
 import {
   CreateQuestionRequest,
   UpdateQuestionRequest,
@@ -20,7 +20,7 @@ import {
   UpdateAnswerRequest,
   QuestionsQuery,
   VoteRequest,
-} from "../types/qa.types.js";
+} from "../types/qa.types";
 
 // Question Controllers
 export const createQuestionController = async (

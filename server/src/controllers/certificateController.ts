@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
-import { validateCertificateGeneration } from "../validations/certificateValidation.js";
+import { validateCertificateGeneration } from "../validations/certificateValidation";
 import {
   generateCertificate,
   sendCertificateEmail,
-} from "../services/certificateService.js";
-import Certificate from "../models/Certificate.js";
-import Enrollment from "../models/Enrollment.js";
-import Course from "../models/Course.js";
+} from "../services/certificateService";
+import Certificate from "../models/Certificate";
+import Enrollment from "../models/Enrollment";
+import Course from "../models/Course";
 import mongoose from "mongoose";
 
 // Generate and send certificate

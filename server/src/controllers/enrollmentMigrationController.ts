@@ -4,7 +4,7 @@ import {
   syncEnrollmentData,
   syncFromUserEnrolledCourses,
   syncFromCourseStudentsEnrolled,
-} from "../services/enrollmentMigrationService.js";
+} from "../services/enrollmentMigrationService";
 
 // Admin function to sync all enrollment data
 export const syncAllEnrollments = async (req: Request, res: Response) => {

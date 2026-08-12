@@ -1,5 +1,5 @@
 import mongoose, { Document } from "mongoose";
-import courseMessageSchema from "../schemas/courseMessageSchema.js";
+import courseMessageSchema from "../schemas/courseMessageSchema";
 
 export interface ICourseMessage extends Document {
   content: string;
@@ -21,7 +21,7 @@ export interface ICourseMessage extends Document {
 
 const CourseMessage = mongoose.model<ICourseMessage>(
   "CourseMessage",
-  courseMessageSchema
+  courseMessageSchema,
 );
 
 export default CourseMessage;

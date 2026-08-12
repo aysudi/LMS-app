@@ -1,4 +1,4 @@
-import User from "../models/User.js";
+import User from "../models/User";
 import mongoose from "mongoose";
 import {
   RegisterUserDto,
@@ -6,23 +6,23 @@ import {
   IUser,
   AuthResponse,
   UserProfileDto,
-} from "../types/user.types.js";
-import formatMongoData from "../utils/formatMongoData.js";
-import { JWTUtils } from "../utils/jwt.utils.js";
+} from "../types/user.types";
+import formatMongoData from "../utils/formatMongoData";
+import { JWTUtils } from "../utils/jwt.utils";
 import {
   createUserProfile,
   comparePassword,
   hashPassword,
-} from "../utils/user.utils.js";
+} from "../utils/user.utils";
 import {
   generateVerificationToken,
   generatePasswordResetToken,
   hashToken,
-} from "../utils/token.utils.js";
+} from "../utils/token.utils";
 import {
   sendVerificationEmail,
   sendForgotPasswordEmail,
-} from "../utils/sendMail.js";
+} from "../utils/sendMail";
 
 const MAX_ATTEMPTS = 5;
 const LOCK_TIME = 15 * 60 * 1000;

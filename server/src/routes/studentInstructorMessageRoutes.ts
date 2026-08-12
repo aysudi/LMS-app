@@ -1,4 +1,4 @@
-import { authenticateToken } from "./../middlewares/auth.middleware.js";
+import { authenticateToken } from "./../middlewares/auth.middleware";
 import express from "express";
 import {
   sendMessageToInstructor,
@@ -9,7 +9,7 @@ import {
   markMessageAsRead,
   markConversationAsResolved,
   getEnrolledInstructors,
-} from "../controllers/studentInstructorMessageController.js";
+} from "../controllers/studentInstructorMessageController";
 
 const router = express.Router();
 router.use(authenticateToken);

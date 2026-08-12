@@ -1,10 +1,10 @@
 import { Response } from "express";
-import { AuthRequest } from "../types/common.types.js";
-import Enrollment from "../models/Enrollment.js";
-import Course from "../models/Course.js";
-import User from "../models/User.js";
-import { EnrollmentStatus } from "../types/enrollment.types.js";
-import { trackEnrollment } from "../services/analyticsService.js";
+import { AuthRequest } from "../types/common.types";
+import Enrollment from "../models/Enrollment";
+import Course from "../models/Course";
+import User from "../models/User";
+import { EnrollmentStatus } from "../types/enrollment.types";
+import { trackEnrollment } from "../services/analyticsService";
 import type {
   EnrollmentListResponse,
   EnrollmentDetailsResponse,
@@ -15,8 +15,8 @@ import type {
   AddReviewRequest,
   AddReviewResponse,
   LearningStatsResponse,
-} from "../types/enrollment.types.js";
-import formatMongoData from "../utils/formatMongoData.js";
+} from "../types/enrollment.types";
+import formatMongoData from "../utils/formatMongoData";
 
 export const getUserEnrollments = async (req: AuthRequest, res: Response) => {
   try {

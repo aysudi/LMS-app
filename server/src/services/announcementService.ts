@@ -1,12 +1,12 @@
-import Announcement from "../models/Announcement.js";
-import Course from "../models/Course.js";
-import formatMongoData from "../utils/formatMongoData.js";
+import Announcement from "../models/Announcement";
+import Course from "../models/Course";
+import formatMongoData from "../utils/formatMongoData";
 import {
   CreateAnnouncementDto,
   UpdateAnnouncementDto,
   AnnouncementQuery,
   IAnnouncement,
-} from "../types/announcement.types.js";
+} from "../types/announcement.types";
 
 // Get all announcements with pagination and filtering
 export const getAllAnnouncementsService = async (query: AnnouncementQuery) => {

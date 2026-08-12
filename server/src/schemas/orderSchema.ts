@@ -3,7 +3,7 @@ import {
   OrderStatus,
   PaymentStatus,
   PaymentMethod,
-} from "../types/order.types.js";
+} from "../types/order.types";
 
 const orderItemSchema = new mongoose.Schema(
   {

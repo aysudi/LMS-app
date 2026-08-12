@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { MessageStatus } from "../types/studentInstructorMessage.types.js";
+import { MessageStatus } from "../types/studentInstructorMessage.types";
 
 const studentInstructorMessageSchema = new mongoose.Schema(
   {

@@ -1,18 +1,18 @@
 import { Response } from "express";
-import { AuthRequest } from "../types/common.types.js";
-import UserProgress from "../models/UserProgress.js";
-import Enrollment from "../models/Enrollment.js";
-import Course from "../models/Course.js";
-import Section from "../models/Section.js";
-import Lesson from "../models/Lesson.js";
-import User from "../models/User.js";
+import { AuthRequest } from "../types/common.types";
+import UserProgress from "../models/UserProgress";
+import Enrollment from "../models/Enrollment";
+import Course from "../models/Course";
+import Section from "../models/Section";
+import Lesson from "../models/Lesson";
+import User from "../models/User";
 import type {
   UserProgressResponse,
   UpdateUserProgressRequest,
   UpdateUserProgressResponse,
   CourseProgressResponse,
   LearningAnalyticsResponse,
-} from "../types/userProgress.types.js";
+} from "../types/userProgress.types";
 
 // Get user progress for a specific course
 export const getCourseProgress = async (req: AuthRequest, res: Response) => {

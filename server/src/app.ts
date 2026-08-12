@@ -1,36 +1,33 @@
 import cors from "cors";
 import passport from "passport";
-import "./configs/passport.js";
+import "./configs/passport";
 import express from "express";
 import cookieParser from "cookie-parser";
-import {
-  errorHandler,
-  notFoundHandler,
-} from "./middlewares/error.middleware.js";
-import userRouter from "./routes/userRoutes.js";
-import courseRouter from "./routes/courseRoutes.js";
-import sectionRouter from "./routes/sectionRoute.js";
-import lessonRouter from "./routes/lessonRoute.js";
-import googleRouter from "./routes/googleRoutes.js";
-import githubRouter from "./routes/githubRoutes.js";
-import personalizationRouter from "./routes/personalization.js";
-import searchRouter from "./routes/searchRoutes.js";
-import wishlistRouter from "./routes/wishlistRoutes.js";
-import cartRouter from "./routes/cartRoutes.js";
-import orderRouter from "./routes/orderRoutes.js";
-import stripeRouter from "./routes/stripeRoute.js";
-import enrollmentRouter from "./routes/enrollmentRoutes.js";
-import userProgressRouter from "./routes/userProgressRoutes.js";
-import instructorRouter from "./routes/instructorRoutes.js";
-import instructorApplicationRouter from "./routes/instructorApplicationRoutes.js";
-import adminRouter from "./routes/adminRoutes.js";
-import qaRouter from "./routes/qaRoutes.js";
-import certificateRouter from "./routes/certificateRoutes.js";
-import announcementRouter from "./routes/announcementRoutes.js";
-import contactRouter from "./routes/contactRoutes.js";
-import courseMessageRouter from "./routes/courseMessageRoutes.js";
-import studentInstructorMessageRouter from "./routes/studentInstructorMessageRoutes.js";
-import config from "./configs/config.js";
+import { errorHandler, notFoundHandler } from "./middlewares/error.middleware";
+import userRouter from "./routes/userRoutes";
+import courseRouter from "./routes/courseRoutes";
+import sectionRouter from "./routes/sectionRoute";
+import lessonRouter from "./routes/lessonRoute";
+import googleRouter from "./routes/googleRoutes";
+import githubRouter from "./routes/githubRoutes";
+import personalizationRouter from "./routes/personalization";
+import searchRouter from "./routes/searchRoutes";
+import wishlistRouter from "./routes/wishlistRoutes";
+import cartRouter from "./routes/cartRoutes";
+import orderRouter from "./routes/orderRoutes";
+import stripeRouter from "./routes/stripeRoute";
+import enrollmentRouter from "./routes/enrollmentRoutes";
+import userProgressRouter from "./routes/userProgressRoutes";
+import instructorRouter from "./routes/instructorRoutes";
+import instructorApplicationRouter from "./routes/instructorApplicationRoutes";
+import adminRouter from "./routes/adminRoutes";
+import qaRouter from "./routes/qaRoutes";
+import certificateRouter from "./routes/certificateRoutes";
+import announcementRouter from "./routes/announcementRoutes";
+import contactRouter from "./routes/contactRoutes";
+import courseMessageRouter from "./routes/courseMessageRoutes";
+import studentInstructorMessageRouter from "./routes/studentInstructorMessageRoutes";
+import config from "./configs/config";
 
 const app = express();
 

@@ -1,14 +1,14 @@
-import Contact from "../models/Contact.js";
+import Contact from "../models/Contact";
 import {
   CreateContactData,
   GetContactsQuery,
   ReplyContactData,
   ContactsPaginationData,
-} from "../types/contact.types.js";
+} from "../types/contact.types";
 import {
   sendContactNotificationEmail,
   sendContactReplyEmail,
-} from "../utils/emailService.js";
+} from "../utils/emailService";
 
 // Create a new contact message
 export const createContact = async (contactData: CreateContactData) => {

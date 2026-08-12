@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { AuthRequest } from "../types/common.types.js";
+import { AuthRequest } from "../types/common.types";
 import {
   getAllAnnouncementsService,
   getAnnouncementsByCourseService,
@@ -10,12 +10,12 @@ import {
   deleteAnnouncementService,
   markAnnouncementAsReadService,
   getAnnouncementStatsService,
-} from "../services/announcementService.js";
+} from "../services/announcementService";
 import {
   CreateAnnouncementDto,
   UpdateAnnouncementDto,
   AnnouncementQuery,
-} from "../types/announcement.types.js";
+} from "../types/announcement.types";
 
 // Get all announcements (admin only)
 export const getAllAnnouncements = async (req: Request, res: Response) => {

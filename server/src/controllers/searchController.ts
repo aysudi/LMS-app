@@ -5,8 +5,8 @@ import {
   getSearchHistory as getSearchHistoryService,
   clearSearchHistory as clearSearchHistoryService,
   getPopularSearches as getPopularSearchesService,
-} from "../services/searchService.js";
-import { SearchQuery, SearchHistoryQuery } from "../types/search.types.js";
+} from "../services/searchService";
+import { SearchQuery, SearchHistoryQuery } from "../types/search.types";
 
 export const getSearchSuggestions = async (req: Request, res: Response) => {
   try {

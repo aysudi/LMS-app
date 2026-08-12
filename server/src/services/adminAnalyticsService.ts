@@ -1,7 +1,7 @@
-import Order from "../models/Order.js";
-import User from "../models/User.js";
-import Course from "../models/Course.js";
-import Enrollment from "../models/Enrollment.js";
+import Order from "../models/Order";
+import User from "../models/User";
+import Course from "../models/Course";
+import Enrollment from "../models/Enrollment";
 
 // Calculate admin revenue (25% of all orders)
 export const getAdminAnalyticsService = async (params: any = {}) => {

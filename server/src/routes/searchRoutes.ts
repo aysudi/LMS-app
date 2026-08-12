@@ -5,8 +5,8 @@ import {
   getSearchHistory,
   clearSearchHistory,
   getPopularSearches,
-} from "../controllers/searchController.js";
-import { authenticateToken } from "../middlewares/auth.middleware.js";
+} from "../controllers/searchController";
+import { authenticateToken } from "../middlewares/auth.middleware";
 
 const router = express.Router();
 

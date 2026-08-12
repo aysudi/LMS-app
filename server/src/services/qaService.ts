@@ -1,8 +1,8 @@
 import { FilterQuery } from "mongoose";
-import Question from "../models/Question.js";
-import Answer from "../models/Answer.js";
-import Course from "../models/Course.js";
-import Lesson from "../models/Lesson.js";
+import Question from "../models/Question";
+import Answer from "../models/Answer";
+import Course from "../models/Course";
+import Lesson from "../models/Lesson";
 import {
   CreateQuestionRequest,
   UpdateQuestionRequest,
@@ -10,7 +10,7 @@ import {
   UpdateAnswerRequest,
   QuestionsQuery,
   AnswersQuery,
-} from "../types/qa.types.js";
+} from "../types/qa.types";
 
 // Question Services
 export const createQuestion = async (

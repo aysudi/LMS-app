@@ -1,12 +1,12 @@
 import { Response } from "express";
-import { AuthRequest } from "../types/common.types.js";
+import { AuthRequest } from "../types/common.types";
 import {
   getInstructorTotalEarnings,
   getInstructorEarningsByCourse,
   getInstructorMonthlyAnalytics,
   updatePayoutStatus,
-} from "../services/instructorEarningsService.js";
-import { getCourseStudentsService } from "../services/instructorService.js";
+} from "../services/instructorEarningsService";
+import { getCourseStudentsService } from "../services/instructorService";
 
 // Get instructor total earnings summary
 export const getInstructorEarnings = async (

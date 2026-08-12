@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-import { AuthRequest } from "../types/common.types.js";
+import { AuthRequest } from "../types/common.types";
 import {
   CourseQuery,
   CreateCourseData,
   UpdateCourseData,
-} from "../types/course.types.js";
+} from "../types/course.types";
 import {
   createCourseService,
   deleteCourseService,
@@ -15,8 +15,8 @@ import {
   updateCourseService,
   toggleCourseStatusService,
   submitCourseForApprovalService,
-} from "../services/courseService.js";
-import formatMongoData from "../utils/formatMongoData.js";
+} from "../services/courseService";
+import formatMongoData from "../utils/formatMongoData";
 
 // Get all courses with filtering and pagination
 export const getAllCourses = async (req: Request, res: Response) => {
@@ -243,7 +243,7 @@ export const addReview = async (req: AuthRequest, res: Response) => {
     }
 
     const { addReviewToCourseService } =
-      await import("../services/courseService.js");
+      await import("../services/courseService");
     const course = await addReviewToCourseService(id, userId, rating, comment);
 
     res.status(201).json({
@@ -267,7 +267,7 @@ export const getCourseReviews = async (req: Request, res: Response) => {
     const limit = parseInt(req.query.limit as string) || 10;
 
     const { getCourseReviewsService } =
-      await import("../services/courseService.js");
+      await import("../services/courseService");
     const result = await getCourseReviewsService(id, page, limit);
 
     const response = {
@@ -337,8 +337,7 @@ export const updateReview = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    const { updateReviewService } =
-      await import("../services/courseService.js");
+    const { updateReviewService } = await import("../services/courseService");
     const course = await updateReviewService(id, userId, rating, comment);
 
     res.status(200).json({
@@ -360,8 +359,7 @@ export const deleteReview = async (req: AuthRequest, res: Response) => {
     const { id }: any = req.params;
     const userId = req.user!.userId;
 
-    const { deleteReviewService } =
-      await import("../services/courseService.js");
+    const { deleteReviewService } = await import("../services/courseService");
     const result = await deleteReviewService(id, userId);
 
     res.status(200).json({

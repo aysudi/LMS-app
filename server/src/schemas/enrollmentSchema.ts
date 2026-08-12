@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { EnrollmentStatus } from "../types/enrollment.types.js";
+import { EnrollmentStatus } from "../types/enrollment.types";
 
 const enrollmentSchema = new mongoose.Schema(
   {
@@ -188,7 +188,7 @@ enrollmentSchema.methods.updateProgress = async function (
     // Track course completion for analytics
     try {
       const { trackCourseCompletion } =
-        await import("../services/analyticsService.js");
+        await import("../services/analyticsService");
       await trackCourseCompletion(this.course.toString(), this.user.toString());
     } catch (error) {
       console.error("Error tracking course completion:", error);

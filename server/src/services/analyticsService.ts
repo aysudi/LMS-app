@@ -1,5 +1,5 @@
-import InstructorAnalytics from "../models/InstructorAnalytics.js";
-import Course from "../models/Course.js";
+import InstructorAnalytics from "../models/InstructorAnalytics";
+import Course from "../models/Course";
 
 // Track course view for analytics
 export const trackCourseView = async (courseId: string, userId?: string) => {

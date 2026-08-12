@@ -1,4 +1,4 @@
-import { sendEmail } from "./sendMail.js";
+import { sendEmail } from "./sendMail";
 import he from "he";
 
 interface ContactNotificationData {

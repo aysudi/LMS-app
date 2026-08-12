@@ -1,13 +1,13 @@
 import { Response } from "express";
-import { AuthRequest } from "../types/common.types.js";
-import { UserRole } from "../types/user.types.js";
+import { AuthRequest } from "../types/common.types";
+import { UserRole } from "../types/user.types";
 import {
   submitInstructorApplication,
   getAllInstructorApplications,
   getUserInstructorApplication,
   approveInstructorApplication,
   rejectInstructorApplication,
-} from "../services/instructorApplicationService.js";
+} from "../services/instructorApplicationService";
 
 // Submit instructor application
 export const submitApplication = async (req: AuthRequest, res: Response) => {

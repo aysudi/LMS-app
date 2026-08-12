@@ -13,12 +13,12 @@ import {
   updateUserProfile,
   changeUserPassword,
   updateUserAvatar,
-} from "../services/userService.js";
+} from "../services/userService";
 import bcrypt from "bcrypt";
-import { uploadToCloudinary } from "../middlewares/upload.middleware.js";
-import formatMongoData from "../utils/formatMongoData.js";
-import cloudinary from "../configs/cloudinary.config.js";
-import config from "../configs/config.js";
+import { uploadToCloudinary } from "../middlewares/upload.middleware";
+import formatMongoData from "../utils/formatMongoData";
+import cloudinary from "../configs/cloudinary.config";
+import config from "../configs/config";
 
 export const getCurrentUserController = async (
   req: any,
@@ -575,7 +575,7 @@ export const banUserController = async (
       });
     }
 
-    const { banUser } = await import("../services/userService.js");
+    const { banUser } = await import("../services/userService");
     const updatedUser = await banUser(userId, bannedBy, banDuration, reason);
 
     res.status(200).json({
@@ -607,7 +607,7 @@ export const unbanUserController = async (
 
     const { userId } = req.params;
 
-    const { unbanUser } = await import("../services/userService.js");
+    const { unbanUser } = await import("../services/userService");
     const updatedUser = await unbanUser(userId);
 
     res.status(200).json({

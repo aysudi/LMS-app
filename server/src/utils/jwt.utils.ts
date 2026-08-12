@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
-import { IUser } from "../types/user.types.js";
-import config from "../configs/config.js";
+import { IUser } from "../types/user.types";
+import config from "../configs/config";
 
 interface JWTPayload {
   userId: string;

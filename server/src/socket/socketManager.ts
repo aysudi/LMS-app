@@ -1,7 +1,7 @@
 import { Server, Socket } from "socket.io";
 import jwt from "jsonwebtoken";
-import { JWTUtils } from "../utils/jwt.utils.js";
-import Enrollment from "../models/Enrollment.js";
+import { JWTUtils } from "../utils/jwt.utils";
+import Enrollment from "../models/Enrollment";
 
 interface SocketUser {
   userId: string;
@@ -65,7 +65,7 @@ export const initializeSocket = (io: Server) => {
         console.error("❌ JWT Error details:", error.message);
         if (error.message.includes("invalid signature")) {
           console.error(
-            "❌ Token signature verification failed - check JWT secret"
+            "❌ Token signature verification failed - check JWT secret",
           );
         } else if (error.message.includes("jwt expired")) {
           console.error("❌ Token has expired");
@@ -77,8 +77,8 @@ export const initializeSocket = (io: Server) => {
         new Error(
           `Authentication failed: ${
             error instanceof Error ? error.message : "Unknown error"
-          }`
-        )
+          }`,
+        ),
       );
     }
   });
@@ -143,7 +143,7 @@ export const initializeSocket = (io: Server) => {
           const room = io.sockets.adapter.rooms.get(`course-${courseId}`);
         } else {
           console.log(
-            `❌ User ${authSocket.userId} not enrolled in course: ${courseId}`
+            `❌ User ${authSocket.userId} not enrolled in course: ${courseId}`,
           );
         }
       } catch (error) {

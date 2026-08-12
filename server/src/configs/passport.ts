@@ -1,13 +1,13 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import config from "./config.js";
+import config from "./config";
 import { Profile } from "passport-google-oauth20";
 import { VerifyCallback } from "passport-oauth2";
 import {
   Strategy as GitHubStrategy,
   Profile as GitHubProfile,
 } from "passport-github2";
-import UserModel from "../models/User.js";
+import UserModel from "../models/User";
 
 const sanitizeUsername = (input: string): string => {
   return input
@@ -73,8 +73,8 @@ passport.use(
       } catch (error) {
         done(error, false);
       }
-    }
-  )
+    },
+  ),
 );
 
 passport.use(
@@ -89,7 +89,7 @@ passport.use(
       _accessToken: string,
       _refreshToken: string,
       profile: GitHubProfile,
-      done: VerifyCallback
+      done: VerifyCallback,
     ) => {
       try {
         if (!profile.id) {
@@ -147,8 +147,8 @@ passport.use(
         console.error("💥 GitHub strategy error:", error);
         return done(error as Error, false);
       }
-    }
-  )
+    },
+  ),
 );
 
 passport.serializeUser((user: any, done) => {

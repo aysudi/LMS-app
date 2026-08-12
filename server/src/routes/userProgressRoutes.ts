@@ -5,9 +5,9 @@ import {
   getLearningAnalytics,
   getUserProgress,
   completeLessonProgress,
-} from "../controllers/userProgressController.js";
-import { authenticateToken } from "../middlewares/auth.middleware.js";
-import { AuthRequest } from "../types/common.types.js";
+} from "../controllers/userProgressController";
+import { authenticateToken } from "../middlewares/auth.middleware";
+import { AuthRequest } from "../types/common.types";
 
 const userProgressRouter = Router();
 

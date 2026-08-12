@@ -7,17 +7,17 @@ import {
   getSection,
   updateSection,
   deleteSection,
-} from "../controllers/sectionController.js";
+} from "../controllers/sectionController";
 import {
   authenticateToken,
   authorizeRoles,
-} from "../middlewares/auth.middleware.js";
-import { UserRole } from "../types/user.types.js";
+} from "../middlewares/auth.middleware";
+import { UserRole } from "../types/user.types";
 import {
   sectionUploadMiddleware,
   sectionUploadErrorHandler,
   processSectionUploads,
-} from "../middlewares/section-upload.middleware.js";
+} from "../middlewares/section-upload.middleware";
 
 const sectionRouter = Router();
 

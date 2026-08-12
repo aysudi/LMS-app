@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import multer from "multer";
-import cloudinary from "../configs/cloudinary.config.js";
+import cloudinary from "../configs/cloudinary.config";
 import { Buffer } from "buffer";
 
 const storage = multer.memoryStorage();
@@ -77,7 +77,7 @@ const lessonUpload = multer({
 
 export const uploadLessonVideoToCloudinary = async (
   buffer: Buffer,
-  filename: string
+  filename: string,
 ): Promise<{ url: string; publicId: string }> => {
   return new Promise((resolve, reject) => {
     cloudinary.uploader
@@ -105,7 +105,7 @@ export const uploadLessonVideoToCloudinary = async (
               publicId: result?.public_id || "",
             });
           }
-        }
+        },
       )
       .end(buffer);
   });
@@ -114,7 +114,7 @@ export const uploadLessonVideoToCloudinary = async (
 export const uploadResourceToCloudinary = async (
   buffer: Buffer,
   filename: string,
-  mimeType: string
+  mimeType: string,
 ): Promise<{ url: string; publicId: string }> => {
   return new Promise((resolve, reject) => {
     let resourceType: "image" | "video" | "auto" | "raw" = "raw";
@@ -171,7 +171,7 @@ export const lessonUploadErrorHandler = (
   err: any,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   if (err instanceof multer.MulterError) {
     if (err.code === "LIMIT_FILE_SIZE") {
@@ -207,7 +207,7 @@ export const lessonUploadErrorHandler = (
 export const processLessonUploads = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
@@ -224,7 +224,7 @@ export const processLessonUploads = async (
 
       const result = await uploadLessonVideoToCloudinary(
         videoFile.buffer,
-        filename
+        filename,
       );
       uploadedFiles.video = result;
     }
@@ -238,13 +238,13 @@ export const processLessonUploads = async (
           const result = await uploadResourceToCloudinary(
             file.buffer,
             filename,
-            file.mimetype
+            file.mimetype,
           );
           return {
             ...result,
             name: file.originalname,
           };
-        })
+        }),
       );
     }
 

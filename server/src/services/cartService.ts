@@ -1,6 +1,6 @@
-import Cart from "../models/Cart.js";
-import Course from "../models/Course.js";
-import User from "../models/User.js";
+import Cart from "../models/Cart";
+import Course from "../models/Course";
+import User from "../models/User";
 import mongoose from "mongoose";
 
 export const getUserCart = async (userId: string) => {

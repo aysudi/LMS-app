@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { AuthProvider, UserRole } from "../types/user.types.js";
+import { AuthProvider, UserRole } from "../types/user.types";
 
 const socialLinksSchema = new mongoose.Schema(
   {
@@ -8,7 +8,7 @@ const socialLinksSchema = new mongoose.Schema(
     github: { type: String, trim: true },
     twitter: { type: String, trim: true },
   },
-  { versionKey: false }
+  { versionKey: false },
 );
 
 const preferencesSchema = new mongoose.Schema(
@@ -17,7 +17,7 @@ const preferencesSchema = new mongoose.Schema(
     marketingEmails: { type: Boolean, default: false },
     theme: { type: String, enum: ["light", "dark"], default: "light" },
   },
-  { versionKey: false }
+  { versionKey: false },
 );
 
 const userSchema = new mongoose.Schema(
@@ -275,7 +275,7 @@ const userSchema = new mongoose.Schema(
   {
     timestamps: true,
     versionKey: false,
-  }
+  },
 );
 
 userSchema.index({ role: 1 });

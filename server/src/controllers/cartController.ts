@@ -1,6 +1,6 @@
 import { Response } from "express";
-import { AuthRequest } from "../types/common.types.js";
-import * as cartService from "../services/cartService.js";
+import { AuthRequest } from "../types/common.types";
+import * as cartService from "../services/cartService";
 import mongoose from "mongoose";
 
 // Get user's cart

@@ -1,20 +1,20 @@
 import { FilterQuery } from "mongoose";
-import Course from "../models/Course.js";
-import User from "../models/User.js";
-import Section from "../models/Section.js";
-import Lesson from "../models/Lesson.js";
+import Course from "../models/Course";
+import User from "../models/User";
+import Section from "../models/Section";
+import Lesson from "../models/Lesson";
 import {
   CourseQuery,
   CreateCourseData,
   ICourse,
   UpdateCourseData,
-} from "../types/course.types.js";
-import UserNote from "../models/UserNote.js";
-import UserProgress from "../models/UserProgress.js";
+} from "../types/course.types";
+import UserNote from "../models/UserNote";
+import UserProgress from "../models/UserProgress";
 import {
   deleteFromCloudinary,
   extractPublicIdFromUrl,
-} from "../middlewares/course-upload.middleware.js";
+} from "../middlewares/course-upload.middleware";
 
 export const getAllCoursesService = async (query: CourseQuery = {}) => {
   const {

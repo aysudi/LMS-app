@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { AuthRequest } from "../types/common.types.js";
+import { AuthRequest } from "../types/common.types";
 import {
   createLessonService,
   getAllLessons,
@@ -9,8 +9,8 @@ import {
   deleteLessonService,
   addNoteToLessonService,
   getUserNotesForLessonService,
-} from "../services/lessonService.js";
-import formatMongoData from "../utils/formatMongoData.js";
+} from "../services/lessonService";
+import formatMongoData from "../utils/formatMongoData";
 
 export const getAllLessonsController = async (
   req: AuthRequest,

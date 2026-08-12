@@ -1,26 +1,26 @@
 import { Response } from "express";
-import { AuthRequest } from "../types/common.types.js";
+import { AuthRequest } from "../types/common.types";
 import { Types } from "mongoose";
-import Course from "../models/Course.js";
-import User from "../models/User.js";
-import Enrollment from "../models/Enrollment.js";
-import InstructorEarnings from "../models/InstructorEarnings.js";
-import { createInstructorEarningsForOrder } from "../services/instructorEarningsService.js";
-import { trackEnrollment } from "../services/analyticsService.js";
+import Course from "../models/Course";
+import User from "../models/User";
+import Enrollment from "../models/Enrollment";
+import InstructorEarnings from "../models/InstructorEarnings";
+import { createInstructorEarningsForOrder } from "../services/instructorEarningsService";
+import { trackEnrollment } from "../services/analyticsService";
 import {
   OrderStatus,
   PaymentStatus,
   PaymentMethod,
-} from "../types/order.types.js";
-import { EnrollmentStatus } from "../types/enrollment.types.js";
+} from "../types/order.types";
+import { EnrollmentStatus } from "../types/enrollment.types";
 import type {
   CreateOrderRequest,
   CreateOrderResponse,
   OrderListResponse,
   OrderDetailsResponse,
-} from "../types/order.types.js";
-import Order from "../models/Order.js";
-import formatMongoData from "../utils/formatMongoData.js";
+} from "../types/order.types";
+import Order from "../models/Order";
+import formatMongoData from "../utils/formatMongoData";
 
 // Create a new order (before payment)
 export const createOrder = async (req: AuthRequest, res: Response) => {

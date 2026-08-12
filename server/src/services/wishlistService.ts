@@ -1,9 +1,9 @@
-import User from "../models/User.js";
+import User from "../models/User";
 import mongoose from "mongoose";
 
 export const isInWishlist = async (
   userId: string,
-  courseId: string
+  courseId: string,
 ): Promise<boolean> => {
   try {
     const user = await User.findById(userId).select("wishlist");

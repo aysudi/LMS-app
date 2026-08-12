@@ -1,12 +1,12 @@
-import Course from "../models/Course.js";
-import User from "../models/User.js";
-import { SearchHistory } from "../schemas/searchHistorySchema.js";
+import Course from "../models/Course";
+import User from "../models/User";
+import { SearchHistory } from "../schemas/searchHistorySchema";
 import {
   SearchSuggestion,
   SearchQuery,
   SearchHistoryQuery,
   SearchHistory as SearchHistoryType,
-} from "../types/search.types.js";
+} from "../types/search.types";
 
 export const getSearchSuggestions = async (
   query: SearchQuery,

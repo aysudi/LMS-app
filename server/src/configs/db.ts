@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 import { createServer } from "http";
 import { Server } from "socket.io";
-import config from "./config.js";
-import { initializeSocket } from "../socket/socketManager.js";
+import config from "./config";
+import { initializeSocket } from "../socket/socketManager";
 
 const connectToDB = (app: any) => {
   if (config.DB_URL) {
