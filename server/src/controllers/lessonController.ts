@@ -11,6 +11,45 @@ import {
   getUserNotesForLessonService,
 } from "../services/lessonService";
 import formatMongoData from "../utils/formatMongoData";
+import Enrollment from "../models/Enrollment";
+import { EnrollmentStatus } from "../types/enrollment.types";
+import { UserRole } from "../types/user.types";
+
+const getCourseId = (lesson: any): string =>
+  lesson.course?._id?.toString() || lesson.course?.toString();
+
+const hasFullLessonAccess = async (lesson: any, req: AuthRequest) => {
+  if (!req.user) return false;
+  if (req.user.role === UserRole.ADMIN) return true;
+
+  const courseId = getCourseId(lesson);
+  const instructorId =
+    lesson.course?.instructor?._id?.toString() ||
+    lesson.course?.instructor?.toString();
+
+  if (instructorId === req.user.userId) return true;
+
+  return Boolean(
+    await Enrollment.exists({
+      user: req.user.userId,
+      course: courseId,
+      status: EnrollmentStatus.ACTIVE,
+    }),
+  );
+};
+
+const isPublishedPreview = (lesson: any) =>
+  lesson.isPreview === true &&
+  lesson.course?.isPublished === true &&
+  lesson.course?.status === "approved";
+
+const redactLessonContent = (lesson: any) => {
+  const safeLesson = lesson.toObject ? lesson.toObject() : { ...lesson };
+  safeLesson.video = undefined;
+  safeLesson.resources = [];
+  safeLesson.quiz = [];
+  return safeLesson;
+};
 
 export const getAllLessonsController = async (
   req: AuthRequest,
@@ -135,10 +174,16 @@ export const getLessonsBySection = async (req: AuthRequest, res: Response) => {
     const { sectionId }: any = req.params;
 
     const lessons = await getLessonsBySectionService(sectionId);
+    const safeLessons = await Promise.all(
+      lessons.map(async (lesson) => {
+        if (await hasFullLessonAccess(lesson, req)) return lesson;
+        return isPublishedPreview(lesson) ? lesson : redactLessonContent(lesson);
+      }),
+    );
 
     res.status(200).json({
       success: true,
-      data: formatMongoData(lessons),
+      data: formatMongoData(safeLessons),
     });
   } catch (error: any) {
     res.status(400).json({
@@ -153,6 +198,16 @@ export const getLessonById = async (req: AuthRequest, res: Response) => {
     const { lessonId }: any = req.params;
 
     const lesson = await getLessonByIdService(lessonId);
+
+    if (
+      !(await hasFullLessonAccess(lesson, req)) &&
+      !isPublishedPreview(lesson)
+    ) {
+      return res.status(req.user ? 403 : 401).json({
+        success: false,
+        message: "Enrollment is required to access this lesson",
+      });
+    }
 
     res.status(200).json({
       success: true,

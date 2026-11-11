@@ -1,4 +1,5 @@
 import { Response } from "express";
+import Stripe from "stripe";
 import { AuthRequest } from "../types/common.types";
 import { Types } from "mongoose";
 import Course from "../models/Course";
@@ -22,6 +23,16 @@ import type {
 import Order from "../models/Order";
 import formatMongoData from "../utils/formatMongoData";
 
+const getStripe = () => {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error("Stripe payments are not configured");
+  }
+
+  return new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: "2025-08-27.basil",
+  });
+};
+
 // Create a new order (before payment)
 export const createOrder = async (req: AuthRequest, res: Response) => {
   try {
@@ -44,7 +55,11 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
     }
 
     const courseIds = items.map((item) => item.course);
-    const courses = await Course.find({ _id: { $in: courseIds } });
+    const courses = await Course.find({
+      _id: { $in: courseIds },
+      isPublished: true,
+      status: "approved",
+    });
 
     if (courses.length !== items.length) {
       return res.status(400).json({
@@ -71,16 +86,21 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
 
     let subtotal = 0;
     const orderItems = items.map((item) => {
-      const course = courses.find((c) => c._id.toString() === item.course);
-      const price = course?.discountPrice || course?.originalPrice || 0;
-      const actualPrice = item.discountPrice || item.price || price;
+      const course = courses.find((c) => c._id.toString() === item.course)!;
+      const originalPrice = course.originalPrice || 0;
+      const discountPrice = course.discountPrice || 0;
+      const actualPrice = course.isFree
+        ? 0
+        : discountPrice > 0 && discountPrice < originalPrice
+          ? discountPrice
+          : originalPrice;
 
       subtotal += actualPrice;
 
       return {
-        course: course?._id,
-        price: course?.originalPrice || 0,
-        discountPrice: course?.discountPrice,
+        course: course._id,
+        price: originalPrice,
+        discountPrice: course.discountPrice,
         actualPrice,
       };
     });
@@ -344,7 +364,7 @@ export const completeOrder = async (orderId: string, paymentDetails: any) => {
 export const confirmPayment = async (req: AuthRequest, res: Response) => {
   try {
     const { orderId } = req.params;
-    const { paymentIntentId, paymentMethodId } = req.body;
+    const { paymentIntentId } = req.body;
     const userId = req.user?.id;
 
     if (!userId) {
@@ -386,6 +406,31 @@ export const confirmPayment = async (req: AuthRequest, res: Response) => {
       });
     }
 
+    if (typeof paymentIntentId !== "string") {
+      return res.status(400).json({
+        success: false,
+        message: "A valid payment intent is required",
+      });
+    }
+
+    const paymentIntent = await getStripe().paymentIntents.retrieve(
+      paymentIntentId,
+    );
+    const expectedAmount = Math.round(order.total * 100);
+
+    if (
+      paymentIntent.status !== "succeeded" ||
+      paymentIntent.amount_received !== expectedAmount ||
+      paymentIntent.currency !== order.currency.toLowerCase() ||
+      paymentIntent.metadata.orderId !== order.id ||
+      paymentIntent.metadata.userId !== userId
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Payment could not be verified for this order",
+      });
+    }
+
     order.status = OrderStatus.COMPLETED;
     order.paymentStatus = PaymentStatus.COMPLETED;
 
@@ -393,6 +438,10 @@ export const confirmPayment = async (req: AuthRequest, res: Response) => {
       method: PaymentMethod.CREDIT_CARD,
       stripePaymentIntentId: paymentIntentId,
       transactionId: paymentIntentId,
+      stripeChargeId:
+        typeof paymentIntent.latest_charge === "string"
+          ? paymentIntent.latest_charge
+          : paymentIntent.latest_charge?.id,
     });
 
     order.completedAt = new Date();

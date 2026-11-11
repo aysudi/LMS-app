@@ -23,7 +23,11 @@ import {
   uploadErrorHandler,
 } from "../middlewares/upload.middleware";
 import { validateJoiRequest } from "../middlewares/validation.middleware";
-import { authenticateToken } from "../middlewares/auth.middleware";
+import {
+  authenticateToken,
+  authorizeRoles,
+} from "../middlewares/auth.middleware";
+import { UserRole } from "../types/user.types";
 import {
   registerValidationSchema,
   loginValidationSchema,
@@ -68,7 +72,13 @@ const userRouter = Router();
 // Protected route - must be before other routes to avoid conflicts
 userRouter.get("/me", authenticateToken, getCurrentUserController);
 
-userRouter.get("/", validateQuery(getUsersQuerySchema), getAllUsersController);
+userRouter.get(
+  "/",
+  authenticateToken,
+  authorizeRoles(UserRole.ADMIN),
+  validateQuery(getUsersQuerySchema),
+  getAllUsersController,
+);
 
 userRouter.post(
   "/register",
@@ -128,7 +138,17 @@ userRouter.put(
 );
 
 // Admin routes for user management
-userRouter.post("/:userId/ban", authenticateToken, banUserController);
-userRouter.post("/:userId/unban", authenticateToken, unbanUserController);
+userRouter.post(
+  "/:userId/ban",
+  authenticateToken,
+  authorizeRoles(UserRole.ADMIN),
+  banUserController,
+);
+userRouter.post(
+  "/:userId/unban",
+  authenticateToken,
+  authorizeRoles(UserRole.ADMIN),
+  unbanUserController,
+);
 
 export default userRouter;

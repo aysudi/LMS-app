@@ -212,7 +212,11 @@ const getRemainingLockTime = (lockUntil: Date): number => {
 export const register = async (
   userData: RegisterUserDto,
   avatarUrl?: string,
-): Promise<{ message: string; user: UserProfileDto }> => {
+): Promise<{
+  message: string;
+  verificationEmailSent: boolean;
+  user: UserProfileDto;
+}> => {
   const existingUser = await User.findOne({
     $or: [{ email: userData.email }, { username: userData.username }],
   });
@@ -234,17 +238,21 @@ export const register = async (
 
   const user = await User.create(userDataWithAvatar);
 
+  let verificationEmailSent = true;
   try {
     await sendVerificationEmail(user.email, user.firstName, verificationToken);
-  } catch (emailError) {
-    console.error("Failed to send verification email:", emailError);
+  } catch {
+    verificationEmailSent = false;
+    console.error("Failed to send verification email during registration");
   }
 
   const userProfile = createUserProfile(user);
 
   return {
-    message:
-      "Registration successful! Please check your email to verify your account.",
+    message: verificationEmailSent
+      ? "Registration successful! Please check your email to verify your account."
+      : "Your account was created, but the verification email could not be sent. Please request a new email from the verification page.",
+    verificationEmailSent,
     user: formatMongoData(userProfile),
   };
 };

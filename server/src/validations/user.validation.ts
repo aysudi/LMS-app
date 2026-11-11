@@ -38,13 +38,9 @@ export const registerValidationSchema = Joi.object({
     "any.required": "Password is required",
   }),
 
-  role: Joi.string()
-    .valid(...Object.values(UserRole))
-    .optional()
-    .default(UserRole.STUDENT)
-    .messages({
-      "any.only": "Role must be either student, instructor, or admin",
-    }),
+  role: Joi.forbidden().messages({
+    "any.unknown": "Role cannot be assigned during registration",
+  }),
 });
 
 export const loginValidationSchema = Joi.object({

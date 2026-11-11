@@ -14,6 +14,7 @@ export interface LoginRequest {
 export interface AuthResponse {
   success: boolean;
   message: string;
+  verificationEmailSent?: boolean;
   data: {
     user: {
       id: string;

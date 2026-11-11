@@ -5,17 +5,27 @@ import config from "./config";
 import { initializeSocket } from "../socket/socketManager";
 
 const connectToDB = (app: any) => {
-  if (config.DB_URL) {
-    mongoose
-      .connect(config.DB_URL)
-      .then(() => {
+  if (!config.DB_URL) {
+    throw new Error("DB_URL must be configured before the server starts");
+  }
+
+  mongoose
+    .connect(config.DB_URL)
+    .then(() => {
         console.log("🚀 mongodb connected successfully!");
 
         // Create HTTP server and Socket.IO
         const server = createServer(app);
+        const allowedOrigins = new Set([
+          config.CLIENT_URL,
+          ...(config.NODE_ENV === "production"
+            ? []
+            : ["http://localhost:5173", "http://localhost:5174"]),
+        ].filter((origin): origin is string => Boolean(origin)));
+
         const io = new Server(server, {
           cors: {
-            origin: ["http://localhost:5173", "http://localhost:5174"],
+            origin: [...allowedOrigins],
             credentials: true,
           },
         });
@@ -29,9 +39,9 @@ const connectToDB = (app: any) => {
         });
       })
       .catch((err) => {
-        console.warn("❌ db connection failed: ", err.message);
+        console.error("❌ db connection failed: ", err.message);
+        process.exit(1);
       });
-  }
 };
 
 export default connectToDB;

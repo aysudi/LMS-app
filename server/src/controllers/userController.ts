@@ -19,6 +19,7 @@ import { uploadToCloudinary } from "../middlewares/upload.middleware";
 import formatMongoData from "../utils/formatMongoData";
 import cloudinary from "../configs/cloudinary.config";
 import config from "../configs/config";
+import { UserRole } from "../types/user.types";
 
 export const getCurrentUserController = async (
   req: any,
@@ -96,11 +97,12 @@ export const getUserByIdController = async (
     }
 
     const user = await getUserById(userId);
+    const { email: _email, ...publicProfile } = user;
 
     res.status(200).json({
       success: true,
       message: "User retrieved successfully",
-      data: formatMongoData(user),
+      data: formatMongoData(publicProfile),
     });
   } catch (error: any) {
     console.error("Get user by ID error:", error);
@@ -129,11 +131,12 @@ export const getUserByUsernameController = async (
     }
 
     const user = await getUserByUsername(username);
+    const { email: _email, ...publicProfile } = user;
 
     res.status(200).json({
       success: true,
       message: "User retrieved successfully",
-      data: formatMongoData(user),
+      data: formatMongoData(publicProfile),
     });
   } catch (error: any) {
     console.error("Get user by username error:", error);
@@ -151,7 +154,7 @@ export const registerUser = async (
   next: NextFunction,
 ) => {
   try {
-    const { firstName, lastName, username, email, password, role } = req.body;
+    const { firstName, lastName, username, email, password } = req.body;
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
@@ -161,7 +164,7 @@ export const registerUser = async (
       username,
       email,
       password: hashedPassword,
-      role,
+      role: UserRole.STUDENT,
     };
 
     let avatarUrl: string | undefined;
@@ -185,6 +188,7 @@ export const registerUser = async (
     res.status(201).json({
       success: true,
       message: result.message,
+      verificationEmailSent: result.verificationEmailSent,
       data: { user: result.user },
     });
   } catch (error: any) {

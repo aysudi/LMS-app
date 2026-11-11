@@ -1,4 +1,5 @@
 import Contact from "../models/Contact";
+import config from "../configs/config";
 import {
   CreateContactData,
   GetContactsQuery,
@@ -17,7 +18,7 @@ export const createContact = async (contactData: CreateContactData) => {
     const savedContact = await contact.save();
 
     sendContactNotificationEmail({
-      adminEmail: process.env.GMAIL_USER!,
+      adminEmail: config.CONTACT_NOTIFICATION_EMAIL || config.EMAIL_FROM || "",
       contactData: {
         name: contactData.name,
         email: contactData.email,

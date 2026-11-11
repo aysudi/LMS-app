@@ -8,11 +8,19 @@ interface JWTPayload {
   role: string;
 }
 
+const requireSecret = (secret: string | undefined, name: string): string => {
+  if (!secret) {
+    throw new Error(`${name} must be configured before the server starts`);
+  }
+
+  return secret;
+};
+
 export class JWTUtils {
   private static readonly ACCESS_TOKEN_SECRET =
-    config.JWT_ACCESS_SECRET_KEY || "lms-access-secret";
+    requireSecret(config.JWT_ACCESS_SECRET_KEY, "JWT_ACCESS_SECRET_KEY");
   private static readonly REFRESH_TOKEN_SECRET =
-    config.JWT_REFRESH_SECRET_KEY || "lms-refresh-secret";
+    requireSecret(config.JWT_REFRESH_SECRET_KEY, "JWT_REFRESH_SECRET_KEY");
   private static readonly ACCESS_TOKEN_EXPIRES_IN =
     config.JWT_ACCESS_EXPIRES_IN || "1h";
   private static readonly REFRESH_TOKEN_EXPIRES_IN =

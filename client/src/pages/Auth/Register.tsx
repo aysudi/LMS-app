@@ -23,7 +23,6 @@ import { User } from "../../classes/User";
 import { getErrorMessage } from "../../utils/errorUtils";
 import { useToast } from "../../components/UI/ToastProvider";
 import { generalToasts } from "../../utils/toastUtils";
-// @ts-ignore
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "../../components/Common/LanguageSwitcher";
 
@@ -90,6 +89,7 @@ const Register = () => {
             state: {
               email: values.email,
               fromRegistration: true,
+              verificationEmailSent: result.verificationEmailSent !== false,
             },
           });
         }, 2000);

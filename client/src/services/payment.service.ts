@@ -23,7 +23,7 @@ export interface Order {
   orderNumber: string;
   user: string;
   items: {
-    course: any;
+    course: string | Record<string, unknown>;
     price: number;
     discountPrice?: number;
     actualPrice: number;
@@ -35,8 +35,8 @@ export interface Order {
   currency: string;
   status: string;
   paymentStatus: string;
-  paymentDetails?: any;
-  billingAddress?: any;
+  paymentDetails?: Record<string, unknown>;
+  billingAddress?: Record<string, unknown>;
   couponCode?: string;
   notes?: string;
   createdAt: string;
@@ -52,8 +52,6 @@ export interface CreateOrderResponse {
 
 export interface PaymentIntentRequest {
   orderId: string;
-  amount: number;
-  currency?: string;
 }
 
 export interface PaymentIntentResponse {
@@ -63,14 +61,13 @@ export interface PaymentIntentResponse {
 export interface ConfirmPaymentRequest {
   orderId: string;
   paymentIntentId: string;
-  paymentMethodId: string;
 }
 
 export interface ConfirmPaymentResponse {
   success: boolean;
   data: {
     order: Order;
-    enrollment?: any;
+    enrollment?: unknown;
   };
 }
 
@@ -101,29 +98,20 @@ class PaymentService {
     request: PaymentIntentRequest
   ): Promise<PaymentIntentResponse> {
     const response = await api.post("/api/payments/create-payment-intent", {
-      amount: Math.round(request.amount * 100), // Convert to cents
-      currency: request.currency || "usd",
-      metadata: {
-        orderId: request.orderId,
-      },
+      orderId: request.orderId,
     });
     return response.data;
   }
 
   async createCheckoutSession(request: {
     orderId: string;
-    lineItems: any[];
     successUrl: string;
     cancelUrl: string;
   }) {
     const response = await api.post("/api/payments/create-checkout-session", {
-      lineItems: request.lineItems,
-      mode: "payment",
+      orderId: request.orderId,
       successUrl: request.successUrl,
       cancelUrl: request.cancelUrl,
-      metadata: {
-        orderId: request.orderId,
-      },
     });
     return response.data;
   }
@@ -135,7 +123,6 @@ class PaymentService {
       `/api/orders/${request.orderId}/confirm-payment`,
       {
         paymentIntentId: request.paymentIntentId,
-        paymentMethodId: request.paymentMethodId,
       }
     );
     return response.data;

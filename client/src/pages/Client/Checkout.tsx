@@ -18,7 +18,7 @@ import {
 } from "../../hooks/usePayment";
 import { stripePromise, stripeConfig } from "../../utils/stripe";
 import StripePaymentForm from "../../components/Client/Cart/StripePaymentForm";
-import type { CreateOrderRequest } from "../../services/payment.service";
+import type { CreateOrderRequest, Order } from "../../services/payment.service";
 import { getImageUrl } from "../../utils/mediaHelpers";
 import { t } from "i18next";
 
@@ -38,7 +38,7 @@ const Checkout = () => {
     selectedItemIds.includes(course.id)
   );
 
-  const [currentOrder, setCurrentOrder] = useState<any>(null);
+  const [currentOrder, setCurrentOrder] = useState<Order | null>(null);
   const [clientSecret, setClientSecret] = useState<string>("");
   const [paymentStep, setPaymentStep] = useState<
     "order" | "payment" | "processing" | "success"
@@ -87,8 +87,6 @@ const Checkout = () => {
       // Step 2: Create payment intent
       const paymentResponse = await createPaymentIntentMutation.mutateAsync({
         orderId: order._id,
-        amount: order.total,
-        currency: "usd",
       });
 
       setClientSecret(paymentResponse.clientSecret);
@@ -98,14 +96,15 @@ const Checkout = () => {
     }
   };
 
-  const handlePaymentSuccess = async (paymentIntent: any) => {
+  const handlePaymentSuccess = async (paymentIntent: { id: string }) => {
+    if (!currentOrder) return;
+
     try {
       setPaymentStep("processing");
 
       await confirmPaymentMutation.mutateAsync({
         orderId: currentOrder._id,
         paymentIntentId: paymentIntent.id,
-        paymentMethodId: paymentIntent.payment_method,
       });
 
       await clearCartMutation.mutateAsync();

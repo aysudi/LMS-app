@@ -12,6 +12,7 @@ import {
 import {
   authenticateToken,
   authorizeRoles,
+  optionalAuth,
 } from "../middlewares/auth.middleware.js";
 import { UserRole } from "../types/user.types.js";
 import {
@@ -25,13 +26,20 @@ const lessonRouter = Router();
 
 // lessonRouter.use(authenticateToken);
 
-lessonRouter.get("/", (req, res) => getAllLessonsController(req as any, res));
+lessonRouter.get(
+  "/",
+  authenticateToken,
+  authorizeRoles(UserRole.ADMIN),
+  (req, res) => getAllLessonsController(req as any, res),
+);
 
-lessonRouter.get("/section/:sectionId", (req, res) =>
+lessonRouter.get("/section/:sectionId", optionalAuth, (req, res) =>
   getLessonsBySection(req as any, res),
 );
 
-lessonRouter.get("/:lessonId", (req, res) => getLessonById(req as any, res));
+lessonRouter.get("/:lessonId", optionalAuth, (req, res) =>
+  getLessonById(req as any, res),
+);
 
 lessonRouter.post(
   "/",
