@@ -1,33 +1,107 @@
 import nodemailer from "nodemailer";
 import config from "../configs/config";
 
-const getTransporter = () => {
-  if (!config.BREVO_SMTP_USER || !config.BREVO_SMTP_PASS) {
-    throw new Error("Email delivery is not configured (Brevo SMTP credentials are missing)");
-  }
+export type EmailTransport = Pick<
+  ReturnType<typeof nodemailer.createTransport>,
+  "sendMail" | "verify"
+>;
 
-  return nodemailer.createTransport({
-    host: "smtp-relay.brevo.com",
-    port: 587,
-    secure: false,
-    auth: {
-      user: config.BREVO_SMTP_USER,
-      pass: config.BREVO_SMTP_PASS,
+export type BrevoTransportOptions = nodemailer.TransportOptions & {
+  host: string;
+  port: number;
+  secure: boolean;
+  auth: { user: string; pass: string };
+};
+
+export const createEmailSender = (
+  emailConfig: typeof config,
+  createTransport: (
+    options: BrevoTransportOptions,
+  ) => EmailTransport = nodemailer.createTransport as (
+    options: BrevoTransportOptions,
+  ) => EmailTransport,
+) => {
+  let transport: EmailTransport | undefined;
+
+  const getTransport = () => {
+    if (!emailConfig.BREVO_SMTP_USER || !emailConfig.BREVO_SMTP_PASS) {
+      throw new Error(
+        "Email is not configured: BREVO_SMTP_USER and BREVO_SMTP_PASS are required",
+      );
+    }
+
+    if (!emailConfig.EMAIL_FROM) {
+      throw new Error("Email is not configured: EMAIL_FROM is required");
+    }
+
+    transport ??= createTransport({
+      host: "smtp-relay.brevo.com",
+      port: 587,
+      secure: false,
+      auth: {
+        user: emailConfig.BREVO_SMTP_USER,
+        pass: emailConfig.BREVO_SMTP_PASS,
+      },
+    });
+
+    return transport;
+  };
+
+  return {
+    send: async (
+      to: string,
+      subject: string,
+      html: string,
+      text?: string,
+      attachments?: nodemailer.SendMailOptions["attachments"],
+    ) => {
+      if (!to.trim()) {
+        throw new Error("Email recipient is required");
+      }
+
+      const activeTransport = getTransport();
+      try {
+        return await activeTransport.sendMail({
+          from: `"${emailConfig.EMAIL_FROM_NAME || "Skillify"}" <${emailConfig.EMAIL_FROM}>`,
+          to,
+          subject,
+          text,
+          html,
+          attachments,
+        });
+      } catch (error) {
+        const code =
+          error && typeof error === "object" && "code" in error
+            ? String(error.code)
+            : "UNKNOWN";
+        console.error(`Email delivery failed (${code})`);
+        throw new Error("Email delivery failed", { cause: error });
+      }
     },
-  });
+    verify: async () => {
+      try {
+        await getTransport().verify();
+        return true;
+      } catch (error) {
+        const code =
+          error && typeof error === "object" && "code" in error
+            ? String(error.code)
+            : "UNKNOWN";
+        console.error(`Email transport verification failed (${code})`);
+        throw new Error("Email transport verification failed", {
+          cause: error,
+        });
+      }
+    },
+  };
 };
 
-const getSender = () => {
-  if (!config.EMAIL_FROM) {
-    throw new Error("Email delivery is not configured (EMAIL_FROM is missing)");
-  }
-
-  return `"${config.EMAIL_FROM_NAME || "Skillify"}" <${config.EMAIL_FROM}>`;
-};
+const emailSender = createEmailSender(config);
+export const verifyEmailTransport = emailSender.verify;
 
 const getClientUrl = () => {
   if (!config.CLIENT_URL) {
-    throw new Error("Email links are not configured (CLIENT_URL is missing)");
+    throw new Error("Email links are not configured: CLIENT_URL is required");
   }
 
   return config.CLIENT_URL.replace(/\/$/, "");
@@ -37,31 +111,10 @@ export const sendEmail = async (
   to: string,
   subject: string,
   htmlContent: string,
-  textContent?: string | undefined,
+  textContent?: string,
+  attachments?: nodemailer.SendMailOptions["attachments"],
 ): Promise<void> => {
-  try {
-    if (process.env.NODE_ENV !== "production" && !config.BREVO_SMTP_PASS) {
-      console.log(
-        `[DEV] Email skipped - no Brevo credentials. Subject: ${subject}`,
-      );
-      return;
-    }
-
-    const transporter = getTransporter();
-
-    const mailOptions = {
-      from: getSender(),
-      to,
-      subject,
-      text: textContent,
-      html: htmlContent,
-    };
-
-    await transporter.sendMail(mailOptions);
-  } catch (error) {
-    console.error("Error sending email:", error);
-    throw new Error("Failed to send email");
-  }
+  await emailSender.send(to, subject, htmlContent, textContent, attachments);
 };
 
 // Email verification function
@@ -414,15 +467,6 @@ export const sendCertificateEmail = async (
   fileName: string,
 ): Promise<void> => {
   try {
-    if (process.env.NODE_ENV !== "production" && !config.BREVO_SMTP_PASS) {
-      console.log(
-        `[DEV] Certificate email skipped - no credentials configured. Course: ${courseName}`,
-      );
-      return;
-    }
-
-    const transporter = getTransporter();
-
     const subject = `🎉 Your Certificate of Completion - ${courseName}`;
 
     const htmlContent = `
@@ -470,21 +514,19 @@ export const sendCertificateEmail = async (
       </div>
     `;
 
-    const mailOptions = {
-      from: getSender(),
-      to: email,
+    await sendEmail(
+      email,
       subject,
-      html: htmlContent,
-      attachments: [
+      htmlContent,
+      undefined,
+      [
         {
           filename: fileName,
           content: certificateBuffer,
           contentType: "application/pdf",
         },
       ],
-    };
-
-    await transporter.sendMail(mailOptions);
+    );
   } catch (error) {
     console.error("Error in sendCertificateEmail:", error);
     throw error;

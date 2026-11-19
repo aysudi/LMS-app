@@ -4,7 +4,8 @@
   "scripts": {
     "dev": "nodemon --exec tsx src/server.ts",
     "build": "rimraf dist && tsc",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "test": "tsx --test src/utils/sendMail.test.ts"
   },
   "author": "",
   "license": "ISC",

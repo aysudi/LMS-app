@@ -17,10 +17,14 @@ const requireSecret = (secret: string | undefined, name: string): string => {
 };
 
 export class JWTUtils {
-  private static readonly ACCESS_TOKEN_SECRET =
-    requireSecret(config.JWT_ACCESS_SECRET_KEY, "JWT_ACCESS_SECRET_KEY");
-  private static readonly REFRESH_TOKEN_SECRET =
-    requireSecret(config.JWT_REFRESH_SECRET_KEY, "JWT_REFRESH_SECRET_KEY");
+  private static readonly ACCESS_TOKEN_SECRET = requireSecret(
+    config.JWT_ACCESS_SECRET_KEY,
+    "JWT_ACCESS_SECRET_KEY",
+  );
+  private static readonly REFRESH_TOKEN_SECRET = requireSecret(
+    config.JWT_REFRESH_SECRET_KEY,
+    "JWT_REFRESH_SECRET_KEY",
+  );
   private static readonly ACCESS_TOKEN_EXPIRES_IN =
     config.JWT_ACCESS_EXPIRES_IN || "1h";
   private static readonly REFRESH_TOKEN_EXPIRES_IN =

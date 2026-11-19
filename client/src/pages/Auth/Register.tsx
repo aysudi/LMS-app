@@ -23,6 +23,7 @@ import { User } from "../../classes/User";
 import { getErrorMessage } from "../../utils/errorUtils";
 import { useToast } from "../../components/UI/ToastProvider";
 import { generalToasts } from "../../utils/toastUtils";
+// @ts-ignore
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "../../components/Common/LanguageSwitcher";
 
@@ -80,7 +81,9 @@ const Register = () => {
         showToast(
           generalToasts.success(
             "Registration successful!",
-            "🎉 Account created successfully! Check your email for verification."
+            result.verificationEmailSent === false
+              ? "Account created, but the verification email was not delivered. You can resend it on the next page."
+              : "🎉 Account created successfully! Check your email for verification."
           )
         );
 

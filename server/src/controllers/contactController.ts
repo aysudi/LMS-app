@@ -18,11 +18,15 @@ export const createContact = async (
 ) => {
   try {
     const contactData = req.body;
-    const contact = await contactService.createContact(contactData);
+    const { contact, notificationEmailSent } =
+      await contactService.createContact(contactData);
 
     res.status(201).json({
       success: true,
-      message: "Contact message sent successfully",
+      message: notificationEmailSent
+        ? "Contact message sent successfully"
+        : "Contact message was saved, but its email notification could not be delivered.",
+      notificationEmailSent,
       data: contact,
     });
   } catch (error: any) {
@@ -90,11 +94,15 @@ export const replyToContact = async (
     const { id } = req.params;
     const replyData = req.body;
 
-    const updatedContact = await contactService.replyToContact(id, replyData);
+    const { contact: updatedContact, notificationEmailSent } =
+      await contactService.replyToContact(id, replyData);
 
     res.status(200).json({
       success: true,
-      message: "Reply sent successfully",
+      message: notificationEmailSent
+        ? "Reply sent successfully"
+        : "Reply was saved, but its email notification could not be delivered.",
+      notificationEmailSent,
       data: updatedContact,
     });
   } catch (error: any) {

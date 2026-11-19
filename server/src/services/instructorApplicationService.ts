@@ -10,11 +10,16 @@ import {
   sendApplicationRejectedEmail,
 } from "../utils/sendMail";
 
+interface InstructorApplicationEmailResult {
+  application: IInstructorApplication;
+  notificationEmailSent: boolean;
+}
+
 // Submit instructor application
 export const submitInstructorApplication = async (
   userId: string,
   applicationData: any,
-): Promise<IInstructorApplication> => {
+): Promise<InstructorApplicationEmailResult> => {
   try {
     const user = await User.findById(userId);
     if (!user) {
@@ -66,15 +71,21 @@ export const submitInstructorApplication = async (
 
     const savedApplication = await newApplication.save();
 
-    sendApplicationReceivedEmail(
-      user.email,
-      user.firstName,
-      user.lastName,
-    ).catch((error) => {
-      console.error("Error sending application received email:", error.message);
-    });
+    let notificationEmailSent = true;
+    try {
+      await sendApplicationReceivedEmail(
+        user.email,
+        user.firstName,
+        user.lastName,
+      );
+    } catch {
+      notificationEmailSent = false;
+      console.error(
+        "Instructor application was saved, but its notification email was not delivered",
+      );
+    }
 
-    return savedApplication;
+    return { application: savedApplication, notificationEmailSent };
   } catch (error: any) {
     throw new Error(`Failed to submit application: ${error.message}`);
   }
@@ -140,7 +151,7 @@ export const approveInstructorApplication = async (
   applicationId: string,
   adminId: string,
   adminFeedback?: string,
-) => {
+): Promise<InstructorApplicationEmailResult> => {
   try {
     const application =
       await InstructorApplication.findById(applicationId).populate("user");
@@ -187,14 +198,20 @@ export const approveInstructorApplication = async (
 
     await Promise.all([application.save(), user.save()]);
 
-    sendApplicationApprovedEmail(
-      user.email,
-      `${user.firstName} ${user.lastName}`,
-    ).catch((error) => {
-      console.error("Error sending application approved email:", error.message);
-    });
+    let notificationEmailSent = true;
+    try {
+      await sendApplicationApprovedEmail(
+        user.email,
+        `${user.firstName} ${user.lastName}`,
+      );
+    } catch {
+      notificationEmailSent = false;
+      console.error(
+        "Instructor application was approved, but its notification email was not delivered",
+      );
+    }
 
-    return application;
+    return { application, notificationEmailSent };
   } catch (error: any) {
     throw new Error(`Failed to approve application: ${error.message}`);
   }
@@ -206,7 +223,7 @@ export const rejectInstructorApplication = async (
   adminId: string,
   rejectionReason: string,
   adminFeedback?: string,
-) => {
+): Promise<InstructorApplicationEmailResult> => {
   try {
     const application =
       await InstructorApplication.findById(applicationId).populate("user");
@@ -235,15 +252,21 @@ export const rejectInstructorApplication = async (
 
     await application.save();
 
-    sendApplicationRejectedEmail(
-      user.email,
-      `${user.firstName} ${user.lastName}`,
-      rejectionReason,
-    ).catch((error) => {
-      console.error("Error sending application rejected email:", error.message);
-    });
+    let notificationEmailSent = true;
+    try {
+      await sendApplicationRejectedEmail(
+        user.email,
+        `${user.firstName} ${user.lastName}`,
+        rejectionReason,
+      );
+    } catch {
+      notificationEmailSent = false;
+      console.error(
+        "Instructor application was rejected, but its notification email was not delivered",
+      );
+    }
 
-    return application;
+    return { application, notificationEmailSent };
   } catch (error: any) {
     throw new Error(`Failed to reject application: ${error.message}`);
   }

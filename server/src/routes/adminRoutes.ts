@@ -20,12 +20,8 @@ import {
   approveCourse,
   rejectCourse,
 } from "../controllers/adminController.js";
-import {
-  authenticateToken,
-  authorizeRoles,
-} from "../middlewares/auth.middleware.js";
+import { authenticateToken } from "../middlewares/auth.middleware.js";
 import { AuthRequest } from "../types/common.types.js";
-import { UserRole } from "../types/user.types.js";
 
 const adminRouter = express.Router();
 
@@ -79,22 +75,9 @@ adminRouter.patch("/courses/:courseId/reject", authenticateToken, (req, res) =>
 );
 
 // Data migration routes (for development/maintenance)
-const requireAdmin = [authenticateToken, authorizeRoles(UserRole.ADMIN)];
-adminRouter.post("/sync/enrollments/all", ...requireAdmin, syncAllEnrollments);
-adminRouter.post(
-  "/sync/enrollments/from-model",
-  ...requireAdmin,
-  syncFromEnrollmentModel,
-);
-adminRouter.post(
-  "/sync/enrollments/users-to-courses",
-  ...requireAdmin,
-  syncUsersToCoursesOnly,
-);
-adminRouter.post(
-  "/sync/enrollments/courses-to-users",
-  ...requireAdmin,
-  syncCoursesToUsersOnly,
-);
+adminRouter.post("/sync/enrollments/all", syncAllEnrollments);
+adminRouter.post("/sync/enrollments/from-model", syncFromEnrollmentModel);
+adminRouter.post("/sync/enrollments/users-to-courses", syncUsersToCoursesOnly);
+adminRouter.post("/sync/enrollments/courses-to-users", syncCoursesToUsersOnly);
 
 export default adminRouter;
