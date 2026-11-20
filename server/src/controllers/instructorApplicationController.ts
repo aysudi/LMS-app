@@ -30,10 +30,7 @@ export const submitApplication = async (req: AuthRequest, res: Response) => {
     }
 
     const applicationData = req.body;
-    const result = await submitInstructorApplication(
-      userId,
-      applicationData,
-    );
+    const result = await submitInstructorApplication(userId, applicationData);
 
     res.status(201).json({
       success: true,

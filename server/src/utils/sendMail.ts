@@ -10,6 +10,10 @@ export type BrevoTransportOptions = nodemailer.TransportOptions & {
   host: string;
   port: number;
   secure: boolean;
+  requireTLS: boolean;
+  connectionTimeout: number;
+  greetingTimeout: number;
+  socketTimeout: number;
   auth: { user: string; pass: string };
 };
 
@@ -38,6 +42,10 @@ export const createEmailSender = (
       host: "smtp-relay.brevo.com",
       port: 587,
       secure: false,
+      requireTLS: true,
+      connectionTimeout: 15000,
+      greetingTimeout: 10000,
+      socketTimeout: 30000,
       auth: {
         user: emailConfig.BREVO_SMTP_USER,
         pass: emailConfig.BREVO_SMTP_PASS,
@@ -514,19 +522,13 @@ export const sendCertificateEmail = async (
       </div>
     `;
 
-    await sendEmail(
-      email,
-      subject,
-      htmlContent,
-      undefined,
-      [
-        {
-          filename: fileName,
-          content: certificateBuffer,
-          contentType: "application/pdf",
-        },
-      ],
-    );
+    await sendEmail(email, subject, htmlContent, undefined, [
+      {
+        filename: fileName,
+        content: certificateBuffer,
+        contentType: "application/pdf",
+      },
+    ]);
   } catch (error) {
     console.error("Error in sendCertificateEmail:", error);
     throw error;

@@ -27,6 +27,7 @@ export const useInstructorMessageStats = () => {
         unreadMessages,
       };
     },
-    refetchInterval: 5000, // Refresh every 5 seconds
+    refetchOnWindowFocus: false,
+    staleTime: 60 * 1000,
   });
 };

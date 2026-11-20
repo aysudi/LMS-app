@@ -27,9 +27,9 @@ export const useUnreadMessageCounts = () => {
   return useQuery({
     queryKey: ["unreadMessageCounts"],
     queryFn: () => courseMessageService.getUnreadMessageCounts(),
-    staleTime: 60000, // 1 minute
-    gcTime: 300000, // 5 minutes
-    refetchInterval: 60000, // Refetch every minute
+    staleTime: 60 * 1000,
+    gcTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 };
 

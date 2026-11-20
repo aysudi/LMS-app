@@ -75,7 +75,7 @@ const Register = () => {
         setRegistrationStatus("success");
         setSuccessMessage(
           result.message ||
-            "Account created successfully! Please check your email for verification."
+            "Account created successfully! Please check your email for verification.",
         );
 
         showToast(
@@ -83,8 +83,8 @@ const Register = () => {
             "Registration successful!",
             result.verificationEmailSent === false
               ? "Account created, but the verification email was not delivered. You can resend it on the next page."
-              : "🎉 Account created successfully! Check your email for verification."
-          )
+              : "🎉 Account created successfully! Check your email for verification.",
+          ),
         );
 
         setTimeout(() => {
@@ -545,10 +545,10 @@ const Register = () => {
                     registrationStatus === "success"
                       ? "bg-green-500 hover:bg-green-600 text-white"
                       : registrationStatus === "loading"
-                      ? "bg-gray-400 text-white cursor-not-allowed"
-                      : registrationStatus === "error"
-                      ? "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white"
-                      : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white hover:shadow-xl"
+                        ? "bg-gray-400 text-white cursor-not-allowed"
+                        : registrationStatus === "error"
+                          ? "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white"
+                          : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white hover:shadow-xl"
                   } ${
                     (registerMutation.isPending ||
                       !formik.isValid ||
@@ -568,8 +568,8 @@ const Register = () => {
                     {registrationStatus === "loading"
                       ? t("auth.creatingAccount")
                       : registrationStatus === "success"
-                      ? t("auth.accountCreatedRedirecting")
-                      : t("auth.createAccount")}
+                        ? t("auth.accountCreatedRedirecting")
+                        : t("auth.createAccount")}
                   </span>
                 </motion.button>
 

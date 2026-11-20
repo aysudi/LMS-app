@@ -21,6 +21,27 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+let refreshPromise: Promise<string> | null = null;
+
+const refreshAccessToken = (): Promise<string> => {
+  if (refreshPromise) return refreshPromise;
+
+  refreshPromise = axios
+    .post(`${API_BASE_URL}/api/auth/refresh`, {}, { withCredentials: true })
+    .then((response) => {
+      const token = response.data.data.token as string | undefined;
+      if (!token) throw new Error("No token received from refresh");
+      localStorage.setItem("accessToken", token);
+      window.dispatchEvent(new CustomEvent("auth-token-changed"));
+      return token;
+    })
+    .finally(() => {
+      refreshPromise = null;
+    });
+
+  return refreshPromise;
+};
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -37,22 +58,10 @@ api.interceptors.response.use(
           return Promise.reject(error);
         }
 
-        const response = await axios.post(
-          `${API_BASE_URL}/api/auth/refresh`,
-          {},
-          { withCredentials: true }
-        );
+        const token = await refreshAccessToken();
 
-        const { token } = response.data.data;
-        if (token) {
-          localStorage.setItem("accessToken", token);
-          window.dispatchEvent(new CustomEvent("auth-token-changed"));
-
-          originalRequest.headers.Authorization = `Bearer ${token}`;
-          return api(originalRequest);
-        } else {
-          throw new Error("No token received from refresh");
-        }
+        originalRequest.headers.Authorization = `Bearer ${token}`;
+        return api(originalRequest);
       } catch (refreshError) {
         console.error("Token refresh failed:", refreshError);
         localStorage.removeItem("accessToken");

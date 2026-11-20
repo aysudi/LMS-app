@@ -89,7 +89,8 @@ export const useStudentConversations = () => {
   return useQuery({
     queryKey: STUDENT_INSTRUCTOR_MESSAGE_KEYS.studentConversations(),
     queryFn: studentInstructorMessageService.getStudentConversations,
-    refetchInterval: 30000, // Refetch every 30 seconds
+    refetchOnWindowFocus: false,
+    staleTime: 60 * 1000,
   });
 };
 
@@ -98,7 +99,8 @@ export const useInstructorConversations = () => {
   return useQuery({
     queryKey: STUDENT_INSTRUCTOR_MESSAGE_KEYS.instructorConversations(),
     queryFn: studentInstructorMessageService.getInstructorConversations,
-    refetchInterval: 30000, // Refetch every 30 seconds
+    refetchOnWindowFocus: false,
+    staleTime: 60 * 1000,
   });
 };
 
@@ -109,7 +111,8 @@ export const useConversationThread = (messageId: string) => {
     queryFn: () =>
       studentInstructorMessageService.getConversationThread(messageId),
     enabled: !!messageId,
-    refetchInterval: 10000, // Refetch every 10 seconds for real-time updates
+    refetchOnWindowFocus: false,
+    staleTime: 60 * 1000,
   });
 };
 

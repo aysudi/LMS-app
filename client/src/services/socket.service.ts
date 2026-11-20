@@ -13,7 +13,10 @@ class SocketService {
     this.isConnecting = true;
 
     try {
-      const serverUrl = "http://localhost:4040";
+      const configuredUrl = import.meta.env.VITE_API_URL;
+      const serverUrl = configuredUrl
+        ? configuredUrl.replace(/\/api\/?$/, "")
+        : "http://localhost:4040";
 
       this.socket = io(serverUrl, {
         auth: {

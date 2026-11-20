@@ -788,7 +788,9 @@ export const approveCourse = async (req: AuthRequest, res: Response) => {
       );
     } catch {
       notificationEmailSent = false;
-      console.error("Course was approved, but its notification email was not delivered");
+      console.error(
+        "Course was approved, but its notification email was not delivered",
+      );
     }
 
     res.status(200).json({
@@ -879,7 +881,9 @@ export const rejectCourse = async (req: AuthRequest, res: Response) => {
       );
     } catch {
       notificationEmailSent = false;
-      console.error("Course was rejected, but its notification email was not delivered");
+      console.error(
+        "Course was rejected, but its notification email was not delivered",
+      );
     }
 
     res.status(200).json({

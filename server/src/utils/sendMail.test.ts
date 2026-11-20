@@ -63,7 +63,10 @@ test("shared sender uses centralized Brevo settings and sends an attachment", as
     user: "smtp-user",
     pass: "smtp-password",
   });
-  assert.equal(fake.messages[0].from, '"Skillify Test" <verified@example.test>');
+  assert.equal(
+    fake.messages[0].from,
+    '"Skillify Test" <verified@example.test>',
+  );
   assert.deepEqual(fake.messages[0].attachments, [attachment]);
   assert.equal(fake.messages.length, 2);
 });
@@ -101,7 +104,10 @@ test("shared sender rejects an empty recipient and verifies transport without se
   const fake = makeTransport();
   const sender = createEmailSender(config, () => fake.transport);
 
-  await assert.rejects(sender.send("  ", "Subject", "<p>Body</p>"), /recipient is required/);
+  await assert.rejects(
+    sender.send("  ", "Subject", "<p>Body</p>"),
+    /recipient is required/,
+  );
   assert.equal(await sender.verify(), true);
   assert.equal(fake.getVerifyCalls(), 1);
   assert.equal(fake.messages.length, 0);

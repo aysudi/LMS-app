@@ -57,9 +57,7 @@ const VerifyEmail = () => {
     if (!token) {
       if (fromRegistration) {
         const emailSent = verificationEmailSent !== false;
-        setVerificationStatus(
-          emailSent ? "awaiting-verification" : "error",
-        );
+        setVerificationStatus(emailSent ? "awaiting-verification" : "error");
         setMessage(
           emailSent
             ? t("auth.verificationEmailSentToInbox")
