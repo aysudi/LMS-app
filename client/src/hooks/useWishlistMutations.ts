@@ -7,18 +7,20 @@ import {
 import type { WishlistActionResponse } from "../types/wishlist.type";
 import { wishlistQueryKeys } from "./useWishlistQueries";
 import { courseQueryKeys } from "./useCourseHooks";
+import { useAuthContext } from "../context/AuthContext";
 
 export const useAddToWishlist = (
-  options?: UseMutationOptions<WishlistActionResponse, Error, string>
+  options?: UseMutationOptions<WishlistActionResponse, Error, string>,
 ) => {
   const queryClient = useQueryClient();
+  const { user } = useAuthContext();
 
   return useMutation({
     mutationFn: addToWishlist,
     onSuccess: (_, courseId) => {
       // Invalidate wishlist to refresh the data
       queryClient.invalidateQueries({
-        queryKey: wishlistQueryKeys.list(),
+        queryKey: wishlistQueryKeys.list(user?.id),
       });
 
       // Optionally invalidate course details to update wishlist status
@@ -34,16 +36,17 @@ export const useAddToWishlist = (
 };
 
 export const useRemoveFromWishlist = (
-  options?: UseMutationOptions<WishlistActionResponse, Error, string>
+  options?: UseMutationOptions<WishlistActionResponse, Error, string>,
 ) => {
   const queryClient = useQueryClient();
+  const { user } = useAuthContext();
 
   return useMutation({
     mutationFn: removeFromWishlist,
     onSuccess: (_, courseId) => {
       // Invalidate wishlist to refresh the data
       queryClient.invalidateQueries({
-        queryKey: wishlistQueryKeys.list(),
+        queryKey: wishlistQueryKeys.list(user?.id),
       });
 
       // Optionally invalidate course details to update wishlist status
@@ -83,15 +86,17 @@ export const useToggleWishlist = () => {
 // Hook for optimistic updates (for better UX)
 export const useOptimisticWishlist = () => {
   const queryClient = useQueryClient();
+  const { user } = useAuthContext();
   const addMutation = useAddToWishlist();
   const removeMutation = useRemoveFromWishlist();
+  const wishlistQueryKey = wishlistQueryKeys.list(user?.id);
 
   const optimisticToggle = (
     courseId: string,
-    isCurrentlyInWishlist: boolean
+    isCurrentlyInWishlist: boolean,
   ) => {
     // Optimistically update the cache
-    queryClient.setQueryData(wishlistQueryKeys.list(), (oldData: any) => {
+    queryClient.setQueryData(wishlistQueryKey, (oldData: any) => {
       if (!oldData) return oldData;
 
       if (isCurrentlyInWishlist) {
@@ -101,7 +106,7 @@ export const useOptimisticWishlist = () => {
           data: {
             ...oldData.data,
             wishlist: oldData.data.wishlist.filter(
-              (course: any) => course.id !== courseId
+              (course: any) => course.id !== courseId,
             ),
           },
         };
@@ -118,7 +123,7 @@ export const useOptimisticWishlist = () => {
         onError: () => {
           // Revert on error
           queryClient.invalidateQueries({
-            queryKey: wishlistQueryKeys.list(),
+            queryKey: wishlistQueryKey,
           });
         },
       });
@@ -127,7 +132,7 @@ export const useOptimisticWishlist = () => {
         onError: () => {
           // Revert on error
           queryClient.invalidateQueries({
-            queryKey: wishlistQueryKeys.list(),
+            queryKey: wishlistQueryKey,
           });
         },
       });

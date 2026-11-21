@@ -1,12 +1,7 @@
 import type { Course } from "../types/course.type";
-import { useCart, useCartCount } from "./useCartQueries";
+import { useCart } from "./useCartQueries";
 
-export {
-  useCart,
-  useCartCount,
-  useIsInCart,
-  cartQueryKeys,
-} from "./useCartQueries";
+export { useCart, useIsInCart, cartQueryKeys } from "./useCartQueries";
 
 export {
   useAddToCart,
@@ -22,15 +17,9 @@ export const useCartHelpers = () => {
     error: cartError,
   } = useCart();
 
-  const {
-    data: cartCountData,
-    isLoading: isLoadingCartCount,
-    error: cartCountError,
-  } = useCartCount();
-
   const getCartItems = () => cartData?.data || [];
 
-  const getCartCount = () => cartCountData?.data?.count || 0;
+  const getCartCount = () => cartData?.totalItems || 0;
 
   const getCartTotalValue = () => cartData?.totalValue || 0;
 
@@ -46,8 +35,8 @@ export const useCartHelpers = () => {
     cartTotalValue: getCartTotalValue(),
     checkIfInCartLocal,
     isLoadingCart,
-    isLoadingCartCount,
+    isLoadingCartCount: isLoadingCart,
     cartError,
-    cartCountError,
+    cartCountError: cartError,
   };
 };

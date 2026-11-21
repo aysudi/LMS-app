@@ -6,6 +6,7 @@ import type {
 import {
   getCourses,
   getCourseById,
+  getUserCourses,
   createCourse,
   updateCourse,
   deleteCourse,
@@ -19,6 +20,7 @@ import type {
   CourseResponse,
   CourseQuery,
   CoursesResponse,
+  CourseListResponse,
 } from "../types/course.type";
 
 // Query keys for consistent caching
@@ -29,16 +31,20 @@ export const courseQueryKeys = {
     [...courseQueryKeys.lists(), filters] as const,
   details: () => [...courseQueryKeys.all, "detail"] as const,
   detail: (id: string) => [...courseQueryKeys.details(), id] as const,
-  search: (term: string) => [...courseQueryKeys.all, "search", term] as const,
+  search: (term: string, params: CourseQuery = {}) =>
+    [...courseQueryKeys.all, "search", term, params] as const,
   userCourses: (userId?: string) =>
     [...courseQueryKeys.all, "user", userId] as const,
   instructorCourses: (instructorId?: string) =>
     [...courseQueryKeys.all, "instructor", instructorId] as const,
-  category: (category: string) =>
-    [...courseQueryKeys.all, "category", category] as const,
-  featured: () => [...courseQueryKeys.all, "featured"] as const,
-  free: () => [...courseQueryKeys.all, "free"] as const,
-  trending: () => [...courseQueryKeys.all, "trending"] as const,
+  category: (category: string, params: CourseQuery = {}) =>
+    [...courseQueryKeys.all, "category", category, params] as const,
+  featured: (params: CourseQuery = {}) =>
+    [...courseQueryKeys.all, "featured", params] as const,
+  free: (params: CourseQuery = {}) =>
+    [...courseQueryKeys.all, "free", params] as const,
+  trending: (params: CourseQuery = {}) =>
+    [...courseQueryKeys.all, "trending", params] as const,
 };
 
 // QUERY HOOKS
@@ -48,7 +54,7 @@ export const useCourses = (
   options?: Omit<
     UseQueryOptions<CoursesResponse, Error>,
     "queryKey" | "queryFn"
-  >
+  >,
 ) => {
   return useQuery({
     queryKey: courseQueryKeys.list(params || {}),
@@ -60,7 +66,10 @@ export const useCourses = (
 
 export const useCourse = (
   courseId: string,
-  options?: Omit<UseQueryOptions<CourseResponse, Error>, "queryKey" | "queryFn">
+  options?: Omit<
+    UseQueryOptions<CourseResponse, Error>,
+    "queryKey" | "queryFn"
+  >,
 ) => {
   return useQuery({
     queryKey: courseQueryKeys.detail(courseId),
@@ -77,10 +86,10 @@ export const useSearchCourses = (
   options?: Omit<
     UseQueryOptions<CoursesResponse, Error>,
     "queryKey" | "queryFn"
-  >
+  >,
 ) => {
   return useQuery({
-    queryKey: courseQueryKeys.search(searchTerm),
+    queryKey: courseQueryKeys.search(searchTerm, params),
     queryFn: () => searchCourses(searchTerm, params),
     enabled: !!searchTerm && searchTerm.length > 0,
     staleTime: 2 * 60 * 1000,
@@ -90,15 +99,14 @@ export const useSearchCourses = (
 
 export const useUserCourses = (
   userId?: string,
-  params?: CourseQuery,
   options?: Omit<
-    UseQueryOptions<CoursesResponse, Error>,
+    UseQueryOptions<CourseListResponse, Error>,
     "queryKey" | "queryFn"
-  >
+  >,
 ) => {
   return useQuery({
     queryKey: courseQueryKeys.userCourses(userId),
-    queryFn: () => getCourses({ ...params, instructor: userId }),
+    queryFn: getUserCourses,
     enabled: !!userId,
     staleTime: 5 * 60 * 1000,
     ...options,
@@ -111,10 +119,10 @@ export const useInstructorCourses = (
   options?: Omit<
     UseQueryOptions<CoursesResponse, Error>,
     "queryKey" | "queryFn"
-  >
+  >,
 ) => {
   return useQuery({
-    queryKey: courseQueryKeys.instructorCourses(instructorId),
+    queryKey: [...courseQueryKeys.instructorCourses(instructorId), params],
     queryFn: () => getCourses({ ...params, instructor: instructorId }),
     enabled: !!instructorId,
     staleTime: 5 * 60 * 1000,
@@ -128,10 +136,10 @@ export const useCoursesByCategory = (
   options?: Omit<
     UseQueryOptions<CoursesResponse, Error>,
     "queryKey" | "queryFn"
-  >
+  >,
 ) => {
   return useQuery({
-    queryKey: courseQueryKeys.category(category),
+    queryKey: courseQueryKeys.category(category, params),
     queryFn: () => getCourses({ ...params, category }),
     enabled: !!category,
     staleTime: 5 * 60 * 1000,
@@ -144,11 +152,11 @@ export const useFeaturedCourses = (
   options?: Omit<
     UseQueryOptions<CoursesResponse, Error>,
     "queryKey" | "queryFn"
-  >
+  >,
 ) => {
   const params = typeof limit === "number" ? { limit } : limit;
   return useQuery({
-    queryKey: courseQueryKeys.featured(),
+    queryKey: courseQueryKeys.featured(params || {}),
     queryFn: () => getCourses(params),
     staleTime: 10 * 60 * 1000,
     ...options,
@@ -160,11 +168,11 @@ export const useFreeCourses = (
   options?: Omit<
     UseQueryOptions<CoursesResponse, Error>,
     "queryKey" | "queryFn"
-  >
+  >,
 ) => {
   const params = typeof limit === "number" ? { limit } : limit;
   return useQuery({
-    queryKey: courseQueryKeys.free(),
+    queryKey: courseQueryKeys.free(params || {}),
     queryFn: () => getCourses({ ...params, minPrice: 0, maxPrice: 0 }),
     staleTime: 5 * 60 * 1000,
     ...options,
@@ -176,11 +184,11 @@ export const useTrendingCourses = (
   options?: Omit<
     UseQueryOptions<CoursesResponse, Error>,
     "queryKey" | "queryFn"
-  >
+  >,
 ) => {
   const params = typeof limit === "number" ? { limit } : limit;
   return useQuery({
-    queryKey: courseQueryKeys.trending(),
+    queryKey: courseQueryKeys.trending(params || {}),
     queryFn: () => getCourses(params),
     staleTime: 5 * 60 * 1000,
     ...options,
@@ -190,33 +198,15 @@ export const useTrendingCourses = (
 // MUTATION HOOKS
 
 export const useCreateCourse = (
-  options?: UseMutationOptions<CourseResponse, Error, FormData>
+  options?: UseMutationOptions<CourseResponse, Error, FormData>,
 ) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (courseData: FormData) => createCourse(courseData),
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        predicate: (query) => {
-          const key = query.queryKey;
-          return (
-            (Array.isArray(key) && key[0] === "instructor") ||
-            (Array.isArray(key) && key[0] === "courses")
-          );
-        },
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: courseQueryKeys.all,
-      });
-
-      queryClient.refetchQueries({
-        predicate: (query) => {
-          const key = query.queryKey;
-          return Array.isArray(key) && key[0] === "instructor";
-        },
-      });
+      void queryClient.invalidateQueries({ queryKey: courseQueryKeys.all });
+      void queryClient.invalidateQueries({ queryKey: ["instructor"] });
     },
     ...options,
   });
@@ -227,7 +217,7 @@ export const useUpdateCourse = (
     CourseResponse,
     Error,
     { courseId: string; updateData: UpdateCourseData }
-  >
+  >,
 ) => {
   const queryClient = useQueryClient();
 
@@ -238,32 +228,11 @@ export const useUpdateCourse = (
       // Update the specific course cache
       queryClient.setQueryData(
         courseQueryKeys.detail(variables.courseId),
-        data
+        data,
       );
 
-      // Invalidate ALL instructor-related queries - comprehensive approach
-      queryClient.invalidateQueries({
-        predicate: (query) => {
-          const key = query.queryKey;
-          return (
-            (Array.isArray(key) && key[0] === "instructor") ||
-            (Array.isArray(key) && key[0] === "courses")
-          );
-        },
-      });
-
-      // Also invalidate course lists
-      queryClient.invalidateQueries({
-        queryKey: courseQueryKeys.all,
-      });
-
-      // Refetch all instructor queries immediately
-      queryClient.refetchQueries({
-        predicate: (query) => {
-          const key = query.queryKey;
-          return Array.isArray(key) && key[0] === "instructor";
-        },
-      });
+      void queryClient.invalidateQueries({ queryKey: courseQueryKeys.all });
+      void queryClient.invalidateQueries({ queryKey: ["instructor"] });
     },
     ...options,
   });
@@ -274,7 +243,7 @@ export const useDeleteCourse = (
     { success: boolean; message: string },
     Error,
     string
-  >
+  >,
 ) => {
   const queryClient = useQueryClient();
 
@@ -285,30 +254,8 @@ export const useDeleteCourse = (
         queryKey: courseQueryKeys.detail(courseId),
       });
 
-      queryClient.invalidateQueries({
-        predicate: (query) => {
-          const key = query.queryKey;
-          return (
-            (Array.isArray(key) && key[0] === "instructor") ||
-            (Array.isArray(key) && key[0] === "courses")
-          );
-        },
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: courseQueryKeys.all,
-      });
-
-      queryClient.refetchQueries({
-        predicate: (query) => {
-          const key = query.queryKey;
-          return (
-            (Array.isArray(key) && key[0] === "instructor") ||
-            (Array.isArray(key) && key[0] === "courses") ||
-            (Array.isArray(key) && key[0] === "course")
-          );
-        },
-      });
+      void queryClient.invalidateQueries({ queryKey: courseQueryKeys.all });
+      void queryClient.invalidateQueries({ queryKey: ["instructor"] });
     },
     ...options,
   });
@@ -319,7 +266,7 @@ export const useToggleCourseStatus = (
     { success: boolean; message: string; data?: any },
     Error,
     string
-  >
+  >,
 ) => {
   const queryClient = useQueryClient();
 
@@ -337,25 +284,11 @@ export const useToggleCourseStatus = (
               isPublished: !oldData.data.isPublished,
             },
           };
-        }
+        },
       );
 
-      queryClient.removeQueries({
-        predicate: (query) => {
-          return (
-            query.queryKey[0] === "instructor" &&
-            query.queryKey[1] === "courses"
-          );
-        },
-      });
-
-      queryClient.refetchQueries({
-        predicate: (query) => {
-          return (
-            query.queryKey[0] === "instructor" &&
-            query.queryKey[1] === "courses"
-          );
-        },
+      void queryClient.invalidateQueries({
+        queryKey: ["instructor", "courses"],
       });
     },
     ...options,
@@ -423,7 +356,7 @@ export const useSubmitCourseForApproval = (
     { success: boolean; message: string; data?: any },
     Error,
     string
-  >
+  >,
 ) => {
   const queryClient = useQueryClient();
 
@@ -442,39 +375,14 @@ export const useSubmitCourseForApproval = (
               status: "pending",
             },
           };
-        }
+        },
       );
 
-      // Invalidate all instructor course queries with precise targeting
-      queryClient.invalidateQueries({
-        predicate: (query) => {
-          const key = query.queryKey;
-          return (
-            // Target: ["instructor", "courses", ...] patterns
-            (key[0] === "instructor" && key[1] === "courses") ||
-            // Target: ["instructor", "courses", "stats", ...] patterns specifically
-            (key[0] === "instructor" &&
-              key[1] === "courses" &&
-              key[2] === "stats")
-          );
-        },
+      void queryClient.invalidateQueries({
+        queryKey: ["instructor", "courses"],
       });
-
-      // Also invalidate general course queries
-      queryClient.invalidateQueries({
+      void queryClient.invalidateQueries({
         queryKey: courseQueryKeys.lists(),
-      });
-
-      // Force refetch of instructor courses to ensure immediate update
-      queryClient.refetchQueries({
-        predicate: (query) => {
-          const key = query.queryKey;
-          return (
-            key[0] === "instructor" &&
-            key[1] === "courses" &&
-            key[2] === "stats"
-          );
-        },
       });
     },
     ...options,
@@ -487,7 +395,7 @@ export const useSaveAsDraft = (
     CourseResponse,
     Error,
     { courseId: string; updateData: UpdateCourseData }
-  >
+  >,
 ) => {
   const queryClient = useQueryClient();
 
@@ -498,39 +406,14 @@ export const useSaveAsDraft = (
       // Update the specific course cache
       queryClient.setQueryData(
         courseQueryKeys.detail(variables.courseId),
-        data
+        data,
       );
 
-      // Invalidate all instructor course queries with precise targeting
-      queryClient.invalidateQueries({
-        predicate: (query) => {
-          const key = query.queryKey;
-          return (
-            // Target: ["instructor", "courses", ...] patterns
-            (key[0] === "instructor" && key[1] === "courses") ||
-            // Target: ["instructor", "courses", "stats", ...] patterns specifically
-            (key[0] === "instructor" &&
-              key[1] === "courses" &&
-              key[2] === "stats")
-          );
-        },
+      void queryClient.invalidateQueries({
+        queryKey: ["instructor", "courses"],
       });
-
-      // Invalidate general course lists
-      queryClient.invalidateQueries({
+      void queryClient.invalidateQueries({
         queryKey: courseQueryKeys.lists(),
-      });
-
-      // Force refetch of instructor courses to ensure immediate update
-      queryClient.refetchQueries({
-        predicate: (query) => {
-          const key = query.queryKey;
-          return (
-            key[0] === "instructor" &&
-            key[1] === "courses" &&
-            key[2] === "stats"
-          );
-        },
       });
     },
     ...options,

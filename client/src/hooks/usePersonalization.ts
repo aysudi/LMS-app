@@ -1,120 +1,107 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { personalizationApi } from "../services/personalizationApi";
 import type { PersonalizedRecommendations } from "../services/personalizationApi";
 import { useAuthContext } from "../context/AuthContext";
+import { useWishlist } from "./useWishlistQueries";
+import { wishlistQueryKeys } from "./useWishlistQueries";
+
+const emptyRecommendations: PersonalizedRecommendations = {
+  recommended: [],
+  popular: [],
+  free: [],
+};
+
+export const personalizationQueryKeys = {
+  all: ["personalization"] as const,
+  recommendations: (userId?: string) =>
+    [...personalizationQueryKeys.all, "recommendations", userId] as const,
+};
 
 export const usePersonalization = () => {
-  const { user } = useAuthContext();
-  const [wishlist, setWishlist] = useState<any[]>([]);
-  const [recommendations, setRecommendations] =
-    useState<PersonalizedRecommendations>({
-      recommended: [],
-      popular: [],
-      free: [],
-    });
-  const [loading, setLoading] = useState(false);
+  const { user, isAuthenticated } = useAuthContext();
+  const queryClient = useQueryClient();
+  const wishlistQuery = useWishlist();
   const [error, setError] = useState<string | null>(null);
 
-  const fetchWishlist = async () => {
-    if (!user) return;
+  const recommendationsQuery = useQuery({
+    queryKey: personalizationQueryKeys.recommendations(user?.id),
+    queryFn: async () => {
+      const response = await personalizationApi.getRecommendations();
+      return response.data;
+    },
+    enabled: isAuthenticated && !!user?.id,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    retry: (failureCount, queryError: any) => {
+      if (queryError?.response?.status === 401) return false;
+      return failureCount < 1;
+    },
+  });
 
-    try {
-      const response = await personalizationApi.getWishlist();
-      setWishlist(response.data);
-    } catch (err) {
-      console.error("Error fetching wishlist:", err);
-    }
-  };
-
-  // Add to wishlist
   const addToWishlist = async (courseId: string) => {
     try {
       await personalizationApi.addToWishlist(courseId);
-      await fetchWishlist(); // Refresh wishlist
+      await queryClient.invalidateQueries({
+        queryKey: wishlistQueryKeys.all,
+      });
       return true;
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to add to wishlist");
+    } catch (requestError: any) {
+      setError(
+        requestError?.response?.data?.message || "Failed to add to wishlist",
+      );
       return false;
     }
   };
 
-  // Remove from wishlist
   const removeFromWishlist = async (courseId: string) => {
     try {
       await personalizationApi.removeFromWishlist(courseId);
-      await fetchWishlist(); // Refresh wishlist
+      await queryClient.invalidateQueries({
+        queryKey: wishlistQueryKeys.all,
+      });
       return true;
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to remove from wishlist");
+    } catch (requestError: any) {
+      setError(
+        requestError?.response?.data?.message ||
+          "Failed to remove from wishlist",
+      );
       return false;
     }
   };
 
-  // Check if course is in wishlist
-  const isInWishlist = (courseId: string) => {
-    return wishlist.some((course) => course._id === courseId);
-  };
-
-  // Add to search history
   const addToSearchHistory = async (query: string, category?: string) => {
     if (!user || !query.trim()) return;
 
     try {
       await personalizationApi.addToSearchHistory(query, category);
-    } catch (err) {
-      console.error("Error adding to search history:", err);
+    } catch (requestError) {
+      console.error("Error adding to search history:", requestError);
     }
   };
 
-  // Add viewed course
   const addViewedCourse = async (courseId: string) => {
     if (!user) return;
 
     try {
       await personalizationApi.addViewedCourse(courseId);
-    } catch (err) {
-      console.error("Error adding viewed course:", err);
+    } catch (requestError) {
+      console.error("Error adding viewed course:", requestError);
     }
   };
-
-  // Fetch recommendations
-  const fetchRecommendations = async () => {
-    if (!user) return;
-
-    setLoading(true);
-    try {
-      const response = await personalizationApi.getRecommendations();
-      setRecommendations(response.data);
-    } catch (err) {
-      console.error("Error fetching recommendations:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Initial fetch when user logs in
-  useEffect(() => {
-    if (user) {
-      fetchWishlist();
-      fetchRecommendations();
-    } else {
-      // Clear data when user logs out
-      setWishlist([]);
-      setRecommendations({ recommended: [], popular: [], free: [] });
-    }
-  }, [user]);
 
   return {
-    wishlist,
-    recommendations,
-    loading,
+    wishlist: wishlistQuery.data?.data || [],
+    recommendations: recommendationsQuery.data || emptyRecommendations,
+    loading: recommendationsQuery.isLoading,
     error,
     addToWishlist,
     removeFromWishlist,
-    isInWishlist,
+    isInWishlist: (courseId: string) =>
+      (wishlistQuery.data?.data || []).some((course) => course.id === courseId),
     addToSearchHistory,
     addViewedCourse,
-    fetchRecommendations,
-    refreshWishlist: fetchWishlist,
+    fetchRecommendations: () => recommendationsQuery.refetch(),
+    refreshWishlist: () => wishlistQuery.refetch(),
   };
 };

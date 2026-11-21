@@ -40,6 +40,7 @@ export interface SearchHistoryResponse {
 
 export const getSearchSuggestions = async (
   query: string,
+  signal?: AbortSignal,
 ): Promise<SearchSuggestion[]> => {
   try {
     if (!query.trim()) {
@@ -51,6 +52,7 @@ export const getSearchSuggestions = async (
       `/api/search/suggestions?q=${encodeURIComponent(
         query.trim(),
       )}&type=course&limit=9`,
+      { signal },
     );
 
     const courseSuggestions = response.data.data || [];
@@ -66,6 +68,7 @@ export const getSearchSuggestions = async (
     // Return search term first, then course suggestions
     return [searchTermSuggestion, ...courseSuggestions];
   } catch (error) {
+    if (signal?.aborted) return [];
     console.error("Failed to fetch search suggestions:", error);
 
     // Even on error, return the search term suggestion
@@ -158,7 +161,7 @@ export const getGuestSearchHistory = (): RecentSearch[] => {
   }
 };
 
-const saveGuestSearchHistory = (search: RecentSearch): void => {
+export const saveGuestSearchHistory = (search: RecentSearch): void => {
   try {
     const history = getGuestSearchHistory();
 
@@ -174,7 +177,7 @@ const saveGuestSearchHistory = (search: RecentSearch): void => {
   }
 };
 
-const clearGuestSearchHistory = (): void => {
+export const clearGuestSearchHistory = (): void => {
   try {
     localStorage.removeItem(GUEST_SEARCH_HISTORY_KEY);
   } catch (error) {

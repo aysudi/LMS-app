@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
@@ -32,11 +32,16 @@ const Checkout = () => {
   const createPaymentIntentMutation = useCreatePaymentIntent();
   const confirmPaymentMutation = useConfirmPayment();
   const clearCartMutation = useClearCart();
+  const orderCreationLock = useRef(false);
+  const confirmingPaymentIntents = useRef(new Set<string>());
+  const confirmedPaymentIntents = useRef(new Set<string>());
+  const failedPaymentIntents = useRef(new Set<string>());
 
-  const selectedItemIds = location.state?.selectedItems || [];
-  const selectedCourses = cartItems.filter((course) =>
-    selectedItemIds.includes(course.id)
-  );
+  const stateSelectedItems = location.state?.selectedItems;
+  const selectedCourses = useMemo(() => {
+    const selectedItemIds: string[] = stateSelectedItems || [];
+    return cartItems.filter((course) => selectedItemIds.includes(course.id));
+  }, [cartItems, stateSelectedItems]);
 
   const [currentOrder, setCurrentOrder] = useState<any>(null);
   const [clientSecret, setClientSecret] = useState<string>("");
@@ -66,23 +71,29 @@ const Checkout = () => {
 
   const subtotal = selectedCourses.reduce(
     (sum, course) => sum + (course.discountPrice || course.originalPrice),
-    0
+    0,
   );
 
-  const handleCreateOrder = async () => {
-    try {
-      const orderData: CreateOrderRequest = {
-        items: selectedCourses.map((course) => ({
-          course: course.id,
-          price: course.originalPrice,
-          discountPrice: course.discountPrice,
-        })),
-        billingAddress: billingInfo,
-      };
+  const handleCreateOrder = useCallback(async () => {
+    if (orderCreationLock.current || paymentStep !== "order") return;
+    orderCreationLock.current = true;
 
-      const response = await createOrderMutation.mutateAsync(orderData);
-      const order = response.data.order;
-      setCurrentOrder(order);
+    try {
+      let order = currentOrder;
+      if (!order) {
+        const orderData: CreateOrderRequest = {
+          items: selectedCourses.map((course) => ({
+            course: course.id,
+            price: course.originalPrice,
+            discountPrice: course.discountPrice,
+          })),
+          billingAddress: billingInfo,
+        };
+
+        const response = await createOrderMutation.mutateAsync(orderData);
+        order = response.data.order;
+        setCurrentOrder(order);
+      }
 
       // Step 2: Create payment intent
       const paymentResponse = await createPaymentIntentMutation.mutateAsync({
@@ -95,36 +106,67 @@ const Checkout = () => {
       setPaymentStep("payment");
     } catch (error) {
       console.error("Order creation failed:", error);
+    } finally {
+      orderCreationLock.current = false;
     }
-  };
+  }, [
+    paymentStep,
+    currentOrder,
+    selectedCourses,
+    billingInfo,
+    createOrderMutation,
+    createPaymentIntentMutation,
+  ]);
 
-  const handlePaymentSuccess = async (paymentIntent: any) => {
-    try {
-      setPaymentStep("processing");
+  const handlePaymentSuccess = useCallback(
+    async (paymentIntent: any) => {
+      if (
+        !currentOrder ||
+        confirmedPaymentIntents.current.has(paymentIntent.id) ||
+        confirmingPaymentIntents.current.has(paymentIntent.id) ||
+        failedPaymentIntents.current.has(paymentIntent.id)
+      )
+        return;
 
-      await confirmPaymentMutation.mutateAsync({
-        orderId: currentOrder._id,
-        paymentIntentId: paymentIntent.id,
-        paymentMethodId: paymentIntent.payment_method,
-      });
+      confirmingPaymentIntents.current.add(paymentIntent.id);
+      try {
+        setPaymentStep("processing");
 
-      await clearCartMutation.mutateAsync();
+        await confirmPaymentMutation.mutateAsync({
+          orderId: currentOrder._id,
+          paymentIntentId: paymentIntent.id,
+          paymentMethodId: paymentIntent.payment_method,
+        });
 
-      setPaymentStep("success");
+        await clearCartMutation.mutateAsync();
 
-      setTimeout(() => {
-        navigate("/my-learning");
-      }, 2000);
-    } catch (error) {
-      console.error("Payment confirmation failed:", error);
-      setPaymentStep("payment");
-    }
-  };
+        confirmedPaymentIntents.current.add(paymentIntent.id);
+        setPaymentStep("success");
 
-  const handlePaymentError = (error: string) => {
+        setTimeout(() => {
+          navigate("/my-learning");
+        }, 2000);
+      } catch (error) {
+        console.error("Payment confirmation failed:", error);
+        // Remounting the form re-reads a succeeded intent; avoid an endless confirm loop.
+        failedPaymentIntents.current.add(paymentIntent.id);
+        setPaymentStep("payment");
+      } finally {
+        confirmingPaymentIntents.current.delete(paymentIntent.id);
+      }
+    },
+    [currentOrder, confirmPaymentMutation, clearCartMutation, navigate],
+  );
+
+  const handlePaymentError = useCallback((error: string) => {
     console.error("Payment error:", error);
     setPaymentStep("payment");
-  };
+  }, []);
+
+  const stripeElementsOptions = useMemo(
+    () => ({ clientSecret, appearance: stripeConfig.appearance }),
+    [clientSecret],
+  );
 
   if (!isAuthenticated || selectedCourses.length === 0) {
     return null;
@@ -290,10 +332,14 @@ const Checkout = () => {
 
                   <button
                     onClick={handleCreateOrder}
-                    disabled={createOrderMutation.isPending}
+                    disabled={
+                      createOrderMutation.isPending ||
+                      createPaymentIntentMutation.isPending
+                    }
                     className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 cursor-pointer"
                   >
-                    {createOrderMutation.isPending ? (
+                    {createOrderMutation.isPending ||
+                    createPaymentIntentMutation.isPending ? (
                       <>
                         <motion.div
                           animate={{ rotate: 360 }}
@@ -320,10 +366,7 @@ const Checkout = () => {
               {paymentStep === "payment" && clientSecret && (
                 <Elements
                   stripe={stripePromise}
-                  options={{
-                    clientSecret,
-                    appearance: stripeConfig.appearance,
-                  }}
+                  options={stripeElementsOptions}
                 >
                   <StripePaymentForm
                     clientSecret={clientSecret}

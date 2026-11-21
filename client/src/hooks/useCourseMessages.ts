@@ -10,7 +10,7 @@ import { toast } from "react-hot-toast";
 export const useCourseMessages = (
   courseId: string,
   page: number = 1,
-  limit: number = 50
+  limit: number = 50,
 ) => {
   return useQuery({
     queryKey: ["courseMessages", courseId, page, limit],
@@ -107,7 +107,7 @@ export const useEditCourseMessage = () => {
             (message: CourseMessage) =>
               message._id === data.data._id
                 ? { ...message, ...data.data }
-                : message
+                : message,
           );
 
           return {
@@ -117,7 +117,7 @@ export const useEditCourseMessage = () => {
               messages: updatedMessages,
             },
           };
-        }
+        },
       );
 
       toast.success("Message updated successfully");

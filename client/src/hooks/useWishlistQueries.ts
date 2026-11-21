@@ -6,21 +6,22 @@ import { useAuthContext } from "../context/AuthContext";
 
 export const wishlistQueryKeys = {
   all: ["wishlist"] as const,
-  list: () => [...wishlistQueryKeys.all, "list"] as const,
+  list: (userId?: string) =>
+    [...wishlistQueryKeys.all, userId ?? "anonymous", "list"] as const,
 };
 
 export const useWishlist = (
   options?: Omit<
     UseQueryOptions<WishlistResponse, Error>,
     "queryKey" | "queryFn"
-  >
+  >,
 ) => {
-  const { isAuthenticated } = useAuthContext();
+  const { isAuthenticated, user } = useAuthContext();
 
   return useQuery({
-    queryKey: wishlistQueryKeys.list(),
+    queryKey: wishlistQueryKeys.list(user?.id),
     queryFn: getWishlist,
-    enabled: isAuthenticated, // Only run when user is authenticated
+    enabled: isAuthenticated && !!user?.id,
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
     retry: (failureCount, error: any) => {

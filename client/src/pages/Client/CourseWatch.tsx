@@ -37,11 +37,11 @@ const CourseWatch: React.FC = () => {
   const [showControls, setShowControls] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isTablet, setIsTablet] = useState(
-    window.innerWidth >= 768 && window.innerWidth < 1024
+    window.innerWidth >= 768 && window.innerWidth < 1024,
   );
 
   const { data: courseResponse, isLoading: courseLoading } = useCourse(
-    courseId!
+    courseId!,
   );
   const course = courseResponse?.data;
 
@@ -49,7 +49,7 @@ const CourseWatch: React.FC = () => {
 
   const { data: enrollmentsResponse } = useUserEnrollments();
   const enrollment = enrollmentsResponse?.data?.enrollments?.find(
-    (e: any) => e.course._id === courseId
+    (e: any) => e.course._id === courseId,
   );
 
   const completeLessonMutation = useCompleteLessonProgress();
@@ -84,17 +84,17 @@ const CourseWatch: React.FC = () => {
   }>({});
 
   const [lastTimeUpdate, setLastTimeUpdate] = useState(0);
-  const stuckCheckRef = useRef<NodeJS.Timeout | null>(null);
+  const stuckCheckRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [isVideoLoading, setIsVideoLoading] = useState(false);
-  const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const loadingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [watchTimeTracker, setWatchTimeTracker] = useState(0);
   const lastWatchTimeUpdate = useRef(0);
 
   useEffect(() => {
     if (courseId && user?.id) {
       const savedQuizStates = localStorage.getItem(
-        `quiz-states-${courseId}-${user.id}`
+        `quiz-states-${courseId}-${user.id}`,
       );
       if (savedQuizStates) {
         try {
@@ -115,7 +115,7 @@ const CourseWatch: React.FC = () => {
   const { data: questionsData, isLoading: questionsLoading } =
     useQuestionsByCourse(courseId!, qaFilters, { enabled: !!courseId });
 
-  const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const controlsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const handleResize = () => {
@@ -318,7 +318,7 @@ const CourseWatch: React.FC = () => {
         if (progress && progress.watchTime > 0) {
           video.currentTime = Math.min(
             progress.watchTime,
-            lesson.duration || video.duration
+            lesson.duration || video.duration,
           );
         }
         video.removeEventListener("loadedmetadata", handleLoadedMetadata);
@@ -330,7 +330,7 @@ const CourseWatch: React.FC = () => {
     window.history.replaceState(
       null,
       "",
-      `/course/${courseId}/learn?section=${sectionIndex}&lesson=${lessonIndex}`
+      `/course/${courseId}/learn?section=${sectionIndex}&lesson=${lessonIndex}`,
     );
   };
 
@@ -409,7 +409,7 @@ const CourseWatch: React.FC = () => {
               }
             }
           },
-        }
+        },
       );
     }
   };
@@ -520,7 +520,7 @@ const CourseWatch: React.FC = () => {
         onSuccess: () => {
           setNewNote("");
         },
-      }
+      },
     );
   };
 
@@ -536,12 +536,12 @@ const CourseWatch: React.FC = () => {
     !!courseId &&
       !!user?.id &&
       isCourseCompleted() &&
-      !!course?.certificateProvided
+      !!course?.certificateProvided,
   );
 
   const getLessonProgress = (lessonId: string) => {
     return courseProgress?.data?.lessons?.find(
-      (p: any) => p.lessonId === lessonId
+      (p: any) => p.lessonId === lessonId,
     );
   };
 
@@ -688,8 +688,8 @@ const CourseWatch: React.FC = () => {
                 isMobile
                   ? "w-full max-w-sm"
                   : isTablet
-                  ? "w-80"
-                  : "w-80 xl:w-96"
+                    ? "w-80"
+                    : "w-80 xl:w-96"
               } h-full`}
             >
               <Sidebar

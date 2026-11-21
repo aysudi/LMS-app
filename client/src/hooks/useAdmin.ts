@@ -238,7 +238,7 @@ export const useAdminCourses = (
     limit?: number;
     status?: string;
     search?: string;
-  } = {}
+  } = {},
 ) => {
   return useQuery<AdminCoursesResponse>({
     queryKey: ["adminCourses", params],
@@ -309,7 +309,7 @@ export const useAdminAnalytics = (
     period?: string;
     startDate?: string;
     endDate?: string;
-  } = {}
+  } = {},
 ) => {
   return useQuery<AdminAnalytics>({
     queryKey: ["adminAnalytics", params],
@@ -324,7 +324,7 @@ export const useAdminCertificates = (
   params: {
     page?: number;
     limit?: number;
-  } = {}
+  } = {},
 ) => {
   return useQuery<AdminCertificatesResponse>({
     queryKey: ["adminCertificates", params],

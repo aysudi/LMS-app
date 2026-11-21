@@ -42,12 +42,14 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(
   cors({
     origin: (origin, callback) => {
-      const allowed = new Set([
-        config.CLIENT_URL,
-        ...(config.NODE_ENV === "production"
-          ? []
-          : ["http://localhost:5173", "http://localhost:5174"]),
-      ].filter((value): value is string => Boolean(value)));
+      const allowed = new Set(
+        [
+          config.CLIENT_URL,
+          ...(config.NODE_ENV === "production"
+            ? []
+            : ["http://localhost:5173", "http://localhost:5174"]),
+        ].filter((value): value is string => Boolean(value)),
+      );
 
       if (!origin || allowed.has(origin)) callback(null, true);
       else callback(new Error("Origin not allowed by CORS"));
@@ -71,7 +73,8 @@ app.get("/health", (_, res) => {
     success: true,
     message: "Server is healthy",
     uptime: process.uptime(),
-    database: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+    database:
+      mongoose.connection.readyState === 1 ? "connected" : "disconnected",
     timestamp: new Date().toISOString(),
   });
 });

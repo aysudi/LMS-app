@@ -3,6 +3,9 @@ import type { ReactNode } from "react";
 import { useCurrentUser } from "../hooks/useUserQueries";
 import { getAuthToken, removeAuthToken } from "../utils/auth-storage";
 import type { User } from "../types/user.type";
+import { useQueryClient } from "@tanstack/react-query";
+import { userQueryKeys } from "../hooks/useUserQueries";
+import { getCurrentUser } from "../services/user.service";
 
 interface AuthContextType {
   user: User | null;
@@ -27,6 +30,7 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
+  const queryClient = useQueryClient();
   const [hasToken, setHasToken] = useState(() => {
     const token = getAuthToken();
     return !!token;
@@ -66,14 +70,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return () =>
       window.removeEventListener(
         "auth-token-changed",
-        handleCustomStorageChange
+        handleCustomStorageChange,
       );
   }, [hasToken]);
 
   const {
     data: userData,
     isLoading,
-    refetch: refetchUserQuery,
     error,
   } = useCurrentUser({
     enabled: hasToken,
@@ -83,7 +86,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           const currentToken = getAuthToken();
           if (currentToken && hasToken) {
             console.warn(
-              "401 error but token still exists - might be timing issue"
+              "401 error but token still exists - might be timing issue",
             );
             return;
           }
@@ -103,9 +106,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const token = getAuthToken();
     if (token && !hasToken) {
       setHasToken(true);
-      await new Promise((resolve) => setTimeout(resolve, 50));
     }
-    return refetchUserQuery();
+    return queryClient.fetchQuery({
+      queryKey: userQueryKeys.currentUser(),
+      queryFn: getCurrentUser,
+      staleTime: 5 * 60 * 1000,
+    });
   };
 
   const user = userData || null;

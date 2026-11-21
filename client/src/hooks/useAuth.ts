@@ -8,7 +8,6 @@ import {
   resetPassword,
   logout,
 } from "../services/auth.service";
-import { useInvalidateUsers } from "./useUserQueries";
 import { setAuthToken, removeAuthToken } from "../utils/auth-storage";
 import type { LoginRequest, RegisterRequest } from "../types/auth.type";
 
@@ -25,20 +24,15 @@ export const useRegister = () => {
 };
 
 export const useLogin = () => {
-  const { invalidateCurrentUser } = useInvalidateUsers();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (credentials: LoginRequest) => login(credentials),
-    onSuccess: async (data) => {
+    onSuccess: (data) => {
       if (data.data?.token) {
+        // Do not briefly expose cached profile data from a previous session.
+        queryClient.removeQueries();
         setAuthToken(data.data.token);
-
-        await new Promise((resolve) => setTimeout(resolve, 100));
-
-        invalidateCurrentUser();
-
-        // Don't use window.location.href as it causes page reload
-        // Let the component handle navigation
       }
     },
   });

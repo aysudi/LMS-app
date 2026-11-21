@@ -22,12 +22,15 @@ export const useSocket = () => {
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
   const { invalidateConversations, invalidateMessages } =
     useMessageInvalidation();
-  const typingTimeoutRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
+  const typingTimeoutRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
+    new Map(),
+  );
 
   // Initialize socket connection
   useEffect(() => {
     const token = getAuthToken();
     if (!user || !token) {
+      socketService.disconnect();
       return;
     }
 
@@ -90,7 +93,8 @@ export const useSocket = () => {
       setTypingUsers((prev) => {
         const existing = prev.find(
           (u) =>
-            u.userId === data.userId && u.conversationId === data.conversationId
+            u.userId === data.userId &&
+            u.conversationId === data.conversationId,
         );
         if (existing) return prev;
         return [...prev, data];
@@ -111,8 +115,8 @@ export const useSocket = () => {
               !(
                 u.userId === data.userId &&
                 u.conversationId === data.conversationId
-              )
-          )
+              ),
+          ),
         );
         typingTimeoutRef.current.delete(timeoutKey);
       }, 3000);
@@ -129,8 +133,8 @@ export const useSocket = () => {
             !(
               u.userId === data.userId &&
               u.conversationId === data.conversationId
-            )
-        )
+            ),
+        ),
       );
 
       // Clear timeout
@@ -229,7 +233,7 @@ export const useSocket = () => {
     }) => {
       socketService.sendMessage(data);
     },
-    []
+    [],
   );
 
   const startTyping = useCallback((conversationId: string) => {
@@ -244,17 +248,17 @@ export const useSocket = () => {
     (messageId: string, conversationId: string) => {
       socketService.markMessageAsRead(messageId, conversationId);
     },
-    []
+    [],
   );
 
   // Get typing users for a specific conversation
   const getTypingUsers = useCallback(
     (conversationId: string) => {
       return typingUsers.filter(
-        (user) => user.conversationId === conversationId
+        (user) => user.conversationId === conversationId,
       );
     },
-    [typingUsers]
+    [typingUsers],
   );
 
   // Check if user is online
@@ -262,7 +266,7 @@ export const useSocket = () => {
     (userId: string) => {
       return onlineUsers.some((user) => user.userId === userId);
     },
-    [onlineUsers]
+    [onlineUsers],
   );
 
   return {

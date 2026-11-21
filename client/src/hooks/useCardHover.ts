@@ -2,7 +2,9 @@ import { useState, useEffect, useRef } from "react";
 
 export const useCardHover = () => {
   const [isHovered, setIsHovered] = useState(false);
-  const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [hoverTimeout, setHoverTimeout] = useState<ReturnType<
+    typeof setTimeout
+  > | null>(null);
   const [showOnLeft, setShowOnLeft] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
