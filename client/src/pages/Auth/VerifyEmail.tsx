@@ -102,7 +102,7 @@ const VerifyEmail = () => {
         navigate("/auth/login", {
           state: {
             fromVerification: true,
-            message: t("auth.emailVerifiedLoginToContinue"),
+            message: t("auth.emailVerificationLoginToContinue"),
           },
         });
       }, 3000);
