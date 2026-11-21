@@ -30,15 +30,15 @@ export const submitApplication = async (req: AuthRequest, res: Response) => {
     }
 
     const applicationData = req.body;
-    const application = await submitInstructorApplication(
-      userId,
-      applicationData,
-    );
+    const result = await submitInstructorApplication(userId, applicationData);
 
     res.status(201).json({
       success: true,
-      message: "Instructor application submitted successfully",
-      data: application,
+      message: result.notificationEmailSent
+        ? "Instructor application submitted successfully"
+        : "Instructor application was saved, but its notification email could not be delivered.",
+      notificationEmailSent: result.notificationEmailSent,
+      data: result.application,
     });
   } catch (error: any) {
     console.error("Submit application error:", error);
@@ -124,7 +124,7 @@ export const approveApplication = async (req: AuthRequest, res: Response) => {
     const { applicationId }: any = req.params;
     const { adminFeedback } = req.body;
 
-    const application = await approveInstructorApplication(
+    const result = await approveInstructorApplication(
       applicationId,
       userId,
       adminFeedback,
@@ -132,8 +132,11 @@ export const approveApplication = async (req: AuthRequest, res: Response) => {
 
     res.status(200).json({
       success: true,
-      message: "Instructor application approved successfully",
-      data: application,
+      message: result.notificationEmailSent
+        ? "Instructor application approved successfully"
+        : "Instructor application was approved, but its notification email could not be delivered.",
+      notificationEmailSent: result.notificationEmailSent,
+      data: result.application,
     });
   } catch (error: any) {
     console.error("Approve application error:", error);
@@ -167,7 +170,7 @@ export const rejectApplication = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    const application = await rejectInstructorApplication(
+    const result = await rejectInstructorApplication(
       applicationId,
       userId,
       rejectionReason,
@@ -176,8 +179,11 @@ export const rejectApplication = async (req: AuthRequest, res: Response) => {
 
     res.status(200).json({
       success: true,
-      message: "Instructor application rejected",
-      data: application,
+      message: result.notificationEmailSent
+        ? "Instructor application rejected"
+        : "Instructor application was rejected, but its notification email could not be delivered.",
+      notificationEmailSent: result.notificationEmailSent,
+      data: result.application,
     });
   } catch (error: any) {
     console.error("Reject application error:", error);

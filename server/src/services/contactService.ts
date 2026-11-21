@@ -17,23 +17,27 @@ export const createContact = async (contactData: CreateContactData) => {
     const contact = new Contact(contactData);
     const savedContact = await contact.save();
 
-    sendContactNotificationEmail({
-      adminEmail: config.CONTACT_NOTIFICATION_EMAIL || config.EMAIL_FROM || "",
-      contactData: {
-        name: contactData.name,
-        email: contactData.email,
-        subject: contactData.subject,
-        message: contactData.message,
-        phone: contactData.phone,
-      },
-    }).catch((error) => {
+    let notificationEmailSent = true;
+    try {
+      await sendContactNotificationEmail({
+        adminEmail:
+          config.CONTACT_NOTIFICATION_EMAIL || config.EMAIL_FROM || "",
+        contactData: {
+          name: contactData.name,
+          email: contactData.email,
+          subject: contactData.subject,
+          message: contactData.message,
+          phone: contactData.phone,
+        },
+      });
+    } catch {
+      notificationEmailSent = false;
       console.error(
-        "Failed to send contact notification email:",
-        error.message,
+        "Contact was saved, but its notification email was not delivered",
       );
-    });
+    }
 
-    return savedContact;
+    return { contact: savedContact, notificationEmailSent };
   } catch (error: any) {
     if (error.name === "ValidationError") {
       const firstError = Object.values(error.errors)[0] as any;
@@ -141,17 +145,21 @@ export const replyToContact = async (
 
     const updatedContact = await contact.save();
 
-    await sendContactReplyEmail({
-      contactEmail: contact.email,
-      contactName: contact.name,
-      originalSubject: contact.subject,
-      originalMessage: contact.message,
-      replyMessage: replyData.replyMessage,
-    }).catch((error) => {
-      console.error("Failed to send contact reply email:", error.message);
-    });
+    let notificationEmailSent = true;
+    try {
+      await sendContactReplyEmail({
+        contactEmail: contact.email,
+        contactName: contact.name,
+        originalSubject: contact.subject,
+        originalMessage: contact.message,
+        replyMessage: replyData.replyMessage,
+      });
+    } catch {
+      notificationEmailSent = false;
+      console.error("Contact reply was saved, but its email was not delivered");
+    }
 
-    return updatedContact;
+    return { contact: updatedContact, notificationEmailSent };
   } catch (error: any) {
     if (error.message === "Contact message not found") {
       throw error;

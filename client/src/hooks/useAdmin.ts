@@ -18,6 +18,7 @@ export const useAdminDashboardStats = () => {
     queryFn: adminService.getAdminDashboardStats,
     refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
     staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchIntervalInBackground: false,
   });
 };
 
@@ -27,6 +28,7 @@ export const useRecentActivity = (limit: number = 10) => {
     queryFn: () => adminService.getRecentActivity(limit),
     refetchInterval: 2 * 60 * 1000, // Refetch every 2 minutes
     staleTime: 1 * 60 * 1000, // 1 minute
+    refetchIntervalInBackground: false,
   });
 };
 
@@ -236,7 +238,7 @@ export const useAdminCourses = (
     limit?: number;
     status?: string;
     search?: string;
-  } = {}
+  } = {},
 ) => {
   return useQuery<AdminCoursesResponse>({
     queryKey: ["adminCourses", params],
@@ -307,7 +309,7 @@ export const useAdminAnalytics = (
     period?: string;
     startDate?: string;
     endDate?: string;
-  } = {}
+  } = {},
 ) => {
   return useQuery<AdminAnalytics>({
     queryKey: ["adminAnalytics", params],
@@ -322,7 +324,7 @@ export const useAdminCertificates = (
   params: {
     page?: number;
     limit?: number;
-  } = {}
+  } = {},
 ) => {
   return useQuery<AdminCertificatesResponse>({
     queryKey: ["adminCertificates", params],

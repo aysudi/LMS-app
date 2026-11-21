@@ -17,7 +17,6 @@ import {
 } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLogin } from "../../hooks/useAuth";
-import { useAuthContext } from "../../context/AuthContext";
 import { getErrorMessage } from "../../utils/errorUtils";
 import loginValidationSchema from "../../validations/loginValidation";
 import Loading from "../../components/Common/Loading";
@@ -37,7 +36,6 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { showToast } = useToast();
-  const { refetchUser } = useAuthContext();
   const loginMutation = useLogin();
   const { t } = useTranslation();
 
@@ -61,17 +59,13 @@ const Login = () => {
 
         const result = await loginMutation.mutateAsync(values);
 
-        await new Promise((resolve) => setTimeout(resolve, 300));
-
-        await refetchUser();
-
         setLoginStatus("success");
 
         showToast(
           generalToasts.success(
             t("auth.welcomeBack"),
-            `🎉 ${t("auth.welcomeBack")}, ${result.data.user.firstName}!`
-          )
+            `🎉 ${t("auth.welcomeBack")}, ${result.data.user.firstName}!`,
+          ),
         );
 
         setTimeout(() => {
@@ -95,8 +89,8 @@ const Login = () => {
           showToast(
             generalToasts.info(
               "Email Verification Required",
-              "📧 Please verify your email to access all features"
-            )
+              "📧 Please verify your email to access all features",
+            ),
           );
         }
       } catch (error) {

@@ -7,7 +7,6 @@ import {
   useCourses,
   useFeaturedCourses,
   useFreeCourses,
-  useTrendingCourses,
   useUserCourses,
 } from "../../hooks/useCourseHooks";
 import { useAddToCart, useCartHelpers } from "../../hooks/useCart";
@@ -31,15 +30,19 @@ import AddToCartModal from "../../components/Client/Cart/AddToCartModal";
 
 const Home = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuthContext();
-  const { recommendations, addViewedCourse } = usePersonalization();
+  const { isAuthenticated, user } = useAuthContext();
+  const {
+    recommendations,
+    addViewedCourse,
+    loading: recommendationsLoading,
+  } = usePersonalization();
   const { toggleWishlist } = useToggleWishlist();
   const { checkIfInWishlist } = useWishlistHelpers();
   const { showToast } = useToast();
   const { t } = useTranslation();
 
   const [processingWishlist, setProcessingWishlist] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
   const [processingCart, setProcessingCart] = useState<Set<string>>(new Set());
 
@@ -55,16 +58,19 @@ const Home = () => {
 
   const { data: featuredCoursesData, isLoading: featuredLoading } =
     useFeaturedCourses(8);
-  const { data: freeCoursesData, isLoading: freeLoading } = useFreeCourses(6);
-  const { data: trendingCoursesData, isLoading: trendingLoading } =
-    useTrendingCourses(1);
-  const { data: userCoursesData } = useUserCourses();
+  const { data: freeCoursesData, isLoading: freeLoading } = useFreeCourses(6, {
+    enabled:
+      !isAuthenticated ||
+      (!recommendationsLoading && recommendations.free.length === 0),
+  });
+  const { data: userCoursesData } = useUserCourses(user?.id);
 
   // Data processing
   const allCourses = allCoursesData?.data || [];
   const featuredCourses = featuredCoursesData?.data || [];
   const freeCourses = freeCoursesData?.data || [];
-  const trendingCourse = trendingCoursesData?.data?.[0];
+  const trendingCourse = featuredCoursesData?.data?.[0];
+  const trendingLoading = featuredLoading;
   const userCourses = userCoursesData?.data || [];
 
   // Custom hooks
@@ -125,8 +131,8 @@ const Home = () => {
           wasInWishlist ? "Removed from wishlist!" : "Added to wishlist!",
           wasInWishlist
             ? `"${course.title}" removed from wishlist`
-            : `"${course.title}" added to wishlist`
-        )
+            : `"${course.title}" added to wishlist`,
+        ),
       );
     } catch (error) {
       showToast(generalToasts.error("Fail", "Failed to update wishlist"));

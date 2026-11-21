@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -11,31 +11,34 @@ import Loading from "../../components/Common/Loading";
 import { useAuthContext } from "../../context/AuthContext";
 import { useSnackbar } from "notistack";
 import { setAuthToken } from "../../utils/auth-storage";
+import { useQueryClient } from "@tanstack/react-query";
 
 const AuthSuccess = () => {
   const { accessToken } = useParams<{ accessToken: string }>();
   const navigate = useNavigate();
   const { refetchUser } = useAuthContext();
   const { enqueueSnackbar } = useSnackbar();
+  const queryClient = useQueryClient();
+  const authAttempted = useRef(false);
   const [status, setStatus] = useState<"processing" | "success" | "error">(
-    "processing"
+    "processing",
   );
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
+    if (authAttempted.current) return;
+    authAttempted.current = true;
+
     const handleOAuthSuccess = async () => {
       try {
         if (!accessToken) {
           throw new Error("No access token received");
         }
 
+        queryClient.removeQueries();
         setAuthToken(accessToken);
 
-        await new Promise((resolve) => setTimeout(resolve, 300));
-
         await refetchUser();
-
-        await new Promise((resolve) => setTimeout(resolve, 500));
 
         setStatus("success");
 
@@ -57,7 +60,7 @@ const AuthSuccess = () => {
         setErrorMessage(
           error.response?.data?.message ||
             error.message ||
-            "Failed to complete authentication"
+            "Failed to complete authentication",
         );
 
         enqueueSnackbar(`❌ Authentication failed: ${error.message}`, {
@@ -72,7 +75,7 @@ const AuthSuccess = () => {
     };
 
     handleOAuthSuccess();
-  }, [accessToken, refetchUser, navigate, enqueueSnackbar]);
+  }, [accessToken, refetchUser, navigate, enqueueSnackbar, queryClient]);
 
   const handleRetry = () => {
     navigate("/auth/login", { replace: true });

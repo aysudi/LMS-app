@@ -2,25 +2,30 @@ import { io, Socket } from "socket.io-client";
 
 class SocketService {
   private socket: Socket | null = null;
-  private reconnectTimer: NodeJS.Timeout | null = null;
-  private isConnecting = false;
 
   connect(token: string) {
-    if (this.socket?.connected || this.isConnecting) {
+    if (this.socket) {
+      const currentToken =
+        typeof this.socket.auth === "object"
+          ? this.socket.auth.token
+          : undefined;
+      if (currentToken !== token) {
+        this.socket.disconnect();
+        this.socket.auth = { token };
+        this.socket.connect();
+      }
       return this.socket;
     }
 
-    this.isConnecting = true;
-
     try {
-      const serverUrl = "http://localhost:4040";
+      const configuredUrl = import.meta.env.VITE_API_URL;
+      const serverUrl = configuredUrl
+        ? configuredUrl.replace(/\/api\/?$/, "")
+        : "http://localhost:4040";
 
       this.socket = io(serverUrl, {
         auth: {
           token,
-        },
-        query: {
-          token, // Fallback in query params
         },
         autoConnect: true,
         reconnection: true,
@@ -30,12 +35,10 @@ class SocketService {
       });
 
       this.setupEventListeners();
-      this.isConnecting = false;
 
       return this.socket;
     } catch (error) {
       console.error("Failed to connect socket:", error);
-      this.isConnecting = false;
       return null;
     }
   }
@@ -44,25 +47,12 @@ class SocketService {
     if (!this.socket) return;
 
     this.socket.on("connect", () => {
-      this.isConnecting = false;
-
-      // Clear any reconnection timers
-      if (this.reconnectTimer) {
-        clearTimeout(this.reconnectTimer);
-        this.reconnectTimer = null;
-      }
-
       // Emit online status
       this.socket?.emit("status:online");
     });
 
-    this.socket.on("disconnect", (_) => {
-      this.isConnecting = false;
-    });
-
     this.socket.on("connect_error", (error) => {
       console.error("❌ Socket connection error:", error);
-      this.isConnecting = false;
 
       // Check if it's an authentication error
       if (
@@ -79,17 +69,10 @@ class SocketService {
   }
 
   disconnect() {
-    if (this.reconnectTimer) {
-      clearTimeout(this.reconnectTimer);
-      this.reconnectTimer = null;
-    }
-
     if (this.socket) {
       this.socket.disconnect();
       this.socket = null;
     }
-
-    this.isConnecting = false;
   }
 
   // Join conversation rooms
@@ -106,7 +89,7 @@ class SocketService {
     } else {
       console.log(
         "❌ Socket not connected, cannot join course room:",
-        courseId
+        courseId,
       );
     }
   }
@@ -189,7 +172,7 @@ class SocketService {
   }
 
   onMessageDeleted(
-    callback: (data: { messageId: string; conversationId: string }) => void
+    callback: (data: { messageId: string; conversationId: string }) => void,
   ) {
     this.socket?.on("message:deleted", callback);
   }
@@ -199,7 +182,7 @@ class SocketService {
       messageId: string;
       conversationId: string;
       userId: string;
-    }) => void
+    }) => void,
   ) {
     this.socket?.on("message:read", callback);
   }
@@ -209,7 +192,7 @@ class SocketService {
       userId: string;
       username: string;
       conversationId: string;
-    }) => void
+    }) => void,
   ) {
     this.socket?.on("typing:started", callback);
   }
@@ -219,7 +202,7 @@ class SocketService {
       userId: string;
       username: string;
       conversationId: string;
-    }) => void
+    }) => void,
   ) {
     this.socket?.on("typing:stopped", callback);
   }
@@ -229,7 +212,7 @@ class SocketService {
   }
 
   onUserOffline(
-    callback: (data: { userId: string; username: string }) => void
+    callback: (data: { userId: string; username: string }) => void,
   ) {
     this.socket?.on("user:offline", callback);
   }
@@ -248,7 +231,7 @@ class SocketService {
   }
 
   offMessageDeleted(
-    callback?: (data: { messageId: string; conversationId: string }) => void
+    callback?: (data: { messageId: string; conversationId: string }) => void,
   ) {
     this.socket?.off("message:deleted", callback);
   }
@@ -258,7 +241,7 @@ class SocketService {
       messageId: string;
       conversationId: string;
       userId: string;
-    }) => void
+    }) => void,
   ) {
     this.socket?.off("message:read", callback);
   }
@@ -268,7 +251,7 @@ class SocketService {
       userId: string;
       username: string;
       conversationId: string;
-    }) => void
+    }) => void,
   ) {
     this.socket?.off("typing:started", callback);
   }
@@ -278,57 +261,57 @@ class SocketService {
       userId: string;
       username: string;
       conversationId: string;
-    }) => void
+    }) => void,
   ) {
     this.socket?.off("typing:stopped", callback);
   }
 
   offUserOnline(
-    callback?: (data: { userId: string; username: string }) => void
+    callback?: (data: { userId: string; username: string }) => void,
   ) {
     this.socket?.off("user:online", callback);
   }
 
   offUserOffline(
-    callback?: (data: { userId: string; username: string }) => void
+    callback?: (data: { userId: string; username: string }) => void,
   ) {
     this.socket?.off("user:offline", callback);
   }
 
   // Course message event listeners
   onNewCourseMessage(
-    callback: (data: { message: any; courseId: string }) => void
+    callback: (data: { message: any; courseId: string }) => void,
   ) {
     this.socket?.on("newCourseMessage", callback);
   }
 
   onCourseMessageEdited(
-    callback: (data: { message: any; courseId: string }) => void
+    callback: (data: { message: any; courseId: string }) => void,
   ) {
     this.socket?.on("messageEdited", callback);
   }
 
   onCourseMessageDeleted(
-    callback: (data: { messageId: string; courseId: string }) => void
+    callback: (data: { messageId: string; courseId: string }) => void,
   ) {
     this.socket?.on("messageDeleted", callback);
   }
 
   // Course message event listener removers
   offNewCourseMessage(
-    callback?: (data: { message: any; courseId: string }) => void
+    callback?: (data: { message: any; courseId: string }) => void,
   ) {
     this.socket?.off("newCourseMessage", callback);
   }
 
   offCourseMessageEdited(
-    callback?: (data: { message: any; courseId: string }) => void
+    callback?: (data: { message: any; courseId: string }) => void,
   ) {
     this.socket?.off("messageEdited", callback);
   }
 
   offCourseMessageDeleted(
-    callback?: (data: { messageId: string; courseId: string }) => void
+    callback?: (data: { messageId: string; courseId: string }) => void,
   ) {
     this.socket?.off("messageDeleted", callback);
   }

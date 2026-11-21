@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import {
   useQuery,
   useMutation,
@@ -24,7 +25,7 @@ export const messageQueryKeys = {
   conversation: (id: string) => ["conversation", id] as const,
   messages: (
     conversationId: string,
-    params?: { page?: number; limit?: number }
+    params?: { page?: number; limit?: number },
   ) => ["messages", conversationId, params] as const,
 };
 
@@ -35,7 +36,10 @@ export const useConversations = (
     page?: number;
     limit?: number;
   },
-  options?: Omit<UseQueryOptions<ConversationsResponse>, "queryKey" | "queryFn">
+  options?: Omit<
+    UseQueryOptions<ConversationsResponse>,
+    "queryKey" | "queryFn"
+  >,
 ) => {
   return useQuery({
     queryKey: messageQueryKeys.conversations(params),
@@ -76,7 +80,7 @@ export const useMessages = (
   options?: Omit<
     UseQueryOptions<{ success: boolean; data: any }>,
     "queryKey" | "queryFn"
-  >
+  >,
 ) => {
   return useQuery({
     queryKey: messageQueryKeys.messages(params.conversationId, {
@@ -124,7 +128,7 @@ export const useConversationMutations = () => {
     },
     onError: (error: any) => {
       toast.error(
-        error.response?.data?.message || "Failed to create conversation"
+        error.response?.data?.message || "Failed to create conversation",
       );
     },
   });
@@ -139,7 +143,7 @@ export const useConversationMutations = () => {
     },
     onError: (error: any) => {
       toast.error(
-        error.response?.data?.message || "Failed to get conversation"
+        error.response?.data?.message || "Failed to get conversation",
       );
     },
   });
@@ -259,23 +263,29 @@ export const useMessaging = () => {
 export const useMessageInvalidation = () => {
   const queryClient = useQueryClient();
 
-  const invalidateConversations = () => {
+  const invalidateConversations = useCallback(() => {
     queryClient.invalidateQueries({
       queryKey: ["conversations"],
     });
-  };
+  }, [queryClient]);
 
-  const invalidateMessages = (conversationId: string) => {
-    queryClient.invalidateQueries({
-      queryKey: ["messages", conversationId],
-    });
-  };
+  const invalidateMessages = useCallback(
+    (conversationId: string) => {
+      queryClient.invalidateQueries({
+        queryKey: ["messages", conversationId],
+      });
+    },
+    [queryClient],
+  );
 
-  const invalidateConversation = (conversationId: string) => {
-    queryClient.invalidateQueries({
-      queryKey: messageQueryKeys.conversation(conversationId),
-    });
-  };
+  const invalidateConversation = useCallback(
+    (conversationId: string) => {
+      queryClient.invalidateQueries({
+        queryKey: messageQueryKeys.conversation(conversationId),
+      });
+    },
+    [queryClient],
+  );
 
   return {
     invalidateConversations,

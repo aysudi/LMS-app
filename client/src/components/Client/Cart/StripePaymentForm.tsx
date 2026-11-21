@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   PaymentElement,
   useStripe,
@@ -28,39 +28,63 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const processedClientSecret = useRef<string | null>(null);
+  const processingLock = useRef(false);
+  const onPaymentSuccessRef = useRef(onPaymentSuccess);
+  const onPaymentErrorRef = useRef(onPaymentError);
 
   useEffect(() => {
-    if (!stripe || !clientSecret) {
+    onPaymentSuccessRef.current = onPaymentSuccess;
+    onPaymentErrorRef.current = onPaymentError;
+  }, [onPaymentSuccess, onPaymentError]);
+
+  useEffect(() => {
+    if (
+      !stripe ||
+      !clientSecret ||
+      processedClientSecret.current === clientSecret
+    ) {
       return;
     }
 
-    stripe.retrievePaymentIntent(clientSecret).then(({ paymentIntent }) => {
-      if (paymentIntent) {
-        switch (paymentIntent.status) {
-          case "succeeded":
-            onPaymentSuccess(paymentIntent);
-            break;
-          case "processing":
-            setIsProcessing(true);
-            break;
-          case "requires_payment_method":
-            // Default state - ready for payment
-            break;
-          default:
-            onPaymentError("Something went wrong with the payment.");
-            break;
+    processedClientSecret.current = clientSecret;
+    stripe
+      .retrievePaymentIntent(clientSecret)
+      .then(({ paymentIntent }) => {
+        if (processedClientSecret.current !== clientSecret) return;
+        if (paymentIntent) {
+          switch (paymentIntent.status) {
+            case "succeeded":
+              onPaymentSuccessRef.current(paymentIntent);
+              break;
+            case "processing":
+              setIsProcessing(true);
+              break;
+            case "requires_payment_method":
+              break;
+            default:
+              onPaymentErrorRef.current(
+                "Something went wrong with the payment.",
+              );
+              break;
+          }
         }
-      }
-    });
-  }, [stripe, clientSecret, onPaymentSuccess, onPaymentError]);
+      })
+      .catch(() => {
+        if (processedClientSecret.current === clientSecret) {
+          onPaymentErrorRef.current("Unable to retrieve payment status.");
+        }
+      });
+  }, [stripe, clientSecret]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (!stripe || !elements || disabled) {
+    if (!stripe || !elements || disabled || processingLock.current) {
       return;
     }
 
+    processingLock.current = true;
     setIsProcessing(true);
     setErrorMessage("");
 
@@ -75,14 +99,15 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
 
       if (error) {
         setErrorMessage(error.message || "An unexpected error occurred.");
-        onPaymentError(error.message || "Payment failed");
+        onPaymentErrorRef.current(error.message || "Payment failed");
       } else if (paymentIntent && paymentIntent.status === "succeeded") {
-        onPaymentSuccess(paymentIntent);
+        onPaymentSuccessRef.current(paymentIntent);
       }
     } catch (err: any) {
       setErrorMessage(err.message || "An unexpected error occurred.");
-      onPaymentError(err.message || "Payment failed");
+      onPaymentErrorRef.current(err.message || "Payment failed");
     } finally {
+      processingLock.current = false;
       setIsProcessing(false);
     }
   };

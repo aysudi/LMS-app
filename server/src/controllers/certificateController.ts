@@ -96,18 +96,21 @@ export const generateAndSendCertificate = async (
     let emailError = null;
 
     try {
-      await sendCertificateEmail(
+      emailSuccess = await sendCertificateEmail(
         userEmail,
         studentName,
         courseName,
         certificateBuffer,
         certificateData.certificateId,
       );
-      emailSuccess = true;
 
-      await Certificate.findByIdAndUpdate(certificate._id, {
-        emailSent: true,
-      });
+      if (emailSuccess) {
+        await Certificate.findByIdAndUpdate(certificate._id, {
+          emailSent: true,
+        });
+      } else {
+        emailError = "Email delivery failed";
+      }
     } catch (error) {
       console.error("Email sending failed:", error);
       emailError =

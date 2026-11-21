@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FaSearch,
@@ -14,8 +15,11 @@ import { useTranslation } from "react-i18next";
 import {
   getSearchSuggestions,
   getSearchHistory,
+  getGuestSearchHistory,
+  saveGuestSearchHistory,
   saveSearchToHistory,
   clearSearchHistory,
+  clearGuestSearchHistory,
   type SearchSuggestion,
   type RecentSearch,
 } from "../../../services/search.service";
@@ -29,7 +33,6 @@ const SearchBar: React.FC<SearchBarProps> = ({ onBlur }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
-  const [searchHistory, setSearchHistory] = useState<RecentSearch[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
 
@@ -40,75 +43,103 @@ const SearchBar: React.FC<SearchBarProps> = ({ onBlur }) => {
   const [searchParams] = useSearchParams();
   const { t } = useTranslation();
   const { user } = useAuthContext();
+  const queryClient = useQueryClient();
+  const searchHistoryKey = ["searchHistory", user?.id ?? "guest"] as const;
+  const { data: searchHistory = [] } = useQuery({
+    queryKey: searchHistoryKey,
+    queryFn: () =>
+      user ? getSearchHistory() : Promise.resolve(getGuestSearchHistory()),
+    enabled: isSearchFocused,
+    staleTime: 2 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    retry: false,
+  });
+  const searchHistoryRef = useRef(searchHistory);
+  searchHistoryRef.current = searchHistory;
+  const suggestionRequestId = useRef(0);
 
   const saveSearchToHistoryAPI = async (
     query: string,
     type: "search" | "suggestion",
     metadata?: any,
   ) => {
-    if (!user) return;
-
     try {
-      await saveSearchToHistory(query, type, metadata);
+      const recentSearch: RecentSearch = {
+        query: query.trim(),
+        type,
+        timestamp: new Date().toISOString(),
+        metadata,
+      };
+
+      if (user) {
+        await saveSearchToHistory(query, type, metadata);
+      } else {
+        saveGuestSearchHistory(recentSearch);
+      }
+
+      queryClient.setQueryData<RecentSearch[]>(
+        searchHistoryKey,
+        (existing = []) =>
+          [
+            recentSearch,
+            ...existing.filter(
+              (item) =>
+                item.query.toLowerCase() !== recentSearch.query.toLowerCase(),
+            ),
+          ].slice(0, 20),
+      );
     } catch (err) {
       console.error("Save search failed", err);
     }
   };
 
-  const fetchSearchSuggestions = async (query: string) => {
-    if (!query.trim()) {
-      setSuggestions([]);
-      return;
-    }
-
-    setIsLoadingSuggestions(true);
-    try {
-      const apiResults = await getSearchSuggestions(query);
-      const matchingRecentSearches: SearchSuggestion[] = searchHistory
-        .filter((item) =>
-          item.query.toLowerCase().includes(query.toLowerCase()),
-        )
-        .map((item) => ({
-          id: `recent-${item.query}`,
-          value: item.query,
-          label: item.query,
-          type: "search",
-        }));
-
-      const combinedSuggestions: any = [
-        ...matchingRecentSearches,
-        ...apiResults.filter(
-          (api) =>
-            !matchingRecentSearches.some(
-              (recent: any) =>
-                recent.value.toLowerCase() === api.value.toLowerCase(),
-            ),
-        ),
-      ];
-
-      setSuggestions(combinedSuggestions);
-    } catch (error) {
-      console.error("Failed to fetch suggestions:", error);
-      setSuggestions([]);
-    } finally {
-      setIsLoadingSuggestions(false);
-    }
-  };
-
-  const fetchSearchHistory = async () => {
-    try {
-      if (!user) {
-        setSearchHistory([]);
+  const fetchSearchSuggestions = useCallback(
+    async (query: string, requestId: number, signal: AbortSignal) => {
+      if (!query.trim()) {
+        setSuggestions([]);
         return;
       }
 
-      const history = await getSearchHistory();
-      setSearchHistory(history);
-    } catch (error) {
-      console.error("Failed to fetch search history:", error);
-      setSearchHistory([]);
-    }
-  };
+      setIsLoadingSuggestions(true);
+      try {
+        const apiResults = await getSearchSuggestions(query, signal);
+        if (requestId !== suggestionRequestId.current) return;
+        const matchingRecentSearches: SearchSuggestion[] =
+          searchHistoryRef.current
+            .filter((item) =>
+              item.query.toLowerCase().includes(query.toLowerCase()),
+            )
+            .map((item) => ({
+              id: `recent-${item.query}`,
+              value: item.query,
+              label: item.query,
+              type: "search",
+            }));
+
+        const combinedSuggestions: any = [
+          ...matchingRecentSearches,
+          ...apiResults.filter(
+            (api) =>
+              !matchingRecentSearches.some(
+                (recent: any) =>
+                  recent.value.toLowerCase() === api.value.toLowerCase(),
+              ),
+          ),
+        ];
+
+        setSuggestions(combinedSuggestions);
+      } catch (error) {
+        if (signal.aborted || requestId !== suggestionRequestId.current) return;
+        console.error("Failed to fetch suggestions:", error);
+        setSuggestions([]);
+      } finally {
+        if (requestId === suggestionRequestId.current) {
+          setIsLoadingSuggestions(false);
+        }
+      }
+    },
+    [],
+  );
 
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -117,9 +148,6 @@ const SearchBar: React.FC<SearchBarProps> = ({ onBlur }) => {
 
   const handleSearchInputFocus = () => {
     setIsSearchFocused(true);
-    if (!searchQuery.trim()) {
-      fetchSearchHistory();
-    }
   };
 
   const handleSearchInputBlur = () => {
@@ -148,15 +176,12 @@ const SearchBar: React.FC<SearchBarProps> = ({ onBlur }) => {
         if (searchQuery.trim()) {
           const selectedSuggestion = suggestions[selectedIndex];
           handleSuggestionClick(selectedSuggestion);
-          await fetchSearchHistory();
         } else {
           const selectedHistory = searchHistory[selectedIndex];
           handleHistoryClick(selectedHistory);
-          await fetchSearchHistory();
         }
       } else if (searchQuery.trim()) {
         handleSearchSubmit(e);
-        await fetchSearchHistory();
       }
     } else if (e.key === "Escape") {
       setIsSearchFocused(false);
@@ -196,8 +221,12 @@ const SearchBar: React.FC<SearchBarProps> = ({ onBlur }) => {
   };
 
   const handleClearHistory = async () => {
-    await clearSearchHistory();
-    setSearchHistory([]);
+    if (user) {
+      await clearSearchHistory();
+    } else {
+      clearGuestSearchHistory();
+    }
+    queryClient.setQueryData<RecentSearch[]>(searchHistoryKey, []);
   };
 
   const getSuggestionIcon = (suggestion: SearchSuggestion) => {
@@ -254,20 +283,23 @@ const SearchBar: React.FC<SearchBarProps> = ({ onBlur }) => {
 
   useEffect(() => {
     if (searchQuery.trim().length < 2) {
+      suggestionRequestId.current += 1;
       setSuggestions([]);
+      setIsLoadingSuggestions(false);
       return;
     }
 
+    const requestId = ++suggestionRequestId.current;
+    const controller = new AbortController();
     const timeoutId = setTimeout(() => {
-      fetchSearchSuggestions(searchQuery);
+      fetchSearchSuggestions(searchQuery, requestId, controller.signal);
     }, 300);
 
-    return () => clearTimeout(timeoutId);
-  }, [searchQuery]);
-
-  useEffect(() => {
-    fetchSearchHistory();
-  }, []);
+    return () => {
+      clearTimeout(timeoutId);
+      controller.abort();
+    };
+  }, [searchQuery, fetchSearchSuggestions]);
 
   return (
     <div className="hidden md:flex flex-1 min-w-0 mx-4 lg:mx-3 xl:mx-8">

@@ -776,6 +776,7 @@ export const approveCourse = async (req: AuthRequest, res: Response) => {
 
     await course.save();
 
+    let notificationEmailSent = true;
     try {
       const instructor = course.instructor as any;
       await sendCourseApprovedEmail(
@@ -785,13 +786,19 @@ export const approveCourse = async (req: AuthRequest, res: Response) => {
         course._id.toString(),
         adminFeedback,
       );
-    } catch (emailError) {
-      console.error("Failed to send approval email:", emailError);
+    } catch {
+      notificationEmailSent = false;
+      console.error(
+        "Course was approved, but its notification email was not delivered",
+      );
     }
 
     res.status(200).json({
       success: true,
-      message: "Course approved successfully",
+      message: notificationEmailSent
+        ? "Course approved successfully"
+        : "Course approved successfully, but its notification email could not be delivered.",
+      notificationEmailSent,
       data: {
         courseId: course._id,
         status: course.status,
@@ -861,6 +868,7 @@ export const rejectCourse = async (req: AuthRequest, res: Response) => {
 
     await course.save();
 
+    let notificationEmailSent = true;
     try {
       const instructor = course.instructor as any;
       await sendCourseRejectedEmail(
@@ -871,13 +879,19 @@ export const rejectCourse = async (req: AuthRequest, res: Response) => {
         rejectionReason,
         adminFeedback,
       );
-    } catch (emailError) {
-      console.error("Failed to send rejection email:", emailError);
+    } catch {
+      notificationEmailSent = false;
+      console.error(
+        "Course was rejected, but its notification email was not delivered",
+      );
     }
 
     res.status(200).json({
       success: true,
-      message: "Course rejected successfully",
+      message: notificationEmailSent
+        ? "Course rejected successfully"
+        : "Course rejected successfully, but its notification email could not be delivered.",
+      notificationEmailSent,
       data: {
         courseId: course._id,
         status: course.status,

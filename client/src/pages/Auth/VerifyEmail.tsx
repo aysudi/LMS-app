@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Link,
   useNavigate,
@@ -22,6 +22,7 @@ import { getErrorMessage } from "../../utils/errorUtils";
 import Loading from "../../components/Common/Loading";
 import { useToast } from "../../components/UI/ToastProvider";
 import { generalToasts } from "../../utils/toastUtils";
+// @ts-ignore
 import { useTranslation } from "react-i18next";
 
 type VerificationStatus =
@@ -48,7 +49,36 @@ const VerifyEmail = () => {
   const verifyEmailMutation = useVerifyEmail();
   const resendVerificationMutation = useResendVerificationEmail();
 
-  const verifyToken = useCallback(async (token: string) => {
+  useEffect(() => {
+    const token = searchParams.get("token");
+    const { email, fromRegistration, verificationEmailSent } =
+      location.state || {};
+
+    if (!token) {
+      if (fromRegistration) {
+        const emailSent = verificationEmailSent !== false;
+        setVerificationStatus(emailSent ? "awaiting-verification" : "error");
+        setMessage(
+          emailSent
+            ? t("auth.verificationEmailSentToInbox")
+            : "Your account was created, but the verification email could not be delivered. Please request a new email below.",
+        );
+        setResendEmail(email || "");
+        setShowResendForm(!emailSent);
+      } else {
+        setVerificationStatus("invalid-token");
+        setMessage(t("auth.noVerificationToken"));
+      }
+      return;
+    }
+
+    if (!verificationAttempted.current) {
+      verificationAttempted.current = true;
+      verifyToken(token);
+    }
+  }, [searchParams, location.state]);
+
+  const verifyToken = async (token: string) => {
     if (verifyEmailMutation.isPending || verificationStatus === "success") {
       return;
     }
@@ -56,6 +86,7 @@ const VerifyEmail = () => {
     try {
       setVerificationStatus("loading");
       const result = await verifyEmailMutation.mutateAsync(token);
+      console.log(result);
 
       setVerificationStatus("success");
       setMessage(result.message || t("auth.emailVerifiedCanLogin"));
@@ -87,38 +118,7 @@ const VerifyEmail = () => {
         ),
       );
     }
-  }, [verifyEmailMutation, verificationStatus, showToast, t, navigate]);
-
-  useEffect(() => {
-    const token = searchParams.get("token");
-    const { email, fromRegistration, verificationEmailSent } =
-      location.state || {};
-
-    if (!token) {
-      if (fromRegistration) {
-        const emailSent = verificationEmailSent !== false;
-        setVerificationStatus(
-          emailSent ? "awaiting-verification" : "error",
-        );
-        setMessage(
-          emailSent
-            ? t("auth.verificationEmailSentToInbox")
-            : "Your account was created, but the verification email could not be sent. Please request a new email below.",
-        );
-        setResendEmail(email || "");
-        setShowResendForm(!emailSent);
-      } else {
-        setVerificationStatus("invalid-token");
-        setMessage(t("auth.noVerificationToken"));
-      }
-      return;
-    }
-
-    if (!verificationAttempted.current) {
-      verificationAttempted.current = true;
-      verifyToken(token);
-    }
-  }, [searchParams, location.state, t, verifyToken]);
+  };
 
   const handleResendVerification = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,8 +127,8 @@ const VerifyEmail = () => {
       showToast(
         generalToasts.warning(
           t("auth.enterEmailRequired"),
-          t("auth.enterEmailRequired")
-        )
+          t("auth.enterEmailRequired"),
+        ),
       );
       return;
     }
@@ -139,8 +139,8 @@ const VerifyEmail = () => {
       showToast(
         generalToasts.success(
           t("auth.verificationEmailSent"),
-          `📧 ${t("auth.verificationEmailSentDesc")}`
-        )
+          `📧 ${t("auth.verificationEmailSentDesc")}`,
+        ),
       );
 
       setShowResendForm(false);
@@ -149,8 +149,8 @@ const VerifyEmail = () => {
       showToast(
         generalToasts.error(
           t("auth.failedToResend"),
-          `❌ ${t("auth.failedToResendDesc")}: ${getErrorMessage(error)}`
-        )
+          `❌ ${t("auth.failedToResendDesc")}: ${getErrorMessage(error)}`,
+        ),
       );
     }
   };

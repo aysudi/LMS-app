@@ -33,8 +33,10 @@ interface VideoPlayerProps {
   setLastTimeUpdate: (time: number) => void;
   setWatchTimeTracker: (tracker: number | ((prev: number) => number)) => void;
   lastWatchTimeUpdate: React.MutableRefObject<number>;
-  loadingTimeoutRef: React.MutableRefObject<NodeJS.Timeout | null>;
-  stuckCheckRef: React.MutableRefObject<NodeJS.Timeout | null>;
+  loadingTimeoutRef: React.MutableRefObject<ReturnType<
+    typeof setTimeout
+  > | null>;
+  stuckCheckRef: React.MutableRefObject<ReturnType<typeof setTimeout> | null>;
   refreshVideo: () => void;
   isLessonCompleted: () => boolean;
   canCompleteLesson: () => boolean;
@@ -135,7 +137,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 if (courseId && user?.id) {
                   localStorage.setItem(
                     `quiz-states-${courseId}-${user.id}`,
-                    JSON.stringify(newQuizStates)
+                    JSON.stringify(newQuizStates),
                   );
                 }
               }
@@ -265,7 +267,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                   !video.ended
                 ) {
                   console.warn(
-                    "Video appears to be stuck, attempting refresh..."
+                    "Video appears to be stuck, attempting refresh...",
                   );
                   refreshVideo();
                 }

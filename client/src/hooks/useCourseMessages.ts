@@ -10,7 +10,7 @@ import { toast } from "react-hot-toast";
 export const useCourseMessages = (
   courseId: string,
   page: number = 1,
-  limit: number = 50
+  limit: number = 50,
 ) => {
   return useQuery({
     queryKey: ["courseMessages", courseId, page, limit],
@@ -27,9 +27,9 @@ export const useUnreadMessageCounts = () => {
   return useQuery({
     queryKey: ["unreadMessageCounts"],
     queryFn: () => courseMessageService.getUnreadMessageCounts(),
-    staleTime: 60000, // 1 minute
-    gcTime: 300000, // 5 minutes
-    refetchInterval: 60000, // Refetch every minute
+    staleTime: 60 * 1000,
+    gcTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -107,7 +107,7 @@ export const useEditCourseMessage = () => {
             (message: CourseMessage) =>
               message._id === data.data._id
                 ? { ...message, ...data.data }
-                : message
+                : message,
           );
 
           return {
@@ -117,7 +117,7 @@ export const useEditCourseMessage = () => {
               messages: updatedMessages,
             },
           };
-        }
+        },
       );
 
       toast.success("Message updated successfully");

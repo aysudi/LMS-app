@@ -12,7 +12,7 @@ interface EmojiAndStickerPickerProps {
 }
 
 const gf = new GiphyFetch(
-  import.meta.env.VITE_GIPHY_API_KEY || "NilJDSAPFMqepFXAp3qS7A7TRc57ebIy"
+  import.meta.env.VITE_GIPHY_API_KEY || "NilJDSAPFMqepFXAp3qS7A7TRc57ebIy",
 );
 
 const EmojiAndStickerPicker: React.FC<EmojiAndStickerPickerProps> = ({
@@ -58,54 +58,32 @@ const EmojiAndStickerPicker: React.FC<EmojiAndStickerPickerProps> = ({
 
   // Fetch stickers from Giphy
   useEffect(() => {
-    const fetchStickers = async () => {
-      try {
-        let result;
-        if (stickerSearch.trim()) {
-          result = await gf.search(stickerSearch, {
-            limit: 20,
-            type: "stickers",
-          });
-        } else {
-          result = await gf.trending({ limit: 20, type: "stickers" });
-        }
-        setStickers(result.data);
-      } catch (error) {
-        console.error("Error fetching stickers:", error);
-        // Fallback to simple emoji stickers
-        const fallbackStickers = [
-          "🐱",
-          "🐶",
-          "🐼",
-          "🐻",
-          "🐰",
-          "🦊",
-          "👍",
-          "❤️",
-          "👏",
-          "🔥",
-          "⭐",
-          "💯",
-          "😎",
-          "🎉",
-          "💝",
-          "🚀",
-        ];
-        setStickers(
-          fallbackStickers.map((emoji) => ({
-            images: {
-              fixed_height_small: {
-                url: `data:text/plain;charset=utf-8,${emoji}`,
-              },
-            },
-          }))
-        );
-      }
-    };
+    if (!isOpen) return;
 
-    if (activeTab === "sticker" && isOpen) {
-      fetchStickers();
-    }
+    let cancelled = false;
+    const timeoutId = window.setTimeout(
+      async () => {
+        try {
+          const result = stickerSearch.trim()
+            ? await gf.search(stickerSearch.trim(), {
+                limit: 20,
+                type: "stickers",
+              })
+            : await gf.trending({ limit: 20, type: "stickers" });
+
+          if (!cancelled) setStickers(result.data);
+        } catch (error) {
+          if (cancelled) return;
+          console.error("Failed to fetch stickers:", error);
+        }
+      },
+      stickerSearch.trim() ? 350 : 0,
+    );
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+    };
   }, [activeTab, stickerSearch, isOpen]);
 
   if (!isOpen) return null;

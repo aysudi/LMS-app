@@ -10,14 +10,14 @@ export const useInstructorMessageStats = () => {
 
       const totalMessages = conversations.length;
       const resolvedMessages = conversations.filter(
-        (conv: any) => conv.status === "resolved"
+        (conv: any) => conv.status === "resolved",
       ).length;
       const pendingMessages = conversations.filter(
-        (conv: any) => conv.status === "pending" || conv.status === "open"
+        (conv: any) => conv.status === "pending" || conv.status === "open",
       ).length;
       const unreadMessages = conversations.reduce(
         (total: number, conv: any) => total + (conv.unreadCount || 0),
-        0
+        0,
       );
 
       return {
@@ -27,6 +27,7 @@ export const useInstructorMessageStats = () => {
         unreadMessages,
       };
     },
-    refetchInterval: 5000, // Refresh every 5 seconds
+    refetchOnWindowFocus: false,
+    staleTime: 60 * 1000,
   });
 };

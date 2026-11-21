@@ -243,7 +243,7 @@ export const register = async (
     await sendVerificationEmail(user.email, user.firstName, verificationToken);
   } catch {
     verificationEmailSent = false;
-    console.error("Failed to send verification email during registration");
+    console.error("Registration verification email delivery failed");
   }
 
   const userProfile = createUserProfile(user);
@@ -251,7 +251,7 @@ export const register = async (
   return {
     message: verificationEmailSent
       ? "Registration successful! Please check your email to verify your account."
-      : "Your account was created, but the verification email could not be sent. Please request a new email from the verification page.",
+      : "Your account was created, but the verification email could not be delivered. Use resend verification to try again.",
     verificationEmailSent,
     user: formatMongoData(userProfile),
   };
@@ -289,7 +289,9 @@ export const verifyEmail = async (
 export const resendVerificationEmail = async (
   email: string,
 ): Promise<{ message: string }> => {
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email }).select(
+    "+emailVerificationToken +emailVerificationExpires",
+  );
 
   if (!user) {
     throw new Error("User not found");
@@ -303,6 +305,9 @@ export const resendVerificationEmail = async (
   const hashedVerificationToken = hashToken(verificationToken);
   const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
+  const previousToken = user.emailVerificationToken;
+  const previousExpires = user.emailVerificationExpires;
+
   await User.findByIdAndUpdate(user._id, {
     emailVerificationToken: hashedVerificationToken,
     emailVerificationExpires: verificationExpires,
@@ -310,8 +315,27 @@ export const resendVerificationEmail = async (
 
   try {
     await sendVerificationEmail(user.email, user.firstName, verificationToken);
-  } catch (emailError) {
-    console.error("Failed to send verification email:", emailError);
+  } catch {
+    const rollback =
+      previousToken && previousExpires
+        ? {
+            $set: {
+              emailVerificationToken: previousToken,
+              emailVerificationExpires: previousExpires,
+            },
+          }
+        : {
+            $unset: {
+              emailVerificationToken: 1,
+              emailVerificationExpires: 1,
+            },
+          };
+
+    await User.updateOne(
+      { _id: user._id, emailVerificationToken: hashedVerificationToken },
+      rollback,
+    );
+    console.error("Verification email resend failed");
     throw new Error(
       "Failed to send verification email. Please try again later.",
     );
