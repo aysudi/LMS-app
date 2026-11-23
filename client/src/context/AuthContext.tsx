@@ -6,6 +6,7 @@ import type { User } from "../types/user.type";
 import { useQueryClient } from "@tanstack/react-query";
 import { userQueryKeys } from "../hooks/useUserQueries";
 import { getCurrentUser } from "../services/user.service";
+import { shouldRetryQuery } from "../utils/queryClient";
 
 interface AuthContextType {
   user: User | null;
@@ -96,7 +97,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }, 100);
         return false;
       }
-      return failureCount < 2;
+      return shouldRetryQuery(failureCount, error);
     },
     refetchOnWindowFocus: false,
     staleTime: 2 * 60 * 1000,

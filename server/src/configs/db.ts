@@ -14,7 +14,6 @@ const connectToDB = (app: any) => {
     .then(() => {
       console.log("🚀 mongodb connected successfully!");
 
-      // Create HTTP server and Socket.IO
       const server = createServer(app);
       const allowedOrigins = new Set(
         [
@@ -32,7 +31,6 @@ const connectToDB = (app: any) => {
         },
       });
 
-      // Initialize Socket.IO handlers
       initializeSocket(io);
 
       server.listen(config.PORT, () => {
