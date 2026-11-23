@@ -1,6 +1,10 @@
 import axios from "axios";
+import { trackRequestEnd, trackRequestStart } from "../utils/serverStatus";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4040";
+
+const READ_TIMEOUT_MS = 15000;
+const WRITE_TIMEOUT_MS = 60000;
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
@@ -8,14 +12,21 @@ export const api = axios.create({
     "Content-Type": "application/json",
   },
   withCredentials: true,
+  timeout: READ_TIMEOUT_MS,
 });
 
 api.interceptors.request.use(
   (config) => {
+    const method = (config.method || "get").toLowerCase();
+    if (config.timeout === READ_TIMEOUT_MS && method !== "get") {
+      config.timeout = config.data instanceof FormData ? 0 : WRITE_TIMEOUT_MS;
+    }
+
     const token = localStorage.getItem("accessToken");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    trackRequestStart();
     return config;
   },
   (error) => Promise.reject(error),
@@ -27,7 +38,11 @@ const refreshAccessToken = (): Promise<string> => {
   if (refreshPromise) return refreshPromise;
 
   refreshPromise = axios
-    .post(`${API_BASE_URL}/api/auth/refresh`, {}, { withCredentials: true })
+    .post(
+      `${API_BASE_URL}/api/auth/refresh`,
+      {},
+      { withCredentials: true, timeout: READ_TIMEOUT_MS },
+    )
     .then((response) => {
       const token = response.data.data.token as string | undefined;
       if (!token) throw new Error("No token received from refresh");
@@ -43,15 +58,18 @@ const refreshAccessToken = (): Promise<string> => {
 };
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    trackRequestEnd();
+    return response;
+  },
   async (error) => {
+    trackRequestEnd(error);
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {
-        // Check if we have a token before attempting refresh
         const currentToken = localStorage.getItem("accessToken");
 
         if (!currentToken) {
@@ -68,7 +86,6 @@ api.interceptors.response.use(
         localStorage.removeItem("userData");
         window.dispatchEvent(new CustomEvent("auth-token-changed"));
 
-        // Only redirect to login if this isn't an initial user fetch
         const isUserFetch = originalRequest.url?.includes("/api/auth/me");
         if (!isUserFetch) {
           // window.location.href = "/auth/login";

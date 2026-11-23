@@ -592,8 +592,7 @@ const Register = () => {
                     whileTap={{ scale: 0.98 }}
                     type="button"
                     onClick={() => {
-                      window.location.href =
-                        "http://localhost:4040/auth/google";
+                      window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
                     }}
                     className="flex items-center justify-center px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer text-sm sm:text-base"
                   >
@@ -606,8 +605,7 @@ const Register = () => {
                     whileTap={{ scale: 0.98 }}
                     type="button"
                     onClick={() => {
-                      window.location.href =
-                        "http://localhost:4040/auth/github";
+                      window.location.href = `${import.meta.env.VITE_API_URL}/auth/github`;
                     }}
                     className="flex items-center justify-center px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer text-sm sm:text-base"
                   >

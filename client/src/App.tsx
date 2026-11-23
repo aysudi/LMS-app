@@ -5,12 +5,14 @@ import ROUTES from "./route/routes";
 import { queryClient } from "./utils/queryClient";
 import { AuthProvider } from "./context/AuthContext";
 import { ToastProvider } from "./components/UI/ToastProvider";
+import ServerStatusBanner from "./components/Common/ServerStatusBanner";
 
 const router = createBrowserRouter(ROUTES);
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
+      <ServerStatusBanner />
       <AuthProvider>
         <ToastProvider>
           <SnackbarProvider
